@@ -41,7 +41,9 @@ export function FavoritesPage({
   const [createListOpen, setCreateListOpen] = useState(false);
 
   const selectedList =
-    state.lists.find((list) => list.id === selectedListId) ?? state.lists[0] ?? null;
+    state.lists.find((list) => list.id === selectedListId) ??
+    state.lists[0] ??
+    null;
 
   useEffect(() => {
     if (state.lists.length === 0) {
@@ -51,7 +53,10 @@ export function FavoritesPage({
       return;
     }
 
-    if (!selectedListId || !state.lists.some((list) => list.id === selectedListId)) {
+    if (
+      !selectedListId ||
+      !state.lists.some((list) => list.id === selectedListId)
+    ) {
       setSelectedListId(state.lists[0].id);
     }
   }, [selectedListId, state.lists]);
@@ -60,14 +65,14 @@ export function FavoritesPage({
     () =>
       state.servers
         .filter((server) =>
-          selectedList ? server.listIds.includes(selectedList.id) : false,
+          selectedList ? server.listIds.includes(selectedList.id) : false
         )
         .map((server) => server.addr),
-    [selectedList, state.servers],
+    [selectedList, state.servers]
   );
   const serversForSelectedList = useMemo(
     () => servers.filter((server) => favoriteAddresses.includes(server.addr)),
-    [favoriteAddresses, servers],
+    [favoriteAddresses, servers]
   );
 
   return (
@@ -167,7 +172,9 @@ export function FavoritesPage({
               onClick={onRefresh}
               disabled={isRefreshing}
             >
-              <RefreshCw className={`size-4 ${isRefreshing ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`size-4 ${isRefreshing ? "animate-spin" : ""}`}
+              />
               Refresh
             </Button>
           </div>

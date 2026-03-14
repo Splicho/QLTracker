@@ -33,7 +33,9 @@ export function parseFavoritesState(value: string): FavoritesState {
     const parsedServers = Array.isArray(parsed.servers)
       ? parsed.servers.filter(isFavoriteServer)
       : [];
-    const migratedLists = parsedLists.filter((list) => !isLegacyDefaultList(list));
+    const migratedLists = parsedLists.filter(
+      (list) => !isLegacyDefaultList(list)
+    );
     const migratedServers = parsedServers.map((server) => ({
       ...server,
       listIds: server.listIds.filter((listId) => listId !== "default"),
@@ -53,7 +55,8 @@ export function serializeFavoritesState(state: FavoritesState) {
 }
 
 export function countServersForList(state: FavoritesState, listId: string) {
-  return state.servers.filter((server) => server.listIds.includes(listId)).length;
+  return state.servers.filter((server) => server.listIds.includes(listId))
+    .length;
 }
 
 function isFavoriteList(value: unknown): value is FavoriteList {

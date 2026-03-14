@@ -1362,6 +1362,7 @@ fn ensure_main_window(app: &tauri::AppHandle) -> Result<tauri::WebviewWindow, St
 }
 
 fn focus_window(window: &tauri::WebviewWindow) {
+    let _ = window.center();
     let _ = window.show();
     let _ = window.unminimize();
     let _ = window.set_focus();

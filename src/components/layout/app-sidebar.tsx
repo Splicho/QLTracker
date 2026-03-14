@@ -1,7 +1,14 @@
 import appIcon from "@/assets/images/appicon.png";
 import logo from "@/assets/images/logo.png";
 import logoDark from "@/assets/images/logo_dark.png";
-import { Discord, Github, InfoCircle, Steam, XSocial, YouTube } from "@/components/icon";
+import {
+  Discord,
+  Github,
+  InfoCircle,
+  Steam,
+  XSocial,
+  YouTube,
+} from "@/components/icon";
 import { aboutConfig, type AboutSocialId } from "@/config/about";
 import packageJson from "../../../package.json";
 import { navigationItems, type PageId } from "@/lib/navigation";
@@ -28,7 +35,10 @@ import {
 } from "@/components/ui/sidebar";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
-const socialIcons: Record<AboutSocialId, React.ComponentType<{ className?: string }>> = {
+const socialIcons: Record<
+  AboutSocialId,
+  React.ComponentType<{ className?: string }>
+> = {
   github: Github,
   x: XSocial,
   discord: Discord,
@@ -43,7 +53,9 @@ export function AppSidebar({
   page: PageId;
   onNavigate: (page: PageId) => void;
 }) {
-  const populatedSocials = aboutConfig.socials.filter((social) => social.url.trim().length > 0);
+  const populatedSocials = aboutConfig.socials.filter(
+    (social) => social.url.trim().length > 0
+  );
   const hasRepoLink = aboutConfig.repo.url.trim().length > 0;
 
   return (
@@ -114,7 +126,9 @@ export function AppSidebar({
               className="w-full justify-start gap-2 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
             >
               <InfoCircle className="size-4" />
-              <span className="group-data-[collapsible=icon]:hidden">About QLTracker</span>
+              <span className="group-data-[collapsible=icon]:hidden">
+                About QLTracker
+              </span>
             </Button>
           </DialogTrigger>
 
@@ -135,11 +149,15 @@ export function AppSidebar({
             <div className="grid gap-3 rounded-lg border border-border p-4 text-sm">
               <div className="flex items-center justify-between gap-4">
                 <span className="text-muted-foreground">Version</span>
-                <span className="font-medium text-foreground">v{packageJson.version}</span>
+                <span className="font-medium text-foreground">
+                  v{packageJson.version}
+                </span>
               </div>
               <div className="flex items-center justify-between gap-4">
                 <span className="text-muted-foreground">Author</span>
-                <span className="font-medium text-foreground">{aboutConfig.author}</span>
+                <span className="font-medium text-foreground">
+                  {aboutConfig.author}
+                </span>
               </div>
               {populatedSocials.length > 0 ? (
                 <div className="flex items-center justify-between gap-4">
@@ -166,7 +184,9 @@ export function AppSidebar({
               ) : null}
               <div className="flex items-center justify-between gap-4">
                 <span className="text-muted-foreground">Stack</span>
-                <span className="font-medium text-foreground">{aboutConfig.stack}</span>
+                <span className="font-medium text-foreground">
+                  {aboutConfig.stack}
+                </span>
               </div>
               {hasRepoLink ? (
                 <div className="flex items-center justify-between gap-4">

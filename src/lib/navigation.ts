@@ -1,8 +1,8 @@
-import { ServerStack, Star } from "@/components/icon";
+import { HeartOutline, ServerStack } from "@/components/icon";
 
 export const navigationItems = [
   { id: "server-list", title: "Server List", icon: ServerStack },
-  { id: "favorites", title: "Favorites", icon: Star },
+  { id: "favorites", title: "Favorites", icon: HeartOutline },
 ] as const;
 
 export type PageId = (typeof navigationItems)[number]["id"];

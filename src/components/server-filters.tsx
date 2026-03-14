@@ -30,7 +30,11 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -39,7 +43,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const regionOptions = [
   { value: "all", label: "All regions", icon: RegionAll },
@@ -134,7 +143,8 @@ export function ServerFilters({
     value.hideEmpty ||
     value.hideFull;
   const selectedRegion =
-    regionOptions.find((option) => option.value === value.region) ?? regionOptions[0];
+    regionOptions.find((option) => option.value === value.region) ??
+    regionOptions[0];
   const SelectedRegionIcon = selectedRegion.icon;
 
   return (
@@ -168,7 +178,9 @@ export function ServerFilters({
                     onClick={() => setCollapsed((current) => !current)}
                     className="size-8"
                     aria-expanded={!collapsed}
-                    aria-label={collapsed ? "Expand filters" : "Collapse filters"}
+                    aria-label={
+                      collapsed ? "Expand filters" : "Collapse filters"
+                    }
                   >
                     <ChevronDown
                       className={`size-4 transition-transform duration-200 ${collapsed ? "" : "rotate-180"}`}
@@ -199,7 +211,9 @@ export function ServerFilters({
                   <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     value={value.search}
-                    onChange={(event) => onChange({ ...value, search: event.target.value })}
+                    onChange={(event) =>
+                      onChange({ ...value, search: event.target.value })
+                    }
                     placeholder="Search server name"
                     className="pl-9"
                   />
@@ -208,7 +222,10 @@ export function ServerFilters({
 
               <div className="flex flex-col gap-3">
                 <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)_minmax(0,0.85fr)_minmax(0,0.9fr)]">
-                  <TagFilter value={value.tags} onChange={(tags) => onChange({ ...value, tags })} />
+                  <TagFilter
+                    value={value.tags}
+                    onChange={(tags) => onChange({ ...value, tags })}
+                  />
 
                   <Select
                     value={value.region}
@@ -239,7 +256,8 @@ export function ServerFilters({
                     onValueChange={(visibility) =>
                       onChange({
                         ...value,
-                        visibility: visibility as ServerFiltersValue["visibility"],
+                        visibility:
+                          visibility as ServerFiltersValue["visibility"],
                       })
                     }
                   >
@@ -257,7 +275,9 @@ export function ServerFilters({
 
                   <Select
                     value={value.gameMode}
-                    onValueChange={(gameMode) => onChange({ ...value, gameMode })}
+                    onValueChange={(gameMode) =>
+                      onChange({ ...value, gameMode })
+                    }
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Game mode" />
@@ -283,15 +303,21 @@ export function ServerFilters({
                   <RatingRangeFilter
                     system={value.ratingSystem}
                     range={value.ratingRange}
-                    onSystemChange={(ratingSystem) => onChange({ ...value, ratingSystem })}
-                    onRangeChange={(ratingRange) => onChange({ ...value, ratingRange })}
+                    onSystemChange={(ratingSystem) =>
+                      onChange({ ...value, ratingSystem })
+                    }
+                    onRangeChange={(ratingRange) =>
+                      onChange({ ...value, ratingRange })
+                    }
                   />
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Button
                     variant={value.hideEmpty ? "default" : "outline"}
-                    onClick={() => onChange({ ...value, hideEmpty: !value.hideEmpty })}
+                    onClick={() =>
+                      onChange({ ...value, hideEmpty: !value.hideEmpty })
+                    }
                     className="w-full"
                   >
                     Hide Empty
@@ -299,7 +325,9 @@ export function ServerFilters({
 
                   <Button
                     variant={value.hideFull ? "default" : "outline"}
-                    onClick={() => onChange({ ...value, hideFull: !value.hideFull })}
+                    onClick={() =>
+                      onChange({ ...value, hideFull: !value.hideFull })
+                    }
                     className="w-full"
                   >
                     Hide Full
@@ -384,7 +412,10 @@ function RatingRangeFilter({
       </div>
 
       <div className="mt-3 grid gap-3 md:grid-cols-[10rem_minmax(0,1fr)] md:items-center">
-        <Select value={system} onValueChange={(value) => onSystemChange(value as RatingSystem)}>
+        <Select
+          value={system}
+          onValueChange={(value) => onSystemChange(value as RatingSystem)}
+        >
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Rating system" />
           </SelectTrigger>
@@ -421,7 +452,7 @@ function MapMultiSelect({
 
   const selectedMaps = useMemo(
     () => mapEntries.filter((map) => value.includes(map.id)),
-    [value],
+    [value]
   );
 
   const label =
@@ -485,7 +516,10 @@ function MapMultiSelect({
                     onSelect={() => toggleMap(map.id)}
                     className="gap-3 px-3 py-2"
                   >
-                    <Checkbox checked={checked} className="pointer-events-none" />
+                    <Checkbox
+                      checked={checked}
+                      className="pointer-events-none"
+                    />
                     <img
                       src={map.image}
                       alt={map.name}
@@ -527,7 +561,11 @@ function TagFilter({
   }
 
   const label =
-    value.length === 0 ? "Tags" : value.length === 1 ? value[0] : `${value.length}+ tags`;
+    value.length === 0
+      ? "Tags"
+      : value.length === 1
+        ? value[0]
+        : `${value.length}+ tags`;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -559,7 +597,9 @@ function TagFilter({
                 </Badge>
               ))
             ) : (
-              <span className="text-sm text-muted-foreground">No tags selected.</span>
+              <span className="text-sm text-muted-foreground">
+                No tags selected.
+              </span>
             )}
           </div>
 
@@ -568,7 +608,11 @@ function TagFilter({
               value={tagInput}
               onChange={(event) => setTagInput(event.target.value)}
               onKeyDown={(event) => {
-                if (event.key === "Backspace" && tagInput.length === 0 && value.length > 0) {
+                if (
+                  event.key === "Backspace" &&
+                  tagInput.length === 0 &&
+                  value.length > 0
+                ) {
                   event.preventDefault();
                   removeTag(value[value.length - 1]);
                   return;

@@ -175,7 +175,7 @@ const flagLookup = Object.fromEntries(
     const fileName = path.split("/").pop() ?? "";
     const id = fileName.replace(/\.png$/i, "").toLowerCase();
     return [id, src];
-  }),
+  })
 ) as Record<string, string>;
 
 export function getCountryFlagSrc(countryCode: string | null | undefined) {
@@ -187,7 +187,7 @@ export function getCountryFlagSrc(countryCode: string | null | undefined) {
 }
 
 export function getRegionFromCountryCode(
-  countryCode: string | null | undefined,
+  countryCode: string | null | undefined
 ): ServerRegion | null {
   const normalizedCode = countryCode?.trim().toLowerCase();
 

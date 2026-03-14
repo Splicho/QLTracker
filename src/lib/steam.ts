@@ -2,7 +2,8 @@ import { invoke } from "@tauri-apps/api/core";
 import type { ServerCountryLocation } from "@/lib/countries";
 
 const steamAppId = import.meta.env.VITE_STEAM_APP_ID?.trim() || "282440";
-const qlstatsApiUrl = import.meta.env.VITE_QLSTATS_API_URL?.trim() || "https://qlstats.net/api";
+const qlstatsApiUrl =
+  import.meta.env.VITE_QLSTATS_API_URL?.trim() || "https://qlstats.net/api";
 const trueskillUrlTemplate =
   import.meta.env.VITE_TRUESKILL_URL_TEMPLATE?.trim() ||
   "http://qlrelax.freemyip.com/elo/bn/%s";
@@ -97,7 +98,7 @@ export async function fetchSteamServerPlayerRatings(addr: string) {
 
 export async function fetchSteamServerRatingSummaries(
   addrs: string[],
-  ratingKind: "qelo" | "trueskill",
+  ratingKind: "qelo" | "trueskill"
 ) {
   return invoke<ServerRatingSummary[]>("fetch_server_rating_summaries", {
     qlstatsBaseUrl: qlstatsApiUrl,

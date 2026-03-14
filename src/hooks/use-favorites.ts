@@ -13,7 +13,7 @@ import {
 export function useFavorites() {
   const [rawValue, setRawValue] = useLocalStorage(
     FAVORITES_STORAGE_KEY,
-    serializeFavoritesState(DEFAULT_FAVORITES_STATE),
+    serializeFavoritesState(DEFAULT_FAVORITES_STATE)
   );
 
   const state = useMemo(() => parseFavoritesState(rawValue), [rawValue]);
@@ -29,7 +29,9 @@ export function useFavorites() {
     }
 
     const normalizedName = trimmedName.toLowerCase();
-    if (state.lists.some((list) => list.name.toLowerCase() === normalizedName)) {
+    if (
+      state.lists.some((list) => list.name.toLowerCase() === normalizedName)
+    ) {
       return;
     }
 
@@ -46,12 +48,17 @@ export function useFavorites() {
     });
   }
 
-  function addServerToList(server: Omit<FavoriteServer, "addedAt" | "listIds">, listId: string) {
+  function addServerToList(
+    server: Omit<FavoriteServer, "addedAt" | "listIds">,
+    listId: string
+  ) {
     if (!state.lists.some((list) => list.id === listId)) {
       return;
     }
 
-    const existingServer = state.servers.find((entry) => entry.addr === server.addr);
+    const existingServer = state.servers.find(
+      (entry) => entry.addr === server.addr
+    );
 
     if (!existingServer) {
       setState({
@@ -80,13 +87,20 @@ export function useFavorites() {
               ...entry,
               listIds: [...entry.listIds, listId],
             }
-          : entry,
+          : entry
       ),
     });
   }
 
-  function moveServerToList(addr: string, fromListId: string, toListId: string) {
-    if (fromListId === toListId || !state.lists.some((list) => list.id === toListId)) {
+  function moveServerToList(
+    addr: string,
+    fromListId: string,
+    toListId: string
+  ) {
+    if (
+      fromListId === toListId ||
+      !state.lists.some((list) => list.id === toListId)
+    ) {
       return;
     }
 
@@ -97,7 +111,9 @@ export function useFavorites() {
           return entry;
         }
 
-        const nextListIds = entry.listIds.filter((listId) => listId !== fromListId);
+        const nextListIds = entry.listIds.filter(
+          (listId) => listId !== fromListId
+        );
         if (!nextListIds.includes(toListId)) {
           nextListIds.push(toListId);
         }
@@ -118,11 +134,20 @@ export function useFavorites() {
           entry.addr === addr
             ? {
                 ...entry,
-                listIds: entry.listIds.filter((entryListId) => entryListId !== listId),
+                listIds: entry.listIds.filter(
+                  (entryListId) => entryListId !== listId
+                ),
               }
-            : entry,
+            : entry
         )
         .filter((entry) => entry.listIds.length > 0),
+    });
+  }
+
+  function removeServer(addr: string) {
+    setState({
+      ...state,
+      servers: state.servers.filter((entry) => entry.addr !== addr),
     });
   }
 
@@ -131,6 +156,7 @@ export function useFavorites() {
     createList,
     addServerToList,
     moveServerToList,
+    removeServer,
     removeServerFromList,
     countServersForList: (listId: string) => countServersForList(state, listId),
   };

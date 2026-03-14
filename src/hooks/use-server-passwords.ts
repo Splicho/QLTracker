@@ -15,8 +15,8 @@ function parseServerPasswords(rawValue: string): ServerPasswordsState {
     return Object.fromEntries(
       Object.entries(parsed).filter(
         (entry): entry is [string, string] =>
-          typeof entry[0] === "string" && typeof entry[1] === "string",
-      ),
+          typeof entry[0] === "string" && typeof entry[1] === "string"
+      )
     );
   } catch {
     return {};
@@ -30,7 +30,7 @@ function serializeServerPasswords(state: ServerPasswordsState) {
 export function useServerPasswords() {
   const [rawValue, setRawValue] = useLocalStorage(
     SERVER_PASSWORDS_STORAGE_KEY,
-    serializeServerPasswords({}),
+    serializeServerPasswords({})
   );
 
   const state = useMemo(() => parseServerPasswords(rawValue), [rawValue]);
@@ -49,7 +49,7 @@ export function useServerPasswords() {
       serializeServerPasswords({
         ...state,
         [addr]: trimmedPassword,
-      }),
+      })
     );
   }
 

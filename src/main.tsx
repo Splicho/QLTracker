@@ -20,11 +20,16 @@ const isBootstrapWindow = currentWindowLabel === "bootstrap";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem storageKey="qlist-theme">
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      storageKey="qlist-theme"
+    >
       <QueryClientProvider client={queryClient}>
         {isBootstrapWindow ? <BootstrapPage /> : <App />}
         <Toaster position="bottom-right" richColors />
       </QueryClientProvider>
     </ThemeProvider>
-  </React.StrictMode>,
+  </React.StrictMode>
 );

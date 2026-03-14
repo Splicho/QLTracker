@@ -61,7 +61,9 @@ function getNumber(value: unknown) {
   return null;
 }
 
-export function toOnlinePlayer(document: QlStatsPlayerDocument): QlStatsOnlinePlayer | null {
+export function toOnlinePlayer(
+  document: QlStatsPlayerDocument
+): QlStatsOnlinePlayer | null {
   const data = document.DATA;
   if (!data) {
     return null;
@@ -97,12 +99,17 @@ export async function fetchQlStatsOnlinePlayers(baseUrl: string) {
     return [];
   }
 
-  return payload.map(toOnlinePlayer).filter((player): player is QlStatsOnlinePlayer => player !== null);
+  return payload
+    .map(toOnlinePlayer)
+    .filter((player): player is QlStatsOnlinePlayer => player !== null);
 }
 
-export async function fetchQlStatsServerPlayers(baseUrl: string, serverAddress: string) {
+export async function fetchQlStatsServerPlayers(
+  baseUrl: string,
+  serverAddress: string
+) {
   const response = await fetch(
-    `${normalizeBaseUrl(baseUrl)}/server/${encodeURIComponent(serverAddress)}/players`,
+    `${normalizeBaseUrl(baseUrl)}/server/${encodeURIComponent(serverAddress)}/players`
   );
 
   if (!response.ok) {

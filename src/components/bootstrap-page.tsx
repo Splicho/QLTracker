@@ -55,16 +55,19 @@ export function BootstrapPage() {
     };
   }, []);
 
-  const updateState = useCallback((next: Partial<BootstrapState> | BootstrapState) => {
-    if (!mountedRef.current) {
-      return;
-    }
+  const updateState = useCallback(
+    (next: Partial<BootstrapState> | BootstrapState) => {
+      if (!mountedRef.current) {
+        return;
+      }
 
-    setState((current) => ({
-      ...current,
-      ...next,
-    }));
-  }, []);
+      setState((current) => ({
+        ...current,
+        ...next,
+      }));
+    },
+    []
+  );
 
   const openLauncher = useCallback(async () => {
     updateState({
@@ -102,7 +105,9 @@ export function BootstrapPage() {
   const runBootstrap = useCallback(async () => {
     updateState(INITIAL_STATE);
 
-    const packaged = await invoke<boolean>("app_is_packaged").catch(() => false);
+    const packaged = await invoke<boolean>("app_is_packaged").catch(
+      () => false
+    );
     if (!packaged) {
       updateState({
         phase: "development",
@@ -186,7 +191,13 @@ export function BootstrapPage() {
               downloadedBytes,
               totalBytes,
               progress: totalBytes
-                ? Math.max(1, Math.min(99, Math.round((downloadedBytes / totalBytes) * 100)))
+                ? Math.max(
+                    1,
+                    Math.min(
+                      99,
+                      Math.round((downloadedBytes / totalBytes) * 100)
+                    )
+                  )
                 : null,
             });
           },
@@ -236,7 +247,8 @@ export function BootstrapPage() {
   }, [runBootstrap]);
 
   const showProgress = state.phase === "downloading";
-  const hasError = state.phase === "check-error" || state.phase === "install-error";
+  const hasError =
+    state.phase === "check-error" || state.phase === "install-error";
   const splashLabel =
     state.phase === "checking"
       ? "Checking for updates..."
@@ -263,7 +275,11 @@ export function BootstrapPage() {
             repeat: hasError ? 0 : Infinity,
           }}
         >
-          <img src={splashIcon} alt="QLTracker" className="h-24 w-auto object-contain" />
+          <img
+            src={splashIcon}
+            alt="QLTracker"
+            className="h-24 w-auto object-contain"
+          />
         </motion.div>
 
         {splashLabel ? (
@@ -274,13 +290,18 @@ export function BootstrapPage() {
 
         {showProgress ? (
           <div className="mt-10 w-full">
-            <Progress className="h-1.5 bg-white/8" value={state.progress ?? undefined} />
+            <Progress
+              className="h-1.5 bg-white/8"
+              value={state.progress ?? undefined}
+            />
           </div>
         ) : null}
 
         {hasError ? (
           <div className="mt-8 max-w-[15rem] text-center">
-            <p className="text-sm font-medium text-foreground/90">{state.status}</p>
+            <p className="text-sm font-medium text-foreground/90">
+              {state.status}
+            </p>
             <p className="mt-2 text-xs leading-5 text-muted-foreground">
               {state.error ?? state.detail}
             </p>
@@ -297,7 +318,7 @@ function applyDownloadEvent(
     onStart: (contentLength?: number) => void;
     onProgress: (chunkLength: number) => void;
     onFinish: () => void;
-  },
+  }
 ) {
   if (event.event === "Started") {
     handlers.onStart(event.data.contentLength);

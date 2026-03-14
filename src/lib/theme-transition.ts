@@ -29,7 +29,7 @@ export function changeThemeWithTransition(
   theme: ThemeValue,
   setTheme: (theme: ThemeValue) => void,
   element?: HTMLElement | null,
-  origin?: { x: number; y: number } | null,
+  origin?: { x: number; y: number } | null
 ) {
   const nextOrigin = origin ?? (element ? getElementCenter(element) : null);
   const transitionDocument = document as ViewTransitionDocument;

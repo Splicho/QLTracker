@@ -33,9 +33,12 @@ export function renderQuakeText(text: string): ReactNode[] {
     }
 
     segments.push(
-      <span key={`quake-segment-${segments.length}`} style={{ color: currentColor }}>
+      <span
+        key={`quake-segment-${segments.length}`}
+        style={{ color: currentColor }}
+      >
         {buffer}
-      </span>,
+      </span>
     );
     buffer = "";
   };

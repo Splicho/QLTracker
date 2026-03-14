@@ -54,7 +54,9 @@ export function QlStatsStatus() {
           <span className="text-muted-foreground">
             {query.data.length} player{query.data.length === 1 ? "" : "s"}
           </span>
-          {summary ? <span className="truncate text-muted-foreground">{summary}</span> : null}
+          {summary ? (
+            <span className="truncate text-muted-foreground">{summary}</span>
+          ) : null}
         </div>
       ) : null}
     </section>

@@ -181,7 +181,19 @@ GitHub Actions now includes a release workflow:
 
 - [.github/workflows/release.yml](.github/workflows/release.yml)
 
-It runs on tags like `v0.1.0`, builds signed Windows NSIS updater artifacts, and publishes them to this repository's GitHub Release.
+It runs on tags like `v0.1.0` and publishes release assets for:
+
+- Windows x64
+- Windows ARM64
+- Linux x64
+- Linux ARM64
+
+Current bundle outputs:
+
+- Windows: NSIS installer `.exe`
+- Linux: `.AppImage` and `.deb`
+
+macOS is intentionally not built in this workflow.
 
 Required GitHub repository secrets:
 

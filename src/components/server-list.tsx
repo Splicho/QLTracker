@@ -1,4 +1,10 @@
-import { Fragment, useDeferredValue, useEffect, useMemo, useState } from "react";
+import {
+  Fragment,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -12,9 +18,19 @@ import {
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ArrowUpRight, Pencil, Plus } from "lucide-react";
+import { ArrowUpDown, ArrowUpRight, Pencil } from "lucide-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { Lock, Medal, Ping, Play, SlashCircle, Unlock } from "@/components/icon";
+import {
+  HeartCrossed,
+  HeartFilled,
+  HeartOutline,
+  Lock,
+  Medal,
+  Ping,
+  Play,
+  SlashCircle,
+  Unlock,
+} from "@/components/icon";
 import { useFavorites } from "@/hooks/use-favorites";
 import { useServerPasswords } from "@/hooks/use-server-passwords";
 import {
@@ -51,10 +67,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerContent,
-} from "@/components/ui/drawer";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import {
   Pagination,
   PaginationContent,
@@ -86,7 +99,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const regionLabels: Record<string, string> = {
   eu: "EU",
@@ -125,7 +142,7 @@ function sortServersForPage(
   servers: SteamServer[],
   sorting: SortingState,
   modesByAddr: Record<string, string | null>,
-  pingsByAddr: Record<string, number | null>,
+  pingsByAddr: Record<string, number | null>
 ) {
   if (sorting.length === 0) {
     return servers;
@@ -183,14 +200,17 @@ type ServerListProps = {
 };
 
 function normalizeSteamServerRegion(server: SteamServer) {
-  return server.region != null ? steamRegionMap[server.region] ?? null : null;
+  return server.region != null ? (steamRegionMap[server.region] ?? null) : null;
 }
 
 function resolveServerRegion(
   server: SteamServer,
-  location?: ServerCountryLocation | null,
+  location?: ServerCountryLocation | null
 ) {
-  return getRegionFromCountryCode(location?.country_code) ?? normalizeSteamServerRegion(server);
+  return (
+    getRegionFromCountryCode(location?.country_code) ??
+    normalizeSteamServerRegion(server)
+  );
 }
 
 function normalizeGameMode(server: SteamServer) {
@@ -246,7 +266,10 @@ function normalizeTags(server: SteamServer) {
 }
 
 function normalizePlayerName(name: string) {
-  return name.replace(/\^[0-9]/g, "").trim().toLowerCase();
+  return name
+    .replace(/\^[0-9]/g, "")
+    .trim()
+    .toLowerCase();
 }
 
 function calculateAverage(values: Array<number | null | undefined>) {
@@ -257,13 +280,13 @@ function calculateAverage(values: Array<number | null | undefined>) {
   }
 
   return Math.round(
-    numbers.reduce((total, value) => total + value, 0) / numbers.length,
+    numbers.reduce((total, value) => total + value, 0) / numbers.length
   );
 }
 
 function calculateHighestRatedPlayer(
   players: ServerPlayerRating[],
-  ratingKey: "qelo" | "trueskill",
+  ratingKey: "qelo" | "trueskill"
 ) {
   return players.reduce<ServerPlayerRating | null>((highest, player) => {
     const rating = player[ratingKey];
@@ -293,7 +316,11 @@ function buildSteamConnectUrl(serverAddress: string, password?: string) {
     : `steam://connect/${serverAddress}`;
 }
 
-function ServerAverageRatingBadges({ serverAddress }: { serverAddress: string }) {
+function ServerAverageRatingBadges({
+  serverAddress,
+}: {
+  serverAddress: string;
+}) {
   const ratingsQuery = useQuery({
     queryKey: ["steam", "server", "player-ratings", serverAddress],
     queryFn: () => fetchSteamServerPlayerRatings(serverAddress),
@@ -303,19 +330,19 @@ function ServerAverageRatingBadges({ serverAddress }: { serverAddress: string })
 
   const averageQelo = useMemo(
     () => calculateAverage(ratings.map((player) => player.qelo)),
-    [ratings],
+    [ratings]
   );
   const averageTrueskill = useMemo(
     () => calculateAverage(ratings.map((player) => player.trueskill)),
-    [ratings],
+    [ratings]
   );
   const highestQeloPlayer = useMemo(
     () => calculateHighestRatedPlayer(ratings, "qelo"),
-    [ratings],
+    [ratings]
   );
   const highestTrueskillPlayer = useMemo(
     () => calculateHighestRatedPlayer(ratings, "trueskill"),
-    [ratings],
+    [ratings]
   );
   const isPending =
     ratingsQuery.isPending ||
@@ -359,7 +386,9 @@ function ServerAverageRatingBadges({ serverAddress }: { serverAddress: string })
             </div>
           </Badge>
         </TooltipTrigger>
-        <TooltipContent side="top">Average TSkill on this server</TooltipContent>
+        <TooltipContent side="top">
+          Average TSkill on this server
+        </TooltipContent>
       </Tooltip>
       <Separator orientation="vertical" className="!h-4 self-center" />
       <Tooltip>
@@ -376,11 +405,15 @@ function ServerAverageRatingBadges({ serverAddress }: { serverAddress: string })
               <span className="max-w-28 truncate text-foreground">-</span>
             )}
             <div className="rounded-sm bg-muted px-1.5 py-0.5 text-foreground">
-              {highestQeloPlayer?.qelo != null ? Math.round(highestQeloPlayer.qelo) : "-"}
+              {highestQeloPlayer?.qelo != null
+                ? Math.round(highestQeloPlayer.qelo)
+                : "-"}
             </div>
           </Badge>
         </TooltipTrigger>
-        <TooltipContent side="top">Highest QElo player on this server</TooltipContent>
+        <TooltipContent side="top">
+          Highest QElo player on this server
+        </TooltipContent>
       </Tooltip>
       <Tooltip>
         <TooltipTrigger asChild>
@@ -402,7 +435,9 @@ function ServerAverageRatingBadges({ serverAddress }: { serverAddress: string })
             </div>
           </Badge>
         </TooltipTrigger>
-        <TooltipContent side="top">Highest TSkill player on this server</TooltipContent>
+        <TooltipContent side="top">
+          Highest TSkill player on this server
+        </TooltipContent>
       </Tooltip>
     </div>
   );
@@ -430,9 +465,9 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
         (ratingsQuery.data ?? []).map((player) => [
           normalizePlayerName(player.name),
           player,
-        ]),
+        ])
       ),
-    [ratingsQuery.data],
+    [ratingsQuery.data]
   );
   const mergedPlayers = useMemo(
     () =>
@@ -440,7 +475,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
         ...player,
         rating: playerRatingsByName[normalizePlayerName(player.name)] ?? null,
       })),
-    [playerRatingsByName, players],
+    [playerRatingsByName, players]
   );
   const playerPanelPending =
     playersQuery.isPending ||
@@ -562,7 +597,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
           formatDurationHoursMinutes(row.original.duration_seconds),
       },
     ],
-    [],
+    []
   );
 
   const table = useReactTable({
@@ -666,7 +701,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext(),
+                          header.getContext()
                         )}
                   </TableHead>
                 ))}
@@ -709,13 +744,20 @@ export function ServerList({
     state: favoritesState,
     addServerToList,
     moveServerToList,
+    removeServer,
     removeServerFromList,
   } = useFavorites();
   const { getPassword, savePassword } = useServerPasswords();
-  const [selectedServer, setSelectedServer] = useState<SteamServer | null>(null);
-  const [favoriteServer, setFavoriteServer] = useState<SteamServer | null>(null);
+  const [selectedServer, setSelectedServer] = useState<SteamServer | null>(
+    null
+  );
+  const [favoriteServer, setFavoriteServer] = useState<SteamServer | null>(
+    null
+  );
   const [targetFavoriteListId, setTargetFavoriteListId] = useState<string>("");
-  const [passwordServer, setPasswordServer] = useState<SteamServer | null>(null);
+  const [passwordServer, setPasswordServer] = useState<SteamServer | null>(
+    null
+  );
   const [joinPassword, setJoinPassword] = useState("");
   const [rememberServerPassword, setRememberServerPassword] = useState(false);
   const [sorting, setSorting] = useState<SortingState>([
@@ -726,14 +768,21 @@ export function ServerList({
     pageSize: 25,
   });
   const deferredSearch = useDeferredValue(filters.search);
+  const favoriteAddresses = useMemo(
+    () => new Set(favoritesState.servers.map((server) => server.addr)),
+    [favoritesState.servers]
+  );
   const [cachedCountriesByAddr, setCachedCountriesByAddr] = useState<
     Record<string, ServerCountryLocation>
   >({});
-  const [cachedPingsByAddr, setCachedPingsByAddr] = useState<Record<string, number | null>>({});
-  const [cachedRequiresPasswordByAddr, setCachedRequiresPasswordByAddr] = useState<
-    Record<string, boolean | null>
+  const [cachedPingsByAddr, setCachedPingsByAddr] = useState<
+    Record<string, number | null>
   >({});
-  const [cachedModesByAddr, setCachedModesByAddr] = useState<Record<string, string | null>>({});
+  const [cachedRequiresPasswordByAddr, setCachedRequiresPasswordByAddr] =
+    useState<Record<string, boolean | null>>({});
+  const [cachedModesByAddr, setCachedModesByAddr] = useState<
+    Record<string, string | null>
+  >({});
 
   const staticFilteredServers = useMemo(() => {
     const search = deferredSearch.trim().toLowerCase();
@@ -766,7 +815,7 @@ export function ServerList({
       if (
         tagQuery.length > 0 &&
         !tagQuery.every((tag) =>
-          tags.some((serverTag) => serverTag.includes(tag)),
+          tags.some((serverTag) => serverTag.includes(tag))
         )
       ) {
         return false;
@@ -789,20 +838,30 @@ export function ServerList({
       filters.region !== "all"
         ? staticFilteredServers.map((server) => server.addr)
         : [],
-    [filters.region, staticFilteredServers],
+    [filters.region, staticFilteredServers]
   );
   const regionCountryQuery = useQuery({
-    queryKey: ["steam", "server-countries", "region-filter", regionCandidateAddresses],
+    queryKey: [
+      "steam",
+      "server-countries",
+      "region-filter",
+      regionCandidateAddresses,
+    ],
     queryFn: () => fetchSteamServerCountries(regionCandidateAddresses),
     enabled: filters.region !== "all" && regionCandidateAddresses.length > 0,
     staleTime: 1000 * 60 * 60,
   });
-  const resolvedRegionCountriesByAddr = useMemo<Record<string, ServerCountryLocation>>(
+  const resolvedRegionCountriesByAddr = useMemo<
+    Record<string, ServerCountryLocation>
+  >(
     () =>
       Object.fromEntries(
-        (regionCountryQuery.data ?? []).map((location) => [location.addr, location]),
+        (regionCountryQuery.data ?? []).map((location) => [
+          location.addr,
+          location,
+        ])
       ),
-    [regionCountryQuery.data],
+    [regionCountryQuery.data]
   );
   useEffect(() => {
     if (!regionCountryQuery.data?.length) {
@@ -811,7 +870,9 @@ export function ServerList({
 
     setCachedCountriesByAddr((current) => ({
       ...current,
-      ...Object.fromEntries(regionCountryQuery.data.map((location) => [location.addr, location])),
+      ...Object.fromEntries(
+        regionCountryQuery.data.map((location) => [location.addr, location])
+      ),
     }));
   }, [regionCountryQuery.data]);
   const regionFilteredServers = useMemo(() => {
@@ -824,7 +885,10 @@ export function ServerList({
     }
 
     return staticFilteredServers.filter((server) => {
-      const region = resolveServerRegion(server, resolvedRegionCountriesByAddr[server.addr]);
+      const region = resolveServerRegion(
+        server,
+        resolvedRegionCountriesByAddr[server.addr]
+      );
       return region === filters.region;
     });
   }, [
@@ -839,23 +903,31 @@ export function ServerList({
       filters.visibility !== "all"
         ? regionFilteredServers.map((server) => server.addr)
         : [],
-    [filters.visibility, regionFilteredServers],
+    [filters.visibility, regionFilteredServers]
   );
   const visibilityPingQuery = useQuery({
-    queryKey: ["steam", "server-pings", "visibility-filter", visibilityCandidateAddresses],
+    queryKey: [
+      "steam",
+      "server-pings",
+      "visibility-filter",
+      visibilityCandidateAddresses,
+    ],
     queryFn: () => fetchSteamServerPings(visibilityCandidateAddresses),
-    enabled: filters.visibility !== "all" && visibilityCandidateAddresses.length > 0,
+    enabled:
+      filters.visibility !== "all" && visibilityCandidateAddresses.length > 0,
     staleTime: 1000 * 60 * 5,
   });
-  const visibilityRequiresPasswordByAddr = useMemo<Record<string, boolean | null>>(
+  const visibilityRequiresPasswordByAddr = useMemo<
+    Record<string, boolean | null>
+  >(
     () =>
       Object.fromEntries(
         ((visibilityPingQuery.data ?? []) as ServerPing[]).map((entry) => [
           entry.addr,
           entry.requires_password,
-        ]),
+        ])
       ),
-    [visibilityPingQuery.data],
+    [visibilityPingQuery.data]
   );
   useEffect(() => {
     if (!visibilityPingQuery.data?.length) {
@@ -868,7 +940,7 @@ export function ServerList({
         ((visibilityPingQuery.data ?? []) as ServerPing[]).map((entry) => [
           entry.addr,
           entry.requires_password,
-        ]),
+        ])
       ),
     }));
     setCachedPingsByAddr((current) => ({
@@ -877,7 +949,7 @@ export function ServerList({
         ((visibilityPingQuery.data ?? []) as ServerPing[]).map((entry) => [
           entry.addr,
           entry.ping_ms,
-        ]),
+        ])
       ),
     }));
   }, [visibilityPingQuery.data]);
@@ -913,7 +985,7 @@ export function ServerList({
   const searchEnrichmentEnabled = filters.search.trim().length === 0;
   const ratingCandidateAddresses = useMemo(
     () => visibilityFilteredServers.map((server) => server.addr),
-    [visibilityFilteredServers],
+    [visibilityFilteredServers]
   );
   const ratingSummaryQuery = useQuery({
     queryKey: [
@@ -925,7 +997,7 @@ export function ServerList({
     queryFn: () =>
       fetchSteamServerRatingSummaries(
         ratingCandidateAddresses,
-        filters.ratingSystem,
+        filters.ratingSystem
       ),
     enabled: ratingFilterActive && ratingCandidateAddresses.length > 0,
     staleTime: 1000 * 60 * 5,
@@ -933,15 +1005,17 @@ export function ServerList({
   const ratingSummariesByAddr = useMemo<Record<string, ServerRatingSummary>>(
     () =>
       Object.fromEntries(
-        ((ratingSummaryQuery.data ?? []) as ServerRatingSummary[]).map((summary) => [
-          summary.addr,
-          summary,
-        ]),
+        ((ratingSummaryQuery.data ?? []) as ServerRatingSummary[]).map(
+          (summary) => [summary.addr, summary]
+        )
       ),
-    [ratingSummaryQuery.data],
+    [ratingSummaryQuery.data]
   );
   const filteredServers = useMemo(() => {
-    if (!ratingFilterActive || (ratingSummaryQuery.isPending && !ratingSummaryQuery.data)) {
+    if (
+      !ratingFilterActive ||
+      (ratingSummaryQuery.isPending && !ratingSummaryQuery.data)
+    ) {
       return visibilityFilteredServers;
     }
 
@@ -954,7 +1028,11 @@ export function ServerList({
           ? summary?.average_trueskill
           : summary?.average_qelo;
 
-      return ratingValue != null && ratingValue >= minRating && ratingValue <= maxRating;
+      return (
+        ratingValue != null &&
+        ratingValue >= minRating &&
+        ratingValue <= maxRating
+      );
     });
   }, [
     filters.ratingRange,
@@ -968,13 +1046,13 @@ export function ServerList({
 
   useEffect(() => {
     setPagination((current) =>
-      current.pageIndex === 0 ? current : { ...current, pageIndex: 0 },
+      current.pageIndex === 0 ? current : { ...current, pageIndex: 0 }
     );
   }, [filteredServers.length]);
 
   const sortedServersForPage = useMemo(
     () => sortServersForPage(filteredServers, sorting, {}, {}),
-    [filteredServers, sorting],
+    [filteredServers, sorting]
   );
   const pageSliceStart = pagination.pageIndex * pagination.pageSize;
   const pageSliceEnd = pageSliceStart + pagination.pageSize;
@@ -983,7 +1061,7 @@ export function ServerList({
       sortedServersForPage
         .slice(pageSliceStart, pageSliceEnd)
         .map((server) => server.addr),
-    [pageSliceEnd, pageSliceStart, sortedServersForPage],
+    [pageSliceEnd, pageSliceStart, sortedServersForPage]
   );
   const countryQuery = useQuery({
     queryKey: ["steam", "server-countries", visiblePageAddresses],
@@ -991,12 +1069,14 @@ export function ServerList({
     enabled: searchEnrichmentEnabled && visiblePageAddresses.length > 0,
     staleTime: 1000 * 60 * 60,
   });
-  const latestVisibleCountriesByAddr = useMemo<Record<string, ServerCountryLocation>>(
+  const latestVisibleCountriesByAddr = useMemo<
+    Record<string, ServerCountryLocation>
+  >(
     () =>
       Object.fromEntries(
-        (countryQuery.data ?? []).map((location) => [location.addr, location]),
+        (countryQuery.data ?? []).map((location) => [location.addr, location])
       ),
-    [countryQuery.data],
+    [countryQuery.data]
   );
   useEffect(() => {
     if (!countryQuery.data?.length) {
@@ -1005,16 +1085,24 @@ export function ServerList({
 
     setCachedCountriesByAddr((current) => ({
       ...current,
-      ...Object.fromEntries(countryQuery.data.map((location) => [location.addr, location])),
+      ...Object.fromEntries(
+        countryQuery.data.map((location) => [location.addr, location])
+      ),
     }));
   }, [countryQuery.data]);
-  const resolvedCountriesByAddr = useMemo<Record<string, ServerCountryLocation>>(
+  const resolvedCountriesByAddr = useMemo<
+    Record<string, ServerCountryLocation>
+  >(
     () => ({
       ...cachedCountriesByAddr,
       ...resolvedRegionCountriesByAddr,
       ...latestVisibleCountriesByAddr,
     }),
-    [cachedCountriesByAddr, resolvedRegionCountriesByAddr, latestVisibleCountriesByAddr],
+    [
+      cachedCountriesByAddr,
+      resolvedRegionCountriesByAddr,
+      latestVisibleCountriesByAddr,
+    ]
   );
   const pingQuery = useQuery({
     queryKey: ["steam", "server-pings", visiblePageAddresses],
@@ -1028,9 +1116,9 @@ export function ServerList({
         ((pingQuery.data ?? []) as ServerPing[]).map((entry) => [
           entry.addr,
           entry.ping_ms,
-        ]),
+        ])
       ),
-    [pingQuery.data],
+    [pingQuery.data]
   );
   const latestRequiresPasswordByAddr = useMemo<Record<string, boolean | null>>(
     () =>
@@ -1038,9 +1126,9 @@ export function ServerList({
         ((pingQuery.data ?? []) as ServerPing[]).map((entry) => [
           entry.addr,
           entry.requires_password,
-        ]),
+        ])
       ),
-    [pingQuery.data],
+    [pingQuery.data]
   );
   useEffect(() => {
     if (!pingQuery.data?.length) {
@@ -1050,7 +1138,10 @@ export function ServerList({
     setCachedPingsByAddr((current) => ({
       ...current,
       ...Object.fromEntries(
-        ((pingQuery.data ?? []) as ServerPing[]).map((entry) => [entry.addr, entry.ping_ms]),
+        ((pingQuery.data ?? []) as ServerPing[]).map((entry) => [
+          entry.addr,
+          entry.ping_ms,
+        ])
       ),
     }));
     setCachedRequiresPasswordByAddr((current) => ({
@@ -1059,7 +1150,7 @@ export function ServerList({
         ((pingQuery.data ?? []) as ServerPing[]).map((entry) => [
           entry.addr,
           entry.requires_password,
-        ]),
+        ])
       ),
     }));
   }, [pingQuery.data]);
@@ -1068,14 +1159,16 @@ export function ServerList({
       ...cachedPingsByAddr,
       ...latestPingsByAddr,
     }),
-    [cachedPingsByAddr, latestPingsByAddr],
+    [cachedPingsByAddr, latestPingsByAddr]
   );
-  const resolvedRequiresPasswordByAddr = useMemo<Record<string, boolean | null>>(
+  const resolvedRequiresPasswordByAddr = useMemo<
+    Record<string, boolean | null>
+  >(
     () => ({
       ...cachedRequiresPasswordByAddr,
       ...latestRequiresPasswordByAddr,
     }),
-    [cachedRequiresPasswordByAddr, latestRequiresPasswordByAddr],
+    [cachedRequiresPasswordByAddr, latestRequiresPasswordByAddr]
   );
   const modeQuery = useQuery({
     queryKey: ["qlstats", "server-modes", visiblePageAddresses],
@@ -1089,9 +1182,9 @@ export function ServerList({
         ((modeQuery.data ?? []) as ServerMode[]).map((entry) => [
           entry.addr,
           entry.game_mode,
-        ]),
+        ])
       ),
-    [modeQuery.data],
+    [modeQuery.data]
   );
   useEffect(() => {
     if (!modeQuery.data?.length) {
@@ -1101,7 +1194,10 @@ export function ServerList({
     setCachedModesByAddr((current) => ({
       ...current,
       ...Object.fromEntries(
-        ((modeQuery.data ?? []) as ServerMode[]).map((entry) => [entry.addr, entry.game_mode]),
+        ((modeQuery.data ?? []) as ServerMode[]).map((entry) => [
+          entry.addr,
+          entry.game_mode,
+        ])
       ),
     }));
   }, [modeQuery.data]);
@@ -1110,11 +1206,17 @@ export function ServerList({
       ...cachedModesByAddr,
       ...latestModesByAddr,
     }),
-    [cachedModesByAddr, latestModesByAddr],
+    [cachedModesByAddr, latestModesByAddr]
   );
   const sortedServers = useMemo(
-    () => sortServersForPage(filteredServers, sorting, resolvedModesByAddr, resolvedPingsByAddr),
-    [filteredServers, resolvedModesByAddr, resolvedPingsByAddr, sorting],
+    () =>
+      sortServersForPage(
+        filteredServers,
+        sorting,
+        resolvedModesByAddr,
+        resolvedPingsByAddr
+      ),
+    [filteredServers, resolvedModesByAddr, resolvedPingsByAddr, sorting]
   );
   const countryLookupPending =
     countryQuery.isPending || countryQuery.fetchStatus === "fetching";
@@ -1151,7 +1253,8 @@ export function ServerList({
                   className="pointer-events-none absolute inset-y-0 left-0 w-[25%] min-w-28 bg-cover bg-left bg-no-repeat opacity-60"
                   style={{
                     backgroundImage: `url(${map.image})`,
-                    maskImage: "linear-gradient(to right, black 0%, black 62%, transparent 100%)",
+                    maskImage:
+                      "linear-gradient(to right, black 0%, black 62%, transparent 100%)",
                     WebkitMaskImage:
                       "linear-gradient(to right, black 0%, black 62%, transparent 100%)",
                     maskSize: "100% 100%",
@@ -1181,7 +1284,9 @@ export function ServerList({
                         </Badge>
                       </TooltipTrigger>
                       <TooltipContent side="top">
-                        {hasSavedPassword ? "Password saved" : "Password required"}
+                        {hasSavedPassword
+                          ? "Password saved"
+                          : "Password required"}
                       </TooltipContent>
                     </Tooltip>
                   ) : null}
@@ -1199,11 +1304,14 @@ export function ServerList({
           "",
         header: () => (
           <div className="px-0.5 text-xs uppercase tracking-[0.12em] text-muted-foreground">
-            Country
+            Location
           </div>
         ),
         cell: ({ row }) => {
-          if (countryLookupPending && !(row.original.addr in resolvedCountriesByAddr)) {
+          if (
+            countryLookupPending &&
+            !(row.original.addr in resolvedCountriesByAddr)
+          ) {
             return <Skeleton className="h-4 w-4 rounded-full" />;
           }
 
@@ -1222,7 +1330,9 @@ export function ServerList({
           return (
             <img
               src={flagSrc}
-              alt={location.country_code?.toUpperCase() ?? location.country_name}
+              alt={
+                location.country_code?.toUpperCase() ?? location.country_name
+              }
               title={location.country_name}
               className="h-4 w-4 rounded-full object-cover"
             />
@@ -1244,12 +1354,17 @@ export function ServerList({
           </Button>
         ),
         cell: ({ row }) => {
-          if (modeLookupPending && !(row.original.addr in resolvedModesByAddr)) {
+          if (
+            modeLookupPending &&
+            !(row.original.addr in resolvedModesByAddr)
+          ) {
             return <Skeleton className="h-4 w-20 rounded-md" />;
           }
 
-          const mode = resolvedModesByAddr[row.original.addr] ?? normalizeGameMode(row.original);
-          return mode ? modeLabels[mode] ?? mode.toUpperCase() : "Unknown";
+          const mode =
+            resolvedModesByAddr[row.original.addr] ??
+            normalizeGameMode(row.original);
+          return mode ? (modeLabels[mode] ?? mode.toUpperCase()) : "Unknown";
         },
       },
       {
@@ -1266,7 +1381,8 @@ export function ServerList({
             <ArrowUpDown className="size-3.5" />
           </Button>
         ),
-        cell: ({ row }) => `${row.original.players}/${row.original.max_players}`,
+        cell: ({ row }) =>
+          `${row.original.players}/${row.original.max_players}`,
       },
       {
         id: "ping",
@@ -1285,10 +1401,13 @@ export function ServerList({
         cell: ({ row }) =>
           pingLookupPending && !(row.original.addr in resolvedPingsByAddr) ? (
             <Skeleton className="h-4 w-14 rounded-md" />
-          ) : (resolvedPingsByAddr[row.original.addr] ?? row.original.ping_ms) != null ? (
+          ) : (resolvedPingsByAddr[row.original.addr] ??
+              row.original.ping_ms) != null ? (
             <div className="flex items-center gap-2 text-sm text-foreground">
               <Ping className="size-3.5 text-lime-400" />
-              <span>{resolvedPingsByAddr[row.original.addr] ?? row.original.ping_ms}</span>
+              <span>
+                {resolvedPingsByAddr[row.original.addr] ?? row.original.ping_ms}
+              </span>
             </div>
           ) : (
             "N/A"
@@ -1301,49 +1420,67 @@ export function ServerList({
             Actions
           </div>
         ),
-        cell: ({ row }) => (
-          <div className="flex justify-end gap-2">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="outline"
-                  className="size-8"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    setTargetFavoriteListId(
-                      actionMode === "edit"
-                        ? favoriteListId ?? ""
-                        : favoritesState.lists[0]?.id ?? "",
-                    );
-                    setFavoriteServer(row.original);
-                  }}
-                >
-                  {actionMode === "edit" ? (
-                    <Pencil className="size-4" />
-                  ) : (
-                    <Plus className="size-4" />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="top">
-                {actionMode === "edit" ? "Edit favorite" : "Add to favorites"}
-              </TooltipContent>
-            </Tooltip>
-            <Button
-              type="button"
-              size="icon"
-              className="size-8 bg-success text-success-foreground hover:bg-success-hover"
-              onClick={(event) => {
-                event.stopPropagation();
-                handleJoinServer(row.original);
-              }}
-            >
-              <Play className="size-4" />
-            </Button>
-          </div>
-        ),
+        cell: ({ row }) => {
+          const isFavorited = favoriteAddresses.has(row.original.addr);
+
+          return (
+            <div className="flex justify-end gap-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="outline"
+                    className="group relative size-8"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      if (actionMode === "add" && isFavorited) {
+                        removeServer(row.original.addr);
+                        toast.success("Removed from favorites.");
+                        return;
+                      }
+                      setTargetFavoriteListId(
+                        actionMode === "edit"
+                          ? (favoriteListId ?? "")
+                          : (favoritesState.lists[0]?.id ?? "")
+                      );
+                      setFavoriteServer(row.original);
+                    }}
+                  >
+                    {actionMode === "edit" ? (
+                      <Pencil className="size-4" />
+                    ) : isFavorited ? (
+                      <>
+                        <HeartFilled className="size-4 text-red-500 transition-opacity group-hover:opacity-0" />
+                        <HeartCrossed className="absolute inset-0 m-auto size-4 text-red-500 opacity-0 transition-opacity group-hover:opacity-100" />
+                      </>
+                    ) : (
+                      <HeartOutline className="size-4" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  {actionMode === "edit"
+                    ? "Edit favorite"
+                    : isFavorited
+                      ? "Remove from favorites"
+                      : "Add to favorites"}
+                </TooltipContent>
+              </Tooltip>
+              <Button
+                type="button"
+                size="icon"
+                className="size-8 bg-success text-success-foreground hover:bg-success-hover"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleJoinServer(row.original);
+                }}
+              >
+                <Play className="size-4" />
+              </Button>
+            </div>
+          );
+        },
       },
     ],
     [
@@ -1356,9 +1493,11 @@ export function ServerList({
       resolvedRequiresPasswordByAddr,
       getPassword,
       actionMode,
+      favoriteAddresses,
       favoriteListId,
       favoritesState.lists,
-    ],
+      removeServer,
+    ]
   );
 
   const table = useReactTable({
@@ -1383,7 +1522,8 @@ export function ServerList({
     void openUrl(buildSteamConnectUrl(serverAddress, password));
   };
   const handleJoinServer = (server: SteamServer) => {
-    const requiresPassword = resolvedRequiresPasswordByAddr[server.addr] === true;
+    const requiresPassword =
+      resolvedRequiresPasswordByAddr[server.addr] === true;
     if (!requiresPassword) {
       launchServer(server.addr);
       return;
@@ -1403,16 +1543,14 @@ export function ServerList({
   const currentPage = table.getState().pagination.pageIndex + 1;
   const visiblePageNumbers = Array.from(
     { length: pageCount },
-    (_, index) => index + 1,
+    (_, index) => index + 1
   ).filter((page) => {
     if (pageCount <= 7) {
       return true;
     }
 
     return (
-      page === 1 ||
-      page === pageCount ||
-      Math.abs(page - currentPage) <= 1
+      page === 1 || page === pageCount || Math.abs(page - currentPage) <= 1
     );
   });
   return (
@@ -1437,7 +1575,7 @@ export function ServerList({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext(),
+                            header.getContext()
                           )}
                     </TableHead>
                   ))}
@@ -1503,7 +1641,7 @@ export function ServerList({
                       >
                         {flexRender(
                           cell.column.columnDef.cell,
-                          cell.getContext(),
+                          cell.getContext()
                         )}
                       </TableCell>
                     ))}
@@ -1655,12 +1793,16 @@ export function ServerList({
                               </Badge>
                             </TooltipTrigger>
                             <TooltipContent side="top">
-                              {selectedHasSavedPassword ? "Password saved" : "Password required"}
+                              {selectedHasSavedPassword
+                                ? "Password saved"
+                                : "Password required"}
                             </TooltipContent>
                           </Tooltip>
                         ) : null}
                       </div>
-                      <ServerAverageRatingBadges serverAddress={selectedServer.addr} />
+                      <ServerAverageRatingBadges
+                        serverAddress={selectedServer.addr}
+                      />
                     </div>
                     <Button
                       type="button"
@@ -1709,7 +1851,10 @@ export function ServerList({
           </DialogHeader>
 
           {favoritesState.lists.length > 0 ? (
-            <Select value={targetFavoriteListId} onValueChange={setTargetFavoriteListId}>
+            <Select
+              value={targetFavoriteListId}
+              onValueChange={setTargetFavoriteListId}
+            >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a list" />
               </SelectTrigger>
@@ -1723,7 +1868,8 @@ export function ServerList({
             </Select>
           ) : (
             <p className="text-sm text-muted-foreground">
-              No favorite lists available. Create a list on the Favorites page first.
+              No favorite lists available. Create a list on the Favorites page
+              first.
             </p>
           )}
 
@@ -1752,7 +1898,8 @@ export function ServerList({
                 !favoriteServer ||
                 !targetFavoriteListId ||
                 favoritesState.lists.length === 0 ||
-                (actionMode === "edit" && targetFavoriteListId === favoriteListId)
+                (actionMode === "edit" &&
+                  targetFavoriteListId === favoriteListId)
               }
               onClick={() => {
                 if (!favoriteServer || !targetFavoriteListId) {
@@ -1763,7 +1910,7 @@ export function ServerList({
                   moveServerToList(
                     favoriteServer.addr,
                     favoriteListId,
-                    targetFavoriteListId,
+                    targetFavoriteListId
                   );
                   toast.success("Favorite updated.");
                 } else {
@@ -1773,7 +1920,7 @@ export function ServerList({
                       name: favoriteServer.name,
                       map: favoriteServer.map,
                     },
-                    targetFavoriteListId,
+                    targetFavoriteListId
                   );
                   toast.success("Added to favorites.");
                 }
@@ -1822,7 +1969,11 @@ export function ServerList({
             value={joinPassword}
             onChange={(event) => setJoinPassword(event.target.value)}
             onKeyDown={(event) => {
-              if (event.key !== "Enter" || !passwordServer || !joinPassword.trim()) {
+              if (
+                event.key !== "Enter" ||
+                !passwordServer ||
+                !joinPassword.trim()
+              ) {
                 return;
               }
 
@@ -1842,7 +1993,9 @@ export function ServerList({
             <Checkbox
               id="remember-server-password"
               checked={rememberServerPassword}
-              onCheckedChange={(checked) => setRememberServerPassword(checked === true)}
+              onCheckedChange={(checked) =>
+                setRememberServerPassword(checked === true)
+              }
               className="mt-0.5"
             />
             <Label

@@ -20,7 +20,7 @@ export function Header({ page }: { page: PageId }) {
 
   const handleThemeChange = (
     nextTheme: "light" | "dark" | "system",
-    event: MouseEvent<HTMLButtonElement>,
+    event: MouseEvent<HTMLButtonElement>
   ) => {
     changeThemeWithTransition(
       nextTheme,
@@ -31,7 +31,7 @@ export function Header({ page }: { page: PageId }) {
             x: event.clientX,
             y: event.clientY,
           }
-        : null,
+        : null
     );
   };
 
@@ -49,10 +49,7 @@ export function Header({ page }: { page: PageId }) {
         </Breadcrumb>
       </div>
 
-      <Tabs
-        value={theme ?? "system"}
-        className="flex-none"
-      >
+      <Tabs value={theme ?? "system"} className="flex-none">
         <TabsList className="h-9 gap-1 rounded-full border border-border bg-muted/40 p-1">
           <TabsTrigger
             value="light"

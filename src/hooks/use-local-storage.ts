@@ -3,14 +3,16 @@ import { useEffect, useState } from "react";
 const LOCAL_STORAGE_SYNC_EVENT = "qlist-local-storage-sync";
 
 export function useLocalStorage(key: string, initialValue: string) {
-  const [value, setValue] = useState(() => localStorage.getItem(key) ?? initialValue);
+  const [value, setValue] = useState(
+    () => localStorage.getItem(key) ?? initialValue
+  );
 
   useEffect(() => {
     localStorage.setItem(key, value);
     window.dispatchEvent(
       new CustomEvent(LOCAL_STORAGE_SYNC_EVENT, {
         detail: { key, value },
-      }),
+      })
     );
   }, [key, value]);
 

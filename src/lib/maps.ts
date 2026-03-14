@@ -6,7 +6,7 @@ const levelshotModules = import.meta.glob<LevelshotModule>(
   "@/assets/images/levelshots/*.{jpg,jpeg,png,webp}",
   {
     eager: true,
-  },
+  }
 );
 
 export type MapEntry = {
@@ -36,7 +36,7 @@ export const mapEntries: MapEntry[] = Object.entries(levelshotModules)
   .sort((left, right) => left.name.localeCompare(right.name));
 
 export const mapLookup = Object.fromEntries(
-  mapEntries.map((entry) => [entry.id, entry]),
+  mapEntries.map((entry) => [entry.id, entry])
 ) satisfies Record<string, MapEntry>;
 
 export function getMapEntry(mapId: string | null | undefined) {

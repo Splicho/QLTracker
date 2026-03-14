@@ -43,11 +43,15 @@ function parseStoredFilters(rawValue: string): ServerFiltersValue {
       return defaults;
     }
 
-    const ratingRange = Array.isArray(parsed.ratingRange) ? parsed.ratingRange : null;
+    const ratingRange = Array.isArray(parsed.ratingRange)
+      ? parsed.ratingRange
+      : null;
 
     return {
-      search: typeof parsed.search === "string" ? parsed.search : defaults.search,
-      region: typeof parsed.region === "string" ? parsed.region : defaults.region,
+      search:
+        typeof parsed.search === "string" ? parsed.search : defaults.search,
+      region:
+        typeof parsed.region === "string" ? parsed.region : defaults.region,
       visibility:
         parsed.visibility === "all" ||
         parsed.visibility === "public" ||
@@ -55,22 +59,39 @@ function parseStoredFilters(rawValue: string): ServerFiltersValue {
           ? parsed.visibility
           : defaults.visibility,
       maps: Array.isArray(parsed.maps)
-        ? parsed.maps.filter((value): value is string => typeof value === "string")
+        ? parsed.maps.filter(
+            (value): value is string => typeof value === "string"
+          )
         : defaults.maps,
-      gameMode: typeof parsed.gameMode === "string" ? parsed.gameMode : defaults.gameMode,
+      gameMode:
+        typeof parsed.gameMode === "string"
+          ? parsed.gameMode
+          : defaults.gameMode,
       ratingSystem:
         parsed.ratingSystem === "qelo" || parsed.ratingSystem === "trueskill"
           ? parsed.ratingSystem
           : defaults.ratingSystem,
       ratingRange: [
-        typeof ratingRange?.[0] === "number" ? ratingRange[0] : defaults.ratingRange[0],
-        typeof ratingRange?.[1] === "number" ? ratingRange[1] : defaults.ratingRange[1],
+        typeof ratingRange?.[0] === "number"
+          ? ratingRange[0]
+          : defaults.ratingRange[0],
+        typeof ratingRange?.[1] === "number"
+          ? ratingRange[1]
+          : defaults.ratingRange[1],
       ],
       tags: Array.isArray(parsed.tags)
-        ? parsed.tags.filter((value): value is string => typeof value === "string")
+        ? parsed.tags.filter(
+            (value): value is string => typeof value === "string"
+          )
         : defaults.tags,
-      hideEmpty: typeof parsed.hideEmpty === "boolean" ? parsed.hideEmpty : defaults.hideEmpty,
-      hideFull: typeof parsed.hideFull === "boolean" ? parsed.hideFull : defaults.hideFull,
+      hideEmpty:
+        typeof parsed.hideEmpty === "boolean"
+          ? parsed.hideEmpty
+          : defaults.hideEmpty,
+      hideFull:
+        typeof parsed.hideFull === "boolean"
+          ? parsed.hideFull
+          : defaults.hideFull,
     };
   } catch {
     return defaults;
@@ -85,7 +106,7 @@ export function App() {
   const [page, setPage] = useState<PageId>("server-list");
   const [rawFilters, setRawFilters] = useLocalStorage(
     SERVER_FILTERS_STORAGE_KEY,
-    serializeFilters(createDefaultServerFilters()),
+    serializeFilters(createDefaultServerFilters())
   );
   const filters = useMemo(() => parseStoredFilters(rawFilters), [rawFilters]);
   const serversQuery = useQuery({
@@ -131,16 +152,29 @@ export function App() {
               servers={serversQuery.data ?? []}
               filters={filters}
               isLoading={serversQuery.isLoading}
-              isRefreshing={serversQuery.fetchStatus === "fetching" && !serversQuery.isLoading}
-              error={steamApiKey.length === 0 ? "Set VITE_STEAM_API_KEY to load servers." : serversErrorMessage}
+              isRefreshing={
+                serversQuery.fetchStatus === "fetching" &&
+                !serversQuery.isLoading
+              }
+              error={
+                steamApiKey.length === 0
+                  ? "Set VITE_STEAM_API_KEY to load servers."
+                  : serversErrorMessage
+              }
             />
           </>
         ) : (
           <FavoritesPage
             servers={serversQuery.data ?? []}
             isLoading={serversQuery.isLoading}
-            isRefreshing={serversQuery.fetchStatus === "fetching" && !serversQuery.isLoading}
-            error={steamApiKey.length === 0 ? "Set VITE_STEAM_API_KEY to load servers." : serversErrorMessage}
+            isRefreshing={
+              serversQuery.fetchStatus === "fetching" && !serversQuery.isLoading
+            }
+            error={
+              steamApiKey.length === 0
+                ? "Set VITE_STEAM_API_KEY to load servers."
+                : serversErrorMessage
+            }
             onRefresh={() => {
               void serversQuery.refetch();
             }}
