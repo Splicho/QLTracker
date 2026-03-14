@@ -1,6 +1,8 @@
+import type { MouseEvent } from "react";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { navigationItems, type PageId } from "@/lib/navigation";
+import { changeThemeWithTransition } from "@/lib/theme-transition";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -15,6 +17,23 @@ export function Header({ page }: { page: PageId }) {
   const { setTheme, theme } = useTheme();
   const currentPage =
     navigationItems.find((item) => item.id === page)?.title ?? "Unknown";
+
+  const handleThemeChange = (
+    nextTheme: "light" | "dark" | "system",
+    event: MouseEvent<HTMLButtonElement>,
+  ) => {
+    changeThemeWithTransition(
+      nextTheme,
+      setTheme,
+      event.currentTarget,
+      event.detail > 0
+        ? {
+            x: event.clientX,
+            y: event.clientY,
+          }
+        : null,
+    );
+  };
 
   return (
     <header className="flex h-16 items-center justify-between gap-3 border-b border-border px-4">
@@ -32,19 +51,30 @@ export function Header({ page }: { page: PageId }) {
 
       <Tabs
         value={theme ?? "system"}
-        onValueChange={(value) => setTheme(value)}
         className="flex-none"
       >
         <TabsList className="h-9 gap-1 rounded-full border border-border bg-muted/40 p-1">
-          <TabsTrigger value="light" className="size-7 rounded-full px-0">
+          <TabsTrigger
+            value="light"
+            className="size-7 rounded-full px-0"
+            onClick={(event) => handleThemeChange("light", event)}
+          >
             <Sun className="size-4" />
             <span className="sr-only">Light theme</span>
           </TabsTrigger>
-          <TabsTrigger value="dark" className="size-7 rounded-full px-0">
+          <TabsTrigger
+            value="dark"
+            className="size-7 rounded-full px-0"
+            onClick={(event) => handleThemeChange("dark", event)}
+          >
             <Moon className="size-4" />
             <span className="sr-only">Dark theme</span>
           </TabsTrigger>
-          <TabsTrigger value="system" className="size-7 rounded-full px-0">
+          <TabsTrigger
+            value="system"
+            className="size-7 rounded-full px-0"
+            onClick={(event) => handleThemeChange("system", event)}
+          >
             <Monitor className="size-4" />
             <span className="sr-only">System theme</span>
           </TabsTrigger>

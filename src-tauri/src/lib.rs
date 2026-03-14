@@ -15,6 +15,8 @@ static COUNTRY_CACHE: OnceLock<Mutex<HashMap<String, Option<ServerCountryLocatio
     OnceLock::new();
 static PING_CACHE: OnceLock<Mutex<HashMap<String, Option<u128>>>> = OnceLock::new();
 static MODE_CACHE: OnceLock<Mutex<HashMap<String, Option<String>>>> = OnceLock::new();
+static PLAYER_RATING_CACHE: OnceLock<Mutex<HashMap<String, Vec<ServerPlayerRating>>>> =
+    OnceLock::new();
 
 #[derive(Debug, Deserialize)]
 struct SteamListResponse {
@@ -55,6 +57,15 @@ struct ServerPlayer {
     name: String,
     score: i32,
     duration_seconds: f32,
+}
+
+#[derive(Debug, Serialize, Clone)]
+#[serde(rename_all = "snake_case")]
+struct ServerPlayerRating {
+    name: String,
+    steam_id: Option<String>,
+    qelo: Option<f64>,
+    trueskill: Option<f64>,
 }
 
 #[derive(Debug, Serialize, Clone)]
@@ -109,6 +120,10 @@ fn ping_cache() -> &'static Mutex<HashMap<String, Option<u128>>> {
 
 fn mode_cache() -> &'static Mutex<HashMap<String, Option<String>>> {
     MODE_CACHE.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+fn player_rating_cache() -> &'static Mutex<HashMap<String, Vec<ServerPlayerRating>>> {
+    PLAYER_RATING_CACHE.get_or_init(|| Mutex::new(HashMap::new()))
 }
 
 fn extract_between<'a>(haystack: &'a str, start: &str, end: &str) -> Option<&'a str> {
@@ -561,7 +576,7 @@ async fn fetch_server_countries(addrs: Vec<String>) -> Result<Vec<ServerCountryL
 
     let client = reqwest::Client::builder()
         .timeout(Duration::from_secs(8))
-        .user_agent("QList/0.1.0")
+        .user_agent("QLTracker/0.1.0")
         .build()
         .map_err(|error| error.to_string())?;
 
@@ -621,6 +636,130 @@ struct QlStatsServerInfo {
 struct QlStatsServerResponse {
     #[serde(default)]
     serverinfo: Option<QlStatsServerInfo>,
+    #[serde(default)]
+    players: Vec<serde_json::Value>,
+}
+
+fn qlstats_value_as_string(value: &serde_json::Value, key: &str) -> Option<String> {
+    value
+        .get(key)
+        .and_then(|field| field.as_str())
+        .map(|field| field.trim().to_string())
+        .filter(|field| !field.is_empty())
+}
+
+fn qlstats_value_as_f64(value: &serde_json::Value, key: &str) -> Option<f64> {
+    let field = value.get(key)?;
+
+    match field {
+        serde_json::Value::Number(number) => number.as_f64(),
+        serde_json::Value::String(string) => string.trim().parse::<f64>().ok(),
+        _ => None,
+    }
+}
+
+fn extract_rating_number(input: &str) -> Option<f64> {
+    let lowered = input.to_lowercase();
+    let keywords = ["trueskill", "rating", "elo", "mu"];
+
+    for keyword in keywords {
+        let mut search_start = 0;
+        while let Some(index) = lowered[search_start..].find(keyword) {
+            let absolute_index = search_start + index;
+            let tail = &lowered[absolute_index + keyword.len()..];
+            if let Some(value) = extract_first_plausible_number(tail) {
+                return Some(value);
+            }
+            search_start = absolute_index + keyword.len();
+        }
+    }
+
+    None
+}
+
+fn extract_first_plausible_number(input: &str) -> Option<f64> {
+    let mut buffer = String::new();
+    let mut seen_dot = false;
+
+    for character in input.chars() {
+        if character.is_ascii_digit() || (buffer.is_empty() && character == '-') {
+            buffer.push(character);
+            continue;
+        }
+
+        if character == '.' && !seen_dot && !buffer.is_empty() {
+            seen_dot = true;
+            buffer.push(character);
+            continue;
+        }
+
+        if !buffer.is_empty() && buffer != "-" {
+            if let Ok(value) = buffer.parse::<f64>() {
+                if value.is_finite() && value > 0.0 && value < 10_000.0 && value != 1500.0 {
+                    return Some(value);
+                }
+            }
+        }
+
+        if !buffer.is_empty() {
+            break;
+        }
+    }
+
+    if !buffer.is_empty() && buffer != "-" {
+        if let Ok(value) = buffer.parse::<f64>() {
+            if value.is_finite() && value > 0.0 && value < 10_000.0 && value != 1500.0 {
+                return Some(value);
+            }
+        }
+    }
+
+    None
+}
+
+async fn fetch_trueskill(
+    client: &reqwest::Client,
+    url_template: &str,
+    steam_id: &str,
+) -> Option<f64> {
+    let trimmed_template = url_template.trim();
+    if trimmed_template.is_empty() {
+        return None;
+    }
+
+    let url = if trimmed_template.contains("%s") {
+        trimmed_template.replace("%s", steam_id)
+    } else {
+        format!("{}/{}", trimmed_template.trim_end_matches('/'), steam_id)
+    };
+
+    let response = client.get(url).send().await.ok()?;
+    if !response.status().is_success() {
+        return None;
+    }
+
+    let body = response.text().await.ok()?;
+
+    if let Ok(json) = serde_json::from_str::<serde_json::Value>(&body) {
+        if let Some(number) = json.as_f64() {
+            return Some(number);
+        }
+
+        for key in ["elo", "trueskill", "rating", "mu"] {
+            if let Some(number) = json.get(key).and_then(|value| value.as_f64()) {
+                return Some(number);
+            }
+            if let Some(number) = json
+                .get(key)
+                .and_then(|value| value.as_str())
+                .and_then(|value| value.trim().parse::<f64>().ok())
+            {
+                return Some(number);
+            }
+        }
+    }
+
+    extract_rating_number(&body)
 }
 
 #[tauri::command]
@@ -730,6 +869,93 @@ async fn fetch_server_mode(
     })
 }
 
+async fn fetch_server_player_ratings_impl(
+    client: &reqwest::Client,
+    qlstats_base_url: &str,
+    trueskill_url_template: &str,
+    addr: &str,
+) -> Result<Vec<ServerPlayerRating>, String> {
+    let normalized_addr = normalize_addr(addr);
+
+    if let Some(cached) = player_rating_cache()
+        .lock()
+        .map_err(|error| error.to_string())?
+        .get(&normalized_addr)
+        .cloned()
+    {
+        return Ok(cached);
+    }
+
+    let normalized_base = qlstats_base_url.trim().trim_end_matches('/');
+    if normalized_base.is_empty() {
+        return Err("QLStats API URL is required.".into());
+    }
+
+    let response = client
+        .get(format!(
+            "{}/server/{}/players",
+            normalized_base,
+            urlencoding::encode(&normalized_addr)
+        ))
+        .send()
+        .await
+        .map_err(|error| {
+            format!(
+                "QLStats player ratings request failed for {}: {}",
+                normalized_addr, error
+            )
+        })?;
+
+    if !response.status().is_success() {
+        return Err(format!(
+            "QLStats returned HTTP {} for {}.",
+            response.status(),
+            normalized_addr
+        ));
+    }
+
+    let payload = response
+        .json::<QlStatsServerResponse>()
+        .await
+        .map_err(|error| {
+            format!(
+                "QLStats player ratings response was invalid for {}: {}",
+                normalized_addr, error
+            )
+        })?;
+
+    let mut ratings = Vec::with_capacity(payload.players.len());
+    for player in payload.players {
+        let steam_id = qlstats_value_as_string(&player, "steamid")
+            .or_else(|| qlstats_value_as_string(&player, "steam_id"));
+        let name = qlstats_value_as_string(&player, "name")
+            .or_else(|| qlstats_value_as_string(&player, "nick"))
+            .or_else(|| qlstats_value_as_string(&player, "client_name"))
+            .unwrap_or_else(|| "Unknown player".into());
+        let qelo = qlstats_value_as_f64(&player, "rating")
+            .or_else(|| qlstats_value_as_f64(&player, "elo"));
+        let trueskill = if let Some(ref steam_id) = steam_id {
+            fetch_trueskill(client, trueskill_url_template, steam_id).await
+        } else {
+            None
+        };
+
+        ratings.push(ServerPlayerRating {
+            name,
+            steam_id,
+            qelo,
+            trueskill,
+        });
+    }
+
+    player_rating_cache()
+        .lock()
+        .map_err(|error| error.to_string())?
+        .insert(normalized_addr, ratings.clone());
+
+    Ok(ratings)
+}
+
 #[tauri::command]
 async fn fetch_server_modes(
     base_url: String,
@@ -749,7 +975,7 @@ async fn fetch_server_modes(
 
     let client = reqwest::Client::builder()
         .timeout(Duration::from_secs(8))
-        .user_agent("QList/0.1.0")
+        .user_agent("QLTracker/0.1.0")
         .build()
         .map_err(|error| error.to_string())?;
 
@@ -784,6 +1010,22 @@ async fn fetch_server_modes(
     Ok(modes)
 }
 
+#[tauri::command]
+async fn fetch_server_player_ratings(
+    qlstats_base_url: String,
+    trueskill_url_template: String,
+    addr: String,
+) -> Result<Vec<ServerPlayerRating>, String> {
+    let client = reqwest::Client::builder()
+        .timeout(Duration::from_secs(10))
+        .user_agent("QLTracker/0.1.0")
+        .build()
+        .map_err(|error| error.to_string())?;
+
+    fetch_server_player_ratings_impl(&client, &qlstats_base_url, &trueskill_url_template, &addr)
+        .await
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -801,6 +1043,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             fetch_quake_live_servers,
             fetch_server_players,
+            fetch_server_player_ratings,
             fetch_server_countries,
             fetch_server_pings,
             fetch_server_modes

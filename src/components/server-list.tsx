@@ -12,19 +12,21 @@ import {
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, LoaderCircle, Pencil, Plus } from "lucide-react";
+import { ArrowUpDown, Pencil, Plus } from "lucide-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { Ping, Play } from "@/components/icon";
 import { useFavorites } from "@/hooks/use-favorites";
 import { getCountryFlagSrc, type ServerCountryLocation } from "@/lib/countries";
 import { getMapEntry } from "@/lib/maps";
-import { QuakeText } from "@/lib/quake";
+import { QuakeText, stripQuakeColors } from "@/lib/quake";
 import {
   fetchServerModes,
+  fetchSteamServerPlayerRatings,
   fetchSteamServerCountries,
   fetchSteamServerPings,
   fetchSteamServerPlayers,
   type ServerMode,
+  type ServerPlayerRating,
   type ServerPing,
   type SteamServer,
 } from "@/lib/steam";
@@ -41,9 +43,6 @@ import {
 import {
   Drawer,
   DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
 } from "@/components/ui/drawer";
 import {
   Pagination,
@@ -189,19 +188,51 @@ function normalizeTags(server: SteamServer) {
     .filter(Boolean);
 }
 
+function normalizePlayerName(name: string) {
+  return name.replace(/\^[0-9]/g, "").trim().toLowerCase();
+}
+
 function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
   const [sorting, setSorting] = useState<SortingState>([
     { id: "points", desc: true },
   ]);
-  const query = useQuery({
+  const playersQuery = useQuery({
     queryKey: ["steam", "server", "players", serverAddress],
     queryFn: () => fetchSteamServerPlayers(serverAddress),
     staleTime: 30_000,
   });
+  const ratingsQuery = useQuery({
+    queryKey: ["steam", "server", "player-ratings", serverAddress],
+    queryFn: () => fetchSteamServerPlayerRatings(serverAddress),
+    staleTime: 30_000,
+  });
 
-  const players = query.data ?? [];
+  const players = playersQuery.data ?? [];
+  const playerRatingsByName = useMemo<Record<string, ServerPlayerRating>>(
+    () =>
+      Object.fromEntries(
+        (ratingsQuery.data ?? []).map((player) => [
+          normalizePlayerName(player.name),
+          player,
+        ]),
+      ),
+    [ratingsQuery.data],
+  );
+  const mergedPlayers = useMemo(
+    () =>
+      players.map((player) => ({
+        ...player,
+        rating: playerRatingsByName[normalizePlayerName(player.name)] ?? null,
+      })),
+    [playerRatingsByName, players],
+  );
+  const playerPanelPending =
+    playersQuery.isPending ||
+    (playersQuery.fetchStatus === "fetching" && !playersQuery.data) ||
+    ratingsQuery.isPending;
+  const playerPanelFrameClass = "min-h-[20rem]";
 
-  const columns = useMemo<ColumnDef<(typeof players)[number]>[]>(
+  const columns = useMemo<ColumnDef<(typeof mergedPlayers)[number]>[]>(
     () => [
       {
         accessorKey: "name",
@@ -239,6 +270,44 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
         cell: ({ row }) => row.original.score,
       },
       {
+        id: "qelo",
+        accessorFn: (row) => row.rating?.qelo ?? Number.NEGATIVE_INFINITY,
+        header: ({ column }) => (
+          <Button
+            type="button"
+            variant="ghost"
+            className="-ml-2 h-8 px-2.5 text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:bg-transparent"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            QElo
+            <ArrowUpDown className="size-3.5" />
+          </Button>
+        ),
+        cell: ({ row }) =>
+          row.original.rating?.qelo != null
+            ? Math.round(row.original.rating.qelo)
+            : "-",
+      },
+      {
+        id: "trueskill",
+        accessorFn: (row) => row.rating?.trueskill ?? Number.NEGATIVE_INFINITY,
+        header: ({ column }) => (
+          <Button
+            type="button"
+            variant="ghost"
+            className="-ml-2 h-8 px-2.5 text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:bg-transparent"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            TSkill
+            <ArrowUpDown className="size-3.5" />
+          </Button>
+        ),
+        cell: ({ row }) =>
+          row.original.rating?.trueskill != null
+            ? Math.round(row.original.rating.trueskill)
+            : "-",
+      },
+      {
         id: "time",
         accessorFn: (row) => row.duration_seconds,
         header: ({ column }) => (
@@ -260,7 +329,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
   );
 
   const table = useReactTable({
-    data: players,
+    data: mergedPlayers,
     columns,
     state: { sorting },
     onSortingChange: setSorting,
@@ -268,16 +337,64 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
     getSortedRowModel: getSortedRowModel(),
   });
 
-  if (query.isLoading) {
+  if (playerPanelPending) {
     return (
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <LoaderCircle className="size-4 animate-spin" />
-        Loading players...
+      <div className={`flex flex-col gap-2 ${playerPanelFrameClass}`}>
+        <div className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+          Players
+        </div>
+        <div className="overflow-hidden rounded-lg border border-border">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-b border-border hover:bg-transparent">
+                <TableHead className="h-10 px-4">
+                  <Skeleton className="h-4 w-14" />
+                </TableHead>
+                <TableHead className="h-10 px-4">
+                  <Skeleton className="h-4 w-12" />
+                </TableHead>
+                <TableHead className="h-10 px-4">
+                  <Skeleton className="h-4 w-12" />
+                </TableHead>
+                <TableHead className="h-10 px-4">
+                  <Skeleton className="h-4 w-12" />
+                </TableHead>
+                <TableHead className="h-10 px-4">
+                  <Skeleton className="h-4 w-12" />
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {Array.from({ length: 6 }).map((_, index) => (
+                <TableRow
+                  key={`player-skeleton-${index}`}
+                  className="border-b border-border hover:bg-transparent"
+                >
+                  <TableCell className="px-3 py-2">
+                    <Skeleton className="h-4 w-32" />
+                  </TableCell>
+                  <TableCell className="px-3 py-2">
+                    <Skeleton className="h-4 w-12" />
+                  </TableCell>
+                  <TableCell className="px-3 py-2">
+                    <Skeleton className="h-4 w-12" />
+                  </TableCell>
+                  <TableCell className="px-3 py-2">
+                    <Skeleton className="h-4 w-12" />
+                  </TableCell>
+                  <TableCell className="px-3 py-2">
+                    <Skeleton className="h-4 w-14" />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     );
   }
 
-  if (query.isError) {
+  if (playersQuery.isError) {
     return (
       <div className="text-sm text-muted-foreground">
         Steam player lookup failed.
@@ -285,7 +402,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
     );
   }
 
-  if (players.length === 0) {
+  if (mergedPlayers.length === 0) {
     return (
       <div className="text-sm text-muted-foreground">
         No player data for this server.
@@ -294,7 +411,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className={`flex flex-col gap-2 ${playerPanelFrameClass}`}>
       <div className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
         Players
       </div>
@@ -676,11 +793,10 @@ export function ServerList({
             <Button
               type="button"
               size="icon"
-              variant="default"
-              className="size-8"
+              className="size-8 bg-success text-success-foreground hover:bg-success-hover"
               onClick={(event) => {
                 event.stopPropagation();
-                void openUrl(`steam://connect/${row.original.addr}`);
+                handleJoinServer(row.original.addr);
               }}
             >
               <Play className="size-4" />
@@ -713,6 +829,9 @@ export function ServerList({
   });
 
   const selectedMap = selectedServer ? getMapEntry(selectedServer.map) : null;
+  const handleJoinServer = (serverAddress: string) => {
+    void openUrl(`steam://connect/${serverAddress}`);
+  };
   const pageCount = table.getPageCount();
   const currentPage = table.getState().pagination.pageIndex + 1;
   const visiblePageNumbers = Array.from(
@@ -760,14 +879,36 @@ export function ServerList({
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow className="border-b border-border">
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 px-3 py-2 text-center text-muted-foreground"
+                Array.from({ length: pagination.pageSize }).map((_, index) => (
+                  <TableRow
+                    key={`server-skeleton-${index}`}
+                    className="h-11 border-b border-border"
                   >
-                    Loading servers...
-                  </TableCell>
-                </TableRow>
+                    <TableCell className="relative h-11 p-0 align-middle">
+                      <div className="flex h-full items-center px-3">
+                        <Skeleton className="h-4 w-56" />
+                      </div>
+                    </TableCell>
+                    <TableCell className="h-11 px-3 py-0 align-middle">
+                      <Skeleton className="h-4 w-4 rounded-full" />
+                    </TableCell>
+                    <TableCell className="h-11 px-3 py-0 align-middle">
+                      <Skeleton className="h-4 w-20" />
+                    </TableCell>
+                    <TableCell className="h-11 px-3 py-0 align-middle">
+                      <Skeleton className="h-4 w-10" />
+                    </TableCell>
+                    <TableCell className="h-11 px-3 py-0 align-middle">
+                      <Skeleton className="h-4 w-12" />
+                    </TableCell>
+                    <TableCell className="h-11 px-3 py-0 align-middle">
+                      <div className="flex justify-end gap-2">
+                        <Skeleton className="size-8 rounded-md" />
+                        <Skeleton className="size-8 rounded-md" />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
               ) : error ? (
                 <TableRow className="border-b border-border">
                   <TableCell
@@ -904,39 +1045,56 @@ export function ServerList({
           }
         }}
       >
-        <DrawerContent className="max-h-[85vh] w-full !border-0 rounded-t-2xl shadow-none">
+        <DrawerContent className="h-[85vh] max-h-[85vh] w-full !border-0 rounded-t-2xl shadow-none overflow-hidden">
           {selectedServer ? (
             <>
-              <DrawerHeader className="border-b border-border px-5 py-4 text-left">
-                <DrawerTitle className="truncate text-left text-base">
-                  <QuakeText text={selectedServer.name} />
-                </DrawerTitle>
-                <DrawerDescription className="truncate text-left text-xs">
-                  {selectedServer.addr}
-                </DrawerDescription>
-              </DrawerHeader>
-              <div className="overflow-y-auto px-5 py-4">
-                <div className="flex items-center gap-3 border-b border-border pb-4">
-                  <div className="h-14 w-20 shrink-0 overflow-hidden rounded-md border border-border bg-muted">
-                    {selectedMap ? (
-                      <img
-                        src={selectedMap.image}
-                        alt={selectedMap.name}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : null}
+              <div className="relative overflow-hidden border-b border-border">
+                {selectedMap ? (
+                  <div className="pointer-events-none absolute inset-0">
+                    <div
+                      className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
+                      style={{
+                        backgroundImage: `url(${selectedMap.image})`,
+                        maskImage:
+                          "linear-gradient(to bottom, black 0%, black 58%, transparent 100%)",
+                        WebkitMaskImage:
+                          "linear-gradient(to bottom, black 0%, black 58%, transparent 100%)",
+                        maskSize: "100% 100%",
+                        WebkitMaskSize: "100% 100%",
+                        maskRepeat: "no-repeat",
+                        WebkitMaskRepeat: "no-repeat",
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-background/15 via-background/55 to-background" />
+                    <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-background to-transparent" />
                   </div>
-                  <div className="min-w-0">
-                    <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                      Map
+                ) : null}
+                <div className="relative z-10 h-40">
+                  <div className="pointer-events-none absolute inset-x-0 top-11 text-center text-[11px] uppercase tracking-[0.14em] text-muted-foreground/80">
+                    {selectedMap?.name ?? selectedServer.map}
+                  </div>
+                  <div className="absolute inset-x-5 bottom-5 flex items-end justify-between gap-4">
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-left text-lg font-semibold leading-tight text-foreground drop-shadow-[0_1px_10px_rgba(0,0,0,0.55)]">
+                        {stripQuakeColors(selectedServer.name)}
+                      </div>
+                      <div className="mt-1 truncate text-left text-sm leading-tight text-muted-foreground/90 drop-shadow-[0_1px_8px_rgba(0,0,0,0.45)]">
+                        {selectedServer.addr}
+                      </div>
                     </div>
-                    <div className="mt-1 text-sm font-medium text-foreground">
-                      {selectedMap?.name ?? selectedServer.map}
-                    </div>
+                    <Button
+                      type="button"
+                      className="h-9 shrink-0 gap-2 bg-success text-success-foreground shadow-[0_0_28px_color-mix(in_oklch,var(--color-success)_28%,transparent)] hover:bg-success-hover hover:shadow-[0_0_34px_color-mix(in_oklch,var(--color-success-hover)_34%,transparent)]"
+                      onClick={() => handleJoinServer(selectedServer.addr)}
+                    >
+                      <Play className="size-4" />
+                      Play
+                    </Button>
                   </div>
                 </div>
-
-                <div className="mt-4">
+              </div>
+              <div className="min-h-0 flex-1 overflow-y-auto">
+                <div className="px-5 py-4">
                   <QlStatsPlayersPanel serverAddress={selectedServer.addr} />
                 </div>
               </div>

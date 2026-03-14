@@ -53,7 +53,7 @@ export function App() {
       return;
     }
 
-    console.log("[QList] Steam query", {
+    console.log("[QLTracker] Steam query", {
       enabled: steamApiKey.length > 0,
       status: serversQuery.status,
       fetchStatus: serversQuery.fetchStatus,

@@ -1,5 +1,6 @@
 import appIcon from "@/assets/images/appicon.png";
 import logo from "@/assets/images/logo.png";
+import logoDark from "@/assets/images/logo_dark.png";
 import packageJson from "../../../package.json";
 import { navigationItems, type PageId } from "@/lib/navigation";
 import {
@@ -30,14 +31,21 @@ export function AppSidebar({
     >
       <SidebarHeader>
         <div className="relative h-14 px-2">
-          <img
-            src={logo}
-            alt="QList"
-            className="absolute left-2 top-1/2 h-8 w-auto -translate-y-1/2 object-contain opacity-100 transition-opacity duration-200 ease-linear group-data-[collapsible=icon]:opacity-0"
-          />
+          <div className="absolute inset-y-0 left-2 flex items-center group-data-[collapsible=icon]:hidden">
+            <img
+              src={logoDark}
+              alt="QLTracker"
+              className="h-8 w-auto object-contain dark:hidden"
+            />
+            <img
+              src={logo}
+              alt="QLTracker"
+              className="hidden h-8 w-auto object-contain dark:block"
+            />
+          </div>
           <img
             src={appIcon}
-            alt="QList app icon"
+            alt="QLTracker app icon"
             className="absolute left-1/2 top-1/2 size-8 -translate-x-1/2 -translate-y-1/2 object-contain opacity-0 transition-opacity duration-200 ease-linear group-data-[collapsible=icon]:opacity-100"
           />
         </div>
@@ -45,7 +53,7 @@ export function AppSidebar({
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className="uppercase tracking-[0.18em]">
-            QList
+            QLTracker
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -74,9 +82,9 @@ export function AppSidebar({
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="border-t border-sidebar-border">
+      <SidebarFooter className="border-t border-sidebar-border group-data-[collapsible=icon]:hidden">
         <div className="w-full px-2 py-1 text-center text-xs text-muted-foreground">
-          QList v{packageJson.version}
+          QLTracker v{packageJson.version}
         </div>
       </SidebarFooter>
     </Sidebar>

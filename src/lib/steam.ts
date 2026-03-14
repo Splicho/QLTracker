@@ -3,6 +3,9 @@ import type { ServerCountryLocation } from "@/lib/countries";
 
 const steamAppId = import.meta.env.VITE_STEAM_APP_ID?.trim() || "282440";
 const qlstatsApiUrl = import.meta.env.VITE_QLSTATS_API_URL?.trim() || "https://qlstats.net/api";
+const trueskillUrlTemplate =
+  import.meta.env.VITE_TRUESKILL_URL_TEMPLATE?.trim() ||
+  "http://qlrelax.freemyip.com/elo/bn/%s";
 
 export type SteamServer = {
   addr: string;
@@ -37,6 +40,13 @@ export type ServerMode = {
   game_mode: string | null;
 };
 
+export type ServerPlayerRating = {
+  name: string;
+  steam_id: string | null;
+  qelo: number | null;
+  trueskill: number | null;
+};
+
 export async function fetchSteamServers(apiKey: string) {
   return invoke<SteamServer[]>("fetch_quake_live_servers", {
     apiKey,
@@ -67,5 +77,13 @@ export async function fetchServerModes(addrs: string[]) {
   return invoke<ServerMode[]>("fetch_server_modes", {
     baseUrl: qlstatsApiUrl,
     addrs,
+  });
+}
+
+export async function fetchSteamServerPlayerRatings(addr: string) {
+  return invoke<ServerPlayerRating[]>("fetch_server_player_ratings", {
+    qlstatsBaseUrl: qlstatsApiUrl,
+    trueskillUrlTemplate,
+    addr,
   });
 }
