@@ -14,7 +14,7 @@ import {
 } from "@tanstack/react-table";
 import { ArrowUpDown, Pencil, Plus } from "lucide-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { Ping, Play } from "@/components/icon";
+import { Medal, Ping, Play, SlashCircle } from "@/components/icon";
 import { useFavorites } from "@/hooks/use-favorites";
 import { getCountryFlagSrc, type ServerCountryLocation } from "@/lib/countries";
 import { getMapEntry } from "@/lib/maps";
@@ -69,6 +69,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -190,6 +192,154 @@ function normalizeTags(server: SteamServer) {
 
 function normalizePlayerName(name: string) {
   return name.replace(/\^[0-9]/g, "").trim().toLowerCase();
+}
+
+function calculateAverage(values: Array<number | null | undefined>) {
+  const numbers = values.filter((value): value is number => value != null);
+
+  if (numbers.length === 0) {
+    return null;
+  }
+
+  return Math.round(
+    numbers.reduce((total, value) => total + value, 0) / numbers.length,
+  );
+}
+
+function calculateHighestRatedPlayer(
+  players: ServerPlayerRating[],
+  ratingKey: "qelo" | "trueskill",
+) {
+  return players.reduce<ServerPlayerRating | null>((highest, player) => {
+    const rating = player[ratingKey];
+
+    if (rating == null) {
+      return highest;
+    }
+
+    if (highest == null) {
+      return player;
+    }
+
+    return rating > (highest[ratingKey] ?? Number.NEGATIVE_INFINITY)
+      ? player
+      : highest;
+  }, null);
+}
+
+function ServerAverageRatingBadges({ serverAddress }: { serverAddress: string }) {
+  const ratingsQuery = useQuery({
+    queryKey: ["steam", "server", "player-ratings", serverAddress],
+    queryFn: () => fetchSteamServerPlayerRatings(serverAddress),
+    staleTime: 30_000,
+  });
+  const ratings = ratingsQuery.data ?? [];
+
+  const averageQelo = useMemo(
+    () => calculateAverage(ratings.map((player) => player.qelo)),
+    [ratings],
+  );
+  const averageTrueskill = useMemo(
+    () => calculateAverage(ratings.map((player) => player.trueskill)),
+    [ratings],
+  );
+  const highestQeloPlayer = useMemo(
+    () => calculateHighestRatedPlayer(ratings, "qelo"),
+    [ratings],
+  );
+  const highestTrueskillPlayer = useMemo(
+    () => calculateHighestRatedPlayer(ratings, "trueskill"),
+    [ratings],
+  );
+  const isPending =
+    ratingsQuery.isPending ||
+    (ratingsQuery.fetchStatus === "fetching" && !ratingsQuery.data);
+  const badgeClassName =
+    "rounded-md pl-2 pr-1 py-1 text-[11px] font-medium tracking-[0.01em]";
+
+  if (isPending) {
+    return (
+      <div className="mt-2 flex flex-wrap gap-2">
+        <Skeleton className="h-7 w-24 rounded-md" />
+        <Skeleton className="h-7 w-24 rounded-md" />
+        <Separator orientation="vertical" className="h-7" />
+        <Skeleton className="h-7 w-36 rounded-md" />
+        <Skeleton className="h-7 w-36 rounded-md" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-2 flex flex-wrap gap-2">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Badge variant="outline" className={badgeClassName}>
+            <SlashCircle className="size-3" />
+            QElo {"\u00b7"}
+            <div className="rounded-sm bg-muted px-1.5 py-0.5 text-foreground">
+              {averageQelo ?? "-"}
+            </div>
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent side="top">Average QElo on this server</TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Badge variant="outline" className={badgeClassName}>
+            <SlashCircle className="size-3" />
+            TSkill {"\u00b7"}
+            <div className="rounded-sm bg-muted px-1.5 py-0.5 text-foreground">
+              {averageTrueskill ?? "-"}
+            </div>
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent side="top">Average TSkill on this server</TooltipContent>
+      </Tooltip>
+      <Separator orientation="vertical" className="!h-4 self-center" />
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Badge variant="outline" className={badgeClassName}>
+            <Medal className="size-3 text-amber-400" />
+            QElo {"\u00b7"}
+            {highestQeloPlayer ? (
+              <QuakeText
+                text={highestQeloPlayer.name}
+                fallbackClassName="inline-block max-w-28 truncate align-bottom text-foreground"
+              />
+            ) : (
+              <span className="max-w-28 truncate text-foreground">-</span>
+            )}
+            <div className="rounded-sm bg-muted px-1.5 py-0.5 text-foreground">
+              {highestQeloPlayer?.qelo != null ? Math.round(highestQeloPlayer.qelo) : "-"}
+            </div>
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent side="top">Highest QElo player on this server</TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Badge variant="outline" className={badgeClassName}>
+            <Medal className="size-3 text-amber-400" />
+            TSkill {"\u00b7"}
+            {highestTrueskillPlayer ? (
+              <QuakeText
+                text={highestTrueskillPlayer.name}
+                fallbackClassName="inline-block max-w-28 truncate align-bottom text-foreground"
+              />
+            ) : (
+              <span className="max-w-28 truncate text-foreground">-</span>
+            )}
+            <div className="rounded-sm bg-muted px-1.5 py-0.5 text-foreground">
+              {highestTrueskillPlayer?.trueskill != null
+                ? Math.round(highestTrueskillPlayer.trueskill)
+                : "-"}
+            </div>
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent side="top">Highest TSkill player on this server</TooltipContent>
+      </Tooltip>
+    </div>
+  );
 }
 
 function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
@@ -1078,9 +1228,7 @@ export function ServerList({
                       <div className="truncate text-left text-lg font-semibold leading-tight text-foreground drop-shadow-[0_1px_10px_rgba(0,0,0,0.55)]">
                         {stripQuakeColors(selectedServer.name)}
                       </div>
-                      <div className="mt-1 truncate text-left text-sm leading-tight text-muted-foreground/90 drop-shadow-[0_1px_8px_rgba(0,0,0,0.45)]">
-                        {selectedServer.addr}
-                      </div>
+                      <ServerAverageRatingBadges serverAddress={selectedServer.addr} />
                     </div>
                     <Button
                       type="button"
