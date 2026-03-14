@@ -1,11 +1,20 @@
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::io;
 use std::net::{SocketAddr, UdpSocket};
-use std::time::{Duration, Instant};
+use std::process::Command;
+use std::sync::{Mutex, OnceLock};
+use std::time::Duration;
 
 const STEAM_SERVER_LIST_URL: &str =
     "https://api.steampowered.com/IGameServersService/GetServerList/v1/";
-const A2S_INFO_HEADER: &[u8] = b"\xFF\xFF\xFF\xFFTSource Engine Query\x00";
 const A2S_PLAYER_HEADER: &[u8] = b"\xFF\xFF\xFF\xFFU\xFF\xFF\xFF\xFF";
+const A2S_INFO_HEADER: &[u8] = b"\xFF\xFF\xFF\xFFTSource Engine Query\x00";
+const CHECK_HOST_IP_INFO_URL: &str = "https://check-host.net/ip-info";
+static COUNTRY_CACHE: OnceLock<Mutex<HashMap<String, Option<ServerCountryLocation>>>> =
+    OnceLock::new();
+static PING_CACHE: OnceLock<Mutex<HashMap<String, Option<u128>>>> = OnceLock::new();
+static MODE_CACHE: OnceLock<Mutex<HashMap<String, Option<String>>>> = OnceLock::new();
 
 #[derive(Debug, Deserialize)]
 struct SteamListResponse {
@@ -37,7 +46,7 @@ struct SteamServerRecord {
     #[serde(default)]
     bots: Option<u8>,
     #[serde(default)]
-    region: Option<u8>,
+    region: Option<i32>,
 }
 
 #[derive(Debug, Serialize, Clone)]
@@ -46,6 +55,15 @@ struct ServerPlayer {
     name: String,
     score: i32,
     duration_seconds: f32,
+}
+
+#[derive(Debug, Serialize, Clone)]
+#[serde(rename_all = "snake_case")]
+struct ServerCountryLocation {
+    addr: String,
+    ip: String,
+    country_name: Option<String>,
+    country_code: Option<String>,
 }
 
 #[derive(Debug, Serialize, Clone)]
@@ -62,25 +80,367 @@ struct QuakeServer {
     max_players: u8,
     bots: u8,
     ping_ms: Option<u128>,
-    region: Option<u8>,
+    region: Option<i32>,
     version: Option<String>,
     keywords: Option<String>,
     connect_url: String,
     players_info: Vec<ServerPlayer>,
 }
 
-#[derive(Default)]
-struct QueryInfo {
-    name: Option<String>,
-    map: Option<String>,
-    game_directory: Option<String>,
-    game_description: Option<String>,
-    players: Option<u8>,
-    max_players: Option<u8>,
-    bots: Option<u8>,
-    version: Option<String>,
-    keywords: Option<String>,
-    ping_ms: Option<u128>,
+fn normalize_addr(addr: &str) -> String {
+    if addr.contains(':') {
+        addr.to_string()
+    } else {
+        format!("{addr}:27960")
+    }
+}
+
+fn extract_host(addr: &str) -> &str {
+    addr.rsplit_once(':').map_or(addr, |(host, _)| host)
+}
+
+fn country_cache() -> &'static Mutex<HashMap<String, Option<ServerCountryLocation>>> {
+    COUNTRY_CACHE.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+fn ping_cache() -> &'static Mutex<HashMap<String, Option<u128>>> {
+    PING_CACHE.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+fn mode_cache() -> &'static Mutex<HashMap<String, Option<String>>> {
+    MODE_CACHE.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+fn extract_between<'a>(haystack: &'a str, start: &str, end: &str) -> Option<&'a str> {
+    let from = haystack.find(start)? + start.len();
+    let tail = &haystack[from..];
+    let to = tail.find(end)?;
+    Some(&tail[..to])
+}
+
+fn parse_country_from_section(section: &str) -> Option<(String, String)> {
+    let country_marker = section.find("<!-- Country -->")?;
+    let country_section = &section[country_marker..];
+    let country_name = extract_between(country_section, "<strong>", "</strong>")?
+        .trim()
+        .to_string();
+    let country_code = extract_between(country_section, "(", ")")?.trim().to_lowercase();
+
+    if country_name.is_empty() || country_code.len() != 2 {
+        return None;
+    }
+
+    Some((country_name, country_code))
+}
+
+fn parse_country_from_html(addr: &str, ip: &str, html: &str) -> ServerCountryLocation {
+    let providers = ["dbip", "ipgeolocation", "ip2location", "geolite2", "ipinfoio"];
+
+    for provider in providers {
+        let marker = format!("id=\"ip_info-{provider}\"");
+        let Some(section_start) = html.find(&marker) else {
+            continue;
+        };
+
+        let section = &html[section_start..];
+        if let Some((country_name, country_code)) = parse_country_from_section(section) {
+            return ServerCountryLocation {
+                addr: addr.to_string(),
+                ip: ip.to_string(),
+                country_name: Some(country_name),
+                country_code: Some(country_code),
+            };
+        }
+    }
+
+    ServerCountryLocation {
+        addr: addr.to_string(),
+        ip: ip.to_string(),
+        country_name: None,
+        country_code: None,
+    }
+}
+
+async fn fetch_country_location(
+    client: &reqwest::Client,
+    addr: &str,
+) -> Result<ServerCountryLocation, String> {
+    let ip = extract_host(addr).to_string();
+
+    if let Some(cached) = country_cache()
+        .lock()
+        .map_err(|error| error.to_string())?
+        .get(&ip)
+        .cloned()
+    {
+        return Ok(cached.unwrap_or(ServerCountryLocation {
+            addr: addr.to_string(),
+            ip,
+            country_name: None,
+            country_code: None,
+        }));
+    }
+
+    let response = client
+        .get(CHECK_HOST_IP_INFO_URL)
+        .query(&[("host", ip.as_str())])
+        .send()
+        .await
+        .map_err(|error| format!("Check-Host request failed for {ip}: {error}"))?;
+
+    if !response.status().is_success() {
+        return Err(format!(
+            "Check-Host returned HTTP {} for {}.",
+            response.status(),
+            ip
+        ));
+    }
+
+    let html = response
+        .text()
+        .await
+        .map_err(|error| format!("Check-Host response read failed for {ip}: {error}"))?;
+
+    let location = parse_country_from_html(addr, &ip, &html);
+
+    country_cache()
+        .lock()
+        .map_err(|error| error.to_string())?
+        .insert(ip, Some(location.clone()));
+
+    Ok(location)
+}
+
+fn read_cstring(buf: &[u8], cursor: &mut usize) -> Option<String> {
+    if *cursor >= buf.len() {
+        return None;
+    }
+
+    let start = *cursor;
+    while *cursor < buf.len() && buf[*cursor] != 0 {
+        *cursor += 1;
+    }
+
+    let value = String::from_utf8_lossy(&buf[start..(*cursor).min(buf.len())]).into_owned();
+
+    if *cursor < buf.len() {
+      *cursor += 1;
+    }
+
+    Some(value)
+}
+
+fn query_players(addr: &str) -> Result<Vec<ServerPlayer>, String> {
+    let socket_addr: SocketAddr = normalize_addr(addr)
+        .parse()
+        .map_err(|error| format!("Invalid server address '{addr}': {error}"))?;
+
+    let socket = UdpSocket::bind("0.0.0.0:0").map_err(|error| error.to_string())?;
+    socket
+        .set_read_timeout(Some(Duration::from_secs(4)))
+        .map_err(|error| error.to_string())?;
+    socket
+        .set_write_timeout(Some(Duration::from_secs(4)))
+        .map_err(|error| error.to_string())?;
+
+    socket
+        .send_to(A2S_PLAYER_HEADER, socket_addr)
+        .map_err(|error| format!("A2S challenge request failed: {error}"))?;
+
+    let mut challenge_buf = [0_u8; 1400];
+    let (challenge_len, _) = socket
+        .recv_from(&mut challenge_buf)
+        .map_err(|error| format!("A2S challenge response failed: {error}"))?;
+
+    if challenge_len < 9 || &challenge_buf[0..5] != b"\xFF\xFF\xFF\xFFA" {
+        return Err("Unexpected A2S challenge response.".into());
+    }
+
+    let challenge = &challenge_buf[5..9];
+    let mut request = Vec::with_capacity(A2S_PLAYER_HEADER.len());
+    request.extend_from_slice(&A2S_PLAYER_HEADER[..5]);
+    request.extend_from_slice(challenge);
+
+    socket
+        .send_to(&request, socket_addr)
+        .map_err(|error| format!("A2S player request failed: {error}"))?;
+
+    let mut players_buf = [0_u8; 4096];
+    let (players_len, _) = socket
+        .recv_from(&mut players_buf)
+        .map_err(|error| format!("A2S player response failed: {error}"))?;
+
+    parse_player_response(&players_buf[..players_len])
+}
+
+fn query_ping(addr: &str) -> Result<u128, String> {
+    let normalized_addr = normalize_addr(addr);
+
+    if let Some(cached) = ping_cache()
+        .lock()
+        .map_err(|error| error.to_string())?
+        .get(&normalized_addr)
+        .copied()
+        .flatten()
+    {
+        return Ok(cached);
+    }
+
+    let socket_addr: SocketAddr = normalized_addr
+        .parse()
+        .map_err(|error| format!("Invalid server address '{addr}': {error}"))?;
+
+    let socket = UdpSocket::bind("0.0.0.0:0").map_err(|error| error.to_string())?;
+    socket
+        .set_read_timeout(Some(Duration::from_secs(3)))
+        .map_err(|error| error.to_string())?;
+    socket
+        .set_write_timeout(Some(Duration::from_secs(3)))
+        .map_err(|error| error.to_string())?;
+
+    let started_at = std::time::Instant::now();
+    socket
+        .send_to(A2S_INFO_HEADER, socket_addr)
+        .map_err(|error| format!("A2S info request failed: {error}"))?;
+
+    let mut response_buf = [0_u8; 1400];
+    let (mut response_len, _) = socket
+        .recv_from(&mut response_buf)
+        .map_err(|error| format!("A2S info response failed: {error}"))?;
+
+    if response_len >= 9 && &response_buf[0..5] == b"\xFF\xFF\xFF\xFFA" {
+        let mut challenged_request = Vec::with_capacity(A2S_INFO_HEADER.len() + 4);
+        challenged_request.extend_from_slice(A2S_INFO_HEADER);
+        challenged_request.extend_from_slice(&response_buf[5..9]);
+
+        socket
+            .send_to(&challenged_request, socket_addr)
+            .map_err(|error| format!("A2S challenged info request failed: {error}"))?;
+
+        (response_len, _) = socket
+            .recv_from(&mut response_buf)
+            .map_err(|error| format!("A2S challenged info response failed: {error}"))?;
+    }
+
+    if response_len < 6 || &response_buf[0..5] != b"\xFF\xFF\xFF\xFFI" {
+        let fallback_ping = query_system_ping(extract_host(&normalized_addr))?;
+        ping_cache()
+            .lock()
+            .map_err(|error| error.to_string())?
+            .insert(normalized_addr, Some(fallback_ping));
+        return Ok(fallback_ping);
+    }
+
+    let ping_ms = started_at.elapsed().as_millis();
+    ping_cache()
+        .lock()
+        .map_err(|error| error.to_string())?
+        .insert(normalized_addr, Some(ping_ms));
+
+    Ok(ping_ms)
+}
+
+fn query_system_ping(host: &str) -> Result<u128, String> {
+    #[cfg(target_os = "windows")]
+    let output = Command::new("ping")
+        .args(["-n", "1", "-w", "1200", host])
+        .output()
+        .map_err(|error| format!("System ping failed to start: {error}"))?;
+
+    #[cfg(not(target_os = "windows"))]
+    let output = Command::new("ping")
+        .args(["-c", "1", "-W", "1", host])
+        .output()
+        .map_err(|error| format!("System ping failed to start: {error}"))?;
+
+    if !output.status.success() {
+        return Err("System ping failed.".into());
+    }
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+
+    #[cfg(target_os = "windows")]
+    {
+        for part in stdout.split_whitespace() {
+            if let Some(value) = part.strip_prefix("time=") {
+                let ms = value.trim_end_matches("ms");
+                if let Ok(parsed) = ms.parse::<u128>() {
+                    return Ok(parsed);
+                }
+            }
+            if let Some(value) = part.strip_prefix("time<") {
+                if value.contains("ms") {
+                    return Ok(1);
+                }
+            }
+        }
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    {
+        for part in stdout.split_whitespace() {
+            if let Some(value) = part.strip_prefix("time=") {
+                let ms = value.trim_end_matches("ms");
+                if let Ok(parsed) = ms.parse::<f64>() {
+                    return Ok(parsed.round() as u128);
+                }
+            }
+        }
+    }
+
+    Err("Unable to parse system ping output.".into())
+}
+
+fn parse_player_response(buf: &[u8]) -> Result<Vec<ServerPlayer>, String> {
+    if buf.len() < 6 {
+        return Err("A2S player response was too short.".into());
+    }
+
+    if &buf[0..5] != b"\xFF\xFF\xFF\xFFD" {
+        return Err("Unexpected A2S player response header.".into());
+    }
+
+    let player_count = usize::from(buf[5]);
+    let mut cursor = 6;
+    let mut players = Vec::with_capacity(player_count);
+
+    for _ in 0..player_count {
+        if cursor >= buf.len() {
+            break;
+        }
+
+        cursor += 1;
+
+        let name = read_cstring(buf, &mut cursor).unwrap_or_else(|| "Unknown player".into());
+
+        if cursor + 8 > buf.len() {
+            break;
+        }
+
+        let score = i32::from_le_bytes(
+            buf[cursor..cursor + 4]
+                .try_into()
+                .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "invalid score bytes"))
+                .map_err(|error| error.to_string())?,
+        );
+        cursor += 4;
+
+        let duration_seconds = f32::from_le_bytes(
+            buf[cursor..cursor + 4]
+                .try_into()
+                .map_err(|_| io::Error::new(io::ErrorKind::InvalidData, "invalid duration bytes"))
+                .map_err(|error| error.to_string())?,
+        );
+        cursor += 4;
+
+        players.push(ServerPlayer {
+            name,
+            score,
+            duration_seconds,
+        });
+    }
+
+    Ok(players)
 }
 
 #[tauri::command]
@@ -89,6 +449,12 @@ async fn fetch_quake_live_servers(
     search: String,
     limit: u32,
 ) -> Result<Vec<QuakeServer>, String> {
+    log::info!(
+        "fetch_quake_live_servers called with filter='{}' limit={}",
+        search,
+        limit
+    );
+
     if api_key.trim().is_empty() {
         return Err("Steam API key is required.".into());
     }
@@ -116,223 +482,306 @@ async fn fetch_quake_live_servers(
     let payload = response
         .json::<SteamListResponse>()
         .await
-        .map_err(|error| format!("Steam API response was invalid: {error}"))?;
+        .map_err(|error| {
+            let message = format!("Steam API response was invalid: {error}");
+            log::error!("{message}");
+            message
+        })?;
+
+    log::info!(
+        "Steam returned {} raw server rows",
+        payload.response.servers.len()
+    );
 
     let mut servers = Vec::with_capacity(payload.response.servers.len());
 
     for entry in payload.response.servers {
-        let query_addr = normalize_addr(&entry.addr);
-        let info = tauri::async_runtime::spawn_blocking(move || query_server(&query_addr))
-            .await
-            .map_err(|error| error.to_string())?
-            .unwrap_or_default();
-
         servers.push(QuakeServer {
             addr: entry.addr.clone(),
             steamid: entry.steamid,
-            name: info
-                .name
-                .or(entry.name)
-                .unwrap_or_else(|| "Unknown server".into()),
-            map: info.map.or(entry.map).unwrap_or_else(|| "unknown".into()),
-            game_directory: info
+            name: entry.name.unwrap_or_else(|| "Unknown server".into()),
+            map: entry.map.unwrap_or_else(|| "unknown".into()),
+            game_directory: entry
                 .game_directory
-                .or(entry.game_directory)
-                .unwrap_or_else(|| "quakelive".into()),
-            game_description: info.game_description.unwrap_or_else(|| "Quake Live".into()),
+                .unwrap_or_else(|| "baseq3".into()),
+            game_description: "Quake Live".into(),
             app_id: entry.app_id.unwrap_or(282_440),
-            players: info.players.or(entry.players).unwrap_or(0),
-            max_players: info.max_players.or(entry.max_players).unwrap_or(0),
-            bots: info.bots.or(entry.bots).unwrap_or(0),
-            ping_ms: info.ping_ms,
+            players: entry.players.unwrap_or(0),
+            max_players: entry.max_players.unwrap_or(0),
+            bots: entry.bots.unwrap_or(0),
+            ping_ms: None,
             region: entry.region,
-            version: info.version,
-            keywords: info.keywords,
+            version: None,
+            keywords: None,
             connect_url: format!("+connect {}", entry.addr),
-            players_info: query_players(&normalize_addr(&entry.addr)).unwrap_or_default(),
+            players_info: Vec::new(),
         });
     }
 
     servers.sort_by(|left, right| {
-        right
-            .players
-            .cmp(&left.players)
-            .then_with(|| left.ping_ms.unwrap_or(u128::MAX).cmp(&right.ping_ms.unwrap_or(u128::MAX)))
+        right.players.cmp(&left.players).then_with(|| {
+            left.ping_ms
+                .unwrap_or(u128::MAX)
+                .cmp(&right.ping_ms.unwrap_or(u128::MAX))
+        })
     });
+
+    log::info!("Returning {} enriched server rows", servers.len());
 
     Ok(servers)
 }
 
-fn normalize_addr(addr: &str) -> String {
-    if addr.contains(':') {
-        addr.to_string()
-    } else {
-        format!("{addr}:27015")
-    }
+#[tauri::command]
+async fn fetch_server_players(addr: String) -> Result<Vec<ServerPlayer>, String> {
+    log::info!("fetch_server_players called for {}", addr);
+
+    let addr_clone = addr.clone();
+    tauri::async_runtime::spawn_blocking(move || query_players(&addr_clone))
+        .await
+        .map_err(|error| format!("Player query task failed: {error}"))?
 }
 
-fn query_server(addr: &str) -> Result<QueryInfo, String> {
-    let socket_addr: SocketAddr = addr.parse().map_err(|error| format!("Bad address: {error}"))?;
-    let socket = UdpSocket::bind("0.0.0.0:0").map_err(|error| error.to_string())?;
-    socket
-        .set_read_timeout(Some(Duration::from_secs(3)))
-        .map_err(|error| error.to_string())?;
+#[tauri::command]
+async fn fetch_server_countries(addrs: Vec<String>) -> Result<Vec<ServerCountryLocation>, String> {
+    let unique_addrs = addrs.into_iter().fold(Vec::new(), |mut acc, addr| {
+        if !acc.contains(&addr) {
+            acc.push(addr);
+        }
+        acc
+    });
 
-    let started = Instant::now();
-    socket
-        .send_to(A2S_INFO_HEADER, socket_addr)
-        .map_err(|error| error.to_string())?;
-
-    let mut buf = [0u8; 1400];
-    let (size, _) = socket.recv_from(&mut buf).map_err(|error| error.to_string())?;
-    let ping_ms = started.elapsed().as_millis();
-
-    parse_info_response(&buf[..size], ping_ms)
-}
-
-fn parse_info_response(buf: &[u8], ping_ms: u128) -> Result<QueryInfo, String> {
-    if buf.len() < 6 || buf[4] != 0x49 {
-        return Err("Unexpected A2S_INFO response.".into());
-    }
-
-    let mut cursor = 6;
-    let name = read_cstring(buf, &mut cursor)?;
-    let map = read_cstring(buf, &mut cursor)?;
-    let game_directory = read_cstring(buf, &mut cursor)?;
-    let game_description = read_cstring(buf, &mut cursor)?;
-
-    if cursor + 7 > buf.len() {
-        return Err("Incomplete A2S_INFO payload.".into());
-    }
-
-    cursor += 2;
-    let players = buf[cursor];
-    cursor += 1;
-    let max_players = buf[cursor];
-    cursor += 1;
-    let bots = buf[cursor];
-    cursor += 1;
-    cursor += 2;
-    let version = read_cstring(buf, &mut cursor).ok();
-    let keywords = if cursor < buf.len() {
-        read_edf_keywords(buf, &mut cursor)
-    } else {
-        None
-    };
-
-    Ok(QueryInfo {
-        name: Some(name),
-        map: Some(map),
-        game_directory: Some(game_directory),
-        game_description: Some(game_description),
-        players: Some(players),
-        max_players: Some(max_players),
-        bots: Some(bots),
-        version,
-        keywords,
-        ping_ms: Some(ping_ms),
-    })
-}
-
-fn read_edf_keywords(buf: &[u8], cursor: &mut usize) -> Option<String> {
-    let edf = *buf.get(*cursor)?;
-    *cursor += 1;
-    if edf & 0x80 != 0 {
-        *cursor += 2;
-    }
-    if edf & 0x10 != 0 {
-        *cursor += 8;
-    }
-    if edf & 0x40 != 0 {
-        *cursor += 2;
-        *cursor += 8;
-    }
-    if edf & 0x20 != 0 {
-        return read_cstring(buf, cursor).ok();
-    }
-    None
-}
-
-fn query_players(addr: &str) -> Result<Vec<ServerPlayer>, String> {
-    let socket_addr: SocketAddr = addr.parse().map_err(|error| format!("Bad address: {error}"))?;
-    let socket = UdpSocket::bind("0.0.0.0:0").map_err(|error| error.to_string())?;
-    socket
-        .set_read_timeout(Some(Duration::from_secs(3)))
-        .map_err(|error| error.to_string())?;
-
-    socket
-        .send_to(A2S_PLAYER_HEADER, socket_addr)
-        .map_err(|error| error.to_string())?;
-
-    let mut challenge_buf = [0u8; 1400];
-    let (size, _) = socket
-        .recv_from(&mut challenge_buf)
-        .map_err(|error| error.to_string())?;
-
-    if size < 9 || challenge_buf[4] != 0x41 {
+    if unique_addrs.is_empty() {
         return Ok(Vec::new());
     }
 
-    let challenge = &challenge_buf[5..9];
-    let mut request = vec![0xFF, 0xFF, 0xFF, 0xFF, 0x55];
-    request.extend_from_slice(challenge);
-    socket
-        .send_to(&request, socket_addr)
+    log::info!(
+        "fetch_server_countries called for {} server addresses",
+        unique_addrs.len()
+    );
+
+    let client = reqwest::Client::builder()
+        .timeout(Duration::from_secs(8))
+        .user_agent("QList/0.1.0")
+        .build()
         .map_err(|error| error.to_string())?;
 
-    let (players_size, _) = socket
-        .recv_from(&mut challenge_buf)
-        .map_err(|error| error.to_string())?;
+    let tasks: Vec<_> = unique_addrs
+        .into_iter()
+        .map(|addr| {
+            let client = client.clone();
+            tauri::async_runtime::spawn(async move {
+                match fetch_country_location(&client, &addr).await {
+                    Ok(location) => location,
+                    Err(error) => {
+                        log::warn!("{error}");
+                        ServerCountryLocation {
+                            addr: addr.clone(),
+                            ip: extract_host(&addr).to_string(),
+                            country_name: None,
+                            country_code: None,
+                        }
+                    }
+                }
+            })
+        })
+        .collect();
 
-    parse_player_response(&challenge_buf[..players_size])
+    let mut locations = Vec::with_capacity(tasks.len());
+    for task in tasks {
+        locations.push(
+            task.await
+                .map_err(|error| format!("Country lookup task failed: {error}"))?,
+        );
+    }
+
+    Ok(locations)
 }
 
-fn parse_player_response(buf: &[u8]) -> Result<Vec<ServerPlayer>, String> {
-    if buf.len() < 6 || buf[4] != 0x44 {
+#[derive(Debug, Serialize, Clone)]
+#[serde(rename_all = "snake_case")]
+struct ServerPing {
+    addr: String,
+    ping_ms: Option<u128>,
+}
+
+#[derive(Debug, Serialize, Clone)]
+#[serde(rename_all = "snake_case")]
+struct ServerMode {
+    addr: String,
+    game_mode: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct QlStatsServerInfo {
+    #[serde(default)]
+    gt: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct QlStatsServerResponse {
+    #[serde(default)]
+    serverinfo: Option<QlStatsServerInfo>,
+}
+
+#[tauri::command]
+async fn fetch_server_pings(addrs: Vec<String>) -> Result<Vec<ServerPing>, String> {
+    let unique_addrs = addrs.into_iter().fold(Vec::new(), |mut acc, addr| {
+        let normalized_addr = normalize_addr(&addr);
+        if !acc.contains(&normalized_addr) {
+            acc.push(normalized_addr);
+        }
+        acc
+    });
+
+    if unique_addrs.is_empty() {
         return Ok(Vec::new());
     }
 
-    let mut cursor = 5;
-    let player_count = buf[cursor] as usize;
-    cursor += 1;
-    let mut players = Vec::with_capacity(player_count);
+    log::info!(
+        "fetch_server_pings called for {} server addresses",
+        unique_addrs.len()
+    );
 
-    for _ in 0..player_count {
-        if cursor >= buf.len() {
-            break;
-        }
+    let tasks: Vec<_> = unique_addrs
+        .into_iter()
+        .map(|addr| {
+            tauri::async_runtime::spawn_blocking(move || {
+                let ping_ms = match query_ping(&addr) {
+                    Ok(ping_ms) => Some(ping_ms),
+                    Err(error) => {
+                        log::warn!("Ping lookup failed for {}: {}", addr, error);
+                        None
+                    }
+                };
 
-        cursor += 1;
-        let name = read_cstring(buf, &mut cursor)?;
-        if cursor + 8 > buf.len() {
-            break;
-        }
-        let score = i32::from_le_bytes(buf[cursor..cursor + 4].try_into().map_err(|_| "Invalid score payload.")?);
-        cursor += 4;
-        let duration_seconds =
-            f32::from_le_bytes(buf[cursor..cursor + 4].try_into().map_err(|_| "Invalid duration payload.")?);
-        cursor += 4;
+                ServerPing { addr, ping_ms }
+            })
+        })
+        .collect();
 
-        players.push(ServerPlayer {
-            name,
-            score,
-            duration_seconds,
+    let mut pings = Vec::with_capacity(tasks.len());
+    for task in tasks {
+        pings.push(
+            task.await
+                .map_err(|error| format!("Ping lookup task failed: {error}"))?,
+        );
+    }
+
+    Ok(pings)
+}
+
+async fn fetch_server_mode(
+    client: &reqwest::Client,
+    base_url: &str,
+    addr: &str,
+) -> Result<ServerMode, String> {
+    let normalized_addr = normalize_addr(addr);
+
+    if let Some(cached) = mode_cache()
+        .lock()
+        .map_err(|error| error.to_string())?
+        .get(&normalized_addr)
+        .cloned()
+    {
+        return Ok(ServerMode {
+            addr: normalized_addr,
+            game_mode: cached,
         });
     }
 
-    Ok(players)
+    let normalized_base = base_url.trim().trim_end_matches('/');
+    if normalized_base.is_empty() {
+        return Err("QLStats API URL is required.".into());
+    }
+
+    let response = client
+        .get(format!(
+            "{}/server/{}/players",
+            normalized_base,
+            urlencoding::encode(&normalized_addr)
+        ))
+        .send()
+        .await
+        .map_err(|error| format!("QLStats mode request failed for {}: {}", normalized_addr, error))?;
+
+    if !response.status().is_success() {
+        return Err(format!(
+            "QLStats returned HTTP {} for {}.",
+            response.status(),
+            normalized_addr
+        ));
+    }
+
+    let payload = response
+        .json::<QlStatsServerResponse>()
+        .await
+        .map_err(|error| format!("QLStats mode response was invalid for {}: {}", normalized_addr, error))?;
+
+    let game_mode = payload.serverinfo.and_then(|serverinfo| serverinfo.gt);
+
+    mode_cache()
+        .lock()
+        .map_err(|error| error.to_string())?
+        .insert(normalized_addr.clone(), game_mode.clone());
+
+    Ok(ServerMode {
+        addr: normalized_addr,
+        game_mode,
+    })
 }
 
-fn read_cstring(buf: &[u8], cursor: &mut usize) -> Result<String, String> {
-    let start = *cursor;
-    let end = buf[start..]
-        .iter()
-        .position(|byte| *byte == 0)
-        .map(|offset| start + offset)
-        .ok_or_else(|| "Missing string terminator.".to_string())?;
+#[tauri::command]
+async fn fetch_server_modes(
+    base_url: String,
+    addrs: Vec<String>,
+) -> Result<Vec<ServerMode>, String> {
+    let unique_addrs = addrs.into_iter().fold(Vec::new(), |mut acc, addr| {
+        let normalized_addr = normalize_addr(&addr);
+        if !acc.contains(&normalized_addr) {
+            acc.push(normalized_addr);
+        }
+        acc
+    });
 
-    *cursor = end + 1;
-    Ok(String::from_utf8_lossy(&buf[start..end]).into_owned())
+    if unique_addrs.is_empty() {
+        return Ok(Vec::new());
+    }
+
+    let client = reqwest::Client::builder()
+        .timeout(Duration::from_secs(8))
+        .user_agent("QList/0.1.0")
+        .build()
+        .map_err(|error| error.to_string())?;
+
+    let tasks: Vec<_> = unique_addrs
+        .into_iter()
+        .map(|addr| {
+            let client = client.clone();
+            let base_url = base_url.clone();
+            tauri::async_runtime::spawn(async move {
+                match fetch_server_mode(&client, &base_url, &addr).await {
+                    Ok(mode) => mode,
+                    Err(error) => {
+                        log::warn!("{error}");
+                        ServerMode {
+                            addr,
+                            game_mode: None,
+                        }
+                    }
+                }
+            })
+        })
+        .collect();
+
+    let mut modes = Vec::with_capacity(tasks.len());
+    for task in tasks {
+        modes.push(
+            task.await
+                .map_err(|error| format!("Mode lookup task failed: {error}"))?,
+        );
+    }
+
+    Ok(modes)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -349,7 +798,13 @@ pub fn run() {
             }
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![fetch_quake_live_servers])
+        .invoke_handler(tauri::generate_handler![
+            fetch_quake_live_servers,
+            fetch_server_players,
+            fetch_server_countries,
+            fetch_server_pings,
+            fetch_server_modes
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
