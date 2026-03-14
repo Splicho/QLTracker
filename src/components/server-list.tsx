@@ -14,8 +14,9 @@ import {
 } from "@tanstack/react-table";
 import { ArrowUpDown, ArrowUpRight, Pencil, Plus } from "lucide-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { Medal, Ping, Play, SlashCircle } from "@/components/icon";
+import { Lock, Medal, Ping, Play, SlashCircle, Unlock } from "@/components/icon";
 import { useFavorites } from "@/hooks/use-favorites";
+import { useServerPasswords } from "@/hooks/use-server-passwords";
 import {
   getCountryFlagSrc,
   getRegionFromCountryCode,
@@ -80,6 +81,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -280,6 +282,13 @@ function calculateHighestRatedPlayer(
 
 function getQlStatsPlayerProfileUrl(steamId: string) {
   return `https://qlstats.net/player/${steamId}`;
+}
+
+function buildSteamConnectUrl(serverAddress: string, password?: string) {
+  const trimmedPassword = password?.trim();
+  return trimmedPassword
+    ? `steam://connect/${serverAddress}/${encodeURIComponent(trimmedPassword)}`
+    : `steam://connect/${serverAddress}`;
 }
 
 function ServerAverageRatingBadges({ serverAddress }: { serverAddress: string }) {
@@ -700,9 +709,12 @@ export function ServerList({
     moveServerToList,
     removeServerFromList,
   } = useFavorites();
+  const { getPassword, savePassword } = useServerPasswords();
   const [selectedServer, setSelectedServer] = useState<SteamServer | null>(null);
   const [favoriteServer, setFavoriteServer] = useState<SteamServer | null>(null);
   const [targetFavoriteListId, setTargetFavoriteListId] = useState<string>("");
+  const [passwordServer, setPasswordServer] = useState<SteamServer | null>(null);
+  const [joinPassword, setJoinPassword] = useState("");
   const [sorting, setSorting] = useState<SortingState>([
     { id: "players", desc: true },
   ]);
@@ -715,6 +727,9 @@ export function ServerList({
     Record<string, ServerCountryLocation>
   >({});
   const [cachedPingsByAddr, setCachedPingsByAddr] = useState<Record<string, number | null>>({});
+  const [cachedRequiresPasswordByAddr, setCachedRequiresPasswordByAddr] = useState<
+    Record<string, boolean | null>
+  >({});
   const [cachedModesByAddr, setCachedModesByAddr] = useState<Record<string, string | null>>({});
 
   const staticFilteredServers = useMemo(() => {
@@ -942,6 +957,16 @@ export function ServerList({
       ),
     [pingQuery.data],
   );
+  const latestRequiresPasswordByAddr = useMemo<Record<string, boolean | null>>(
+    () =>
+      Object.fromEntries(
+        ((pingQuery.data ?? []) as ServerPing[]).map((entry) => [
+          entry.addr,
+          entry.requires_password,
+        ]),
+      ),
+    [pingQuery.data],
+  );
   useEffect(() => {
     if (!pingQuery.data?.length) {
       return;
@@ -953,6 +978,15 @@ export function ServerList({
         ((pingQuery.data ?? []) as ServerPing[]).map((entry) => [entry.addr, entry.ping_ms]),
       ),
     }));
+    setCachedRequiresPasswordByAddr((current) => ({
+      ...current,
+      ...Object.fromEntries(
+        ((pingQuery.data ?? []) as ServerPing[]).map((entry) => [
+          entry.addr,
+          entry.requires_password,
+        ]),
+      ),
+    }));
   }, [pingQuery.data]);
   const resolvedPingsByAddr = useMemo<Record<string, number | null>>(
     () => ({
@@ -960,6 +994,13 @@ export function ServerList({
       ...latestPingsByAddr,
     }),
     [cachedPingsByAddr, latestPingsByAddr],
+  );
+  const resolvedRequiresPasswordByAddr = useMemo<Record<string, boolean | null>>(
+    () => ({
+      ...cachedRequiresPasswordByAddr,
+      ...latestRequiresPasswordByAddr,
+    }),
+    [cachedRequiresPasswordByAddr, latestRequiresPasswordByAddr],
   );
   const modeQuery = useQuery({
     queryKey: ["qlstats", "server-modes", visiblePageAddresses],
@@ -1024,6 +1065,9 @@ export function ServerList({
         ),
         cell: ({ row }) => {
           const map = getMapEntry(row.original.map);
+          const requiresPassword =
+            resolvedRequiresPasswordByAddr[row.original.addr] === true;
+          const hasSavedPassword = Boolean(getPassword(row.original.addr));
 
           return (
             <div className="relative h-11 min-w-0 overflow-hidden">
@@ -1043,8 +1087,29 @@ export function ServerList({
                 />
               ) : null}
               <div className="relative z-10 flex h-full min-w-0 items-center px-3 text-sm font-medium text-foreground">
-                <div className="truncate">
-                  <QuakeText text={row.original.name} />
+                <div className="flex min-w-0 items-center gap-2">
+                  <div className="min-w-0 truncate">
+                    <QuakeText text={row.original.name} />
+                  </div>
+                  {requiresPassword ? (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge
+                          variant="outline"
+                          className="h-5 shrink-0 gap-1 rounded-md border-amber-500/40 bg-amber-500/10 px-1.5 text-[10px] font-medium text-amber-300"
+                        >
+                          {hasSavedPassword ? (
+                            <Unlock className="size-3" />
+                          ) : (
+                            <Lock className="size-3" />
+                          )}
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">
+                        {hasSavedPassword ? "Password saved" : "Password required"}
+                      </TooltipContent>
+                    </Tooltip>
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -1197,7 +1262,7 @@ export function ServerList({
               className="size-8 bg-success text-success-foreground hover:bg-success-hover"
               onClick={(event) => {
                 event.stopPropagation();
-                handleJoinServer(row.original.addr);
+                handleJoinServer(row.original);
               }}
             >
               <Play className="size-4" />
@@ -1213,6 +1278,7 @@ export function ServerList({
       resolvedCountriesByAddr,
       resolvedModesByAddr,
       resolvedPingsByAddr,
+      resolvedRequiresPasswordByAddr,
       actionMode,
       favoriteListId,
       favoritesState.lists,
@@ -1231,8 +1297,24 @@ export function ServerList({
   });
 
   const selectedMap = selectedServer ? getMapEntry(selectedServer.map) : null;
-  const handleJoinServer = (serverAddress: string) => {
-    void openUrl(`steam://connect/${serverAddress}`);
+  const launchServer = (serverAddress: string, password?: string) => {
+    void openUrl(buildSteamConnectUrl(serverAddress, password));
+  };
+  const handleJoinServer = (server: SteamServer) => {
+    const requiresPassword = resolvedRequiresPasswordByAddr[server.addr] === true;
+    if (!requiresPassword) {
+      launchServer(server.addr);
+      return;
+    }
+
+    const savedPassword = getPassword(server.addr);
+    if (savedPassword) {
+      launchServer(server.addr, savedPassword);
+      return;
+    }
+
+    setPasswordServer(server);
+    setJoinPassword("");
   };
   const pageCount = table.getPageCount();
   const currentPage = table.getState().pagination.pageIndex + 1;
@@ -1479,7 +1561,7 @@ export function ServerList({
                     <Button
                       type="button"
                       className="h-9 shrink-0 gap-2 bg-success text-success-foreground shadow-[0_0_28px_color-mix(in_oklch,var(--color-success)_28%,transparent)] hover:bg-success-hover hover:shadow-[0_0_34px_color-mix(in_oklch,var(--color-success-hover)_34%,transparent)]"
-                      onClick={() => handleJoinServer(selectedServer.addr)}
+                      onClick={() => handleJoinServer(selectedServer)}
                     >
                       <Play className="size-4" />
                       Play
@@ -1597,6 +1679,78 @@ export function ServerList({
               }}
             >
               {actionMode === "edit" ? "Save Changes" : "Add To List"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={passwordServer !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPasswordServer(null);
+            setJoinPassword("");
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Server Password</DialogTitle>
+            <DialogDescription>
+              {passwordServer ? (
+                <>
+                  Enter the password for{" "}
+                  <span className="font-medium text-foreground">
+                    {stripQuakeColors(passwordServer.name)}
+                  </span>
+                  . It will be saved locally for future joins.
+                </>
+              ) : (
+                "Enter the password for this server."
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          <Input
+            type="password"
+            autoFocus
+            value={joinPassword}
+            onChange={(event) => setJoinPassword(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key !== "Enter" || !passwordServer || !joinPassword.trim()) {
+                return;
+              }
+
+              const password = joinPassword.trim();
+              savePassword(passwordServer.addr, password);
+              launchServer(passwordServer.addr, password);
+              setPasswordServer(null);
+              setJoinPassword("");
+            }}
+            placeholder="Enter server password"
+          />
+
+          <DialogFooter>
+            <Button
+              type="button"
+              disabled={!passwordServer || !joinPassword.trim()}
+              onClick={() => {
+                if (!passwordServer) {
+                  return;
+                }
+
+                const password = joinPassword.trim();
+                if (!password) {
+                  return;
+                }
+
+                savePassword(passwordServer.addr, password);
+                launchServer(passwordServer.addr, password);
+                setPasswordServer(null);
+                setJoinPassword("");
+              }}
+            >
+              Save & Join
             </Button>
           </DialogFooter>
         </DialogContent>

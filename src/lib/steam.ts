@@ -33,6 +33,7 @@ export type SteamServer = {
 export type ServerPing = {
   addr: string;
   ping_ms: number | null;
+  requires_password: boolean | null;
 };
 
 export type ServerMode = {

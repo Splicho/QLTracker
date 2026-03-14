@@ -14,6 +14,7 @@ const CHECK_HOST_IP_INFO_URL: &str = "https://check-host.net/ip-info";
 static COUNTRY_CACHE: OnceLock<Mutex<HashMap<String, Option<ServerCountryLocation>>>> =
     OnceLock::new();
 static PING_CACHE: OnceLock<Mutex<HashMap<String, Option<u128>>>> = OnceLock::new();
+static PASSWORD_CACHE: OnceLock<Mutex<HashMap<String, Option<bool>>>> = OnceLock::new();
 static MODE_CACHE: OnceLock<Mutex<HashMap<String, Option<String>>>> = OnceLock::new();
 static PLAYER_RATING_CACHE: OnceLock<Mutex<HashMap<String, Vec<ServerPlayerRating>>>> =
     OnceLock::new();
@@ -91,6 +92,12 @@ struct ServerCountryLocation {
     country_code: Option<String>,
 }
 
+#[derive(Debug, Clone, Copy)]
+struct A2sProbeResult {
+    ping_ms: u128,
+    requires_password: Option<bool>,
+}
+
 #[derive(Debug, Serialize, Clone)]
 #[serde(rename_all = "snake_case")]
 struct QuakeServer {
@@ -153,6 +160,10 @@ fn country_cache() -> &'static Mutex<HashMap<String, Option<ServerCountryLocatio
 
 fn ping_cache() -> &'static Mutex<HashMap<String, Option<u128>>> {
     PING_CACHE.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+fn password_cache() -> &'static Mutex<HashMap<String, Option<bool>>> {
+    PASSWORD_CACHE.get_or_init(|| Mutex::new(HashMap::new()))
 }
 
 fn mode_cache() -> &'static Mutex<HashMap<String, Option<String>>> {
@@ -296,7 +307,7 @@ fn read_cstring(buf: &[u8], cursor: &mut usize) -> Option<String> {
     let value = String::from_utf8_lossy(&buf[start..(*cursor).min(buf.len())]).into_owned();
 
     if *cursor < buf.len() {
-      *cursor += 1;
+        *cursor += 1;
     }
 
     Some(value)
@@ -345,17 +356,75 @@ fn query_players(addr: &str) -> Result<Vec<ServerPlayer>, String> {
     parse_player_response(&players_buf[..players_len])
 }
 
-fn query_ping(addr: &str) -> Result<u128, String> {
+fn parse_a2s_info_requires_password(buf: &[u8]) -> Result<bool, String> {
+    if buf.len() < 6 || &buf[0..5] != b"\xFF\xFF\xFF\xFFI" {
+        return Err("Unexpected A2S info response header.".into());
+    }
+
+    let mut cursor = 5;
+
+    if cursor >= buf.len() {
+        return Err("A2S info response was too short.".into());
+    }
+
+    cursor += 1; // protocol
+
+    read_cstring(buf, &mut cursor).ok_or_else(|| "Missing A2S server name.".to_string())?;
+    read_cstring(buf, &mut cursor).ok_or_else(|| "Missing A2S map name.".to_string())?;
+    read_cstring(buf, &mut cursor).ok_or_else(|| "Missing A2S folder.".to_string())?;
+    read_cstring(buf, &mut cursor).ok_or_else(|| "Missing A2S game name.".to_string())?;
+
+    if cursor + 8 > buf.len() {
+        return Err("A2S info response was too short to parse visibility.".into());
+    }
+
+    cursor += 2; // app id
+    cursor += 1; // players
+    cursor += 1; // max players
+    cursor += 1; // bots
+    cursor += 1; // server type
+    cursor += 1; // environment
+
+    Ok(buf[cursor] == 1)
+}
+
+fn cache_probe_result(
+    normalized_addr: &str,
+    ping_ms: Option<u128>,
+    requires_password: Option<bool>,
+) -> Result<(), String> {
+    ping_cache()
+        .lock()
+        .map_err(|error| error.to_string())?
+        .insert(normalized_addr.to_string(), ping_ms);
+    password_cache()
+        .lock()
+        .map_err(|error| error.to_string())?
+        .insert(normalized_addr.to_string(), requires_password);
+    Ok(())
+}
+
+fn query_ping(addr: &str) -> Result<A2sProbeResult, String> {
     let normalized_addr = normalize_addr(addr);
 
-    if let Some(cached) = ping_cache()
+    let cached_ping = ping_cache()
         .lock()
         .map_err(|error| error.to_string())?
         .get(&normalized_addr)
         .copied()
-        .flatten()
-    {
-        return Ok(cached);
+        .flatten();
+    let cached_requires_password = password_cache()
+        .lock()
+        .map_err(|error| error.to_string())?
+        .get(&normalized_addr)
+        .copied()
+        .flatten();
+
+    if let (Some(ping_ms), Some(requires_password)) = (cached_ping, cached_requires_password) {
+        return Ok(A2sProbeResult {
+            ping_ms,
+            requires_password: Some(requires_password),
+        });
     }
 
     let socket_addr: SocketAddr = normalized_addr
@@ -396,20 +465,21 @@ fn query_ping(addr: &str) -> Result<u128, String> {
 
     if response_len < 6 || &response_buf[0..5] != b"\xFF\xFF\xFF\xFFI" {
         let fallback_ping = query_system_ping(extract_host(&normalized_addr))?;
-        ping_cache()
-            .lock()
-            .map_err(|error| error.to_string())?
-            .insert(normalized_addr, Some(fallback_ping));
-        return Ok(fallback_ping);
+        cache_probe_result(&normalized_addr, Some(fallback_ping), None)?;
+        return Ok(A2sProbeResult {
+            ping_ms: fallback_ping,
+            requires_password: None,
+        });
     }
 
     let ping_ms = started_at.elapsed().as_millis();
-    ping_cache()
-        .lock()
-        .map_err(|error| error.to_string())?
-        .insert(normalized_addr, Some(ping_ms));
+    let requires_password = parse_a2s_info_requires_password(&response_buf[..response_len])?;
+    cache_probe_result(&normalized_addr, Some(ping_ms), Some(requires_password))?;
 
-    Ok(ping_ms)
+    Ok(A2sProbeResult {
+        ping_ms,
+        requires_password: Some(requires_password),
+    })
 }
 
 fn query_system_ping(host: &str) -> Result<u128, String> {
@@ -696,6 +766,7 @@ async fn fetch_server_countries(addrs: Vec<String>) -> Result<Vec<ServerCountryL
 struct ServerPing {
     addr: String,
     ping_ms: Option<u128>,
+    requires_password: Option<bool>,
 }
 
 #[derive(Debug, Serialize, Clone)]
@@ -900,15 +971,19 @@ async fn fetch_server_pings(addrs: Vec<String>) -> Result<Vec<ServerPing>, Strin
         .into_iter()
         .map(|addr| {
             tauri::async_runtime::spawn_blocking(move || {
-                let ping_ms = match query_ping(&addr) {
-                    Ok(ping_ms) => Some(ping_ms),
+                let (ping_ms, requires_password) = match query_ping(&addr) {
+                    Ok(probe) => (Some(probe.ping_ms), probe.requires_password),
                     Err(error) => {
                         log::warn!("Ping lookup failed for {}: {}", addr, error);
-                        None
+                        (None, None)
                     }
                 };
 
-                ServerPing { addr, ping_ms }
+                ServerPing {
+                    addr,
+                    ping_ms,
+                    requires_password,
+                }
             })
         })
         .collect();
