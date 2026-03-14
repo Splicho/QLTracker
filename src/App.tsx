@@ -1,19 +1,21 @@
-import { type CSSProperties, useEffect, useState } from "react";
+import { type CSSProperties, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/layout/header";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import {
-  createDefaultRatingRange,
+  createDefaultServerFilters,
   ServerFilters,
   type ServerFiltersValue,
 } from "@/components/server-filters";
 import { ServerList } from "@/components/server-list";
 import { FavoritesPage } from "@/components/favorites-page";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 import type { PageId } from "@/lib/navigation";
 import { fetchSteamServers } from "@/lib/steam";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 const steamApiKey = import.meta.env.VITE_STEAM_API_KEY?.trim() ?? "";
+const SERVER_FILTERS_STORAGE_KEY = "qltracker-server-filters";
 
 function getQueryErrorMessage(error: unknown) {
   if (typeof error === "string") {
@@ -32,20 +34,60 @@ function getQueryErrorMessage(error: unknown) {
   return null;
 }
 
+function parseStoredFilters(rawValue: string): ServerFiltersValue {
+  const defaults = createDefaultServerFilters();
+
+  try {
+    const parsed = JSON.parse(rawValue) as Partial<ServerFiltersValue> | null;
+    if (!parsed || typeof parsed !== "object") {
+      return defaults;
+    }
+
+    const ratingRange = Array.isArray(parsed.ratingRange) ? parsed.ratingRange : null;
+
+    return {
+      search: typeof parsed.search === "string" ? parsed.search : defaults.search,
+      region: typeof parsed.region === "string" ? parsed.region : defaults.region,
+      visibility:
+        parsed.visibility === "all" ||
+        parsed.visibility === "public" ||
+        parsed.visibility === "private"
+          ? parsed.visibility
+          : defaults.visibility,
+      maps: Array.isArray(parsed.maps)
+        ? parsed.maps.filter((value): value is string => typeof value === "string")
+        : defaults.maps,
+      gameMode: typeof parsed.gameMode === "string" ? parsed.gameMode : defaults.gameMode,
+      ratingSystem:
+        parsed.ratingSystem === "qelo" || parsed.ratingSystem === "trueskill"
+          ? parsed.ratingSystem
+          : defaults.ratingSystem,
+      ratingRange: [
+        typeof ratingRange?.[0] === "number" ? ratingRange[0] : defaults.ratingRange[0],
+        typeof ratingRange?.[1] === "number" ? ratingRange[1] : defaults.ratingRange[1],
+      ],
+      tags: Array.isArray(parsed.tags)
+        ? parsed.tags.filter((value): value is string => typeof value === "string")
+        : defaults.tags,
+      hideEmpty: typeof parsed.hideEmpty === "boolean" ? parsed.hideEmpty : defaults.hideEmpty,
+      hideFull: typeof parsed.hideFull === "boolean" ? parsed.hideFull : defaults.hideFull,
+    };
+  } catch {
+    return defaults;
+  }
+}
+
+function serializeFilters(filters: ServerFiltersValue) {
+  return JSON.stringify(filters);
+}
+
 export function App() {
   const [page, setPage] = useState<PageId>("server-list");
-  const [filters, setFilters] = useState<ServerFiltersValue>({
-    search: "",
-    region: "all",
-    visibility: "all",
-    maps: [],
-    gameMode: "all",
-    ratingSystem: "qelo",
-    ratingRange: createDefaultRatingRange(),
-    tags: [],
-    hideEmpty: false,
-    hideFull: false,
-  });
+  const [rawFilters, setRawFilters] = useLocalStorage(
+    SERVER_FILTERS_STORAGE_KEY,
+    serializeFilters(createDefaultServerFilters()),
+  );
+  const filters = useMemo(() => parseStoredFilters(rawFilters), [rawFilters]);
   const serversQuery = useQuery({
     queryKey: ["steam", "servers"],
     queryFn: () => fetchSteamServers(steamApiKey),
@@ -54,27 +96,6 @@ export function App() {
     refetchInterval: 60_000,
   });
   const serversErrorMessage = getQueryErrorMessage(serversQuery.error);
-
-  useEffect(() => {
-    if (!import.meta.env.DEV) {
-      return;
-    }
-
-    console.log("[QLTracker] Steam query", {
-      enabled: steamApiKey.length > 0,
-      status: serversQuery.status,
-      fetchStatus: serversQuery.fetchStatus,
-      count: serversQuery.data?.length ?? 0,
-      error: serversErrorMessage,
-      filters,
-    });
-  }, [
-    filters,
-    serversQuery.data,
-    serversQuery.fetchStatus,
-    serversQuery.status,
-    serversErrorMessage,
-  ]);
 
   return (
     <SidebarProvider>
@@ -95,25 +116,16 @@ export function App() {
           <>
             <ServerFilters
               value={filters}
-              onChange={setFilters}
+              onChange={(next) => {
+                setRawFilters(serializeFilters(next));
+              }}
               onRefresh={() => {
                 void serversQuery.refetch();
               }}
               refreshing={serversQuery.fetchStatus === "fetching"}
-              onReset={() =>
-                setFilters({
-                  search: "",
-                  region: "all",
-                  visibility: "all",
-                  maps: [],
-                  gameMode: "all",
-                  ratingSystem: "qelo",
-                  ratingRange: createDefaultRatingRange(),
-                  tags: [],
-                  hideEmpty: false,
-                  hideFull: false,
-                })
-              }
+              onReset={() => {
+                setRawFilters(serializeFilters(createDefaultServerFilters()));
+              }}
             />
             <ServerList
               servers={serversQuery.data ?? []}

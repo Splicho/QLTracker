@@ -1,15 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { invoke } from "@tauri-apps/api/core";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { type DownloadEvent, check } from "@tauri-apps/plugin-updater";
-import appIcon from "@/assets/images/appicon.png";
-import { Button } from "@/components/ui/button";
+import splashIcon from "@/assets/images/splash-logo.png";
 import { Progress } from "@/components/ui/progress";
 
 type BootstrapPhase =
   | "checking"
   | "development"
   | "up-to-date"
+  | "opening"
   | "downloading"
   | "restarting"
   | "check-error"
@@ -67,13 +68,21 @@ export function BootstrapPage() {
 
   const openLauncher = useCallback(async () => {
     updateState({
+      phase: "opening",
       status: "Opening QLTracker",
       detail: "Bootstrapping complete.",
       error: null,
     });
 
     try {
-      await invoke("launcher_finish_bootstrap");
+      await Promise.race([
+        invoke("launcher_finish_bootstrap"),
+        new Promise((_, reject) => {
+          window.setTimeout(() => {
+            reject(new Error("Main window handoff timed out."));
+          }, 5000);
+        }),
+      ]);
     } catch (error) {
       updateState({
         phase: "check-error",
@@ -81,7 +90,13 @@ export function BootstrapPage() {
         detail: "The main application window could not be created.",
         error: formatError(error),
       });
+      return;
     }
+
+    await delay(75);
+    await getCurrentWindow()
+      .destroy()
+      .catch(() => undefined);
   }, [updateState]);
 
   const runBootstrap = useCallback(async () => {
@@ -221,13 +236,12 @@ export function BootstrapPage() {
   }, [runBootstrap]);
 
   const showProgress = state.phase === "downloading";
-  const hasCheckError = state.phase === "check-error";
-  const hasInstallError = state.phase === "install-error";
-  const hasError = hasCheckError || hasInstallError;
+  const hasError = state.phase === "check-error" || state.phase === "install-error";
   const splashLabel =
     state.phase === "checking"
       ? "Checking for updates..."
       : state.phase === "development" ||
+          state.phase === "opening" ||
           state.phase === "up-to-date" ||
           state.phase === "restarting"
         ? "Starting..."
@@ -249,7 +263,7 @@ export function BootstrapPage() {
             repeat: hasError ? 0 : Infinity,
           }}
         >
-          <img src={appIcon} alt="QLTracker" className="h-24 w-24 object-contain" />
+          <img src={splashIcon} alt="QLTracker" className="h-24 w-auto object-contain" />
         </motion.div>
 
         {splashLabel ? (
@@ -264,30 +278,12 @@ export function BootstrapPage() {
           </div>
         ) : null}
 
-        {hasCheckError ? (
-          <div className="mt-8 flex w-full gap-3">
-            <Button className="flex-1" size="lg" onClick={() => void runBootstrap()}>
-              Retry
-            </Button>
-            <Button className="flex-1" size="lg" variant="outline" onClick={() => void openLauncher()}>
-              Open app
-            </Button>
-          </div>
-        ) : null}
-
-        {hasInstallError ? (
-          <div className="mt-8 flex w-full gap-3">
-            <Button className="flex-1" size="lg" onClick={() => void runBootstrap()}>
-              Retry
-            </Button>
-            <Button
-              className="flex-1"
-              size="lg"
-              variant="outline"
-              onClick={() => void invoke("launcher_exit_app")}
-            >
-              Exit
-            </Button>
+        {hasError ? (
+          <div className="mt-8 max-w-[15rem] text-center">
+            <p className="text-sm font-medium text-foreground/90">{state.status}</p>
+            <p className="mt-2 text-xs leading-5 text-muted-foreground">
+              {state.error ?? state.detail}
+            </p>
           </div>
         ) : null}
       </div>

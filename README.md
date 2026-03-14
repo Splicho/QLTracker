@@ -1,6 +1,6 @@
 # QLTracker
 
-![QLTracker preview](src/assets/images/logo_dark.png)
+![QLTracker preview](src/assets/images/screenshot.png)
 
 Open-source Quake Live server browser built with Tauri, React, TypeScript, Tailwind v4, and `shadcn/ui`.
 

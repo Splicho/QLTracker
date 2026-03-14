@@ -592,12 +592,6 @@ async fn fetch_quake_live_servers(
     search: String,
     limit: u32,
 ) -> Result<Vec<QuakeServer>, String> {
-    log::info!(
-        "fetch_quake_live_servers called with filter='{}' limit={}",
-        search,
-        limit
-    );
-
     if api_key.trim().is_empty() {
         return Err("Steam API key is required.".into());
     }
@@ -630,11 +624,6 @@ async fn fetch_quake_live_servers(
             log::error!("{message}");
             message
         })?;
-
-    log::info!(
-        "Steam returned {} raw server rows",
-        payload.response.servers.len()
-    );
 
     let mut servers = Vec::with_capacity(payload.response.servers.len());
 
@@ -669,15 +658,11 @@ async fn fetch_quake_live_servers(
         })
     });
 
-    log::info!("Returning {} enriched server rows", servers.len());
-
     Ok(servers)
 }
 
 #[tauri::command]
 async fn fetch_server_players(addr: String) -> Result<Vec<ServerPlayer>, String> {
-    log::info!("fetch_server_players called for {}", addr);
-
     let addr_clone = addr.clone();
     tauri::async_runtime::spawn_blocking(move || query_players(&addr_clone))
         .await
@@ -699,12 +684,6 @@ async fn fetch_server_countries(addrs: Vec<String>) -> Result<Vec<ServerCountryL
     if addrs_by_ip.is_empty() {
         return Ok(Vec::new());
     }
-
-    log::info!(
-        "fetch_server_countries called for {} server addresses across {} unique IPs",
-        addrs_by_ip.values().map(Vec::len).sum::<usize>(),
-        addrs_by_ip.len()
-    );
 
     let client = reqwest::Client::builder()
         .timeout(Duration::from_secs(8))
@@ -962,11 +941,6 @@ async fn fetch_server_pings(addrs: Vec<String>) -> Result<Vec<ServerPing>, Strin
     if unique_addrs.is_empty() {
         return Ok(Vec::new());
     }
-
-    log::info!(
-        "fetch_server_pings called for {} server addresses",
-        unique_addrs.len()
-    );
 
     let tasks: Vec<_> = unique_addrs
         .into_iter()
@@ -1365,11 +1339,6 @@ fn launcher_restart_app(app: tauri::AppHandle) {
 fn launcher_finish_bootstrap(app: tauri::AppHandle) -> Result<(), String> {
     let main_window = ensure_main_window(&app)?;
     focus_window(&main_window);
-
-    if let Some(window) = app.get_webview_window("bootstrap") {
-        window.close().map_err(|error| error.to_string())?;
-    }
-
     Ok(())
 }
 

@@ -13,13 +13,15 @@
     "windows": [
       {
         "label": "main",
-        "create": false,
+        "visible": false,
         "title": "QLTracker",
         "width": 1360,
         "height": 820,
         "minWidth": 1080,
         "minHeight": 640,
-        "resizable": true,
+        "resizable": false,
+        "maximizable": true,
+        "minimizable": true,
         "fullscreen": false
       },
       {

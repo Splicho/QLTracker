@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import {
-  createDefaultRatingRange,
+  createDefaultServerFilters,
   type ServerFiltersValue,
 } from "@/components/server-filters";
 import { useFavorites } from "@/hooks/use-favorites";
@@ -20,18 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import type { SteamServer } from "@/lib/steam";
 
-const emptyFilters: ServerFiltersValue = {
-  search: "",
-  region: "all",
-  visibility: "all",
-  maps: [],
-  gameMode: "all",
-  ratingSystem: "qelo",
-  ratingRange: createDefaultRatingRange(),
-  tags: [],
-  hideEmpty: false,
-  hideFull: false,
-};
+const emptyFilters: ServerFiltersValue = createDefaultServerFilters();
 
 export function FavoritesPage({
   servers,

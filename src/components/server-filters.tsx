@@ -93,6 +93,21 @@ export type ServerFiltersValue = {
   hideFull: boolean;
 };
 
+export function createDefaultServerFilters(): ServerFiltersValue {
+  return {
+    search: "",
+    region: "all",
+    visibility: "all",
+    maps: [],
+    gameMode: "all",
+    ratingSystem: "qelo",
+    ratingRange: createDefaultRatingRange(),
+    tags: [],
+    hideEmpty: false,
+    hideFull: false,
+  };
+}
+
 export function ServerFilters({
   value,
   onChange,
