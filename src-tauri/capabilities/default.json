@@ -11,6 +11,9 @@
       "allow": [
         {
           "url": "steam://*"
+        },
+        {
+          "url": "discord://*"
         }
       ]
     }
