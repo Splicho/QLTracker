@@ -81,7 +81,9 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -715,6 +717,7 @@ export function ServerList({
   const [targetFavoriteListId, setTargetFavoriteListId] = useState<string>("");
   const [passwordServer, setPasswordServer] = useState<SteamServer | null>(null);
   const [joinPassword, setJoinPassword] = useState("");
+  const [rememberServerPassword, setRememberServerPassword] = useState(false);
   const [sorting, setSorting] = useState<SortingState>([
     { id: "players", desc: true },
   ]);
@@ -831,14 +834,86 @@ export function ServerList({
     resolvedRegionCountriesByAddr,
     staticFilteredServers,
   ]);
+  const visibilityCandidateAddresses = useMemo(
+    () =>
+      filters.visibility !== "all"
+        ? regionFilteredServers.map((server) => server.addr)
+        : [],
+    [filters.visibility, regionFilteredServers],
+  );
+  const visibilityPingQuery = useQuery({
+    queryKey: ["steam", "server-pings", "visibility-filter", visibilityCandidateAddresses],
+    queryFn: () => fetchSteamServerPings(visibilityCandidateAddresses),
+    enabled: filters.visibility !== "all" && visibilityCandidateAddresses.length > 0,
+    staleTime: 1000 * 60 * 5,
+  });
+  const visibilityRequiresPasswordByAddr = useMemo<Record<string, boolean | null>>(
+    () =>
+      Object.fromEntries(
+        ((visibilityPingQuery.data ?? []) as ServerPing[]).map((entry) => [
+          entry.addr,
+          entry.requires_password,
+        ]),
+      ),
+    [visibilityPingQuery.data],
+  );
+  useEffect(() => {
+    if (!visibilityPingQuery.data?.length) {
+      return;
+    }
+
+    setCachedRequiresPasswordByAddr((current) => ({
+      ...current,
+      ...Object.fromEntries(
+        ((visibilityPingQuery.data ?? []) as ServerPing[]).map((entry) => [
+          entry.addr,
+          entry.requires_password,
+        ]),
+      ),
+    }));
+    setCachedPingsByAddr((current) => ({
+      ...current,
+      ...Object.fromEntries(
+        ((visibilityPingQuery.data ?? []) as ServerPing[]).map((entry) => [
+          entry.addr,
+          entry.ping_ms,
+        ]),
+      ),
+    }));
+  }, [visibilityPingQuery.data]);
+  const visibilityFilteredServers = useMemo(() => {
+    if (filters.visibility === "all") {
+      return regionFilteredServers;
+    }
+
+    if (visibilityPingQuery.isPending && !visibilityPingQuery.data) {
+      return regionFilteredServers;
+    }
+
+    return regionFilteredServers.filter((server) => {
+      const requiresPassword = visibilityRequiresPasswordByAddr[server.addr];
+
+      if (filters.visibility === "private") {
+        return requiresPassword === true;
+      }
+
+      return requiresPassword === false;
+    });
+  }, [
+    filters.visibility,
+    regionFilteredServers,
+    visibilityPingQuery.data,
+    visibilityPingQuery.isPending,
+    visibilityRequiresPasswordByAddr,
+  ]);
 
   const ratingFilterActive =
     filters.ratingRange[0] !== RATING_FILTER_MIN ||
     filters.ratingRange[1] !== RATING_FILTER_MAX;
   const searchEnrichmentEnabled = filters.search.trim().length === 0;
   const ratingCandidateAddresses = useMemo(
-    () => regionFilteredServers.map((server) => server.addr),
-    [regionFilteredServers],
+    () => visibilityFilteredServers.map((server) => server.addr),
+    [visibilityFilteredServers],
   );
   const ratingSummaryQuery = useQuery({
     queryKey: [
@@ -867,12 +942,12 @@ export function ServerList({
   );
   const filteredServers = useMemo(() => {
     if (!ratingFilterActive || (ratingSummaryQuery.isPending && !ratingSummaryQuery.data)) {
-      return regionFilteredServers;
+      return visibilityFilteredServers;
     }
 
     const [minRating, maxRating] = filters.ratingRange;
 
-    return regionFilteredServers.filter((server) => {
+    return visibilityFilteredServers.filter((server) => {
       const summary = ratingSummariesByAddr[server.addr];
       const ratingValue =
         filters.ratingSystem === "trueskill"
@@ -885,7 +960,7 @@ export function ServerList({
     filters.ratingRange,
     filters.ratingSystem,
     ratingFilterActive,
-    regionFilteredServers,
+    visibilityFilteredServers,
     ratingSummariesByAddr,
     ratingSummaryQuery.data,
     ratingSummaryQuery.isPending,
@@ -1279,6 +1354,7 @@ export function ServerList({
       resolvedModesByAddr,
       resolvedPingsByAddr,
       resolvedRequiresPasswordByAddr,
+      getPassword,
       actionMode,
       favoriteListId,
       favoritesState.lists,
@@ -1297,6 +1373,12 @@ export function ServerList({
   });
 
   const selectedMap = selectedServer ? getMapEntry(selectedServer.map) : null;
+  const selectedRequiresPassword = selectedServer
+    ? resolvedRequiresPasswordByAddr[selectedServer.addr] === true
+    : false;
+  const selectedHasSavedPassword = selectedServer
+    ? Boolean(getPassword(selectedServer.addr))
+    : false;
   const launchServer = (serverAddress: string, password?: string) => {
     void openUrl(buildSteamConnectUrl(serverAddress, password));
   };
@@ -1315,6 +1397,7 @@ export function ServerList({
 
     setPasswordServer(server);
     setJoinPassword("");
+    setRememberServerPassword(false);
   };
   const pageCount = table.getPageCount();
   const currentPage = table.getState().pagination.pageIndex + 1;
@@ -1553,8 +1636,29 @@ export function ServerList({
                   </div>
                   <div className="absolute inset-x-5 bottom-5 flex items-end justify-between gap-4">
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-left text-lg font-semibold leading-tight text-foreground drop-shadow-[0_1px_10px_rgba(0,0,0,0.55)]">
-                        {stripQuakeColors(selectedServer.name)}
+                      <div className="flex min-w-0 items-center gap-2">
+                        <div className="truncate text-left text-lg font-semibold leading-tight text-foreground drop-shadow-[0_1px_10px_rgba(0,0,0,0.55)]">
+                          {stripQuakeColors(selectedServer.name)}
+                        </div>
+                        {selectedRequiresPassword ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Badge
+                                variant="outline"
+                                className="h-5 shrink-0 gap-1 rounded-md border-amber-500/40 bg-amber-500/10 px-1.5 text-[10px] font-medium text-amber-300"
+                              >
+                                {selectedHasSavedPassword ? (
+                                  <Unlock className="size-3" />
+                                ) : (
+                                  <Lock className="size-3" />
+                                )}
+                              </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent side="top">
+                              {selectedHasSavedPassword ? "Password saved" : "Password required"}
+                            </TooltipContent>
+                          </Tooltip>
+                        ) : null}
                       </div>
                       <ServerAverageRatingBadges serverAddress={selectedServer.addr} />
                     </div>
@@ -1690,6 +1794,7 @@ export function ServerList({
           if (!open) {
             setPasswordServer(null);
             setJoinPassword("");
+            setRememberServerPassword(false);
           }
         }}
       >
@@ -1703,7 +1808,7 @@ export function ServerList({
                   <span className="font-medium text-foreground">
                     {stripQuakeColors(passwordServer.name)}
                   </span>
-                  . It will be saved locally for future joins.
+                  .
                 </>
               ) : (
                 "Enter the password for this server."
@@ -1722,13 +1827,31 @@ export function ServerList({
               }
 
               const password = joinPassword.trim();
-              savePassword(passwordServer.addr, password);
+              if (rememberServerPassword) {
+                savePassword(passwordServer.addr, password);
+              }
               launchServer(passwordServer.addr, password);
               setPasswordServer(null);
               setJoinPassword("");
+              setRememberServerPassword(false);
             }}
             placeholder="Enter server password"
           />
+
+          <div className="flex items-start gap-3 rounded-md border border-border px-3 py-2">
+            <Checkbox
+              id="remember-server-password"
+              checked={rememberServerPassword}
+              onCheckedChange={(checked) => setRememberServerPassword(checked === true)}
+              className="mt-0.5"
+            />
+            <Label
+              htmlFor="remember-server-password"
+              className="cursor-pointer text-sm font-normal leading-snug text-muted-foreground"
+            >
+              Save this password locally for future join requests.
+            </Label>
+          </div>
 
           <DialogFooter>
             <Button
@@ -1744,13 +1867,16 @@ export function ServerList({
                   return;
                 }
 
-                savePassword(passwordServer.addr, password);
+                if (rememberServerPassword) {
+                  savePassword(passwordServer.addr, password);
+                }
                 launchServer(passwordServer.addr, password);
                 setPasswordServer(null);
                 setJoinPassword("");
+                setRememberServerPassword(false);
               }}
             >
-              Save & Join
+              Join
             </Button>
           </DialogFooter>
         </DialogContent>

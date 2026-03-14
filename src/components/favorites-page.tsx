@@ -23,6 +23,7 @@ import type { SteamServer } from "@/lib/steam";
 const emptyFilters: ServerFiltersValue = {
   search: "",
   region: "all",
+  visibility: "all",
   maps: [],
   gameMode: "all",
   ratingSystem: "qelo",

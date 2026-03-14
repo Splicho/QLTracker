@@ -50,6 +50,12 @@ const regionOptions = [
   { value: "apac", label: "Asia Pacific", icon: RegionApac },
 ];
 
+const visibilityOptions = [
+  { value: "all", label: "All servers" },
+  { value: "public", label: "Public" },
+  { value: "private", label: "Private" },
+];
+
 const gameModeOptions = [
   { value: "all", label: "All modes" },
   { value: "ca", label: "Clan Arena" },
@@ -77,6 +83,7 @@ export type RatingSystem = "qelo" | "trueskill";
 export type ServerFiltersValue = {
   search: string;
   region: string;
+  visibility: "all" | "public" | "private";
   maps: string[];
   gameMode: string;
   ratingSystem: RatingSystem;
@@ -103,6 +110,7 @@ export function ServerFilters({
   const hasActiveFilters =
     value.search.trim().length > 0 ||
     value.region !== "all" ||
+    value.visibility !== "all" ||
     value.maps.length > 0 ||
     value.gameMode !== "all" ||
     value.ratingRange[0] !== RATING_FILTER_MIN ||
@@ -184,7 +192,7 @@ export function ServerFilters({
               </div>
 
               <div className="flex flex-col gap-3">
-                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)_minmax(0,0.9fr)]">
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)_minmax(0,0.85fr)_minmax(0,0.9fr)]">
                   <TagFilter value={value.tags} onChange={(tags) => onChange({ ...value, tags })} />
 
                   <Select
@@ -206,6 +214,27 @@ export function ServerFilters({
                           <span className="flex items-center gap-2">
                             <span>{option.label}</span>
                           </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Select
+                    value={value.visibility}
+                    onValueChange={(visibility) =>
+                      onChange({
+                        ...value,
+                        visibility: visibility as ServerFiltersValue["visibility"],
+                      })
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Visibility" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {visibilityOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
                         </SelectItem>
                       ))}
                     </SelectContent>

@@ -37,6 +37,7 @@ export function App() {
   const [filters, setFilters] = useState<ServerFiltersValue>({
     search: "",
     region: "all",
+    visibility: "all",
     maps: [],
     gameMode: "all",
     ratingSystem: "qelo",
@@ -103,6 +104,7 @@ export function App() {
                 setFilters({
                   search: "",
                   region: "all",
+                  visibility: "all",
                   maps: [],
                   gameMode: "all",
                   ratingSystem: "qelo",
