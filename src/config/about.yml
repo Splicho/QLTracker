@@ -1,0 +1,18 @@
+appName: QLTracker
+author: isevendeuce
+description: Desktop Quake Live server browser built with Tauri, React, Steam, and qlstats.
+stack: Tauri + React
+repo:
+  label: Splicho/QLTracker
+  url: "https://github.com/Splicho/QLTracker"
+socials:
+  - id: github
+    url: "https://github.com/Splicho/"
+  - id: x
+    url: ""
+  - id: discord
+    url: "discord://-/users/220994041712476161"
+  - id: steam
+    url: "https://steamcommunity.com/profiles/76561199171761827/"
+  - id: youtube
+    url: "https://youtube.com/isevendeuceQL"
