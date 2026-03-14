@@ -1,5 +1,7 @@
 # QLTracker
 
+![QLTracker preview](src/assets/images/logo_dark.png)
+
 Open-source Quake Live server browser built with Tauri, React, TypeScript, Tailwind v4, and `shadcn/ui`.
 
 QLTracker combines Steam server discovery with qlstats and optional TrueSkill enrichment to provide a desktop-first Quake Live browser with favorites, player lookups, and self-updating releases.
@@ -96,6 +98,8 @@ Build the frontend:
 ```bash
 npm run build
 ```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution workflow and PR expectations.
 
 ## Environment
 
@@ -203,4 +207,4 @@ The workflow also verifies that the pushed tag matches the version in `package.j
 
 ## License
 
-No license file is included yet. If you want this repository to be clearly open source for reuse, add a license file explicitly.
+MIT. See [LICENSE](LICENSE).

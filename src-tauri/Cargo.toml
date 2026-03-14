@@ -2,9 +2,9 @@
 name = "app"
 version = "0.0.1-beta.1"
 description = "A Tauri App"
-authors = ["you"]
-license = ""
-repository = ""
+authors = ["isevendeuce"]
+license = "MIT"
+repository = "https://github.com/Splicho/QLTracker"
 edition = "2021"
 rust-version = "1.77.2"
 

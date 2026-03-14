@@ -2,6 +2,11 @@
   "name": "qltracker",
   "private": true,
   "version": "0.0.1-beta.1",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Splicho/QLTracker.git"
+  },
   "type": "module",
   "scripts": {
     "dev": "tauri dev",
