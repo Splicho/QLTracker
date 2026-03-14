@@ -71,6 +71,7 @@ jobs:
             curl \
             wget \
             file \
+            xdg-utils \
             libxdo-dev \
             libssl-dev \
             libwebkit2gtk-4.1-dev \
