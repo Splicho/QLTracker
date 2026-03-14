@@ -1,7 +1,18 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { ExternalLink, KeyRound, RefreshCw, Search, Users, Wifi } from "lucide-react";
+import { useTheme } from "next-themes";
+import {
+  ExternalLink,
+  KeyRound,
+  Monitor,
+  Moon,
+  RefreshCw,
+  Search,
+  Sun,
+  Users,
+  Wifi,
+} from "lucide-react";
 import { fetchServers } from "@/lib/steam";
 import type { QuakeServer } from "@/lib/types";
 import { useLocalStorage } from "@/hooks/use-local-storage";
@@ -21,6 +32,7 @@ function launchUrl(server: QuakeServer) {
 }
 
 export function App() {
+  const { resolvedTheme, setTheme, theme } = useTheme();
   const [apiKey, setApiKey] = useLocalStorage("qlist-steam-api-key", "");
   const [search, setSearch] = useLocalStorage("qlist-search-filter", DEFAULT_SEARCH);
   const [limit, setLimit] = useLocalStorage("qlist-limit", "50");
@@ -53,12 +65,34 @@ export function App() {
     <main className="mx-auto flex min-h-screen max-w-7xl flex-col gap-6 px-4 py-6 md:px-6">
       <section className="grid gap-6 lg:grid-cols-[1.4fr_0.6fr]">
         <Card className="overflow-hidden">
-          <CardHeader className="border-b border-border/50 bg-black/10">
+          <CardHeader className="border-b border-border/50 bg-black/4 dark:bg-black/10">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="space-y-3">
-                <Badge variant="outline" className="bg-background/40">
-                  Steam-powered desktop browser
-                </Badge>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="outline" className="bg-background/40">
+                    Steam-powered desktop browser
+                  </Badge>
+                  <div className="inline-flex rounded-full border border-border/70 bg-background/60 p-1 backdrop-blur">
+                    <ThemeButton
+                      active={theme === "light"}
+                      label="Light"
+                      icon={<Sun className="size-4" />}
+                      onClick={() => setTheme("light")}
+                    />
+                    <ThemeButton
+                      active={theme === "dark"}
+                      label="Dark"
+                      icon={<Moon className="size-4" />}
+                      onClick={() => setTheme("dark")}
+                    />
+                    <ThemeButton
+                      active={theme === "system"}
+                      label={`System${resolvedTheme ? ` ${resolvedTheme}` : ""}`}
+                      icon={<Monitor className="size-4" />}
+                      onClick={() => setTheme("system")}
+                    />
+                  </div>
+                </div>
                 <div>
                   <CardTitle className="text-3xl">QList</CardTitle>
                   <CardDescription className="mt-2 max-w-2xl text-sm leading-6">
@@ -133,7 +167,7 @@ export function App() {
                   className={`grid rounded-xl border px-4 py-4 text-left transition hover:border-primary/50 hover:bg-white/3 ${
                     selectedServer?.addr === server.addr
                       ? "border-primary/60 bg-primary/10"
-                      : "border-border/50 bg-black/10"
+                      : "border-border/50 bg-black/4 dark:bg-black/10"
                   }`}
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
@@ -198,7 +232,7 @@ export function App() {
                       selectedServer.players_info.map((player) => (
                         <div
                           key={`${player.name}-${player.score}-${player.duration_seconds}`}
-                          className="flex items-center justify-between rounded-lg border border-border/60 bg-black/10 px-3 py-2 text-sm"
+                          className="flex items-center justify-between rounded-lg border border-border/60 bg-black/4 px-3 py-2 text-sm dark:bg-black/10"
                         >
                           <span>{player.name || "Unnamed player"}</span>
                           <span className="text-muted-foreground">{player.score}</span>
@@ -233,7 +267,7 @@ export function App() {
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-border/50 bg-black/10 px-4 py-3">
+    <div className="rounded-xl border border-border/50 bg-black/4 px-4 py-3 dark:bg-black/10">
       <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{label}</div>
       <div className="mt-2 text-2xl font-semibold">{value}</div>
     </div>
@@ -250,12 +284,39 @@ function DetailTile({
   icon?: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-border/50 bg-black/10 p-3">
+    <div className="rounded-xl border border-border/50 bg-black/4 p-3 dark:bg-black/10">
       <div className="flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-muted-foreground">
         {icon}
         {label}
       </div>
       <div className="mt-2 text-sm font-medium">{value}</div>
     </div>
+  );
+}
+
+function ThemeButton({
+  active,
+  label,
+  icon,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  icon: React.ReactNode;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition ${
+        active
+          ? "bg-primary text-primary-foreground"
+          : "text-muted-foreground hover:bg-secondary hover:text-secondary-foreground"
+      }`}
+    >
+      {icon}
+      <span>{label}</span>
+    </button>
   );
 }
