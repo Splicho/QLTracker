@@ -2,7 +2,11 @@ import { type CSSProperties, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/layout/header";
 import { AppSidebar } from "@/components/layout/app-sidebar";
-import { ServerFilters, type ServerFiltersValue } from "@/components/server-filters";
+import {
+  createDefaultRatingRange,
+  ServerFilters,
+  type ServerFiltersValue,
+} from "@/components/server-filters";
 import { ServerList } from "@/components/server-list";
 import { FavoritesPage } from "@/components/favorites-page";
 import type { PageId } from "@/lib/navigation";
@@ -35,6 +39,8 @@ export function App() {
     region: "all",
     maps: [],
     gameMode: "all",
+    ratingSystem: "qelo",
+    ratingRange: createDefaultRatingRange(),
     tags: [],
     hideEmpty: false,
     hideFull: false,
@@ -99,6 +105,8 @@ export function App() {
                   region: "all",
                   maps: [],
                   gameMode: "all",
+                  ratingSystem: "qelo",
+                  ratingRange: createDefaultRatingRange(),
                   tags: [],
                   hideEmpty: false,
                   hideFull: false,

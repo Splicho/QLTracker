@@ -78,3 +78,11 @@ export function SlashCircle(props: SVGProps<SVGSVGElement>) {
 export function Medal(props: SVGProps<SVGSVGElement>) {
 	return (<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" {...props}><path fill="currentColor" d="M13.867 2a2.5 2.5 0 0 1 2.145 1.214l.632 1.054c.233.388.356.833.356 1.286v.09a2.5 2.5 0 0 1-.42 1.387l-3.21 4.815a4 4 0 1 1-6.74.001L3.42 7.03A2.5 2.5 0 0 1 3 5.645v-.091a2.5 2.5 0 0 1 .356-1.286l.632-1.054A2.5 2.5 0 0 1 6.133 2zM10 11a3 3 0 1 0 0 6a3 3 0 0 0 0-6M5.002 3.517q-.086.097-.156.212l-.632 1.053A1.5 1.5 0 0 0 4 5.554v.09c0 .297.088.586.252.833L7.3 11.049a4 4 0 0 1 1.829-.953L5.245 4.27a1.46 1.46 0 0 1-.243-.753m9.995 0a1.46 1.46 0 0 1-.242.753l-3.886 5.826a4 4 0 0 1 1.83.952l3.049-4.571A1.5 1.5 0 0 0 16 5.645v-.091a1.5 1.5 0 0 0-.214-.772l-.632-1.053a1.5 1.5 0 0 0-.157-.212M10 9.599L12.4 6H7.6zM6.46 3a.46.46 0 0 0-.383.715l.86 1.29L7 5h6q.03 0 .062.006l.86-1.291A.461.461 0 0 0 13.54 3z"></path></svg>);
 }
+
+export function InfoCircle(props: SVGProps<SVGSVGElement>) {
+	return (<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" {...props}><g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1}><circle cx={12} cy={12} r={10} strokeWidth={1.5}></circle><path strokeWidth={1.5} d="M12 16v-4.5"></path><path strokeWidth={1.8} d="M12 8.012v-.01"></path></g></svg>);
+}
+
+export function ArrowUpRight(props: SVGProps<SVGSVGElement>) {
+	return (<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16" {...props}><path fill="currentColor" d="M10.586 4H4V2h10v10h-2V5.414l-8.293 8.293l-1.414-1.414z"></path></svg>);
+}

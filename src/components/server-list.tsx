@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -12,26 +12,36 @@ import {
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, Pencil, Plus } from "lucide-react";
+import { ArrowUpDown, ArrowUpRight, Pencil, Plus } from "lucide-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { Medal, Ping, Play, SlashCircle } from "@/components/icon";
 import { useFavorites } from "@/hooks/use-favorites";
-import { getCountryFlagSrc, type ServerCountryLocation } from "@/lib/countries";
+import {
+  getCountryFlagSrc,
+  getRegionFromCountryCode,
+  type ServerCountryLocation,
+} from "@/lib/countries";
 import { getMapEntry } from "@/lib/maps";
 import { QuakeText, stripQuakeColors } from "@/lib/quake";
 import {
   fetchServerModes,
+  fetchSteamServerRatingSummaries,
   fetchSteamServerPlayerRatings,
   fetchSteamServerCountries,
   fetchSteamServerPings,
   fetchSteamServerPlayers,
   type ServerMode,
   type ServerPlayerRating,
+  type ServerRatingSummary,
   type ServerPing,
   type SteamServer,
 } from "@/lib/steam";
 import { formatDurationHoursMinutes } from "@/lib/time";
-import type { ServerFiltersValue } from "@/components/server-filters";
+import {
+  RATING_FILTER_MAX,
+  RATING_FILTER_MIN,
+  type ServerFiltersValue,
+} from "@/components/server-filters";
 import {
   Dialog,
   DialogContent,
@@ -168,19 +178,60 @@ type ServerListProps = {
   favoriteListId?: string | null;
 };
 
-function normalizeServerRegion(server: SteamServer) {
+function normalizeSteamServerRegion(server: SteamServer) {
   return server.region != null ? steamRegionMap[server.region] ?? null : null;
 }
 
+function resolveServerRegion(
+  server: SteamServer,
+  location?: ServerCountryLocation | null,
+) {
+  return getRegionFromCountryCode(location?.country_code) ?? normalizeSteamServerRegion(server);
+}
+
 function normalizeGameMode(server: SteamServer) {
-  const keywordMode =
+  const knownModes: Record<string, string> = {
+    ca: "ca",
+    clanarena: "ca",
+    duel: "duel",
+    ffa: "ffa",
+    freeforall: "ffa",
+    tdm: "tdm",
+    teamdeathmatch: "tdm",
+    ctf: "ctf",
+    ad: "ad",
+    attackdefend: "ad",
+    attackanddefend: "ad",
+    dom: "dom",
+    domination: "dom",
+    ft: "ft",
+    freezetag: "ft",
+    har: "har",
+    harvester: "har",
+    race: "race",
+    rr: "rr",
+    redrover: "rr",
+  };
+
+  const keywordParts =
     server.keywords
       ?.split(",")
       .map((part) => part.trim().toLowerCase())
-      .find((part) => part.startsWith("g_"))
-      ?.replace(/^g_/, "") ?? null;
+      .filter(Boolean) ?? [];
 
-  return keywordMode ?? null;
+  for (const part of keywordParts) {
+    if (part.startsWith("g_")) {
+      const normalized = part.replace(/^g_/, "");
+      return knownModes[normalized] ?? normalized;
+    }
+
+    const compact = part.replace(/[\s_-]+/g, "");
+    if (compact in knownModes) {
+      return knownModes[compact];
+    }
+  }
+
+  return null;
 }
 
 function normalizeTags(server: SteamServer) {
@@ -225,6 +276,10 @@ function calculateHighestRatedPlayer(
       ? player
       : highest;
   }, null);
+}
+
+function getQlStatsPlayerProfileUrl(steamId: string) {
+  return `https://qlstats.net/player/${steamId}`;
 }
 
 function ServerAverageRatingBadges({ serverAddress }: { serverAddress: string }) {
@@ -397,11 +452,32 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
             <ArrowUpDown className="size-3.5" />
           </Button>
         ),
-        cell: ({ row }) => (
-          <div className="truncate text-sm font-medium text-foreground">
-            <QuakeText text={row.original.name} />
-          </div>
-        ),
+        cell: ({ row }) => {
+          const steamId = row.original.rating?.steam_id;
+
+          if (!steamId) {
+            return (
+              <div className="truncate text-sm font-medium text-foreground">
+                <QuakeText text={row.original.name} />
+              </div>
+            );
+          }
+
+          return (
+            <button
+              type="button"
+              onClick={() => {
+                void openUrl(getQlStatsPlayerProfileUrl(steamId));
+              }}
+              className="group flex min-w-0 cursor-pointer items-center gap-1.5 text-left text-sm font-medium text-foreground transition-colors hover:text-primary"
+            >
+              <span className="truncate">
+                <QuakeText text={row.original.name} />
+              </span>
+              <ArrowUpRight className="size-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
+            </button>
+          );
+        },
       },
       {
         id: "points",
@@ -634,21 +710,22 @@ export function ServerList({
     pageIndex: 0,
     pageSize: 25,
   });
+  const deferredSearch = useDeferredValue(filters.search);
+  const [cachedCountriesByAddr, setCachedCountriesByAddr] = useState<
+    Record<string, ServerCountryLocation>
+  >({});
+  const [cachedPingsByAddr, setCachedPingsByAddr] = useState<Record<string, number | null>>({});
+  const [cachedModesByAddr, setCachedModesByAddr] = useState<Record<string, string | null>>({});
 
-  const filteredServers = useMemo(() => {
-    const search = filters.search.trim().toLowerCase();
+  const staticFilteredServers = useMemo(() => {
+    const search = deferredSearch.trim().toLowerCase();
     const tagQuery = filters.tags.map((tag) => tag.toLowerCase());
 
     return servers.filter((server) => {
-      const region = normalizeServerRegion(server);
       const gameMode = normalizeGameMode(server);
       const tags = normalizeTags(server);
 
       if (search && !server.name.toLowerCase().includes(search)) {
-        return false;
-      }
-
-      if (filters.region !== "all" && region !== filters.region) {
         return false;
       }
 
@@ -679,7 +756,125 @@ export function ServerList({
 
       return true;
     });
-  }, [filters, servers]);
+  }, [
+    deferredSearch,
+    filters.gameMode,
+    filters.hideEmpty,
+    filters.hideFull,
+    filters.maps,
+    filters.tags,
+    servers,
+  ]);
+
+  const regionCandidateAddresses = useMemo(
+    () =>
+      filters.region !== "all"
+        ? staticFilteredServers.map((server) => server.addr)
+        : [],
+    [filters.region, staticFilteredServers],
+  );
+  const regionCountryQuery = useQuery({
+    queryKey: ["steam", "server-countries", "region-filter", regionCandidateAddresses],
+    queryFn: () => fetchSteamServerCountries(regionCandidateAddresses),
+    enabled: filters.region !== "all" && regionCandidateAddresses.length > 0,
+    staleTime: 1000 * 60 * 60,
+  });
+  const resolvedRegionCountriesByAddr = useMemo<Record<string, ServerCountryLocation>>(
+    () =>
+      Object.fromEntries(
+        (regionCountryQuery.data ?? []).map((location) => [location.addr, location]),
+      ),
+    [regionCountryQuery.data],
+  );
+  useEffect(() => {
+    if (!regionCountryQuery.data?.length) {
+      return;
+    }
+
+    setCachedCountriesByAddr((current) => ({
+      ...current,
+      ...Object.fromEntries(regionCountryQuery.data.map((location) => [location.addr, location])),
+    }));
+  }, [regionCountryQuery.data]);
+  const regionFilteredServers = useMemo(() => {
+    if (filters.region === "all") {
+      return staticFilteredServers;
+    }
+
+    if (regionCountryQuery.isPending && !regionCountryQuery.data) {
+      return staticFilteredServers;
+    }
+
+    return staticFilteredServers.filter((server) => {
+      const region = resolveServerRegion(server, resolvedRegionCountriesByAddr[server.addr]);
+      return region === filters.region;
+    });
+  }, [
+    filters.region,
+    regionCountryQuery.data,
+    regionCountryQuery.isPending,
+    resolvedRegionCountriesByAddr,
+    staticFilteredServers,
+  ]);
+
+  const ratingFilterActive =
+    filters.ratingRange[0] !== RATING_FILTER_MIN ||
+    filters.ratingRange[1] !== RATING_FILTER_MAX;
+  const searchEnrichmentEnabled = filters.search.trim().length === 0;
+  const ratingCandidateAddresses = useMemo(
+    () => regionFilteredServers.map((server) => server.addr),
+    [regionFilteredServers],
+  );
+  const ratingSummaryQuery = useQuery({
+    queryKey: [
+      "steam",
+      "server-rating-summaries",
+      filters.ratingSystem,
+      ratingCandidateAddresses,
+    ],
+    queryFn: () =>
+      fetchSteamServerRatingSummaries(
+        ratingCandidateAddresses,
+        filters.ratingSystem,
+      ),
+    enabled: ratingFilterActive && ratingCandidateAddresses.length > 0,
+    staleTime: 1000 * 60 * 5,
+  });
+  const ratingSummariesByAddr = useMemo<Record<string, ServerRatingSummary>>(
+    () =>
+      Object.fromEntries(
+        ((ratingSummaryQuery.data ?? []) as ServerRatingSummary[]).map((summary) => [
+          summary.addr,
+          summary,
+        ]),
+      ),
+    [ratingSummaryQuery.data],
+  );
+  const filteredServers = useMemo(() => {
+    if (!ratingFilterActive || (ratingSummaryQuery.isPending && !ratingSummaryQuery.data)) {
+      return regionFilteredServers;
+    }
+
+    const [minRating, maxRating] = filters.ratingRange;
+
+    return regionFilteredServers.filter((server) => {
+      const summary = ratingSummariesByAddr[server.addr];
+      const ratingValue =
+        filters.ratingSystem === "trueskill"
+          ? summary?.average_trueskill
+          : summary?.average_qelo;
+
+      return ratingValue != null && ratingValue >= minRating && ratingValue <= maxRating;
+    });
+  }, [
+    filters.ratingRange,
+    filters.ratingSystem,
+    ratingFilterActive,
+    regionFilteredServers,
+    ratingSummariesByAddr,
+    ratingSummaryQuery.data,
+    ratingSummaryQuery.isPending,
+  ]);
 
   useEffect(() => {
     setPagination((current) =>
@@ -703,23 +898,41 @@ export function ServerList({
   const countryQuery = useQuery({
     queryKey: ["steam", "server-countries", visiblePageAddresses],
     queryFn: () => fetchSteamServerCountries(visiblePageAddresses),
-    enabled: visiblePageAddresses.length > 0,
+    enabled: searchEnrichmentEnabled && visiblePageAddresses.length > 0,
     staleTime: 1000 * 60 * 60,
   });
-  const resolvedCountriesByAddr = useMemo<Record<string, ServerCountryLocation>>(
+  const latestVisibleCountriesByAddr = useMemo<Record<string, ServerCountryLocation>>(
     () =>
       Object.fromEntries(
         (countryQuery.data ?? []).map((location) => [location.addr, location]),
       ),
     [countryQuery.data],
   );
+  useEffect(() => {
+    if (!countryQuery.data?.length) {
+      return;
+    }
+
+    setCachedCountriesByAddr((current) => ({
+      ...current,
+      ...Object.fromEntries(countryQuery.data.map((location) => [location.addr, location])),
+    }));
+  }, [countryQuery.data]);
+  const resolvedCountriesByAddr = useMemo<Record<string, ServerCountryLocation>>(
+    () => ({
+      ...cachedCountriesByAddr,
+      ...resolvedRegionCountriesByAddr,
+      ...latestVisibleCountriesByAddr,
+    }),
+    [cachedCountriesByAddr, resolvedRegionCountriesByAddr, latestVisibleCountriesByAddr],
+  );
   const pingQuery = useQuery({
     queryKey: ["steam", "server-pings", visiblePageAddresses],
     queryFn: () => fetchSteamServerPings(visiblePageAddresses),
-    enabled: visiblePageAddresses.length > 0,
+    enabled: searchEnrichmentEnabled && visiblePageAddresses.length > 0,
     staleTime: 1000 * 60 * 5,
   });
-  const resolvedPingsByAddr = useMemo<Record<string, number | null>>(
+  const latestPingsByAddr = useMemo<Record<string, number | null>>(
     () =>
       Object.fromEntries(
         ((pingQuery.data ?? []) as ServerPing[]).map((entry) => [
@@ -729,13 +942,32 @@ export function ServerList({
       ),
     [pingQuery.data],
   );
+  useEffect(() => {
+    if (!pingQuery.data?.length) {
+      return;
+    }
+
+    setCachedPingsByAddr((current) => ({
+      ...current,
+      ...Object.fromEntries(
+        ((pingQuery.data ?? []) as ServerPing[]).map((entry) => [entry.addr, entry.ping_ms]),
+      ),
+    }));
+  }, [pingQuery.data]);
+  const resolvedPingsByAddr = useMemo<Record<string, number | null>>(
+    () => ({
+      ...cachedPingsByAddr,
+      ...latestPingsByAddr,
+    }),
+    [cachedPingsByAddr, latestPingsByAddr],
+  );
   const modeQuery = useQuery({
     queryKey: ["qlstats", "server-modes", visiblePageAddresses],
     queryFn: () => fetchServerModes(visiblePageAddresses),
-    enabled: visiblePageAddresses.length > 0,
+    enabled: searchEnrichmentEnabled && visiblePageAddresses.length > 0,
     staleTime: 1000 * 60 * 5,
   });
-  const resolvedModesByAddr = useMemo<Record<string, string | null>>(
+  const latestModesByAddr = useMemo<Record<string, string | null>>(
     () =>
       Object.fromEntries(
         ((modeQuery.data ?? []) as ServerMode[]).map((entry) => [
@@ -744,6 +976,25 @@ export function ServerList({
         ]),
       ),
     [modeQuery.data],
+  );
+  useEffect(() => {
+    if (!modeQuery.data?.length) {
+      return;
+    }
+
+    setCachedModesByAddr((current) => ({
+      ...current,
+      ...Object.fromEntries(
+        ((modeQuery.data ?? []) as ServerMode[]).map((entry) => [entry.addr, entry.game_mode]),
+      ),
+    }));
+  }, [modeQuery.data]);
+  const resolvedModesByAddr = useMemo<Record<string, string | null>>(
+    () => ({
+      ...cachedModesByAddr,
+      ...latestModesByAddr,
+    }),
+    [cachedModesByAddr, latestModesByAddr],
   );
   const sortedServers = useMemo(
     () => sortServersForPage(filteredServers, sorting, resolvedModesByAddr, resolvedPingsByAddr),
@@ -804,7 +1055,7 @@ export function ServerList({
         id: "country",
         accessorFn: (row) =>
           resolvedCountriesByAddr[row.addr]?.country_name ??
-          normalizeServerRegion(row) ??
+          resolveServerRegion(row, resolvedCountriesByAddr[row.addr]) ??
           "",
         header: () => (
           <div className="px-0.5 text-xs uppercase tracking-[0.12em] text-muted-foreground">
@@ -820,7 +1071,7 @@ export function ServerList({
           const flagSrc = getCountryFlagSrc(location?.country_code);
 
           if (!location?.country_name || !flagSrc) {
-            const region = normalizeServerRegion(row.original);
+            const region = resolveServerRegion(row.original, location);
             return (
               <span className="text-sm text-muted-foreground">
                 {region ? regionLabels[region] : "Unknown"}
@@ -974,6 +1225,7 @@ export function ServerList({
     state: { sorting, pagination },
     onSortingChange: setSorting,
     onPaginationChange: setPagination,
+    autoResetPageIndex: false,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
@@ -1127,9 +1379,7 @@ export function ServerList({
                 <PaginationContent>
                   <PaginationItem>
                     <PaginationPrevious
-                      href="#"
-                      onClick={(event) => {
-                        event.preventDefault();
+                      onClick={() => {
                         table.previousPage();
                       }}
                       className={
@@ -1153,10 +1403,8 @@ export function ServerList({
                         ) : null}
                         <PaginationItem>
                           <PaginationLink
-                            href="#"
                             isActive={page === currentPage}
-                            onClick={(event) => {
-                              event.preventDefault();
+                            onClick={() => {
                               table.setPageIndex(page - 1);
                             }}
                           >
@@ -1168,9 +1416,7 @@ export function ServerList({
                   })}
                   <PaginationItem>
                     <PaginationNext
-                      href="#"
-                      onClick={(event) => {
-                        event.preventDefault();
+                      onClick={() => {
                         table.nextPage();
                       }}
                       className={

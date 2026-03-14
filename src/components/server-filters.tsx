@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Check,
@@ -38,6 +38,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const regionOptions = [
@@ -64,11 +65,22 @@ const gameModeOptions = [
   { value: "rr", label: "Red Rover" },
 ];
 
+export const RATING_FILTER_MIN = 0;
+export const RATING_FILTER_MAX = 3000;
+
+export function createDefaultRatingRange(): [number, number] {
+  return [RATING_FILTER_MIN, RATING_FILTER_MAX];
+}
+
+export type RatingSystem = "qelo" | "trueskill";
+
 export type ServerFiltersValue = {
   search: string;
   region: string;
   maps: string[];
   gameMode: string;
+  ratingSystem: RatingSystem;
+  ratingRange: [number, number];
   tags: string[];
   hideEmpty: boolean;
   hideFull: boolean;
@@ -93,6 +105,8 @@ export function ServerFilters({
     value.region !== "all" ||
     value.maps.length > 0 ||
     value.gameMode !== "all" ||
+    value.ratingRange[0] !== RATING_FILTER_MIN ||
+    value.ratingRange[1] !== RATING_FILTER_MAX ||
     value.tags.length > 0 ||
     value.hideEmpty ||
     value.hideFull;
@@ -221,6 +235,15 @@ export function ServerFilters({
                   />
                 </div>
 
+                <div className="grid gap-3">
+                  <RatingRangeFilter
+                    system={value.ratingSystem}
+                    range={value.ratingRange}
+                    onSystemChange={(ratingSystem) => onChange({ ...value, ratingSystem })}
+                    onRangeChange={(ratingRange) => onChange({ ...value, ratingRange })}
+                  />
+                </div>
+
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Button
                     variant={value.hideEmpty ? "default" : "outline"}
@@ -264,6 +287,82 @@ export function ServerFilters({
         </div>
       </div>
     </section>
+  );
+}
+
+function RatingRangeFilter({
+  system,
+  range,
+  onSystemChange,
+  onRangeChange,
+}: {
+  system: RatingSystem;
+  range: [number, number];
+  onSystemChange: (system: RatingSystem) => void;
+  onRangeChange: (range: [number, number]) => void;
+}) {
+  const [draftRange, setDraftRange] = useState<[number, number]>(range);
+
+  useEffect(() => {
+    setDraftRange(range);
+  }, [range]);
+
+  useEffect(() => {
+    if (draftRange[0] === range[0] && draftRange[1] === range[1]) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      onRangeChange(draftRange);
+    }, 120);
+
+    return () => window.clearTimeout(timeout);
+  }, [draftRange, onRangeChange, range]);
+
+  return (
+    <div className="rounded-lg border border-border p-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-sm font-medium">Rating</div>
+          <div className="text-xs text-muted-foreground">
+            Filter servers by average QElo or TSkill.
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary" className="rounded-md">
+            {draftRange[0]}
+          </Badge>
+          <Badge variant="secondary" className="rounded-md">
+            {draftRange[1]}
+          </Badge>
+        </div>
+      </div>
+
+      <div className="mt-3 grid gap-3 md:grid-cols-[10rem_minmax(0,1fr)] md:items-center">
+        <Select value={system} onValueChange={(value) => onSystemChange(value as RatingSystem)}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Rating system" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="qelo">QElo</SelectItem>
+            <SelectItem value="trueskill">TSkill</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Slider
+          min={RATING_FILTER_MIN}
+          max={RATING_FILTER_MAX}
+          step={25}
+          value={draftRange}
+          onValueChange={(next) => {
+            if (next.length === 2) {
+              setDraftRange([next[0], next[1]]);
+            }
+          }}
+        />
+      </div>
+    </div>
   );
 }
 

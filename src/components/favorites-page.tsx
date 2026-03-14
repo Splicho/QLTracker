@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { RefreshCw } from "lucide-react";
-import type { ServerFiltersValue } from "@/components/server-filters";
+import {
+  createDefaultRatingRange,
+  type ServerFiltersValue,
+} from "@/components/server-filters";
 import { useFavorites } from "@/hooks/use-favorites";
 import { ServerList } from "@/components/server-list";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +25,8 @@ const emptyFilters: ServerFiltersValue = {
   region: "all",
   maps: [],
   gameMode: "all",
+  ratingSystem: "qelo",
+  ratingRange: createDefaultRatingRange(),
   tags: [],
   hideEmpty: false,
   hideFull: false,
@@ -88,7 +93,7 @@ export function FavoritesPage({
               <DialogHeader>
                 <DialogTitle>Create Favorite List</DialogTitle>
                 <DialogDescription>
-                  Create a local list to organize your saved servers.
+                  Create a list to organize your saved servers.
                 </DialogDescription>
               </DialogHeader>
               <Input

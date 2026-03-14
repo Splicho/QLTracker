@@ -47,6 +47,12 @@ export type ServerPlayerRating = {
   trueskill: number | null;
 };
 
+export type ServerRatingSummary = {
+  addr: string;
+  average_qelo: number | null;
+  average_trueskill: number | null;
+};
+
 export async function fetchSteamServers(apiKey: string) {
   return invoke<SteamServer[]>("fetch_quake_live_servers", {
     apiKey,
@@ -85,5 +91,17 @@ export async function fetchSteamServerPlayerRatings(addr: string) {
     qlstatsBaseUrl: qlstatsApiUrl,
     trueskillUrlTemplate,
     addr,
+  });
+}
+
+export async function fetchSteamServerRatingSummaries(
+  addrs: string[],
+  ratingKind: "qelo" | "trueskill",
+) {
+  return invoke<ServerRatingSummary[]>("fetch_server_rating_summaries", {
+    qlstatsBaseUrl: qlstatsApiUrl,
+    trueskillUrlTemplate,
+    addrs,
+    ratingKind,
   });
 }

@@ -17,6 +17,8 @@ static PING_CACHE: OnceLock<Mutex<HashMap<String, Option<u128>>>> = OnceLock::ne
 static MODE_CACHE: OnceLock<Mutex<HashMap<String, Option<String>>>> = OnceLock::new();
 static PLAYER_RATING_CACHE: OnceLock<Mutex<HashMap<String, Vec<ServerPlayerRating>>>> =
     OnceLock::new();
+static RATING_SUMMARY_CACHE: OnceLock<Mutex<HashMap<String, ServerRatingSummary>>> =
+    OnceLock::new();
 
 #[derive(Debug, Deserialize)]
 struct SteamListResponse {
@@ -49,6 +51,10 @@ struct SteamServerRecord {
     bots: Option<u8>,
     #[serde(default)]
     region: Option<i32>,
+    #[serde(default)]
+    keywords: Option<String>,
+    #[serde(default, rename = "gametype")]
+    gametype: Option<String>,
 }
 
 #[derive(Debug, Serialize, Clone)]
@@ -66,6 +72,14 @@ struct ServerPlayerRating {
     steam_id: Option<String>,
     qelo: Option<f64>,
     trueskill: Option<f64>,
+}
+
+#[derive(Debug, Serialize, Clone)]
+#[serde(rename_all = "snake_case")]
+struct ServerRatingSummary {
+    addr: String,
+    average_qelo: Option<f64>,
+    average_trueskill: Option<f64>,
 }
 
 #[derive(Debug, Serialize, Clone)]
@@ -110,6 +124,29 @@ fn extract_host(addr: &str) -> &str {
     addr.rsplit_once(':').map_or(addr, |(host, _)| host)
 }
 
+fn merge_server_keywords(keywords: Option<String>, gametype: Option<String>) -> Option<String> {
+    let mut parts: Vec<String> = Vec::new();
+
+    for value in [keywords, gametype].into_iter().flatten() {
+        for part in value.split(',') {
+            let normalized = part.trim();
+            if normalized.is_empty() {
+                continue;
+            }
+
+            if !parts.iter().any(|existing| existing.eq_ignore_ascii_case(normalized)) {
+                parts.push(normalized.to_string());
+            }
+        }
+    }
+
+    if parts.is_empty() {
+        None
+    } else {
+        Some(parts.join(","))
+    }
+}
+
 fn country_cache() -> &'static Mutex<HashMap<String, Option<ServerCountryLocation>>> {
     COUNTRY_CACHE.get_or_init(|| Mutex::new(HashMap::new()))
 }
@@ -124,6 +161,10 @@ fn mode_cache() -> &'static Mutex<HashMap<String, Option<String>>> {
 
 fn player_rating_cache() -> &'static Mutex<HashMap<String, Vec<ServerPlayerRating>>> {
     PLAYER_RATING_CACHE.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+fn rating_summary_cache() -> &'static Mutex<HashMap<String, ServerRatingSummary>> {
+    RATING_SUMMARY_CACHE.get_or_init(|| Mutex::new(HashMap::new()))
 }
 
 fn extract_between<'a>(haystack: &'a str, start: &str, end: &str) -> Option<&'a str> {
@@ -201,9 +242,19 @@ async fn fetch_country_location(
         .query(&[("host", ip.as_str())])
         .send()
         .await
-        .map_err(|error| format!("Check-Host request failed for {ip}: {error}"))?;
+        .map_err(|error| {
+            let message = format!("Check-Host request failed for {ip}: {error}");
+            let _ = country_cache()
+                .lock()
+                .map(|mut cache| cache.insert(ip.clone(), None));
+            message
+        })?;
 
     if !response.status().is_success() {
+        country_cache()
+            .lock()
+            .map_err(|error| error.to_string())?
+            .insert(ip.clone(), None);
         return Err(format!(
             "Check-Host returned HTTP {} for {}.",
             response.status(),
@@ -214,7 +265,13 @@ async fn fetch_country_location(
     let html = response
         .text()
         .await
-        .map_err(|error| format!("Check-Host response read failed for {ip}: {error}"))?;
+        .map_err(|error| {
+            let message = format!("Check-Host response read failed for {ip}: {error}");
+            let _ = country_cache()
+                .lock()
+                .map(|mut cache| cache.insert(ip.clone(), None));
+            message
+        })?;
 
     let location = parse_country_from_html(addr, &ip, &html);
 
@@ -527,7 +584,7 @@ async fn fetch_quake_live_servers(
             ping_ms: None,
             region: entry.region,
             version: None,
-            keywords: None,
+            keywords: merge_server_keywords(entry.keywords, entry.gametype),
             connect_url: format!("+connect {}", entry.addr),
             players_info: Vec::new(),
         });
@@ -558,20 +615,24 @@ async fn fetch_server_players(addr: String) -> Result<Vec<ServerPlayer>, String>
 
 #[tauri::command]
 async fn fetch_server_countries(addrs: Vec<String>) -> Result<Vec<ServerCountryLocation>, String> {
-    let unique_addrs = addrs.into_iter().fold(Vec::new(), |mut acc, addr| {
-        if !acc.contains(&addr) {
-            acc.push(addr);
+    let mut addrs_by_ip: HashMap<String, Vec<String>> = HashMap::new();
+    for addr in addrs {
+        let normalized_addr = normalize_addr(&addr);
+        let ip = extract_host(&normalized_addr).to_string();
+        let entries = addrs_by_ip.entry(ip).or_default();
+        if !entries.contains(&normalized_addr) {
+            entries.push(normalized_addr);
         }
-        acc
-    });
+    }
 
-    if unique_addrs.is_empty() {
+    if addrs_by_ip.is_empty() {
         return Ok(Vec::new());
     }
 
     log::info!(
-        "fetch_server_countries called for {} server addresses",
-        unique_addrs.len()
+        "fetch_server_countries called for {} server addresses across {} unique IPs",
+        addrs_by_ip.values().map(Vec::len).sum::<usize>(),
+        addrs_by_ip.len()
     );
 
     let client = reqwest::Client::builder()
@@ -580,33 +641,51 @@ async fn fetch_server_countries(addrs: Vec<String>) -> Result<Vec<ServerCountryL
         .build()
         .map_err(|error| error.to_string())?;
 
-    let tasks: Vec<_> = unique_addrs
-        .into_iter()
-        .map(|addr| {
-            let client = client.clone();
-            tauri::async_runtime::spawn(async move {
-                match fetch_country_location(&client, &addr).await {
-                    Ok(location) => location,
-                    Err(error) => {
-                        log::warn!("{error}");
-                        ServerCountryLocation {
-                            addr: addr.clone(),
-                            ip: extract_host(&addr).to_string(),
-                            country_name: None,
-                            country_code: None,
-                        }
-                    }
-                }
-            })
-        })
-        .collect();
+    let unique_ips: Vec<_> = addrs_by_ip.keys().cloned().collect();
+    let mut locations =
+        Vec::with_capacity(addrs_by_ip.values().map(Vec::len).sum::<usize>());
 
-    let mut locations = Vec::with_capacity(tasks.len());
-    for task in tasks {
-        locations.push(
-            task.await
-                .map_err(|error| format!("Country lookup task failed: {error}"))?,
-        );
+    for chunk in unique_ips.chunks(5) {
+        let tasks: Vec<_> = chunk
+            .iter()
+            .cloned()
+            .map(|ip| {
+                let client = client.clone();
+                tauri::async_runtime::spawn(async move {
+                    let location = match fetch_country_location(&client, &ip).await {
+                        Ok(location) => location,
+                        Err(error) => {
+                            log::warn!("{error}");
+                            ServerCountryLocation {
+                                addr: ip.clone(),
+                                ip: ip.clone(),
+                                country_name: None,
+                                country_code: None,
+                            }
+                        }
+                    };
+
+                    (ip, location)
+                })
+            })
+            .collect();
+
+        for task in tasks {
+            let (ip, location) = task
+                .await
+                .map_err(|error| format!("Country lookup task failed: {error}"))?;
+
+            if let Some(addrs_for_ip) = addrs_by_ip.get(&ip) {
+                for addr in addrs_for_ip {
+                    locations.push(ServerCountryLocation {
+                        addr: addr.clone(),
+                        ip: location.ip.clone(),
+                        country_name: location.country_name.clone(),
+                        country_code: location.country_code.clone(),
+                    });
+                }
+            }
+        }
     }
 
     Ok(locations)
@@ -655,6 +734,42 @@ fn qlstats_value_as_f64(value: &serde_json::Value, key: &str) -> Option<f64> {
         serde_json::Value::Number(number) => number.as_f64(),
         serde_json::Value::String(string) => string.trim().parse::<f64>().ok(),
         _ => None,
+    }
+}
+
+fn calculate_average(values: impl IntoIterator<Item = Option<f64>>) -> Option<f64> {
+    let mut total = 0.0;
+    let mut count = 0_u32;
+
+    for value in values {
+        if let Some(value) = value {
+            total += value;
+            count += 1;
+        }
+    }
+
+    if count == 0 {
+        return None;
+    }
+
+    Some((total / f64::from(count)).round())
+}
+
+fn qlstats_player_to_rating(player: &serde_json::Value) -> ServerPlayerRating {
+    let steam_id = qlstats_value_as_string(player, "steamid")
+        .or_else(|| qlstats_value_as_string(player, "steam_id"));
+    let name = qlstats_value_as_string(player, "name")
+        .or_else(|| qlstats_value_as_string(player, "nick"))
+        .or_else(|| qlstats_value_as_string(player, "client_name"))
+        .unwrap_or_else(|| "Unknown player".into());
+    let qelo = qlstats_value_as_f64(player, "rating")
+        .or_else(|| qlstats_value_as_f64(player, "elo"));
+
+    ServerPlayerRating {
+        name,
+        steam_id,
+        qelo,
+        trueskill: None,
     }
 }
 
@@ -869,23 +984,12 @@ async fn fetch_server_mode(
     })
 }
 
-async fn fetch_server_player_ratings_impl(
+async fn fetch_qlstats_server_player_ratings(
     client: &reqwest::Client,
     qlstats_base_url: &str,
-    trueskill_url_template: &str,
     addr: &str,
 ) -> Result<Vec<ServerPlayerRating>, String> {
     let normalized_addr = normalize_addr(addr);
-
-    if let Some(cached) = player_rating_cache()
-        .lock()
-        .map_err(|error| error.to_string())?
-        .get(&normalized_addr)
-        .cloned()
-    {
-        return Ok(cached);
-    }
-
     let normalized_base = qlstats_base_url.trim().trim_end_matches('/');
     if normalized_base.is_empty() {
         return Err("QLStats API URL is required.".into());
@@ -924,28 +1028,39 @@ async fn fetch_server_player_ratings_impl(
             )
         })?;
 
-    let mut ratings = Vec::with_capacity(payload.players.len());
-    for player in payload.players {
-        let steam_id = qlstats_value_as_string(&player, "steamid")
-            .or_else(|| qlstats_value_as_string(&player, "steam_id"));
-        let name = qlstats_value_as_string(&player, "name")
-            .or_else(|| qlstats_value_as_string(&player, "nick"))
-            .or_else(|| qlstats_value_as_string(&player, "client_name"))
-            .unwrap_or_else(|| "Unknown player".into());
-        let qelo = qlstats_value_as_f64(&player, "rating")
-            .or_else(|| qlstats_value_as_f64(&player, "elo"));
-        let trueskill = if let Some(ref steam_id) = steam_id {
+    Ok(payload
+        .players
+        .iter()
+        .map(qlstats_player_to_rating)
+        .collect())
+}
+
+async fn fetch_server_player_ratings_impl(
+    client: &reqwest::Client,
+    qlstats_base_url: &str,
+    trueskill_url_template: &str,
+    addr: &str,
+) -> Result<Vec<ServerPlayerRating>, String> {
+    let normalized_addr = normalize_addr(addr);
+
+    if let Some(cached) = player_rating_cache()
+        .lock()
+        .map_err(|error| error.to_string())?
+        .get(&normalized_addr)
+        .cloned()
+    {
+        return Ok(cached);
+    }
+
+    let mut ratings = fetch_qlstats_server_player_ratings(client, qlstats_base_url, &normalized_addr)
+        .await?;
+
+    for rating in &mut ratings {
+        rating.trueskill = if let Some(ref steam_id) = rating.steam_id {
             fetch_trueskill(client, trueskill_url_template, steam_id).await
         } else {
             None
         };
-
-        ratings.push(ServerPlayerRating {
-            name,
-            steam_id,
-            qelo,
-            trueskill,
-        });
     }
 
     player_rating_cache()
@@ -954,6 +1069,64 @@ async fn fetch_server_player_ratings_impl(
         .insert(normalized_addr, ratings.clone());
 
     Ok(ratings)
+}
+
+async fn fetch_server_rating_summary_impl(
+    client: &reqwest::Client,
+    qlstats_base_url: &str,
+    trueskill_url_template: &str,
+    rating_kind: &str,
+    addr: &str,
+) -> Result<ServerRatingSummary, String> {
+    let normalized_addr = normalize_addr(addr);
+    let cache_key = format!("{}:{}", rating_kind.trim().to_lowercase(), normalized_addr);
+
+    if let Some(cached) = rating_summary_cache()
+        .lock()
+        .map_err(|error| error.to_string())?
+        .get(&cache_key)
+        .cloned()
+    {
+        return Ok(cached);
+    }
+
+    let summary = match rating_kind.trim().to_lowercase().as_str() {
+        "trueskill" => {
+            let ratings = fetch_server_player_ratings_impl(
+                client,
+                qlstats_base_url,
+                trueskill_url_template,
+                &normalized_addr,
+            )
+            .await?;
+
+            ServerRatingSummary {
+                addr: normalized_addr.clone(),
+                average_qelo: calculate_average(ratings.iter().map(|player| player.qelo)),
+                average_trueskill: calculate_average(
+                    ratings.iter().map(|player| player.trueskill),
+                ),
+            }
+        }
+        _ => {
+            let ratings =
+                fetch_qlstats_server_player_ratings(client, qlstats_base_url, &normalized_addr)
+                    .await?;
+
+            ServerRatingSummary {
+                addr: normalized_addr.clone(),
+                average_qelo: calculate_average(ratings.iter().map(|player| player.qelo)),
+                average_trueskill: None,
+            }
+        }
+    };
+
+    rating_summary_cache()
+        .lock()
+        .map_err(|error| error.to_string())?
+        .insert(cache_key, summary.clone());
+
+    Ok(summary)
 }
 
 #[tauri::command]
@@ -1026,6 +1199,77 @@ async fn fetch_server_player_ratings(
         .await
 }
 
+#[tauri::command]
+async fn fetch_server_rating_summaries(
+    qlstats_base_url: String,
+    trueskill_url_template: String,
+    addrs: Vec<String>,
+    rating_kind: String,
+) -> Result<Vec<ServerRatingSummary>, String> {
+    let unique_addrs = addrs.into_iter().fold(Vec::new(), |mut acc, addr| {
+        let normalized_addr = normalize_addr(&addr);
+        if !acc.contains(&normalized_addr) {
+            acc.push(normalized_addr);
+        }
+        acc
+    });
+
+    if unique_addrs.is_empty() {
+        return Ok(Vec::new());
+    }
+
+    let client = reqwest::Client::builder()
+        .timeout(Duration::from_secs(6))
+        .user_agent("QLTracker/0.1.0")
+        .build()
+        .map_err(|error| error.to_string())?;
+
+    let mut summaries = Vec::with_capacity(unique_addrs.len());
+
+    for chunk in unique_addrs.chunks(12) {
+        let tasks: Vec<_> = chunk
+            .iter()
+            .cloned()
+            .map(|addr| {
+                let client = client.clone();
+                let qlstats_base_url = qlstats_base_url.clone();
+                let trueskill_url_template = trueskill_url_template.clone();
+                let rating_kind = rating_kind.clone();
+                tauri::async_runtime::spawn(async move {
+                    match fetch_server_rating_summary_impl(
+                        &client,
+                        &qlstats_base_url,
+                        &trueskill_url_template,
+                        &rating_kind,
+                        &addr,
+                    )
+                    .await
+                    {
+                        Ok(summary) => summary,
+                        Err(error) => {
+                            log::warn!("{error}");
+                            ServerRatingSummary {
+                                addr,
+                                average_qelo: None,
+                                average_trueskill: None,
+                            }
+                        }
+                    }
+                })
+            })
+            .collect();
+
+        for task in tasks {
+            summaries.push(
+                task.await
+                    .map_err(|error| format!("Rating summary task failed: {error}"))?,
+            );
+        }
+    }
+
+    Ok(summaries)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -1044,6 +1288,7 @@ pub fn run() {
             fetch_quake_live_servers,
             fetch_server_players,
             fetch_server_player_ratings,
+            fetch_server_rating_summaries,
             fetch_server_countries,
             fetch_server_pings,
             fetch_server_modes
