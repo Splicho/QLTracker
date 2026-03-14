@@ -5,6 +5,7 @@ use std::net::{SocketAddr, UdpSocket};
 use std::process::Command;
 use std::sync::{Mutex, OnceLock};
 use std::time::Duration;
+use tauri::Manager;
 
 const STEAM_SERVER_LIST_URL: &str =
     "https://api.steampowered.com/IGameServersService/GetServerList/v1/";
@@ -1345,10 +1346,63 @@ async fn fetch_server_rating_summaries(
     Ok(summaries)
 }
 
+#[tauri::command]
+fn app_is_packaged() -> bool {
+    !cfg!(debug_assertions)
+}
+
+#[tauri::command]
+fn launcher_exit_app(app: tauri::AppHandle) {
+    app.exit(0);
+}
+
+#[tauri::command]
+fn launcher_restart_app(app: tauri::AppHandle) {
+    app.request_restart();
+}
+
+#[tauri::command]
+fn launcher_finish_bootstrap(app: tauri::AppHandle) -> Result<(), String> {
+    let main_window = ensure_main_window(&app)?;
+    focus_window(&main_window);
+
+    if let Some(window) = app.get_webview_window("bootstrap") {
+        window.close().map_err(|error| error.to_string())?;
+    }
+
+    Ok(())
+}
+
+fn ensure_main_window(app: &tauri::AppHandle) -> Result<tauri::WebviewWindow, String> {
+    if let Some(window) = app.get_webview_window("main") {
+        return Ok(window);
+    }
+
+    let config = app
+        .config()
+        .app
+        .windows
+        .iter()
+        .find(|window| window.label == "main")
+        .ok_or_else(|| "Main window configuration not found".to_string())?;
+
+    tauri::WebviewWindowBuilder::from_config(app, config)
+        .map_err(|error| error.to_string())?
+        .build()
+        .map_err(|error| error.to_string())
+}
+
+fn focus_window(window: &tauri::WebviewWindow) {
+    let _ = window.show();
+    let _ = window.unminimize();
+    let _ = window.set_focus();
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(
@@ -1360,7 +1414,11 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            app_is_packaged,
             fetch_quake_live_servers,
+            launcher_exit_app,
+            launcher_finish_bootstrap,
+            launcher_restart_app,
             fetch_server_players,
             fetch_server_player_ratings,
             fetch_server_rating_summaries,

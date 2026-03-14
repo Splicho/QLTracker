@@ -1,7 +1,7 @@
 {
   "name": "qltracker",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.0.1-beta.1",
   "type": "module",
   "scripts": {
     "dev": "tauri dev",
@@ -32,6 +32,7 @@
     "@tanstack/react-table": "^8.21.3",
     "@tauri-apps/api": "^2.10.1",
     "@tauri-apps/plugin-opener": "^2.5.3",
+    "@tauri-apps/plugin-updater": "^2.10.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",

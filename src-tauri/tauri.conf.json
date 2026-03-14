@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "QLTracker",
-  "version": "0.1.0",
-  "identifier": "com.stupi.qltracker",
+  "version": "0.0.1-beta.1",
+  "identifier": "com.isevendeuce.qltracker",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",
@@ -13,6 +13,7 @@
     "windows": [
       {
         "label": "main",
+        "create": false,
         "title": "QLTracker",
         "width": 1360,
         "height": 820,
@@ -20,6 +21,23 @@
         "minHeight": 640,
         "resizable": true,
         "fullscreen": false
+      },
+      {
+        "label": "bootstrap",
+        "title": "QLTracker Updater",
+        "url": "index.html?bootstrap=1",
+        "width": 460,
+        "height": 430,
+        "resizable": false,
+        "maximizable": false,
+        "minimizable": false,
+        "closable": false,
+        "fullscreen": false,
+        "decorations": false,
+        "shadow": false,
+        "transparent": true,
+        "center": true,
+        "alwaysOnTop": true
       }
     ],
     "security": {
@@ -28,6 +46,7 @@
   },
   "bundle": {
     "active": true,
+    "createUpdaterArtifacts": true,
     "targets": "all",
     "icon": [
       "icons/32x32.png",
@@ -35,6 +54,22 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser"
+      }
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDlENEQ2NDVCOUJGRTEwRTUKUldUbEVQNmJXMlJObmFqOXJ3Q0ljbkVwUmtoc3ArR1RLWWRJT0p0Nm0zZThJT0tVOUpCS3NPWVUK",
+      "endpoints": [
+        "https://github.com/Splicho/QLTracker/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
   }
 }
