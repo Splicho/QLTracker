@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { RefreshCw } from "lucide-react";
+import type { ServerFiltersValue } from "@/components/server-filters";
 import { useFavorites } from "@/hooks/use-favorites";
 import { ServerList } from "@/components/server-list";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import type { SteamServer } from "@/lib/steam";
 
-const emptyFilters = {
+const emptyFilters: ServerFiltersValue = {
   search: "",
   region: "all",
   maps: [],
@@ -24,7 +25,7 @@ const emptyFilters = {
   tags: [],
   hideEmpty: false,
   hideFull: false,
-} as const;
+};
 
 export function FavoritesPage({
   servers,

@@ -71,6 +71,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const regionLabels: Record<string, string> = {
   eu: "EU",
@@ -644,27 +645,34 @@ export function ServerList({
         ),
         cell: ({ row }) => (
           <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              size="icon"
-              variant="outline"
-              className="size-8"
-              onClick={(event) => {
-                event.stopPropagation();
-                setTargetFavoriteListId(
-                  actionMode === "edit"
-                    ? favoriteListId ?? ""
-                    : favoritesState.lists[0]?.id ?? "",
-                );
-                setFavoriteServer(row.original);
-              }}
-            >
-              {actionMode === "edit" ? (
-                <Pencil className="size-4" />
-              ) : (
-                <Plus className="size-4" />
-              )}
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="outline"
+                  className="size-8"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setTargetFavoriteListId(
+                      actionMode === "edit"
+                        ? favoriteListId ?? ""
+                        : favoritesState.lists[0]?.id ?? "",
+                    );
+                    setFavoriteServer(row.original);
+                  }}
+                >
+                  {actionMode === "edit" ? (
+                    <Pencil className="size-4" />
+                  ) : (
+                    <Plus className="size-4" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                {actionMode === "edit" ? "Edit favorite" : "Add to favorites"}
+              </TooltipContent>
+            </Tooltip>
             <Button
               type="button"
               size="icon"

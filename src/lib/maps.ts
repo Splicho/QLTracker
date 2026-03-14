@@ -44,5 +44,19 @@ export function getMapEntry(mapId: string | null | undefined) {
     return null;
   }
 
-  return mapLookup[mapId] ?? mapLookup.default ?? null;
+  const directMatch = mapLookup[mapId];
+  if (directMatch) {
+    return directMatch;
+  }
+
+  const fallbackImage = mapLookup.default?.image;
+  if (!fallbackImage) {
+    return null;
+  }
+
+  return {
+    id: mapId,
+    name: mapId,
+    image: fallbackImage,
+  };
 }
