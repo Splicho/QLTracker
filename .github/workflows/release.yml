@@ -95,12 +95,23 @@ jobs:
             Write-Error "Tag '$actual' does not match package.json version '$expected'."
           }
 
+      - name: Verify release build environment
+        shell: bash
+        env:
+          VITE_STEAM_API_KEY: ${{ secrets.VITE_STEAM_API_KEY || secrets.STEAM_API_KEY }}
+        run: |
+          if [ -z "$VITE_STEAM_API_KEY" ]; then
+            echo "Missing VITE_STEAM_API_KEY or STEAM_API_KEY GitHub secret."
+            exit 1
+          fi
+
       - name: Build and publish release artifacts
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          VITE_STEAM_API_KEY: ${{ secrets.VITE_STEAM_API_KEY || secrets.STEAM_API_KEY }}
         with:
           projectPath: .
           tauriScript: npm run tauri
