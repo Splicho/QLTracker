@@ -14,6 +14,11 @@ env:
 
 jobs:
   release:
+    env:
+      VITE_STEAM_API_KEY: ${{ secrets.VITE_STEAM_API_KEY || secrets.STEAM_API_KEY }}
+      VITE_STEAM_APP_ID: ${{ secrets.VITE_STEAM_APP_ID || vars.VITE_STEAM_APP_ID || '282440' }}
+      VITE_QLSTATS_API_URL: ${{ secrets.VITE_QLSTATS_API_URL || vars.VITE_QLSTATS_API_URL || 'https://qlstats.net/api' }}
+      VITE_TRUESKILL_URL_TEMPLATE: ${{ secrets.VITE_TRUESKILL_URL_TEMPLATE || vars.VITE_TRUESKILL_URL_TEMPLATE || 'http://qlrelax.freemyip.com/elo/bn/%s' }}
     strategy:
       fail-fast: false
       matrix:
@@ -97,8 +102,6 @@ jobs:
 
       - name: Verify release build environment
         shell: bash
-        env:
-          VITE_STEAM_API_KEY: ${{ secrets.VITE_STEAM_API_KEY || secrets.STEAM_API_KEY }}
         run: |
           if [ -z "$VITE_STEAM_API_KEY" ]; then
             echo "Missing VITE_STEAM_API_KEY or STEAM_API_KEY GitHub secret."
@@ -111,7 +114,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-          VITE_STEAM_API_KEY: ${{ secrets.VITE_STEAM_API_KEY || secrets.STEAM_API_KEY }}
         with:
           projectPath: .
           tauriScript: npm run tauri
