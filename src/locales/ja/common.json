@@ -167,7 +167,10 @@
     "discordPresenceTitle": "Discordプレゼンス",
     "discordPresenceDescription": "アプリの閲覧中に、QLTracker を Discord のアクティビティとして表示します。",
     "discordPresenceServerTitle": "現在のサーバー詳細を表示",
-    "discordPresenceServerDescription": "QLTracker がサーバーを起動したときに、サーバー名、マップ、モード、プレイヤー情報を Discord のアクティビティに含めます。"
+    "discordPresenceServerDescription": "QLTracker がサーバーを起動したときに、サーバー名、マップ、モード、プレイヤー情報を Discord のアクティビティに含めます。",
+    "discordPresenceSteamIdTitle": "現在のサーバー追跡用 SteamID64",
+    "discordPresenceSteamIdDescription": "任意です。SteamID64 を追加すると、Quake Live 内でサーバーを切り替えても、Discord に今いるサーバーを正しく表示できます。",
+    "discordPresenceSteamIdPlaceholder": "7656119..."
   },
   "language": {
     "en": "English",

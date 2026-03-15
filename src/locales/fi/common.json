@@ -167,7 +167,10 @@
     "discordPresenceTitle": "Discord-läsnäolo",
     "discordPresenceDescription": "Näytä QLTracker Discord-aktiviteettinasi, kun selaat sovellusta.",
     "discordPresenceServerTitle": "Näytä nykyisen palvelimen tiedot",
-    "discordPresenceServerDescription": "Kun QLTracker käynnistää palvelimen, sisällytä palvelimen nimi, kartta, pelitila ja pelaajat Discord-aktiviteettiisi."
+    "discordPresenceServerDescription": "Kun QLTracker käynnistää palvelimen, sisällytä palvelimen nimi, kartta, pelitila ja pelaajat Discord-aktiviteettiisi.",
+    "discordPresenceSteamIdTitle": "SteamID64 palvelimen live-seurantaan",
+    "discordPresenceSteamIdDescription": "Valinnainen. Lisää SteamID64-tunnuksesi, jotta Discord voi näyttää palvelimen, jolla oikeasti olet, vaikka vaihtaisit palvelinta Quake Liven sisällä.",
+    "discordPresenceSteamIdPlaceholder": "7656119..."
   },
   "language": {
     "en": "English",

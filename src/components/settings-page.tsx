@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Cog, Spinner } from "@/components/icon";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -284,6 +285,34 @@ export function SettingsPage() {
                         }}
                       />
                     </div>
+                  </div>
+
+                  <div className="mt-4 rounded-md border border-border/60 bg-background/40 p-3">
+                    <Label
+                      htmlFor="discord-presence-steam-id"
+                      className="text-sm font-medium text-foreground"
+                    >
+                      {t("settings.discordPresenceSteamIdTitle")}
+                    </Label>
+                    <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                      {t("settings.discordPresenceSteamIdDescription")}
+                    </p>
+                    <Input
+                      id="discord-presence-steam-id"
+                      className="mt-3"
+                      inputMode="numeric"
+                      placeholder={t(
+                        "settings.discordPresenceSteamIdPlaceholder"
+                      )}
+                      value={settings.discordPresenceSteamId}
+                      onChange={(event) => {
+                        updateSettings({
+                          discordPresenceSteamId: event.target.value
+                            .replace(/\D+/g, "")
+                            .slice(0, 20),
+                        });
+                      }}
+                    />
                   </div>
                 </div>
               </div>

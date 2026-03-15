@@ -167,7 +167,10 @@
     "discordPresenceTitle": "Aktivita na Discordu",
     "discordPresenceDescription": "Zobrazit QLTracker jako vaši aktivitu na Discordu při procházení aplikace.",
     "discordPresenceServerTitle": "Zobrazit podrobnosti o aktuálním serveru",
-    "discordPresenceServerDescription": "Když QLTracker spustí server, zahrňte do aktivity na Discordu název serveru, mapu, režim a hráče."
+    "discordPresenceServerDescription": "Když QLTracker spustí server, zahrňte do aktivity na Discordu název serveru, mapu, režim a hráče.",
+    "discordPresenceSteamIdTitle": "SteamID64 pro sledování aktuálního serveru",
+    "discordPresenceSteamIdDescription": "Volitelné. Přidej svůj SteamID64, aby Discord mohl zobrazit server, na kterém právě jsi, i když v Quake Live přepínáš mezi servery.",
+    "discordPresenceSteamIdPlaceholder": "7656119..."
   },
   "language": {
     "en": "English",

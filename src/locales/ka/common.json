@@ -167,7 +167,10 @@
     "discordPresenceTitle": "Discord აქტივობა",
     "discordPresenceDescription": "აპის დათვალიერებისას აჩვენე QLTracker, როგორც შენი Discord აქტივობა.",
     "discordPresenceServerTitle": "მიმდინარე სერვერის დეტალების ჩვენება",
-    "discordPresenceServerDescription": "როცა QLTracker სერვერს გაუშვებს, Discord აქტივობაში ჩასვი სერვერის სახელი, რუკა, რეჟიმი და მოთამაშეები."
+    "discordPresenceServerDescription": "როცა QLTracker სერვერს გაუშვებს, Discord აქტივობაში ჩასვი სერვერის სახელი, რუკა, რეჟიმი და მოთამაშეები.",
+    "discordPresenceSteamIdTitle": "SteamID64 მიმდინარე სერვერის თვალყურისთვის",
+    "discordPresenceSteamIdDescription": "არასავალდებულოა. დაამატე შენი SteamID64, რომ Discord-მა აჩვენოს რომელ სერვერზე ხარ ახლა, მაშინაც კი თუ Quake Live-ში სერვერს ცვლი.",
+    "discordPresenceSteamIdPlaceholder": "7656119..."
   },
   "language": {
     "en": "English",

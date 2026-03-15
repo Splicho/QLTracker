@@ -35,6 +35,7 @@ export type AppSettingsValue = {
   language: AppLanguage;
   discordPresenceEnabled: boolean;
   discordPresenceShowServerDetails: boolean;
+  discordPresenceSteamId: string;
 };
 
 export const APP_SETTINGS_STORAGE_KEY = "qltracker-app-settings";
@@ -44,6 +45,7 @@ export function createDefaultAppSettings(): AppSettingsValue {
     language: "en",
     discordPresenceEnabled: false,
     discordPresenceShowServerDetails: false,
+    discordPresenceSteamId: "",
   };
 }
 
@@ -70,6 +72,10 @@ export function parseStoredAppSettings(rawValue: string): AppSettingsValue {
         typeof parsed.discordPresenceShowServerDetails === "boolean"
           ? parsed.discordPresenceShowServerDetails
           : defaults.discordPresenceShowServerDetails,
+      discordPresenceSteamId:
+        typeof parsed.discordPresenceSteamId === "string"
+          ? parsed.discordPresenceSteamId
+          : defaults.discordPresenceSteamId,
     };
   } catch {
     return defaults;

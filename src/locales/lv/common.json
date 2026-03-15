@@ -167,7 +167,10 @@
     "discordPresenceTitle": "Discord aktivitāte",
     "discordPresenceDescription": "Rādīt QLTracker kā jūsu Discord aktivitāti, kamēr pārlūkojat lietotni.",
     "discordPresenceServerTitle": "Rādīt pašreizējā servera informāciju",
-    "discordPresenceServerDescription": "Kad QLTracker palaiž serveri, iekļaujiet servera nosaukumu, karti, režīmu un spēlētājus savā Discord aktivitātē."
+    "discordPresenceServerDescription": "Kad QLTracker palaiž serveri, iekļaujiet servera nosaukumu, karti, režīmu un spēlētājus savā Discord aktivitātē.",
+    "discordPresenceSteamIdTitle": "SteamID64 pašreizējā servera izsekošanai",
+    "discordPresenceSteamIdDescription": "Neobligāti. Pievieno savu SteamID64, lai Discord varētu rādīt serveri, kurā patiesībā esi, pat ja pārslēdz serverus pašā Quake Live.",
+    "discordPresenceSteamIdPlaceholder": "7656119..."
   },
   "language": {
     "en": "English",

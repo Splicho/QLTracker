@@ -167,7 +167,10 @@
     "discordPresenceTitle": "Discord присуство",
     "discordPresenceDescription": "Прикажи QLTracker као твоју Discord активност док прегледаш апликацију.",
     "discordPresenceServerTitle": "Прикажи детаље тренутног сервера",
-    "discordPresenceServerDescription": "Када QLTracker покрене сервер, укључи име сервера, мапу, режим и играче у твоју Discord активност."
+    "discordPresenceServerDescription": "Када QLTracker покрене сервер, укључи име сервера, мапу, режим и играче у твоју Discord активност.",
+    "discordPresenceSteamIdTitle": "SteamID64 за праћење тренутног сервера",
+    "discordPresenceSteamIdDescription": "Опционо. Додај свој SteamID64 да би Discord могао да приказује сервер на ком стварно јеси, чак и ако мењаш сервере у самом Quake Live-у.",
+    "discordPresenceSteamIdPlaceholder": "7656119..."
   },
   "language": {
     "en": "English",

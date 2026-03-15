@@ -167,7 +167,10 @@
     "discordPresenceTitle": "Активність у Discord",
     "discordPresenceDescription": "Показувати QLTracker як вашу активність у Discord, поки ви переглядаєте застосунок.",
     "discordPresenceServerTitle": "Показувати відомості про поточний сервер",
-    "discordPresenceServerDescription": "Коли QLTracker запускає сервер, додавайте назву сервера, мапу, режим і гравців до вашої активності у Discord."
+    "discordPresenceServerDescription": "Коли QLTracker запускає сервер, додавайте назву сервера, мапу, режим і гравців до вашої активності у Discord.",
+    "discordPresenceSteamIdTitle": "SteamID64 для відстеження поточного сервера",
+    "discordPresenceSteamIdDescription": "Необов’язково. Додай свій SteamID64, щоб Discord міг показувати сервер, на якому ти зараз перебуваєш, навіть якщо ти змінюєш сервер прямо в Quake Live.",
+    "discordPresenceSteamIdPlaceholder": "7656119..."
   },
   "language": {
     "en": "English",

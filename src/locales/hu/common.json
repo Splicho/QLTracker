@@ -167,7 +167,10 @@
     "discordPresenceTitle": "Discord-jelenlét",
     "discordPresenceDescription": "A QLTracker megjelenítése Discord-tevékenységként az alkalmazás böngészése közben.",
     "discordPresenceServerTitle": "Az aktuális szerver adatainak megjelenítése",
-    "discordPresenceServerDescription": "Amikor a QLTracker elindít egy szervert, jelenjen meg a szerver neve, a pálya, a mód és a játékosok a Discord-tevékenységedben."
+    "discordPresenceServerDescription": "Amikor a QLTracker elindít egy szervert, jelenjen meg a szerver neve, a pálya, a mód és a játékosok a Discord-tevékenységedben.",
+    "discordPresenceSteamIdTitle": "SteamID64 az aktuális szerver követéséhez",
+    "discordPresenceSteamIdDescription": "Nem kötelező. Add meg a SteamID64 azonosítódat, hogy a Discord azt a szervert tudja mutatni, amelyiken tényleg vagy, akkor is, ha Quake Live közben szervert váltasz.",
+    "discordPresenceSteamIdPlaceholder": "7656119..."
   },
   "language": {
     "en": "English",

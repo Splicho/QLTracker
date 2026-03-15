@@ -167,7 +167,10 @@
     "discordPresenceTitle": "Discord veikla",
     "discordPresenceDescription": "Rodyti QLTracker kaip jūsų Discord veiklą, kol naršote programėlę.",
     "discordPresenceServerTitle": "Rodyti dabartinio serverio informaciją",
-    "discordPresenceServerDescription": "Kai QLTracker paleidžia serverį, įtraukite serverio pavadinimą, žemėlapį, režimą ir žaidėjus į savo Discord veiklą."
+    "discordPresenceServerDescription": "Kai QLTracker paleidžia serverį, įtraukite serverio pavadinimą, žemėlapį, režimą ir žaidėjus į savo Discord veiklą.",
+    "discordPresenceSteamIdTitle": "SteamID64 dabartinio serverio sekimui",
+    "discordPresenceSteamIdDescription": "Neprivaloma. Pridėk savo SteamID64, kad Discord galėtų rodyti serverį, kuriame iš tikrųjų esi, net jei Quake Live viduje perjungi serverius.",
+    "discordPresenceSteamIdPlaceholder": "7656119..."
   },
   "language": {
     "en": "English",

@@ -167,7 +167,10 @@
     "discordPresenceTitle": "Discord-aktivitet",
     "discordPresenceDescription": "Vis QLTracker som Discord-aktiviteten din mens du bruker appen.",
     "discordPresenceServerTitle": "Vis detaljer om gjeldende server",
-    "discordPresenceServerDescription": "Når QLTracker starter en server, inkluder servernavn, kart, modus og spillere i Discord-aktiviteten din."
+    "discordPresenceServerDescription": "Når QLTracker starter en server, inkluder servernavn, kart, modus og spillere i Discord-aktiviteten din.",
+    "discordPresenceSteamIdTitle": "SteamID64 for sporing av aktiv server",
+    "discordPresenceSteamIdDescription": "Valgfritt. Legg til SteamID64-en din, så Discord kan vise serveren du faktisk er på, selv om du bytter server inne i Quake Live.",
+    "discordPresenceSteamIdPlaceholder": "7656119..."
   },
   "language": {
     "en": "English",

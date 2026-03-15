@@ -167,7 +167,10 @@
     "discordPresenceTitle": "Prezență Discord",
     "discordPresenceDescription": "Afișează QLTracker ca activitatea ta pe Discord în timp ce folosești aplicația.",
     "discordPresenceServerTitle": "Afișează detaliile serverului curent",
-    "discordPresenceServerDescription": "Când QLTracker lansează un server, include numele serverului, harta, modul și jucătorii în activitatea ta pe Discord."
+    "discordPresenceServerDescription": "Când QLTracker lansează un server, include numele serverului, harta, modul și jucătorii în activitatea ta pe Discord.",
+    "discordPresenceSteamIdTitle": "SteamID64 pentru urmărirea serverului curent",
+    "discordPresenceSteamIdDescription": "Opțional. Adaugă SteamID64-ul tău pentru ca Discord să poată afișa serverul pe care ești cu adevărat, chiar dacă schimbi serverul direct din Quake Live.",
+    "discordPresenceSteamIdPlaceholder": "7656119..."
   },
   "language": {
     "en": "English",

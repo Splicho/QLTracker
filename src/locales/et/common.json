@@ -167,7 +167,10 @@
     "discordPresenceTitle": "Discordi tegevus",
     "discordPresenceDescription": "Kuva QLTracker sinu Discordi tegevusena, kui sirvid rakendust.",
     "discordPresenceServerTitle": "Kuva praeguse serveri üksikasjad",
-    "discordPresenceServerDescription": "Kui QLTracker käivitab serveri, lisa serveri nimi, kaart, režiim ja mängijad sinu Discordi tegevusse."
+    "discordPresenceServerDescription": "Kui QLTracker käivitab serveri, lisa serveri nimi, kaart, režiim ja mängijad sinu Discordi tegevusse.",
+    "discordPresenceSteamIdTitle": "SteamID64 aktiivse serveri jälgimiseks",
+    "discordPresenceSteamIdDescription": "Valikuline. Lisa oma SteamID64, et Discord saaks näidata serverit, kus sa päriselt oled, isegi kui vahetad Quake Live'is serverit.",
+    "discordPresenceSteamIdPlaceholder": "7656119..."
   },
   "language": {
     "en": "English",

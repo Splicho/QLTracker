@@ -1574,8 +1574,7 @@ export function ServerList({
             resolvedRequiresPasswordByAddr[row.original.addr] === true;
           const hasSavedPassword = Boolean(getPassword(row.original.addr));
           const notificationRule = rulesByServerAddr[row.original.addr];
-          const hasActiveNotification =
-            actionMode === "edit" && notificationRule?.enabled === true;
+          const hasActiveNotification = notificationRule?.enabled === true;
 
           return (
             <div className="relative h-11 min-w-0 overflow-hidden">
@@ -1793,27 +1792,22 @@ export function ServerList({
           const notificationRule = rulesByServerAddr[row.original.addr] ?? null;
           const isPrivateServer =
             resolvedRequiresPasswordByAddr[row.original.addr] === true;
+          const shouldShowNotificationAction =
+            notificationsAvailable && notificationUser != null;
           const hasDmWarning =
             notificationUser != null && notificationUser.dmAvailable === false;
-          const notificationDisabledReason =
-            actionMode !== "edit"
-              ? null
-              : isPrivateServer
-                ? t("serverList.actions.notificationsPublicOnly")
-                : !notificationUser
-                  ? t("serverList.actions.connectDiscordFavorites")
-                  : null;
+          const notificationDisabledReason = isPrivateServer
+            ? t("serverList.actions.notificationsPublicOnly")
+            : null;
           const notificationTooltip =
-            actionMode !== "edit"
-              ? null
-              : (notificationDisabledReason ??
-                (notificationRule
-                  ? t("serverList.actions.editNotification")
-                  : t("serverList.actions.notifyDiscord")));
+            notificationDisabledReason ??
+            (notificationRule
+              ? t("serverList.actions.editNotification")
+              : t("serverList.actions.notifyDiscord"));
 
           return (
             <div className="flex justify-end gap-2">
-              {actionMode === "edit" && notificationsAvailable ? (
+              {shouldShowNotificationAction ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button

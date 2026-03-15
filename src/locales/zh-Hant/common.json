@@ -167,7 +167,10 @@
     "discordPresenceTitle": "Discord 狀態",
     "discordPresenceDescription": "在瀏覽應用程式時，將 QLTracker 顯示為你的 Discord 活動。",
     "discordPresenceServerTitle": "顯示目前伺服器詳細資訊",
-    "discordPresenceServerDescription": "當 QLTracker 啟動伺服器時，在你的 Discord 活動中包含伺服器名稱、地圖、模式和玩家資訊。"
+    "discordPresenceServerDescription": "當 QLTracker 啟動伺服器時，在你的 Discord 活動中包含伺服器名稱、地圖、模式和玩家資訊。",
+    "discordPresenceSteamIdTitle": "用於即時伺服器追蹤的 SteamID64",
+    "discordPresenceSteamIdDescription": "可選。加入你的 SteamID64，這樣 Discord 就能顯示你目前實際所在的伺服器，即使你在 Quake Live 裡切換伺服器也一樣。",
+    "discordPresenceSteamIdPlaceholder": "7656119..."
   },
   "language": {
     "en": "English",

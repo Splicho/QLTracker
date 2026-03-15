@@ -6,12 +6,14 @@ import {
   Cog,
   Discord,
   Github,
+  Headset,
   InfoCircle,
   Steam,
   XSocial,
   YouTube,
 } from "@/components/icon";
 import { aboutConfig, type AboutSocialId } from "@/config/about";
+import { useFavorites } from "@/hooks/use-favorites";
 import packageJson from "../../../package.json";
 import { navigationItems, type PageId } from "@/lib/navigation";
 import {
@@ -30,11 +32,14 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
+  SidebarMenuBadge,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import type { SteamServer } from "@/lib/steam";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 const socialIcons: Record<
@@ -51,15 +56,28 @@ const socialIcons: Record<
 export function AppSidebar({
   page,
   onNavigate,
+  servers,
 }: {
   page: PageId;
   onNavigate: (page: PageId) => void;
+  servers: SteamServer[];
 }) {
   const { t } = useTranslation();
+  const { state: favoritesState } = useFavorites();
   const populatedSocials = aboutConfig.socials.filter(
     (social) => social.url.trim().length > 0
   );
   const hasRepoLink = aboutConfig.repo.url.trim().length > 0;
+  const favoritePlayerCount = useMemo(() => {
+    const favoriteAddresses = new Set(
+      favoritesState.servers.map((server) => server.addr)
+    );
+
+    return servers.reduce((sum, server) => {
+      return favoriteAddresses.has(server.addr) ? sum + server.players : sum;
+    }, 0);
+  }, [favoritesState.servers, servers]);
+  const shouldShowFavoritesBadge = favoritesState.servers.length > 0;
 
   return (
     <Sidebar
@@ -98,7 +116,7 @@ export function AppSidebar({
               {navigationItems.map((item) => (
                 <SidebarMenuItem
                   key={item.id}
-                  className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center"
+                  className="relative group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center"
                 >
                   <SidebarMenuButton
                     asChild
@@ -114,6 +132,12 @@ export function AppSidebar({
                       </span>
                     </button>
                   </SidebarMenuButton>
+                  {item.id === "favorites" && shouldShowFavoritesBadge ? (
+                    <SidebarMenuBadge className="right-2 top-1/2 h-6 min-w-6 -translate-y-1/2 gap-1.5 rounded-md border border-sidebar-border/70 bg-sidebar px-2 text-xs leading-none peer-data-[size=sm]/menu-button:top-1/2 peer-data-[size=default]/menu-button:top-1/2 peer-data-[size=lg]/menu-button:top-1/2">
+                      <Headset className="size-3" />
+                      <span>{favoritePlayerCount}</span>
+                    </SidebarMenuBadge>
+                  ) : null}
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
