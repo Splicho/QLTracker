@@ -25,6 +25,7 @@ import {
   BellOff,
   BellRing,
   Pencil,
+  RefreshCw,
 } from "lucide-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import {
@@ -204,6 +205,7 @@ type ServerListProps = {
   filters: ServerFiltersValue;
   isLoading?: boolean;
   isRefreshing?: boolean;
+  onRefresh?: () => void;
   error?: string | null;
   actionMode?: "add" | "edit";
   favoriteListId?: string | null;
@@ -324,6 +326,22 @@ function buildSteamConnectUrl(serverAddress: string, password?: string) {
   return trimmedPassword
     ? `steam://connect/${serverAddress}/${encodeURIComponent(trimmedPassword)}`
     : `steam://connect/${serverAddress}`;
+}
+
+function getPingIconClassName(ping: number) {
+  if (ping <= 25) {
+    return "text-lime-400";
+  }
+
+  if (ping <= 50) {
+    return "text-yellow-400";
+  }
+
+  if (ping <= 90) {
+    return "text-orange-400";
+  }
+
+  return "text-red-400";
 }
 
 function ServerAverageRatingBadges({
@@ -794,6 +812,7 @@ export function ServerList({
   filters,
   isLoading = false,
   isRefreshing = false,
+  onRefresh,
   error = null,
   actionMode = "add",
   favoriteListId = null,
@@ -845,7 +864,7 @@ export function ServerList({
   const [cachedCountriesByAddr, setCachedCountriesByAddr] = useState<
     Record<string, ServerCountryLocation>
   >({});
-  const [cachedPingsByAddr, setCachedPingsByAddr] = useState<
+  const [lastKnownPingsByAddr, setLastKnownPingsByAddr] = useState<
     Record<string, number | null>
   >({});
   const [cachedRequiresPasswordByAddr, setCachedRequiresPasswordByAddr] =
@@ -985,7 +1004,9 @@ export function ServerList({
     queryFn: () => fetchSteamServerPings(visibilityCandidateAddresses),
     enabled:
       filters.visibility !== "all" && visibilityCandidateAddresses.length > 0,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0,
+    refetchOnMount: "always",
+    placeholderData: (previousData) => previousData,
   });
   const visibilityRequiresPasswordByAddr = useMemo<
     Record<string, boolean | null>
@@ -1013,7 +1034,7 @@ export function ServerList({
         ])
       ),
     }));
-    setCachedPingsByAddr((current) => ({
+    setLastKnownPingsByAddr((current) => ({
       ...current,
       ...Object.fromEntries(
         ((visibilityPingQuery.data ?? []) as ServerPing[]).map((entry) => [
@@ -1178,7 +1199,9 @@ export function ServerList({
     queryKey: ["steam", "server-pings", visiblePageAddresses],
     queryFn: () => fetchSteamServerPings(visiblePageAddresses),
     enabled: searchEnrichmentEnabled && visiblePageAddresses.length > 0,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0,
+    refetchOnMount: "always",
+    placeholderData: (previousData) => previousData,
   });
   const latestPingsByAddr = useMemo<Record<string, number | null>>(
     () =>
@@ -1204,8 +1227,7 @@ export function ServerList({
     if (!pingQuery.data?.length) {
       return;
     }
-
-    setCachedPingsByAddr((current) => ({
+    setLastKnownPingsByAddr((current) => ({
       ...current,
       ...Object.fromEntries(
         ((pingQuery.data ?? []) as ServerPing[]).map((entry) => [
@@ -1226,10 +1248,10 @@ export function ServerList({
   }, [pingQuery.data]);
   const resolvedPingsByAddr = useMemo<Record<string, number | null>>(
     () => ({
-      ...cachedPingsByAddr,
+      ...lastKnownPingsByAddr,
       ...latestPingsByAddr,
     }),
-    [cachedPingsByAddr, latestPingsByAddr]
+    [lastKnownPingsByAddr, latestPingsByAddr]
   );
   const resolvedRequiresPasswordByAddr = useMemo<
     Record<string, boolean | null>
@@ -1486,20 +1508,24 @@ export function ServerList({
             <ArrowUpDown className="size-3.5" />
           </Button>
         ),
-        cell: ({ row }) =>
-          pingLookupPending && !(row.original.addr in resolvedPingsByAddr) ? (
-            <Skeleton className="h-4 w-14 rounded-md" />
-          ) : (resolvedPingsByAddr[row.original.addr] ??
-              row.original.ping_ms) != null ? (
+        cell: ({ row }) => {
+          const ping = resolvedPingsByAddr[row.original.addr] ?? row.original.ping_ms;
+
+          if (pingLookupPending && !(row.original.addr in resolvedPingsByAddr)) {
+            return <Skeleton className="h-4 w-14 rounded-md" />;
+          }
+
+          if (ping == null && !pingLookupPending) {
+            return "N/A";
+          }
+
+          return (
             <div className="flex items-center gap-2 text-sm text-foreground">
-              <Ping className="size-3.5 text-lime-400" />
-              <span>
-                {resolvedPingsByAddr[row.original.addr] ?? row.original.ping_ms}
-              </span>
+              <Ping className={`size-3.5 ${getPingIconClassName(ping ?? 999)}`} />
+              <span>{ping ?? "-"}</span>
             </div>
-          ) : (
-            "N/A"
-          ),
+          );
+        },
       },
       {
         id: "actions",
@@ -1737,9 +1763,21 @@ export function ServerList({
   });
   return (
     <>
-      <section className="flex min-h-0 flex-1 flex-col">
+      <section className="flex min-h-0 flex-1 flex-col overflow-x-clip">
+        <div className="sticky top-0 z-30 flex h-14 items-center border-b border-border bg-background px-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onRefresh}
+            disabled={isRefreshing || !onRefresh}
+            className="w-full gap-2"
+          >
+            <RefreshCw className={`size-4 ${isRefreshing ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
+        </div>
         <div className="relative min-h-[24rem] flex-1">
-          <Table>
+          <Table containerClassName="overflow-x-clip overflow-y-visible">
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow
@@ -1749,7 +1787,7 @@ export function ServerList({
                   {headerGroup.headers.map((header) => (
                     <TableHead
                       key={header.id}
-                      className={`h-9 px-3 text-xs uppercase tracking-[0.12em] text-muted-foreground ${
+                      className={`sticky top-14 z-20 bg-background h-9 px-3 text-xs uppercase tracking-[0.12em] text-muted-foreground ${
                         header.column.id === "actions" ? "text-right" : ""
                       }`}
                     >

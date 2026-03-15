@@ -4,8 +4,6 @@ import {
   Check,
   ChevronDown,
   ChevronsUpDown,
-  LoaderCircle,
-  RefreshCw,
   Search,
   X,
 } from "lucide-react";
@@ -121,14 +119,10 @@ export function ServerFilters({
   value,
   onChange,
   onReset,
-  onRefresh,
-  refreshing = false,
 }: {
   value: ServerFiltersValue;
   onChange: (next: ServerFiltersValue) => void;
   onReset: () => void;
-  onRefresh: () => void;
-  refreshing?: boolean;
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const hasActiveFilters =
@@ -153,21 +147,6 @@ export function ServerFilters({
         <div className="flex items-center justify-between gap-2">
           <h2 className="text-sm font-medium">Filters</h2>
           <div className="flex items-center gap-1">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={onRefresh}
-              disabled={refreshing}
-              className="h-8 gap-2"
-            >
-              {refreshing ? (
-                <LoaderCircle className="size-4 animate-spin" />
-              ) : (
-                <RefreshCw className="size-4" />
-              )}
-              Refresh
-            </Button>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>

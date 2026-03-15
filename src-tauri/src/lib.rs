@@ -14,7 +14,6 @@ const A2S_INFO_HEADER: &[u8] = b"\xFF\xFF\xFF\xFFTSource Engine Query\x00";
 const CHECK_HOST_IP_INFO_URL: &str = "https://check-host.net/ip-info";
 static COUNTRY_CACHE: OnceLock<Mutex<HashMap<String, Option<ServerCountryLocation>>>> =
     OnceLock::new();
-static PING_CACHE: OnceLock<Mutex<HashMap<String, Option<u128>>>> = OnceLock::new();
 static PASSWORD_CACHE: OnceLock<Mutex<HashMap<String, Option<bool>>>> = OnceLock::new();
 static MODE_CACHE: OnceLock<Mutex<HashMap<String, Option<String>>>> = OnceLock::new();
 static PLAYER_RATING_CACHE: OnceLock<Mutex<HashMap<String, Vec<ServerPlayerRating>>>> =
@@ -157,10 +156,6 @@ fn merge_server_keywords(keywords: Option<String>, gametype: Option<String>) -> 
 
 fn country_cache() -> &'static Mutex<HashMap<String, Option<ServerCountryLocation>>> {
     COUNTRY_CACHE.get_or_init(|| Mutex::new(HashMap::new()))
-}
-
-fn ping_cache() -> &'static Mutex<HashMap<String, Option<u128>>> {
-    PING_CACHE.get_or_init(|| Mutex::new(HashMap::new()))
 }
 
 fn password_cache() -> &'static Mutex<HashMap<String, Option<bool>>> {
@@ -389,15 +384,10 @@ fn parse_a2s_info_requires_password(buf: &[u8]) -> Result<bool, String> {
     Ok(buf[cursor] == 1)
 }
 
-fn cache_probe_result(
+fn cache_requires_password(
     normalized_addr: &str,
-    ping_ms: Option<u128>,
     requires_password: Option<bool>,
 ) -> Result<(), String> {
-    ping_cache()
-        .lock()
-        .map_err(|error| error.to_string())?
-        .insert(normalized_addr.to_string(), ping_ms);
     password_cache()
         .lock()
         .map_err(|error| error.to_string())?
@@ -405,33 +395,7 @@ fn cache_probe_result(
     Ok(())
 }
 
-fn query_ping(addr: &str) -> Result<A2sProbeResult, String> {
-    let normalized_addr = normalize_addr(addr);
-
-    let cached_ping = ping_cache()
-        .lock()
-        .map_err(|error| error.to_string())?
-        .get(&normalized_addr)
-        .copied()
-        .flatten();
-    let cached_requires_password = password_cache()
-        .lock()
-        .map_err(|error| error.to_string())?
-        .get(&normalized_addr)
-        .copied()
-        .flatten();
-
-    if let (Some(ping_ms), Some(requires_password)) = (cached_ping, cached_requires_password) {
-        return Ok(A2sProbeResult {
-            ping_ms,
-            requires_password: Some(requires_password),
-        });
-    }
-
-    let socket_addr: SocketAddr = normalized_addr
-        .parse()
-        .map_err(|error| format!("Invalid server address '{addr}': {error}"))?;
-
+fn query_a2s_info_ping(socket_addr: SocketAddr) -> Result<A2sProbeResult, String> {
     let socket = UdpSocket::bind("0.0.0.0:0").map_err(|error| error.to_string())?;
     socket
         .set_read_timeout(Some(Duration::from_secs(3)))
@@ -440,7 +404,7 @@ fn query_ping(addr: &str) -> Result<A2sProbeResult, String> {
         .set_write_timeout(Some(Duration::from_secs(3)))
         .map_err(|error| error.to_string())?;
 
-    let started_at = std::time::Instant::now();
+    let mut started_at = std::time::Instant::now();
     socket
         .send_to(A2S_INFO_HEADER, socket_addr)
         .map_err(|error| format!("A2S info request failed: {error}"))?;
@@ -455,6 +419,8 @@ fn query_ping(addr: &str) -> Result<A2sProbeResult, String> {
         challenged_request.extend_from_slice(A2S_INFO_HEADER);
         challenged_request.extend_from_slice(&response_buf[5..9]);
 
+        // Don't count the anti-reflection challenge round trip as server ping.
+        started_at = std::time::Instant::now();
         socket
             .send_to(&challenged_request, socket_addr)
             .map_err(|error| format!("A2S challenged info request failed: {error}"))?;
@@ -465,21 +431,61 @@ fn query_ping(addr: &str) -> Result<A2sProbeResult, String> {
     }
 
     if response_len < 6 || &response_buf[0..5] != b"\xFF\xFF\xFF\xFFI" {
-        let fallback_ping = query_system_ping(extract_host(&normalized_addr))?;
-        cache_probe_result(&normalized_addr, Some(fallback_ping), None)?;
-        return Ok(A2sProbeResult {
-            ping_ms: fallback_ping,
-            requires_password: None,
-        });
+        return Err("Unexpected A2S info response header.".into());
     }
 
     let ping_ms = started_at.elapsed().as_millis();
     let requires_password = parse_a2s_info_requires_password(&response_buf[..response_len])?;
-    cache_probe_result(&normalized_addr, Some(ping_ms), Some(requires_password))?;
 
     Ok(A2sProbeResult {
         ping_ms,
         requires_password: Some(requires_password),
+    })
+}
+
+fn query_ping(addr: &str) -> Result<A2sProbeResult, String> {
+    let normalized_addr = normalize_addr(addr);
+    let socket_addr: SocketAddr = normalized_addr
+        .parse()
+        .map_err(|error| format!("Invalid server address '{addr}': {error}"))?;
+
+    let mut best_probe: Option<A2sProbeResult> = None;
+    let mut last_error: Option<String> = None;
+
+    for _ in 0..2 {
+        match query_a2s_info_ping(socket_addr) {
+            Ok(probe) => {
+                if best_probe
+                    .as_ref()
+                    .is_none_or(|current| probe.ping_ms < current.ping_ms)
+                {
+                    best_probe = Some(probe);
+                }
+            }
+            Err(error) => {
+                last_error = Some(error);
+            }
+        }
+    }
+
+    if let Some(probe) = best_probe {
+        cache_requires_password(&normalized_addr, probe.requires_password)?;
+        return Ok(probe);
+    }
+
+    let fallback_ping = query_system_ping(extract_host(&normalized_addr))?;
+    cache_requires_password(&normalized_addr, None)?;
+    if let Some(error) = last_error {
+        log::warn!(
+            "Falling back to system ping for {} after A2S probe failure: {}",
+            normalized_addr,
+            error
+        );
+    }
+
+    Ok(A2sProbeResult {
+        ping_ms: fallback_ping,
+        requires_password: None,
     })
 }
 

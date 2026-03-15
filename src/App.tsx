@@ -141,10 +141,6 @@ export function App() {
               onChange={(next) => {
                 setRawFilters(serializeFilters(next));
               }}
-              onRefresh={() => {
-                void serversQuery.refetch();
-              }}
-              refreshing={serversQuery.fetchStatus === "fetching"}
               onReset={() => {
                 setRawFilters(serializeFilters(createDefaultServerFilters()));
               }}
@@ -157,6 +153,9 @@ export function App() {
                 serversQuery.fetchStatus === "fetching" &&
                 !serversQuery.isLoading
               }
+              onRefresh={() => {
+                void serversQuery.refetch();
+              }}
               error={
                 steamApiKey.length === 0
                   ? "Set VITE_STEAM_API_KEY to load servers."
