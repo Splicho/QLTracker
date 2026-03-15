@@ -3,7 +3,10 @@ import { z } from "zod";
 export const serverSnapshotSchema = z.object({
   addr: z.string().min(3),
   steamid: z.string().nullable().optional(),
+  countryCode: z.string().nullable().optional(),
+  countryName: z.string().nullable().optional(),
   name: z.string().min(1),
+  ip: z.string().nullable().optional(),
   map: z.string().min(1),
   appId: z.number().int().positive().optional(),
   bots: z.number().int().nonnegative().optional(),
@@ -37,3 +40,10 @@ export const serverSnapshotSchema = z.object({
 });
 
 export type ServerSnapshot = z.infer<typeof serverSnapshotSchema>;
+
+export type ServerCountryLocation = {
+  addr: string;
+  country_code: string | null;
+  country_name: string | null;
+  ip: string;
+};

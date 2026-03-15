@@ -1,4 +1,5 @@
 import { config } from "./config.js";
+import { lookupCountry } from "./geolite.js";
 import type { ServerSnapshot } from "./types.js";
 
 const steamServerListUrl =
@@ -82,12 +83,16 @@ function normalizeGameMode(keywords: string | null | undefined) {
   return null;
 }
 
-function buildSnapshot(server: SteamServerRecord): ServerSnapshot {
+async function buildSnapshot(server: SteamServerRecord): Promise<ServerSnapshot> {
   const mergedKeywords = mergeKeywords(server.keywords, server.gametype);
+  const country = await lookupCountry(server.addr);
 
   return {
     addr: server.addr,
+    countryCode: country.countryCode,
+    countryName: country.countryName,
     steamid: server.steamid ?? null,
+    ip: country.ip,
     name: server.name ?? "Unknown server",
     map: server.map ?? "unknown",
     appId: server.appid ?? 282440,
@@ -131,5 +136,5 @@ export async function fetchSteamSnapshots() {
   const payload = (await response.json()) as SteamListResponse;
   const servers = payload.response?.servers ?? [];
 
-  return servers.map(buildSnapshot);
+  return Promise.all(servers.map(buildSnapshot));
 }

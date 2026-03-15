@@ -1,3 +1,4 @@
 node_modules/
 dist/
 .env
+GeoLite2-Country.mmdb
