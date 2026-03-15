@@ -96,7 +96,9 @@ export function useNotificationService() {
     if (result.status === "expired" || result.status === "error") {
       setHandledLinkState(result.id);
       setLinkSessionId(null);
-      toast.error(result.errorMessage ?? "Discord connection did not complete.");
+      toast.error(
+        result.errorMessage ?? "Discord connection did not complete."
+      );
     }
   }, [
     handledLinkState,
@@ -164,7 +166,8 @@ export function useNotificationService() {
   });
 
   const deleteRuleMutation = useMutation({
-    mutationFn: (ruleId: string) => deleteNotificationRule(sessionToken, ruleId),
+    mutationFn: (ruleId: string) =>
+      deleteNotificationRule(sessionToken, ruleId),
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: ["notifications", "rules"],

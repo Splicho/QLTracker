@@ -108,3 +108,7 @@ export async function fetchSteamServerRatingSummaries(
     ratingKind,
   });
 }
+
+export async function isQuakeLiveRunning() {
+  return invoke<boolean>("is_quake_live_running");
+}

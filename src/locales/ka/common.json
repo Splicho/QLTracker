@@ -98,7 +98,8 @@
       "notifyDiscord": "შეტყობინება Discord-ზე",
       "editFavorite": "ფავორიტის რედაქტირება",
       "removeFromFavorites": "ფავორიტებიდან წაშლა",
-      "addToFavorites": "ფავორიტებში დამატება"
+      "addToFavorites": "ფავორიტებში დამატება",
+      "copyAddress": "IP:Port-ის კოპირება"
     },
     "drawer": {
       "play": "თამაში",
@@ -149,7 +150,9 @@
       "notificationSaveError": "შეტყობინების წესის შენახვა ვერ მოხერხდა.",
       "notificationRemoveError": "შეტყობინების წესის წაშლა ვერ მოხერხდა.",
       "favoriteUpdated": "ფავორიტი განახლდა.",
-      "addedToFavorites": "ფავორიტებში დაემატა."
+      "addedToFavorites": "ფავორიტებში დაემატა.",
+      "serverAddressCopied": "IP:Port დაკოპირდა.",
+      "serverAddressCopyError": "IP:Port-ის კოპირება ვერ მოხერხდა."
     }
   },
   "settings": {
@@ -159,8 +162,12 @@
     "startupSaving": "გაშვების პარამეტრი ინახება...",
     "unavailable": "ეს პარამეტრი ამ ვერსიაში მიუწვდომელია.",
     "languageTitle": "ენა",
-    "languageDescription": "??????? ???, ???????? QLTracker ???? ???? ???????????.",
-    "languagePlaceholder": "აირჩიეთ ენა"
+    "languageDescription": "აირჩიეთ ენა, რომელსაც QLTracker მთელ აპში გამოიყენებს.",
+    "languagePlaceholder": "აირჩიეთ ენა",
+    "discordPresenceTitle": "Discord აქტივობა",
+    "discordPresenceDescription": "აპის დათვალიერებისას აჩვენე QLTracker, როგორც შენი Discord აქტივობა.",
+    "discordPresenceServerTitle": "მიმდინარე სერვერის დეტალების ჩვენება",
+    "discordPresenceServerDescription": "როცა QLTracker სერვერს გაუშვებს, Discord აქტივობაში ჩასვი სერვერის სახელი, რუკა, რეჟიმი და მოთამაშეები."
   },
   "language": {
     "en": "English",

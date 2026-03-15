@@ -18,7 +18,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import type { DiscordPresenceServerContext } from "@/lib/discord-presence";
 import type { SteamServer } from "@/lib/steam";
 import { useTranslation } from "react-i18next";
 
@@ -30,12 +35,14 @@ export function FavoritesPage({
   isRefreshing = false,
   error = null,
   onRefresh,
+  onServerLaunched,
 }: {
   servers: SteamServer[];
   isLoading?: boolean;
   isRefreshing?: boolean;
   error?: string | null;
   onRefresh: () => void;
+  onServerLaunched?: (context: DiscordPresenceServerContext) => void;
 }) {
   const { t } = useTranslation();
   const { state, createList } = useFavorites();
@@ -218,6 +225,7 @@ export function FavoritesPage({
                 error={error}
                 actionMode="edit"
                 favoriteListId={selectedList.id}
+                onServerLaunched={onServerLaunched}
               />
             )}
           </div>

@@ -98,7 +98,8 @@
       "notifyDiscord": "在分解上通知",
       "editFavorite": "編輯最愛的",
       "removeFromFavorites": "从最愛取出",
-      "addToFavorites": "添加到最愛"
+      "addToFavorites": "添加到最愛",
+      "copyAddress": "複製 IP:Port"
     },
     "drawer": {
       "play": "播放",
@@ -149,7 +150,9 @@
       "notificationSaveError": "無法儲存通知規則 .",
       "notificationRemoveError": "無法移除通知規則 .",
       "favoriteUpdated": "有最愛了 有更新了.",
-      "addedToFavorites": "被加入了最愛."
+      "addedToFavorites": "被加入了最愛.",
+      "serverAddressCopied": "已複製 IP:Port。",
+      "serverAddressCopyError": "無法複製 IP:Port。"
     }
   },
   "settings": {
@@ -159,12 +162,42 @@
     "startupSaving": "正在儲存啟動偏好...",
     "unavailable": "此建築中無法設定 .",
     "languageTitle": "語言",
-    "languageDescription": "?? QLTracker ??????????????",
-    "languagePlaceholder": "選擇語言"
+    "languageDescription": "選擇 QLTracker 在整個應用程式中使用的語言。",
+    "languagePlaceholder": "選擇語言",
+    "discordPresenceTitle": "Discord 狀態",
+    "discordPresenceDescription": "在瀏覽應用程式時，將 QLTracker 顯示為你的 Discord 活動。",
+    "discordPresenceServerTitle": "顯示目前伺服器詳細資訊",
+    "discordPresenceServerDescription": "當 QLTracker 啟動伺服器時，在你的 Discord 活動中包含伺服器名稱、地圖、模式和玩家資訊。"
   },
   "language": {
-    "en": "注",
-    "de": "德意志"
+    "en": "English",
+    "de": "Deutsch",
+    "bg": "Български",
+    "ru": "Русский",
+    "uk": "Українська",
+    "hr": "Hrvatski",
+    "sr": "Српски",
+    "fr": "Français",
+    "it": "Italiano",
+    "et": "Eesti",
+    "nl": "Nederlands",
+    "fi": "Suomi",
+    "sv": "Svenska",
+    "hu": "Magyar",
+    "da": "Dansk",
+    "lv": "Latviešu",
+    "nb": "Norsk Bokmål",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ka": "ქართული",
+    "zh-Hant": "繁體中文",
+    "zh-Hans": "简体中文",
+    "es": "Español",
+    "pt-BR": "Português (Brasil)",
+    "pl": "Polski",
+    "ro": "Română",
+    "lt": "Lietuvių",
+    "cs": "Čeština"
   },
   "favorites": {
     "lists": "列表",
@@ -177,7 +210,7 @@
     "favoriteServers": "最愛的伺服器",
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
-    "noLists": "有名單嗎? 建立您要開始的第一個清單 .",
+    "noLists": "還沒有清單。建立您的第一個清單以開始使用。",
     "noServers": "此清單中尚未儲存伺服器 ."
   },
   "filters": {

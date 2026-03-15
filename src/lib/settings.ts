@@ -33,6 +33,8 @@ export type AppLanguage = (typeof SUPPORTED_APP_LANGUAGES)[number];
 
 export type AppSettingsValue = {
   language: AppLanguage;
+  discordPresenceEnabled: boolean;
+  discordPresenceShowServerDetails: boolean;
 };
 
 export const APP_SETTINGS_STORAGE_KEY = "qltracker-app-settings";
@@ -40,6 +42,8 @@ export const APP_SETTINGS_STORAGE_KEY = "qltracker-app-settings";
 export function createDefaultAppSettings(): AppSettingsValue {
   return {
     language: "en",
+    discordPresenceEnabled: false,
+    discordPresenceShowServerDetails: false,
   };
 }
 
@@ -58,6 +62,14 @@ export function parseStoredAppSettings(rawValue: string): AppSettingsValue {
         SUPPORTED_APP_LANGUAGES.includes(parsed.language as AppLanguage)
           ? (parsed.language as AppLanguage)
           : defaults.language,
+      discordPresenceEnabled:
+        typeof parsed.discordPresenceEnabled === "boolean"
+          ? parsed.discordPresenceEnabled
+          : defaults.discordPresenceEnabled,
+      discordPresenceShowServerDetails:
+        typeof parsed.discordPresenceShowServerDetails === "boolean"
+          ? parsed.discordPresenceShowServerDetails
+          : defaults.discordPresenceShowServerDetails,
     };
   } catch {
     return defaults;

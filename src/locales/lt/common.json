@@ -98,7 +98,8 @@
       "notifyDiscord": "@ info: tooltip",
       "editFavorite": "Keisti mėgstamą",
       "removeFromFavorites": "Pašalinti iš mėgstamiausių",
-      "addToFavorites": "Pridėti prie mėgstamiausių"
+      "addToFavorites": "Pridėti prie mėgstamiausių",
+      "copyAddress": "Kopijuoti IP:Port"
     },
     "drawer": {
       "play": "Groti",
@@ -149,7 +150,9 @@
       "notificationSaveError": "Nepavyko išsaugoti pranešimo taisyklės.",
       "notificationRemoveError": "Nepavyko pašalinti pranešimo taisyklės.",
       "favoriteUpdated": "Mėgstamiausia atnaujinta.",
-      "addedToFavorites": "Pridėta prie mėgstamiausių."
+      "addedToFavorites": "Pridėta prie mėgstamiausių.",
+      "serverAddressCopied": "IP:Port nukopijuotas.",
+      "serverAddressCopyError": "Nepavyko nukopijuoti IP:Port."
     }
   },
   "settings": {
@@ -159,12 +162,42 @@
     "startupSaving": "Taupoma paleidimo pirmenybė...",
     "unavailable": "@ info: whatsthis.",
     "languageTitle": "Kalba",
-    "languageDescription": "Pasirinkite kalb?, kuri? QLTracker naudos visoje programoje.",
-    "languagePlaceholder": "Pasirinkite kalbą"
+    "languageDescription": "Pasirinkite kalbą, kurią QLTracker naudos visoje programoje.",
+    "languagePlaceholder": "Pasirinkite kalbą",
+    "discordPresenceTitle": "Discord veikla",
+    "discordPresenceDescription": "Rodyti QLTracker kaip jūsų Discord veiklą, kol naršote programėlę.",
+    "discordPresenceServerTitle": "Rodyti dabartinio serverio informaciją",
+    "discordPresenceServerDescription": "Kai QLTracker paleidžia serverį, įtraukite serverio pavadinimą, žemėlapį, režimą ir žaidėjus į savo Discord veiklą."
   },
   "language": {
-    "en": "Anglų",
-    "de": "Dutsch"
+    "en": "English",
+    "de": "Deutsch",
+    "bg": "Български",
+    "ru": "Русский",
+    "uk": "Українська",
+    "hr": "Hrvatski",
+    "sr": "Српски",
+    "fr": "Français",
+    "it": "Italiano",
+    "et": "Eesti",
+    "nl": "Nederlands",
+    "fi": "Suomi",
+    "sv": "Svenska",
+    "hu": "Magyar",
+    "da": "Dansk",
+    "lv": "Latviešu",
+    "nb": "Norsk Bokmål",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ka": "ქართული",
+    "zh-Hant": "繁體中文",
+    "zh-Hans": "简体中文",
+    "es": "Español",
+    "pt-BR": "Português (Brasil)",
+    "pl": "Polski",
+    "ro": "Română",
+    "lt": "Lietuvių",
+    "cs": "Čeština"
   },
   "favorites": {
     "lists": "Sąrašai",

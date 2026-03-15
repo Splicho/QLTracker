@@ -1,4 +1,4 @@
-import { type CSSProperties, useMemo, useState } from "react";
+import { type CSSProperties, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/layout/header";
 import { AppSidebar } from "@/components/layout/app-sidebar";
@@ -11,9 +11,16 @@ import { ServerList } from "@/components/server-list";
 import { FavoritesPage } from "@/components/favorites-page";
 import { NotificationsPage } from "@/components/notifications-page";
 import { SettingsPage } from "@/components/settings-page";
+import { useAppSettings } from "@/hooks/use-app-settings";
+import { useDiscordPresence } from "@/hooks/use-discord-presence";
 import { useLocalStorage } from "@/hooks/use-local-storage";
+import type { DiscordPresenceServerContext } from "@/lib/discord-presence";
 import type { PageId } from "@/lib/navigation";
-import { fetchSteamServers } from "@/lib/steam";
+import {
+  fetchSteamServers,
+  isQuakeLiveRunning,
+  type SteamServer,
+} from "@/lib/steam";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 const steamApiKey = import.meta.env.VITE_STEAM_API_KEY?.trim() ?? "";
@@ -117,6 +124,12 @@ function serializeFilters(filters: ServerFiltersValue) {
 
 export function App() {
   const [page, setPage] = useState<PageId>("server-list");
+  const [activePresenceSession, setActivePresenceSession] = useState<{
+    addr: string;
+    modeLabel: string | null;
+    fallbackServer: SteamServer;
+  } | null>(null);
+  const { settings } = useAppSettings();
   const [rawFilters, setRawFilters] = useLocalStorage(
     SERVER_FILTERS_STORAGE_KEY,
     serializeFilters(createDefaultServerFilters())
@@ -127,9 +140,72 @@ export function App() {
     queryFn: () => fetchSteamServers(steamApiKey),
     enabled: steamApiKey.length > 0,
     staleTime: 30_000,
-    refetchInterval: 60_000,
+    refetchInterval: activePresenceSession ? 15_000 : 60_000,
   });
   const serversErrorMessage = getQueryErrorMessage(serversQuery.error);
+  const activePresenceServer =
+    useMemo<DiscordPresenceServerContext | null>(() => {
+      if (!activePresenceSession) {
+        return null;
+      }
+
+      const liveServer =
+        (serversQuery.data ?? []).find(
+          (server) => server.addr === activePresenceSession.addr
+        ) ?? activePresenceSession.fallbackServer;
+
+      return {
+        server: liveServer,
+        modeLabel: activePresenceSession.modeLabel,
+      };
+    }, [activePresenceSession, serversQuery.data]);
+
+  useDiscordPresence({
+    enabled: settings.discordPresenceEnabled,
+    showServerDetails: settings.discordPresenceShowServerDetails,
+    page,
+    activeServer: activePresenceServer,
+  });
+
+  useEffect(() => {
+    if (!activePresenceSession) {
+      return;
+    }
+
+    let cancelled = false;
+    let intervalId: number | null = null;
+
+    const checkSessionState = async () => {
+      try {
+        const running = await isQuakeLiveRunning();
+        if (!cancelled && !running) {
+          setActivePresenceSession(null);
+        }
+      } catch {
+        // Ignore process-check failures and keep current presence.
+      }
+    };
+
+    const startupTimeoutId = window.setTimeout(() => {
+      void checkSessionState();
+      intervalId = window.setInterval(() => {
+        void checkSessionState();
+      }, 5000);
+    }, 10000);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(startupTimeoutId);
+      if (intervalId != null) {
+        window.clearInterval(intervalId);
+      }
+    };
+  }, [activePresenceSession]);
+
+  const handleNavigate = (nextPage: PageId) => {
+    setPage(nextPage);
+    setActivePresenceSession(null);
+  };
 
   return (
     <SidebarProvider>
@@ -142,7 +218,7 @@ export function App() {
         }
         className="contents"
       >
-        <AppSidebar page={page} onNavigate={setPage} />
+        <AppSidebar page={page} onNavigate={handleNavigate} />
       </div>
       <SidebarInset className="md:m-0! md:ml-0! md:!rounded-none md:shadow-none">
         <Header page={page} />
@@ -173,6 +249,13 @@ export function App() {
                   ? "Set VITE_STEAM_API_KEY to load servers."
                   : serversErrorMessage
               }
+              onServerLaunched={(context) => {
+                setActivePresenceSession({
+                  addr: context.server.addr,
+                  modeLabel: context.modeLabel,
+                  fallbackServer: context.server,
+                });
+              }}
             />
           </>
         ) : page === "favorites" ? (
@@ -189,6 +272,13 @@ export function App() {
             }
             onRefresh={() => {
               void serversQuery.refetch();
+            }}
+            onServerLaunched={(context) => {
+              setActivePresenceSession({
+                addr: context.server.addr,
+                modeLabel: context.modeLabel,
+                fallbackServer: context.server,
+              });
             }}
           />
         ) : page === "notifications" ? (

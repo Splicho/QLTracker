@@ -23,9 +23,7 @@ export function Header({ page }: { page: PageId }) {
       : page === "settings"
         ? t("navigation.settings")
         : navigationItems.find((item) => item.id === page)
-          ? t(
-              navigationItems.find((item) => item.id === page)!.titleKey
-            )
+          ? t(navigationItems.find((item) => item.id === page)!.titleKey)
           : null) ?? t("header.unknown");
 
   const handleThemeChange = (

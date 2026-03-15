@@ -98,7 +98,8 @@
       "notifyDiscord": "在 Discord 上通知",
       "editFavorite": "编辑最爱",
       "removeFromFavorites": "从最爱中删除",
-      "addToFavorites": "添加到最爱"
+      "addToFavorites": "添加到最爱",
+      "copyAddress": "复制 IP:Port"
     },
     "drawer": {
       "play": "播放",
@@ -149,7 +150,9 @@
       "notificationSaveError": "无法保存通知规则 .",
       "notificationRemoveError": "无法删除通知规则 .",
       "favoriteUpdated": "最爱更新.",
-      "addedToFavorites": "增入所爱."
+      "addedToFavorites": "增入所爱.",
+      "serverAddressCopied": "已复制 IP:Port。",
+      "serverAddressCopyError": "无法复制 IP:Port。"
     }
   },
   "settings": {
@@ -159,12 +162,42 @@
     "startupSaving": "保存启动首选项...",
     "unavailable": "此建筑没有设置 .",
     "languageTitle": "语言",
-    "languageDescription": "?? QLTracker ????????????",
-    "languagePlaceholder": "选择语言"
+    "languageDescription": "选择 QLTracker 在整个应用中使用的语言。",
+    "languagePlaceholder": "选择语言",
+    "discordPresenceTitle": "Discord 状态",
+    "discordPresenceDescription": "在浏览应用时，将 QLTracker 显示为你的 Discord 活动。",
+    "discordPresenceServerTitle": "显示当前服务器详情",
+    "discordPresenceServerDescription": "当 QLTracker 启动服务器时，在你的 Discord 活动中包含服务器名称、地图、模式和玩家信息。"
   },
   "language": {
-    "en": "联合国",
-    "de": "德国"
+    "en": "English",
+    "de": "Deutsch",
+    "bg": "Български",
+    "ru": "Русский",
+    "uk": "Українська",
+    "hr": "Hrvatski",
+    "sr": "Српски",
+    "fr": "Français",
+    "it": "Italiano",
+    "et": "Eesti",
+    "nl": "Nederlands",
+    "fi": "Suomi",
+    "sv": "Svenska",
+    "hu": "Magyar",
+    "da": "Dansk",
+    "lv": "Latviešu",
+    "nb": "Norsk Bokmål",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ka": "ქართული",
+    "zh-Hant": "繁體中文",
+    "zh-Hans": "简体中文",
+    "es": "Español",
+    "pt-BR": "Português (Brasil)",
+    "pl": "Polski",
+    "ro": "Română",
+    "lt": "Lietuvių",
+    "cs": "Čeština"
   },
   "favorites": {
     "lists": "名单",

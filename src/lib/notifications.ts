@@ -3,10 +3,7 @@ const notificationApiUrl =
 
 export const NOTIFICATION_API_URL = notificationApiUrl;
 
-export type ThresholdMode =
-  | "min_players"
-  | "free_slots"
-  | "active_free_slots";
+export type ThresholdMode = "min_players" | "free_slots" | "active_free_slots";
 export type LinkSessionStatus = "pending" | "complete" | "expired" | "error";
 
 export type NotificationUser = {

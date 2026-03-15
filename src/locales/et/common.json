@@ -98,7 +98,8 @@
       "notifyDiscord": "Teata ebakõlast",
       "editFavorite": "Muuda lemmikut",
       "removeFromFavorites": "Eemalda lemmikutest",
-      "addToFavorites": "Lisa lemmikutele"
+      "addToFavorites": "Lisa lemmikutele",
+      "copyAddress": "Kopeeri IP:Port"
     },
     "drawer": {
       "play": "Mängi",
@@ -149,7 +150,9 @@
       "notificationSaveError": "Teatamisreegli salvestamine nurjus.",
       "notificationRemoveError": "Teatamisreegli eemaldamine nurjus.",
       "favoriteUpdated": "Lemmik uuendatud.",
-      "addedToFavorites": "Lisatud lemmikutele."
+      "addedToFavorites": "Lisatud lemmikutele.",
+      "serverAddressCopied": "IP:Port kopeeritud.",
+      "serverAddressCopyError": "IP:Porti ei saanud kopeerida."
     }
   },
   "settings": {
@@ -159,12 +162,42 @@
     "startupSaving": "Käivituseelistuse salvestamine...",
     "unavailable": "Seade ei ole selles ehituses saadaval.",
     "languageTitle": "Keel",
-    "languageDescription": "Vali keel, mida QLTracker kasutab kogu rakenduses.",
-    "languagePlaceholder": "Vali keel"
+    "languageDescription": "Valige keel, mida QLTracker kasutab kogu rakenduses.",
+    "languagePlaceholder": "Vali keel",
+    "discordPresenceTitle": "Discordi tegevus",
+    "discordPresenceDescription": "Kuva QLTracker sinu Discordi tegevusena, kui sirvid rakendust.",
+    "discordPresenceServerTitle": "Kuva praeguse serveri üksikasjad",
+    "discordPresenceServerDescription": "Kui QLTracker käivitab serveri, lisa serveri nimi, kaart, režiim ja mängijad sinu Discordi tegevusse."
   },
   "language": {
-    "en": "Inglise",
-    "de": "Deutsch"
+    "en": "English",
+    "de": "Deutsch",
+    "bg": "Български",
+    "ru": "Русский",
+    "uk": "Українська",
+    "hr": "Hrvatski",
+    "sr": "Српски",
+    "fr": "Français",
+    "it": "Italiano",
+    "et": "Eesti",
+    "nl": "Nederlands",
+    "fi": "Suomi",
+    "sv": "Svenska",
+    "hu": "Magyar",
+    "da": "Dansk",
+    "lv": "Latviešu",
+    "nb": "Norsk Bokmål",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ka": "ქართული",
+    "zh-Hant": "繁體中文",
+    "zh-Hans": "简体中文",
+    "es": "Español",
+    "pt-BR": "Português (Brasil)",
+    "pl": "Polski",
+    "ro": "Română",
+    "lt": "Lietuvių",
+    "cs": "Čeština"
   },
   "favorites": {
     "lists": "Nimekirjad",

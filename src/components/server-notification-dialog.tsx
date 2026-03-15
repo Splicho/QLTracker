@@ -55,7 +55,9 @@ function inferMatchCapacity(server: SteamServer | null) {
     return 8;
   }
 
-  const match = stripQuakeColors(server.name).match(/(\d{1,2})\s*v\s*(\d{1,2})/i);
+  const match = stripQuakeColors(server.name).match(
+    /(\d{1,2})\s*v\s*(\d{1,2})/i
+  );
   if (!match) {
     return Math.max(server.max_players, 1);
   }
@@ -146,13 +148,11 @@ export function ServerNotificationDialog({
               : t("notifications.dialog.createTitle")}
           </DialogTitle>
           <DialogDescription>
-            {server ? (
-              t("notifications.dialog.descriptionWithServer", {
-                server: stripQuakeColors(server.name),
-              })
-            ) : (
-              t("notifications.dialog.descriptionFallback")
-            )}
+            {server
+              ? t("notifications.dialog.descriptionWithServer", {
+                  server: stripQuakeColors(server.name),
+                })
+              : t("notifications.dialog.descriptionFallback")}
           </DialogDescription>
         </DialogHeader>
 
@@ -212,17 +212,15 @@ export function ServerNotificationDialog({
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              {
-                thresholdModeOptions.find(
-                  (option) => option.value === thresholdMode
-                )?.descriptionKey
-                  ? t(
-                      thresholdModeOptions.find(
-                        (option) => option.value === thresholdMode
-                      )!.descriptionKey
-                    )
-                  : null
-              }
+              {thresholdModeOptions.find(
+                (option) => option.value === thresholdMode
+              )?.descriptionKey
+                ? t(
+                    thresholdModeOptions.find(
+                      (option) => option.value === thresholdMode
+                    )!.descriptionKey
+                  )
+                : null}
             </p>
           </div>
 

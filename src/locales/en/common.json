@@ -92,6 +92,7 @@
     "passwordRequired": "Password required",
     "notificationEnabled": "Discord notification enabled",
     "actions": {
+      "copyAddress": "Copy IP:Port",
       "notificationsPublicOnly": "Notifications are available only for public servers.",
       "connectDiscordFavorites": "Connect Discord on the Notifications page to enable notifications.",
       "editNotification": "Edit Discord notification",
@@ -142,6 +143,8 @@
       "join": "Join"
     },
     "toasts": {
+      "serverAddressCopied": "IP:Port copied.",
+      "serverAddressCopyError": "Could not copy IP:Port.",
       "removedFromFavorites": "Removed from favorites.",
       "notificationUpdated": "Notification updated.",
       "notificationCreated": "Notification created.",
@@ -160,7 +163,11 @@
     "unavailable": "Setting is unavailable in this build.",
     "languageTitle": "Language",
     "languageDescription": "Choose the language used throughout QLTracker.",
-    "languagePlaceholder": "Select language"
+    "languagePlaceholder": "Select language",
+    "discordPresenceTitle": "Discord Presence",
+    "discordPresenceDescription": "Show QLTracker as your Discord activity while you browse the app.",
+    "discordPresenceServerTitle": "Show current server details",
+    "discordPresenceServerDescription": "When QLTracker launches a server, include the server name, map, mode, and players in your Discord activity."
   },
   "language": {
     "en": "English",

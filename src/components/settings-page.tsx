@@ -11,10 +11,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { useAppSettings } from "@/hooks/use-app-settings";
 import { getLanguageFlagSrc } from "@/lib/language-flags";
-import {
-  SUPPORTED_APP_LANGUAGES,
-  type AppLanguage,
-} from "@/lib/settings";
+import { SUPPORTED_APP_LANGUAGES, type AppLanguage } from "@/lib/settings";
 import {
   disable as disableAutostart,
   enable as enableAutostart,
@@ -47,7 +44,11 @@ export function SettingsPage() {
         value,
         label: t(`language.${value}`),
         flagSrc: getLanguageFlagSrc(value),
-      })) as Array<{ value: AppLanguage; label: string; flagSrc: string | null }>,
+      })) as Array<{
+        value: AppLanguage;
+        label: string;
+        flagSrc: string | null;
+      }>,
     [t]
   );
   const selectedLanguageOption = useMemo(
@@ -142,7 +143,10 @@ export function SettingsPage() {
                               setAutostartEnabled(checked);
                             } catch (error) {
                               setAutostartError(
-                                getErrorMessage(error, t("settings.unavailable"))
+                                getErrorMessage(
+                                  error,
+                                  t("settings.unavailable")
+                                )
                               );
                             } finally {
                               setAutostartPending(false);
@@ -227,6 +231,60 @@ export function SettingsPage() {
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div className="rounded-lg border border-border/70 bg-muted/20 p-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <Label
+                        htmlFor="discord-presence-enabled"
+                        className="text-sm font-medium text-foreground"
+                      >
+                        {t("settings.discordPresenceTitle")}
+                      </Label>
+                      <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                        {t("settings.discordPresenceDescription")}
+                      </p>
+                    </div>
+                    <Switch
+                      id="discord-presence-enabled"
+                      checked={settings.discordPresenceEnabled}
+                      onCheckedChange={(checked) => {
+                        updateSettings({
+                          discordPresenceEnabled: checked,
+                          discordPresenceShowServerDetails: checked
+                            ? settings.discordPresenceShowServerDetails
+                            : false,
+                        });
+                      }}
+                    />
+                  </div>
+
+                  <div className="mt-4 rounded-md border border-border/60 bg-background/40 p-3">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0">
+                        <Label
+                          htmlFor="discord-presence-server-details"
+                          className="text-sm font-medium text-foreground"
+                        >
+                          {t("settings.discordPresenceServerTitle")}
+                        </Label>
+                        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                          {t("settings.discordPresenceServerDescription")}
+                        </p>
+                      </div>
+                      <Switch
+                        id="discord-presence-server-details"
+                        checked={settings.discordPresenceShowServerDetails}
+                        disabled={!settings.discordPresenceEnabled}
+                        onCheckedChange={(checked) => {
+                          updateSettings({
+                            discordPresenceShowServerDetails: checked,
+                          });
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

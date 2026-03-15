@@ -98,7 +98,8 @@
       "notifyDiscord": "Paziņot par nesaskaņu",
       "editFavorite": "Rediģēt iecienīto",
       "removeFromFavorites": "Izņemt no favorītiem",
-      "addToFavorites": "Pievienot iecienītajiem"
+      "addToFavorites": "Pievienot iecienītajiem",
+      "copyAddress": "Kopēt IP:Port"
     },
     "drawer": {
       "play": "Atskaņot",
@@ -149,7 +150,9 @@
       "notificationSaveError": "Neizdevās saglabāt paziņošanas noteikumu.",
       "notificationRemoveError": "Neizdevās izņemt paziņojuma noteikumu.",
       "favoriteUpdated": "Iecienīts atjaunināts.",
-      "addedToFavorites": "Pievienots favorītiem."
+      "addedToFavorites": "Pievienots favorītiem.",
+      "serverAddressCopied": "IP:Port nokopēts.",
+      "serverAddressCopyError": "Neizdevās nokopēt IP:Port."
     }
   },
   "settings": {
@@ -159,12 +162,42 @@
     "startupSaving": "Saglabā palaišanas izvēli...",
     "unavailable": "Iestatījumi šajā būvē nav pieejami.",
     "languageTitle": "Valoda",
-    "languageDescription": "Izv?lieties valodu, ko QLTracker izmantos vis? lietotn?.",
-    "languagePlaceholder": "Izvēlieties valodu"
+    "languageDescription": "Izvēlieties valodu, ko QLTracker izmantos visā lietotnē.",
+    "languagePlaceholder": "Izvēlieties valodu",
+    "discordPresenceTitle": "Discord aktivitāte",
+    "discordPresenceDescription": "Rādīt QLTracker kā jūsu Discord aktivitāti, kamēr pārlūkojat lietotni.",
+    "discordPresenceServerTitle": "Rādīt pašreizējā servera informāciju",
+    "discordPresenceServerDescription": "Kad QLTracker palaiž serveri, iekļaujiet servera nosaukumu, karti, režīmu un spēlētājus savā Discord aktivitātē."
   },
   "language": {
-    "en": "Angļu",
-    "de": "Deutsch"
+    "en": "English",
+    "de": "Deutsch",
+    "bg": "Български",
+    "ru": "Русский",
+    "uk": "Українська",
+    "hr": "Hrvatski",
+    "sr": "Српски",
+    "fr": "Français",
+    "it": "Italiano",
+    "et": "Eesti",
+    "nl": "Nederlands",
+    "fi": "Suomi",
+    "sv": "Svenska",
+    "hu": "Magyar",
+    "da": "Dansk",
+    "lv": "Latviešu",
+    "nb": "Norsk Bokmål",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ka": "ქართული",
+    "zh-Hant": "繁體中文",
+    "zh-Hans": "简体中文",
+    "es": "Español",
+    "pt-BR": "Português (Brasil)",
+    "pl": "Polski",
+    "ro": "Română",
+    "lt": "Lietuvių",
+    "cs": "Čeština"
   },
   "favorites": {
     "lists": "Saraksti",

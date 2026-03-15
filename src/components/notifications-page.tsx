@@ -53,7 +53,8 @@ export function NotificationsPage() {
                         {t("notifications.account")}
                       </div>
                       <div className="mt-1 truncate text-sm text-foreground">
-                        {notificationUser.globalName ?? notificationUser.username}
+                        {notificationUser.globalName ??
+                          notificationUser.username}
                       </div>
                     </div>
                     <div className="min-w-0">

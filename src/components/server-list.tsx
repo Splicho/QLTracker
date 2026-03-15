@@ -24,6 +24,7 @@ import {
   Bell,
   BellOff,
   BellRing,
+  Copy,
   Eye,
   Pencil,
   RefreshCw,
@@ -43,6 +44,7 @@ import {
 import { useFavorites } from "@/hooks/use-favorites";
 import { useNotificationService } from "@/hooks/use-notification-service";
 import { useServerPasswords } from "@/hooks/use-server-passwords";
+import type { DiscordPresenceServerContext } from "@/lib/discord-presence";
 import {
   getCountryFlagSrc,
   getRegionFromCountryCode,
@@ -72,6 +74,12 @@ import {
 } from "@/components/server-filters";
 import { ServerDrawer } from "@/components/server-drawer";
 import { ServerNotificationDialog } from "@/components/server-notification-dialog";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import {
   Dialog,
   DialogContent,
@@ -211,6 +219,7 @@ type ServerListProps = {
   error?: string | null;
   actionMode?: "add" | "edit";
   favoriteListId?: string | null;
+  onServerLaunched?: (context: DiscordPresenceServerContext) => void;
 };
 
 function normalizeSteamServerRegion(server: SteamServer) {
@@ -270,6 +279,20 @@ function normalizeGameMode(server: SteamServer) {
   }
 
   return null;
+}
+
+function getGameModeLabel(
+  gameMode: string | null | undefined,
+  t: (key: string) => string
+) {
+  if (!gameMode) {
+    return null;
+  }
+
+  const normalizedMode = gameMode.trim().toLowerCase();
+  const key = modeLabelKeys[normalizedMode];
+
+  return key ? t(key) : normalizedMode.toUpperCase();
 }
 
 function normalizeTags(server: SteamServer) {
@@ -573,8 +596,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
 
     for (const player of mergedPlayers) {
       const qelo = player.rating?.qelo ?? Number.NEGATIVE_INFINITY;
-      const trueskill =
-        player.rating?.trueskill ?? Number.NEGATIVE_INFINITY;
+      const trueskill = player.rating?.trueskill ?? Number.NEGATIVE_INFINITY;
 
       if (qelo > highestQelo) {
         highestQelo = qelo;
@@ -587,10 +609,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
     const names = new Set<string>();
 
     for (const player of mergedPlayers) {
-      if (
-        player.rating?.qelo != null &&
-        player.rating.qelo === highestQelo
-      ) {
+      if (player.rating?.qelo != null && player.rating.qelo === highestQelo) {
         names.add(normalizePlayerName(player.name));
       }
 
@@ -747,7 +766,9 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
     getSortedRowModel: getSortedRowModel(),
   });
   const sortedRows = table.getRowModel().rows;
-  const hasKnownTeams = mergedPlayers.some((player) => player.rating?.team != null);
+  const hasKnownTeams = mergedPlayers.some(
+    (player) => player.rating?.team != null
+  );
   const hasRedBlueTeams = mergedPlayers.some((player) => {
     const team = player.rating?.team;
     return team === 1 || team === 2;
@@ -886,7 +907,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
               ? teamSections.map((section) => (
                   <Fragment key={`player-team-section-${section.key}`}>
                     <TableRow className="border-b border-border bg-muted/10 hover:bg-muted/10">
-                    <TableCell
+                      <TableCell
                         colSpan={columns.length}
                         className={`px-3 py-2 text-[11px] font-medium uppercase tracking-[0.12em] ${section.toneClassName}`}
                       >
@@ -928,7 +949,10 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
                         key={cell.id}
                         className="px-3 py-2 text-sm text-muted-foreground"
                       >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
                       </TableCell>
                     ))}
                   </TableRow>
@@ -955,6 +979,7 @@ export function ServerList({
   error = null,
   actionMode = "add",
   favoriteListId = null,
+  onServerLaunched,
 }: ServerListProps) {
   const {
     state: favoritesState,
@@ -980,9 +1005,8 @@ export function ServerList({
   const [favoriteServer, setFavoriteServer] = useState<SteamServer | null>(
     null
   );
-  const [notificationServer, setNotificationServer] = useState<SteamServer | null>(
-    null
-  );
+  const [notificationServer, setNotificationServer] =
+    useState<SteamServer | null>(null);
   const [targetFavoriteListId, setTargetFavoriteListId] = useState<string>("");
   const [passwordServer, setPasswordServer] = useState<SteamServer | null>(
     null
@@ -1578,7 +1602,9 @@ export function ServerList({
             const region = resolveServerRegion(row.original, location);
             return (
               <span className="text-sm text-muted-foreground">
-                {region ? regionLabels[region] : t("serverList.locationUnknown")}
+                {region
+                  ? regionLabels[region]
+                  : t("serverList.locationUnknown")}
               </span>
             );
           }
@@ -1621,7 +1647,9 @@ export function ServerList({
             resolvedModesByAddr[row.original.addr] ??
             normalizeGameMode(row.original);
           return mode
-            ? (modeLabelKeys[mode] ? t(modeLabelKeys[mode]) : mode.toUpperCase())
+            ? modeLabelKeys[mode]
+              ? t(modeLabelKeys[mode])
+              : mode.toUpperCase()
             : t("serverList.modeUnknown");
         },
       },
@@ -1657,9 +1685,13 @@ export function ServerList({
           </Button>
         ),
         cell: ({ row }) => {
-          const ping = resolvedPingsByAddr[row.original.addr] ?? row.original.ping_ms;
+          const ping =
+            resolvedPingsByAddr[row.original.addr] ?? row.original.ping_ms;
 
-          if (pingLookupPending && !(row.original.addr in resolvedPingsByAddr)) {
+          if (
+            pingLookupPending &&
+            !(row.original.addr in resolvedPingsByAddr)
+          ) {
             return <Skeleton className="h-4 w-14 rounded-md" />;
           }
 
@@ -1669,7 +1701,9 @@ export function ServerList({
 
           return (
             <div className="flex items-center gap-2 text-sm text-foreground">
-              <Ping className={`size-3.5 ${getPingIconClassName(ping ?? 999)}`} />
+              <Ping
+                className={`size-3.5 ${getPingIconClassName(ping ?? 999)}`}
+              />
               <span>{ping ?? "-"}</span>
             </div>
           );
@@ -1700,10 +1734,10 @@ export function ServerList({
           const notificationTooltip =
             actionMode !== "edit"
               ? null
-              : notificationDisabledReason ??
+              : (notificationDisabledReason ??
                 (notificationRule
                   ? t("serverList.actions.editNotification")
-                  : t("serverList.actions.notifyDiscord"));
+                  : t("serverList.actions.notifyDiscord")));
 
           return (
             <div className="flex justify-end gap-2">
@@ -1736,7 +1770,9 @@ export function ServerList({
                       )}
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent side="top">{notificationTooltip}</TooltipContent>
+                  <TooltipContent side="top">
+                    {notificationTooltip}
+                  </TooltipContent>
                 </Tooltip>
               ) : null}
               <Tooltip>
@@ -1750,7 +1786,9 @@ export function ServerList({
                       event.stopPropagation();
                       if (actionMode === "add" && isFavorited) {
                         removeServer(row.original.addr);
-                        toast.success(t("serverList.toasts.removedFromFavorites"));
+                        toast.success(
+                          t("serverList.toasts.removedFromFavorites")
+                        );
                         return;
                       }
                       setTargetFavoriteListId(
@@ -1835,6 +1873,15 @@ export function ServerList({
   const selectedHasSavedPassword = selectedServer
     ? Boolean(getPassword(selectedServer.addr))
     : false;
+  const launchPresenceServer = (server: SteamServer) => {
+    onServerLaunched?.({
+      server,
+      modeLabel: getGameModeLabel(
+        resolvedModesByAddr[server.addr] ?? normalizeGameMode(server),
+        t
+      ),
+    });
+  };
   const launchServer = (serverAddress: string, password?: string) => {
     void openUrl(buildSteamConnectUrl(serverAddress, password));
   };
@@ -1842,12 +1889,14 @@ export function ServerList({
     const requiresPassword =
       resolvedRequiresPasswordByAddr[server.addr] === true;
     if (!requiresPassword) {
+      launchPresenceServer(server);
       launchServer(server.addr);
       return;
     }
 
     const savedPassword = getPassword(server.addr);
     if (savedPassword) {
+      launchPresenceServer(server);
       launchServer(server.addr, savedPassword);
       return;
     }
@@ -1911,6 +1960,14 @@ export function ServerList({
       page === 1 || page === pageCount || Math.abs(page - currentPage) <= 1
     );
   });
+  const copyServerAddress = async (serverAddress: string) => {
+    try {
+      await navigator.clipboard.writeText(serverAddress);
+      toast.success(t("serverList.toasts.serverAddressCopied"));
+    } catch {
+      toast.error(t("serverList.toasts.serverAddressCopyError"));
+    }
+  };
   return (
     <>
       <section className="flex min-h-0 flex-1 flex-col overflow-x-clip">
@@ -1922,7 +1979,9 @@ export function ServerList({
             disabled={isRefreshing || !onRefresh}
             className="w-full gap-2"
           >
-            <RefreshCw className={`size-4 ${isRefreshing ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`size-4 ${isRefreshing ? "animate-spin" : ""}`}
+            />
             {t("serverList.refresh")}
           </Button>
         </div>
@@ -1995,27 +2054,40 @@ export function ServerList({
                 </TableRow>
               ) : table.getPaginationRowModel().rows.length > 0 ? (
                 table.getPaginationRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    className="h-11 cursor-pointer border-b border-border"
-                    onClick={() => setSelectedServer(row.original)}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        className={
-                          cell.column.id === "name"
-                            ? "relative h-11 p-0 align-middle"
-                            : "h-11 px-3 py-0 align-middle"
-                        }
+                  <ContextMenu key={row.id}>
+                    <ContextMenuTrigger asChild>
+                      <TableRow
+                        className="h-11 cursor-pointer border-b border-border"
+                        onClick={() => setSelectedServer(row.original)}
                       >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell
+                            key={cell.id}
+                            className={
+                              cell.column.id === "name"
+                                ? "relative h-11 p-0 align-middle"
+                                : "h-11 px-3 py-0 align-middle"
+                            }
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    </ContextMenuTrigger>
+                    <ContextMenuContent className="w-44">
+                      <ContextMenuItem
+                        onClick={() => {
+                          void copyServerAddress(row.original.addr);
+                        }}
+                      >
+                        <Copy className="size-4" />
+                        {t("serverList.actions.copyAddress")}
+                      </ContextMenuItem>
+                    </ContextMenuContent>
+                  </ContextMenu>
                 ))
               ) : (
                 <TableRow className="border-b border-border">
@@ -2265,13 +2337,11 @@ export function ServerList({
           <DialogHeader>
             <DialogTitle>{t("serverList.passwordDialog.title")}</DialogTitle>
             <DialogDescription>
-              {passwordServer ? (
-                t("serverList.passwordDialog.descriptionWithServer", {
-                  server: stripQuakeColors(passwordServer.name),
-                })
-              ) : (
-                t("serverList.passwordDialog.fallbackDescription")
-              )}
+              {passwordServer
+                ? t("serverList.passwordDialog.descriptionWithServer", {
+                    server: stripQuakeColors(passwordServer.name),
+                  })
+                : t("serverList.passwordDialog.fallbackDescription")}
             </DialogDescription>
           </DialogHeader>
 
@@ -2293,6 +2363,7 @@ export function ServerList({
               if (rememberServerPassword) {
                 savePassword(passwordServer.addr, password);
               }
+              launchPresenceServer(passwordServer);
               launchServer(passwordServer.addr, password);
               setPasswordServer(null);
               setJoinPassword("");
@@ -2335,6 +2406,7 @@ export function ServerList({
                 if (rememberServerPassword) {
                   savePassword(passwordServer.addr, password);
                 }
+                launchPresenceServer(passwordServer);
                 launchServer(passwordServer.addr, password);
                 setPasswordServer(null);
                 setJoinPassword("");

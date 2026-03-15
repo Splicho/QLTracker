@@ -50,7 +50,7 @@
       "mode": {
         "active_free_slots": {
           "label": "Giocare slot sinistra",
-          "description": "Informare quando una partita Ã ̈ vicina al riempimento, utilizzando le slot di gioco attive totali invece di slot server completi."
+          "description": "Avvisa quando una partita è vicina a riempirsi, usando il totale degli slot di gioco attivi invece degli slot completi del server."
         },
         "free_slots": {
           "label": "Fessure libere",
@@ -98,7 +98,8 @@
       "notifyDiscord": "Informare su Discord",
       "editFavorite": "Modifica preferiti",
       "removeFromFavorites": "Rimuovi dai preferiti",
-      "addToFavorites": "Aggiungi ai preferiti"
+      "addToFavorites": "Aggiungi ai preferiti",
+      "copyAddress": "Copia IP:Port"
     },
     "drawer": {
       "play": "Gioca",
@@ -149,7 +150,9 @@
       "notificationSaveError": "Non poteva salvare la regola di notifica.",
       "notificationRemoveError": "Non è possibile rimuovere la regola di notifica.",
       "favoriteUpdated": "Preferito aggiornato.",
-      "addedToFavorites": "Aggiunto ai preferiti."
+      "addedToFavorites": "Aggiunto ai preferiti.",
+      "serverAddressCopied": "IP:Port copiato.",
+      "serverAddressCopyError": "Impossibile copiare IP:Port."
     }
   },
   "settings": {
@@ -159,12 +162,42 @@
     "startupSaving": "Salvataggio delle preferenze di avvio...",
     "unavailable": "L'impostazione non è disponibile in questa costruzione.",
     "languageTitle": "Lingua",
-    "languageDescription": "Scegli la lingua che QLTracker user? in tutta l'app.",
-    "languagePlaceholder": "Seleziona la lingua"
+    "languageDescription": "Scegli la lingua che QLTracker userà in tutta l'app.",
+    "languagePlaceholder": "Seleziona la lingua",
+    "discordPresenceTitle": "Presenza Discord",
+    "discordPresenceDescription": "Mostra QLTracker come tua attività Discord mentre navighi nell'app.",
+    "discordPresenceServerTitle": "Mostra i dettagli del server corrente",
+    "discordPresenceServerDescription": "Quando QLTracker avvia un server, includi il nome del server, la mappa, la modalità e i giocatori nella tua attività Discord."
   },
   "language": {
-    "en": "Inglese",
-    "de": "Italia"
+    "en": "English",
+    "de": "Deutsch",
+    "bg": "Български",
+    "ru": "Русский",
+    "uk": "Українська",
+    "hr": "Hrvatski",
+    "sr": "Српски",
+    "fr": "Français",
+    "it": "Italiano",
+    "et": "Eesti",
+    "nl": "Nederlands",
+    "fi": "Suomi",
+    "sv": "Svenska",
+    "hu": "Magyar",
+    "da": "Dansk",
+    "lv": "Latviešu",
+    "nb": "Norsk Bokmål",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ka": "ქართული",
+    "zh-Hant": "繁體中文",
+    "zh-Hans": "简体中文",
+    "es": "Español",
+    "pt-BR": "Português (Brasil)",
+    "pl": "Polski",
+    "ro": "Română",
+    "lt": "Lietuvių",
+    "cs": "Čeština"
   },
   "favorites": {
     "lists": "Elenco",

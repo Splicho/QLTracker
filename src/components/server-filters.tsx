@@ -163,7 +163,9 @@ export function ServerFilters({
                     onClick={() => setCollapsed((current) => !current)}
                     className="size-8"
                     aria-expanded={!collapsed}
-                    aria-label={collapsed ? t("filters.expand") : t("filters.collapse")}
+                    aria-label={
+                      collapsed ? t("filters.expand") : t("filters.collapse")
+                    }
                   >
                     <ChevronDown
                       className={`size-4 transition-transform duration-200 ${collapsed ? "" : "rotate-180"}`}

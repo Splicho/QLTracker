@@ -98,7 +98,8 @@
       "notifyDiscord": "Meddela på Discord",
       "editFavorite": "Redigera favorit",
       "removeFromFavorites": "Ta bort från favoriter",
-      "addToFavorites": "Lägg till favoriter"
+      "addToFavorites": "Lägg till favoriter",
+      "copyAddress": "Kopiera IP:Port"
     },
     "drawer": {
       "play": "Spela",
@@ -149,7 +150,9 @@
       "notificationSaveError": "Kunde inte spara anmälningsregeln.",
       "notificationRemoveError": "Kunde inte ta bort anmälningsregeln.",
       "favoriteUpdated": "Favorit uppdaterad.",
-      "addedToFavorites": "Tillsatt till favoriter."
+      "addedToFavorites": "Tillsatt till favoriter.",
+      "serverAddressCopied": "IP:Port kopierad.",
+      "serverAddressCopyError": "Kunde inte kopiera IP:Port."
     }
   },
   "settings": {
@@ -159,12 +162,42 @@
     "startupSaving": "Spara startpreferens...",
     "unavailable": "Inställningen är inte tillgänglig i denna byggnad.",
     "languageTitle": "Språkspråk",
-    "languageDescription": "V?lj spr?ket som QLTracker ska anv?nda i hela appen.",
-    "languagePlaceholder": "Välj språk"
+    "languageDescription": "Välj språket som QLTracker ska använda i hela appen.",
+    "languagePlaceholder": "Välj språk",
+    "discordPresenceTitle": "Discord-närvaro",
+    "discordPresenceDescription": "Visa QLTracker som din Discord-aktivitet medan du använder appen.",
+    "discordPresenceServerTitle": "Visa information om aktuell server",
+    "discordPresenceServerDescription": "När QLTracker startar en server, inkludera servernamn, karta, läge och spelare i din Discord-aktivitet."
   },
   "language": {
-    "en": "Engelska",
-    "de": "Deutsch"
+    "en": "English",
+    "de": "Deutsch",
+    "bg": "Български",
+    "ru": "Русский",
+    "uk": "Українська",
+    "hr": "Hrvatski",
+    "sr": "Српски",
+    "fr": "Français",
+    "it": "Italiano",
+    "et": "Eesti",
+    "nl": "Nederlands",
+    "fi": "Suomi",
+    "sv": "Svenska",
+    "hu": "Magyar",
+    "da": "Dansk",
+    "lv": "Latviešu",
+    "nb": "Norsk Bokmål",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ka": "ქართული",
+    "zh-Hant": "繁體中文",
+    "zh-Hans": "简体中文",
+    "es": "Español",
+    "pt-BR": "Português (Brasil)",
+    "pl": "Polski",
+    "ro": "Română",
+    "lt": "Lietuvių",
+    "cs": "Čeština"
   },
   "favorites": {
     "lists": "Listor",

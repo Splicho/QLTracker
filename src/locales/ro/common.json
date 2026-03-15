@@ -98,7 +98,8 @@
       "notifyDiscord": "Anunță pe discordie",
       "editFavorite": "Editează favoritul",
       "removeFromFavorites": "Elimină din favorite",
-      "addToFavorites": "Adaugă la favorite"
+      "addToFavorites": "Adaugă la favorite",
+      "copyAddress": "Copiază IP:Port"
     },
     "drawer": {
       "play": "Joacă",
@@ -149,7 +150,9 @@
       "notificationSaveError": "Nu s-a putut salva regula notificării.",
       "notificationRemoveError": "Nu s-a putut elimina regula notificării.",
       "favoriteUpdated": "Favorite actualizate.",
-      "addedToFavorites": "Adaugat la favorite."
+      "addedToFavorites": "Adaugat la favorite.",
+      "serverAddressCopied": "IP:Port copiat.",
+      "serverAddressCopyError": "Nu s-a putut copia IP:Port."
     }
   },
   "settings": {
@@ -159,12 +162,42 @@
     "startupSaving": "Salvarea preferinței de pornire...",
     "unavailable": "Setarea nu este disponibilă în această clădire.",
     "languageTitle": "Limba",
-    "languageDescription": "Alege limba pe care QLTracker o va folosi ?n toat? aplica?ia.",
-    "languagePlaceholder": "Alegeți limba"
+    "languageDescription": "Alege limba pe care QLTracker o va folosi în toată aplicația.",
+    "languagePlaceholder": "Alegeți limba",
+    "discordPresenceTitle": "Prezență Discord",
+    "discordPresenceDescription": "Afișează QLTracker ca activitatea ta pe Discord în timp ce folosești aplicația.",
+    "discordPresenceServerTitle": "Afișează detaliile serverului curent",
+    "discordPresenceServerDescription": "Când QLTracker lansează un server, include numele serverului, harta, modul și jucătorii în activitatea ta pe Discord."
   },
   "language": {
-    "en": "Engleză",
-    "de": "Deutsch"
+    "en": "English",
+    "de": "Deutsch",
+    "bg": "Български",
+    "ru": "Русский",
+    "uk": "Українська",
+    "hr": "Hrvatski",
+    "sr": "Српски",
+    "fr": "Français",
+    "it": "Italiano",
+    "et": "Eesti",
+    "nl": "Nederlands",
+    "fi": "Suomi",
+    "sv": "Svenska",
+    "hu": "Magyar",
+    "da": "Dansk",
+    "lv": "Latviešu",
+    "nb": "Norsk Bokmål",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ka": "ქართული",
+    "zh-Hant": "繁體中文",
+    "zh-Hans": "简体中文",
+    "es": "Español",
+    "pt-BR": "Português (Brasil)",
+    "pl": "Polski",
+    "ro": "Română",
+    "lt": "Lietuvių",
+    "cs": "Čeština"
   },
   "favorites": {
     "lists": "Liste",

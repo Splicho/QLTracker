@@ -11,13 +11,7 @@ import {
 import { ArrowUpDown, ArrowUpRight, Eye } from "lucide-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useTranslation } from "react-i18next";
-import {
-  Lock,
-  Medal,
-  Play,
-  SlashCircle,
-  Unlock,
-} from "@/components/icon";
+import { Lock, Medal, Play, SlashCircle, Unlock } from "@/components/icon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
@@ -47,7 +41,10 @@ import {
 import { formatDurationHoursMinutes } from "@/lib/time";
 
 function normalizePlayerName(name: string) {
-  return name.replace(/\^[0-9]/g, "").trim().toLowerCase();
+  return name
+    .replace(/\^[0-9]/g, "")
+    .trim()
+    .toLowerCase();
 }
 
 function calculateAverage(values: Array<number | null | undefined>) {
@@ -314,8 +311,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
 
     for (const player of mergedPlayers) {
       const qelo = player.rating?.qelo ?? Number.NEGATIVE_INFINITY;
-      const trueskill =
-        player.rating?.trueskill ?? Number.NEGATIVE_INFINITY;
+      const trueskill = player.rating?.trueskill ?? Number.NEGATIVE_INFINITY;
 
       if (qelo > highestQelo) {
         highestQelo = qelo;
@@ -328,10 +324,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
     const names = new Set<string>();
 
     for (const player of mergedPlayers) {
-      if (
-        player.rating?.qelo != null &&
-        player.rating.qelo === highestQelo
-      ) {
+      if (player.rating?.qelo != null && player.rating.qelo === highestQelo) {
         names.add(normalizePlayerName(player.name));
       }
 
@@ -441,8 +434,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
       },
       {
         id: "trueskill",
-        accessorFn: (row) =>
-          row.rating?.trueskill ?? Number.NEGATIVE_INFINITY,
+        accessorFn: (row) => row.rating?.trueskill ?? Number.NEGATIVE_INFINITY,
         header: ({ column }) => (
           <Button
             type="button"
@@ -489,7 +481,9 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
     getSortedRowModel: getSortedRowModel(),
   });
   const sortedRows = table.getRowModel().rows;
-  const hasKnownTeams = mergedPlayers.some((player) => player.rating?.team != null);
+  const hasKnownTeams = mergedPlayers.some(
+    (player) => player.rating?.team != null
+  );
   const hasRedBlueTeams = mergedPlayers.some((player) => {
     const team = player.rating?.team;
     return team === 1 || team === 2;

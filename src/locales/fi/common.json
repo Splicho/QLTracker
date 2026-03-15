@@ -98,7 +98,8 @@
       "notifyDiscord": "Ilmoita discordille",
       "editFavorite": "Muokkaa suosikkia",
       "removeFromFavorites": "Poista suosikeista",
-      "addToFavorites": "Lisää suosikkeihin"
+      "addToFavorites": "Lisää suosikkeihin",
+      "copyAddress": "Kopioi IP:Port"
     },
     "drawer": {
       "play": "Soita",
@@ -149,7 +150,9 @@
       "notificationSaveError": "Ilmoitussääntöä ei voitu tallentaa.",
       "notificationRemoveError": "Ilmoitussääntöä ei voitu poistaa.",
       "favoriteUpdated": "Suosikki päivitetty.",
-      "addedToFavorites": "Lisätty suosikkeihin."
+      "addedToFavorites": "Lisätty suosikkeihin.",
+      "serverAddressCopied": "IP:Port kopioitu.",
+      "serverAddressCopyError": "IP:Portin kopiointi epäonnistui."
     }
   },
   "settings": {
@@ -159,12 +162,42 @@
     "startupSaving": "Säästän aloitusmieltymystä...",
     "unavailable": "Asetusta ei ole saatavilla tässä rakennuksessa.",
     "languageTitle": "Kieli",
-    "languageDescription": "Valitse kieli, jota QLTracker k?ytt?? koko sovelluksessa.",
-    "languagePlaceholder": "Valitse kieli"
+    "languageDescription": "Valitse kieli, jota QLTracker käyttää koko sovelluksessa.",
+    "languagePlaceholder": "Valitse kieli",
+    "discordPresenceTitle": "Discord-läsnäolo",
+    "discordPresenceDescription": "Näytä QLTracker Discord-aktiviteettinasi, kun selaat sovellusta.",
+    "discordPresenceServerTitle": "Näytä nykyisen palvelimen tiedot",
+    "discordPresenceServerDescription": "Kun QLTracker käynnistää palvelimen, sisällytä palvelimen nimi, kartta, pelitila ja pelaajat Discord-aktiviteettiisi."
   },
   "language": {
-    "en": "Englanti",
-    "de": "Deutsch"
+    "en": "English",
+    "de": "Deutsch",
+    "bg": "Български",
+    "ru": "Русский",
+    "uk": "Українська",
+    "hr": "Hrvatski",
+    "sr": "Српски",
+    "fr": "Français",
+    "it": "Italiano",
+    "et": "Eesti",
+    "nl": "Nederlands",
+    "fi": "Suomi",
+    "sv": "Svenska",
+    "hu": "Magyar",
+    "da": "Dansk",
+    "lv": "Latviešu",
+    "nb": "Norsk Bokmål",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ka": "ქართული",
+    "zh-Hant": "繁體中文",
+    "zh-Hans": "简体中文",
+    "es": "Español",
+    "pt-BR": "Português (Brasil)",
+    "pl": "Polski",
+    "ro": "Română",
+    "lt": "Lietuvių",
+    "cs": "Čeština"
   },
   "favorites": {
     "lists": "Luettelot",

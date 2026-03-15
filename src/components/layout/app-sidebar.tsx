@@ -130,10 +130,7 @@ export function AppSidebar({
               size="lg"
               className="cursor-pointer group-data-[collapsible=icon]:!size-10 group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!p-0 [&_svg]:size-5!"
             >
-              <button
-                type="button"
-                onClick={() => onNavigate("notifications")}
-              >
+              <button type="button" onClick={() => onNavigate("notifications")}>
                 <Bell />
                 <span className="group-data-[collapsible=icon]:hidden">
                   {t("navigation.notifications")}
@@ -195,20 +192,26 @@ export function AppSidebar({
 
             <div className="grid gap-3 rounded-lg border border-border p-4 text-sm">
               <div className="flex items-center justify-between gap-4">
-                <span className="text-muted-foreground">{t("about.version")}</span>
+                <span className="text-muted-foreground">
+                  {t("about.version")}
+                </span>
                 <span className="font-medium text-foreground">
                   v{packageJson.version}
                 </span>
               </div>
               <div className="flex items-center justify-between gap-4">
-                <span className="text-muted-foreground">{t("about.author")}</span>
+                <span className="text-muted-foreground">
+                  {t("about.author")}
+                </span>
                 <span className="font-medium text-foreground">
                   {aboutConfig.author}
                 </span>
               </div>
               {populatedSocials.length > 0 ? (
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-muted-foreground">{t("about.socials")}</span>
+                  <span className="text-muted-foreground">
+                    {t("about.socials")}
+                  </span>
                   <div className="flex items-center gap-1.5 text-muted-foreground">
                     {populatedSocials.map((social) => {
                       const Icon = socialIcons[social.id];
@@ -230,14 +233,18 @@ export function AppSidebar({
                 </div>
               ) : null}
               <div className="flex items-center justify-between gap-4">
-                <span className="text-muted-foreground">{t("about.stack")}</span>
+                <span className="text-muted-foreground">
+                  {t("about.stack")}
+                </span>
                 <span className="font-medium text-foreground">
                   {aboutConfig.stack}
                 </span>
               </div>
               {hasRepoLink ? (
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-muted-foreground">{t("about.repo")}</span>
+                  <span className="text-muted-foreground">
+                    {t("about.repo")}
+                  </span>
                   <button
                     type="button"
                     className="inline-flex cursor-pointer items-center gap-2 font-medium text-foreground hover:text-primary"

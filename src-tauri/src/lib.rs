@@ -1,9 +1,10 @@
+use discord_rich_presence::{activity, DiscordIpc, DiscordIpcClient};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::io;
 use std::net::{SocketAddr, UdpSocket};
 use std::process::Command;
-use std::sync::{Mutex, OnceLock};
+use std::sync::{mpsc, Mutex, OnceLock};
 use std::time::Duration;
 use tauri::Manager;
 
@@ -20,6 +21,7 @@ static PLAYER_RATING_CACHE: OnceLock<Mutex<HashMap<String, Vec<ServerPlayerRatin
     OnceLock::new();
 static RATING_SUMMARY_CACHE: OnceLock<Mutex<HashMap<String, ServerRatingSummary>>> =
     OnceLock::new();
+static DISCORD_PRESENCE_SENDER: OnceLock<mpsc::Sender<DiscordPresenceCommand>> = OnceLock::new();
 
 #[derive(Debug, Deserialize)]
 struct SteamListResponse {
@@ -99,6 +101,22 @@ struct A2sProbeResult {
     requires_password: Option<bool>,
 }
 
+enum DiscordPresenceCommand {
+    Initialize {
+        application_id: String,
+    },
+    SetActivity {
+        application_id: String,
+        details: String,
+        state: String,
+        large_image: String,
+        large_text: String,
+    },
+    Clear {
+        application_id: String,
+    },
+}
+
 #[derive(Debug, Serialize, Clone)]
 #[serde(rename_all = "snake_case")]
 struct QuakeServer {
@@ -173,6 +191,116 @@ fn player_rating_cache() -> &'static Mutex<HashMap<String, Vec<ServerPlayerRatin
 
 fn rating_summary_cache() -> &'static Mutex<HashMap<String, ServerRatingSummary>> {
     RATING_SUMMARY_CACHE.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+fn discord_presence_sender() -> &'static mpsc::Sender<DiscordPresenceCommand> {
+    DISCORD_PRESENCE_SENDER.get_or_init(|| {
+        let (sender, receiver) = mpsc::channel::<DiscordPresenceCommand>();
+
+        std::thread::spawn(move || {
+            let mut current_application_id: Option<String> = None;
+            let mut current_client: Option<DiscordIpcClient> = None;
+
+            fn ensure_client(
+                current_application_id: &mut Option<String>,
+                current_client: &mut Option<DiscordIpcClient>,
+                application_id: &str,
+            ) -> Result<(), String> {
+                if application_id.trim().is_empty() {
+                    return Err("Discord application ID is required.".into());
+                }
+
+                let needs_new_client = current_client.is_none()
+                    || current_application_id
+                        .as_deref()
+                        .is_none_or(|current| current != application_id);
+
+                if needs_new_client {
+                    if let Some(client) = current_client.as_mut() {
+                        let _ = client.close();
+                    }
+
+                    *current_client = Some(connect_discord_client(application_id)?);
+                    *current_application_id = Some(application_id.to_string());
+                }
+
+                Ok(())
+            }
+
+            fn apply_activity(
+                current_application_id: &mut Option<String>,
+                current_client: &mut Option<DiscordIpcClient>,
+                application_id: &str,
+                details: &str,
+                state: &str,
+                large_image: &str,
+                large_text: &str,
+            ) -> Result<(), String> {
+                ensure_client(current_application_id, current_client, application_id)?;
+
+                let activity = build_discord_activity(details, state, large_image, large_text);
+                let client = current_client
+                    .as_mut()
+                    .ok_or_else(|| "Discord presence client was not initialized.".to_string())?;
+
+                match client.set_activity(activity.clone()) {
+                    Ok(()) => Ok(()),
+                    Err(first_error) => {
+                        client
+                            .reconnect()
+                            .map_err(|error| format!("Failed to reconnect to Discord RPC: {error}"))?;
+                        client.set_activity(activity).map_err(|second_error| {
+                            format!(
+                                "Failed to set Discord activity: {first_error}; retry failed: {second_error}"
+                            )
+                        })
+                    }
+                }
+            }
+
+            while let Ok(command) = receiver.recv() {
+                match command {
+                    DiscordPresenceCommand::Initialize { application_id } => {
+                        let _ = ensure_client(
+                            &mut current_application_id,
+                            &mut current_client,
+                            &application_id,
+                        );
+                    }
+                    DiscordPresenceCommand::SetActivity {
+                        application_id,
+                        details,
+                        state,
+                        large_image,
+                        large_text,
+                    } => {
+                        let _ = apply_activity(
+                            &mut current_application_id,
+                            &mut current_client,
+                            &application_id,
+                            &details,
+                            &state,
+                            &large_image,
+                            &large_text,
+                        );
+                    }
+                    DiscordPresenceCommand::Clear { application_id } => {
+                        if current_application_id.as_deref() == Some(application_id.as_str()) {
+                            if let Some(client) = current_client.as_mut() {
+                                let _ = client.clear_activity();
+                                let _ = client.close();
+                            }
+
+                            current_application_id = None;
+                            current_client = None;
+                        }
+                    }
+                }
+            }
+        });
+
+        sender
+    })
 }
 
 fn extract_between<'a>(haystack: &'a str, start: &str, end: &str) -> Option<&'a str> {
@@ -539,6 +667,42 @@ fn query_system_ping(host: &str) -> Result<u128, String> {
     }
 
     Err("Unable to parse system ping output.".into())
+}
+
+fn quake_live_process_running() -> bool {
+    #[cfg(target_os = "windows")]
+    {
+        let output = Command::new("tasklist")
+            .args(["/FO", "CSV", "/NH"])
+            .output();
+
+        let Ok(output) = output else {
+            return false;
+        };
+
+        if !output.status.success() {
+            return false;
+        }
+
+        let stdout = String::from_utf8_lossy(&output.stdout).to_lowercase();
+        return stdout.contains("quakelive_steam.exe") || stdout.contains("quakelive.exe");
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    {
+        let output = Command::new("sh")
+            .args([
+                "-c",
+                "ps -A -o comm= | tr '[:upper:]' '[:lower:]' | grep -E '(^|/)(quakelive(_steam)?)(\\.x86_64|\\.exe)?$'",
+            ])
+            .output();
+
+        let Ok(output) = output else {
+            return false;
+        };
+
+        output.status.success()
+    }
 }
 
 fn parse_player_response(buf: &[u8]) -> Result<Vec<ServerPlayer>, String> {
@@ -1345,6 +1509,11 @@ fn app_is_packaged() -> bool {
 }
 
 #[tauri::command]
+fn is_quake_live_running() -> bool {
+    quake_live_process_running()
+}
+
+#[tauri::command]
 fn launcher_exit_app(app: tauri::AppHandle) {
     app.exit(0);
 }
@@ -1358,6 +1527,104 @@ fn launcher_restart_app(app: tauri::AppHandle) {
 fn launcher_finish_bootstrap(app: tauri::AppHandle) -> Result<(), String> {
     let main_window = ensure_main_window(&app)?;
     focus_window(&main_window);
+    Ok(())
+}
+
+fn connect_discord_client(application_id: &str) -> Result<DiscordIpcClient, String> {
+    DiscordIpcClient::new(application_id)
+        .map_err(|error| format!("Failed to create Discord IPC client: {error}"))
+        .and_then(|mut client| {
+            client
+                .connect()
+                .map_err(|error| format!("Failed to connect to Discord RPC: {error}"))?;
+            Ok(client)
+        })
+}
+
+fn build_discord_activity<'a>(
+    details: &'a str,
+    state: &'a str,
+    large_image: &'a str,
+    large_text: &'a str,
+) -> activity::Activity<'a> {
+    let activity = activity::Activity::new().details(details).state(state);
+
+    if large_image.trim().is_empty() {
+        activity
+    } else {
+        activity.assets(
+            activity::Assets::new()
+                .large_image(large_image)
+                .large_text(large_text),
+        )
+    }
+}
+
+#[tauri::command]
+fn initialize_discord_presence(application_id: String) -> bool {
+    if application_id.trim().is_empty() {
+        return false;
+    }
+
+    let _ = discord_presence_sender().send(DiscordPresenceCommand::Initialize { application_id });
+
+    true
+}
+
+#[tauri::command]
+fn set_discord_browsing_presence(
+    application_id: String,
+    details: String,
+    state: String,
+    large_image: String,
+    large_text: String,
+) -> Result<(), String> {
+    if application_id.trim().is_empty() {
+        return Ok(());
+    }
+
+    let _ = discord_presence_sender().send(DiscordPresenceCommand::SetActivity {
+        application_id,
+        details,
+        state,
+        large_image,
+        large_text,
+    });
+
+    Ok(())
+}
+
+#[tauri::command]
+fn set_discord_server_presence(
+    application_id: String,
+    details: String,
+    state: String,
+    large_image: String,
+    large_text: String,
+) -> Result<(), String> {
+    if application_id.trim().is_empty() {
+        return Ok(());
+    }
+
+    let _ = discord_presence_sender().send(DiscordPresenceCommand::SetActivity {
+        application_id,
+        details,
+        state,
+        large_image,
+        large_text,
+    });
+
+    Ok(())
+}
+
+#[tauri::command]
+fn clear_discord_presence(application_id: String) -> Result<(), String> {
+    if application_id.trim().is_empty() {
+        return Ok(());
+    }
+
+    let _ = discord_presence_sender().send(DiscordPresenceCommand::Clear { application_id });
+
     Ok(())
 }
 
@@ -1408,16 +1675,21 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             app_is_packaged,
+            clear_discord_presence,
             fetch_quake_live_servers,
             launcher_exit_app,
             launcher_finish_bootstrap,
             launcher_restart_app,
+            is_quake_live_running,
+            initialize_discord_presence,
             fetch_server_players,
             fetch_server_player_ratings,
             fetch_server_rating_summaries,
             fetch_server_countries,
             fetch_server_pings,
-            fetch_server_modes
+            fetch_server_modes,
+            set_discord_browsing_presence,
+            set_discord_server_presence
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -98,7 +98,8 @@
       "notifyDiscord": "Notificar en disco",
       "editFavorite": "Editar favorito",
       "removeFromFavorites": "Eliminar de los favoritos",
-      "addToFavorites": "Añadir a favoritos"
+      "addToFavorites": "Añadir a favoritos",
+      "copyAddress": "Copiar IP:Port"
     },
     "drawer": {
       "play": "Jugar",
@@ -149,7 +150,9 @@
       "notificationSaveError": "No podía guardar la regla de notificación.",
       "notificationRemoveError": "No podía eliminar la norma de notificación.",
       "favoriteUpdated": "Actualización favorita.",
-      "addedToFavorites": "Añadido a los favoritos."
+      "addedToFavorites": "Añadido a los favoritos.",
+      "serverAddressCopied": "IP:Port copiado.",
+      "serverAddressCopyError": "No se pudo copiar IP:Port."
     }
   },
   "settings": {
@@ -159,12 +162,42 @@
     "startupSaving": "Ahorro preferencia de inicio...",
     "unavailable": "La configuración no está disponible en esta construcción.",
     "languageTitle": "Idioma",
-    "languageDescription": "Elige el idioma que QLTracker usar? en toda la aplicaci?n.",
-    "languagePlaceholder": "Seleccionar idioma"
+    "languageDescription": "Elige el idioma que QLTracker usará en toda la aplicación.",
+    "languagePlaceholder": "Seleccionar idioma",
+    "discordPresenceTitle": "Actividad de Discord",
+    "discordPresenceDescription": "Muestra QLTracker como tu actividad de Discord mientras navegas por la aplicación.",
+    "discordPresenceServerTitle": "Mostrar detalles del servidor actual",
+    "discordPresenceServerDescription": "Cuando QLTracker inicie un servidor, incluye el nombre del servidor, el mapa, el modo y los jugadores en tu actividad de Discord."
   },
   "language": {
-    "en": "Inglés",
-    "de": "Deutsch"
+    "en": "English",
+    "de": "Deutsch",
+    "bg": "Български",
+    "ru": "Русский",
+    "uk": "Українська",
+    "hr": "Hrvatski",
+    "sr": "Српски",
+    "fr": "Français",
+    "it": "Italiano",
+    "et": "Eesti",
+    "nl": "Nederlands",
+    "fi": "Suomi",
+    "sv": "Svenska",
+    "hu": "Magyar",
+    "da": "Dansk",
+    "lv": "Latviešu",
+    "nb": "Norsk Bokmål",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ka": "ქართული",
+    "zh-Hant": "繁體中文",
+    "zh-Hans": "简体中文",
+    "es": "Español",
+    "pt-BR": "Português (Brasil)",
+    "pl": "Polski",
+    "ro": "Română",
+    "lt": "Lietuvių",
+    "cs": "Čeština"
   },
   "favorites": {
     "lists": "Listas",

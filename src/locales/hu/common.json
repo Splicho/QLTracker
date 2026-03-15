@@ -98,7 +98,8 @@
       "notifyDiscord": "Értesítés a Discordról",
       "editFavorite": "Kedvenc szerkesztése",
       "removeFromFavorites": "Eltávolítás a kedvencekből",
-      "addToFavorites": "Hozzáadás a kedvencekhez"
+      "addToFavorites": "Hozzáadás a kedvencekhez",
+      "copyAddress": "IP:Port másolása"
     },
     "drawer": {
       "play": "Játék",
@@ -149,7 +150,9 @@
       "notificationSaveError": "Nem sikerült elmenteni az értesítési szabályt.",
       "notificationRemoveError": "Nem sikerült törölni az értesítési szabályt.",
       "favoriteUpdated": "Kedvenc frissítve.",
-      "addedToFavorites": "Hozzáadva a kedvencekhez."
+      "addedToFavorites": "Hozzáadva a kedvencekhez.",
+      "serverAddressCopied": "Az IP:Port másolva.",
+      "serverAddressCopyError": "Az IP:Port másolása nem sikerült."
     }
   },
   "settings": {
@@ -159,12 +162,42 @@
     "startupSaving": "Megmentem a kezdő preferenciát...",
     "unavailable": "A beállítás nem elérhető ebben az épületben.",
     "languageTitle": "Nyelv",
-    "languageDescription": "V?laszd ki azt a nyelvet, amelyet a QLTracker az eg?sz alkalmaz?sban haszn?ljon.",
-    "languagePlaceholder": "Nyelv kiválasztása"
+    "languageDescription": "Válaszd ki a nyelvet, amelyet a QLTracker az egész alkalmazásban használ.",
+    "languagePlaceholder": "Nyelv kiválasztása",
+    "discordPresenceTitle": "Discord-jelenlét",
+    "discordPresenceDescription": "A QLTracker megjelenítése Discord-tevékenységként az alkalmazás böngészése közben.",
+    "discordPresenceServerTitle": "Az aktuális szerver adatainak megjelenítése",
+    "discordPresenceServerDescription": "Amikor a QLTracker elindít egy szervert, jelenjen meg a szerver neve, a pálya, a mód és a játékosok a Discord-tevékenységedben."
   },
   "language": {
-    "en": "Angol",
-    "de": "Deutsch"
+    "en": "English",
+    "de": "Deutsch",
+    "bg": "Български",
+    "ru": "Русский",
+    "uk": "Українська",
+    "hr": "Hrvatski",
+    "sr": "Српски",
+    "fr": "Français",
+    "it": "Italiano",
+    "et": "Eesti",
+    "nl": "Nederlands",
+    "fi": "Suomi",
+    "sv": "Svenska",
+    "hu": "Magyar",
+    "da": "Dansk",
+    "lv": "Latviešu",
+    "nb": "Norsk Bokmål",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ka": "ქართული",
+    "zh-Hant": "繁體中文",
+    "zh-Hans": "简体中文",
+    "es": "Español",
+    "pt-BR": "Português (Brasil)",
+    "pl": "Polski",
+    "ro": "Română",
+    "lt": "Lietuvių",
+    "cs": "Čeština"
   },
   "favorites": {
     "lists": "Listák",
