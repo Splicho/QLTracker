@@ -5,6 +5,7 @@ const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(3011),
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
   CORS_ORIGIN: z.string().default("*"),
+  GEOLITE_COUNTRY_DB_PATH: z.string().default("GeoLite2-Country.mmdb"),
   POLL_INTERVAL_MS: z.coerce.number().int().positive().default(30000),
   QLSTATS_API_URL: z.string().default("https://qlstats.net/api"),
   REALTIME_INGEST_TOKEN: z.string().min(1, "REALTIME_INGEST_TOKEN is required"),
@@ -25,6 +26,7 @@ export const config = {
           .map((value) => value.trim())
           .filter((value) => value.length > 0),
   databaseUrl: parsedEnv.DATABASE_URL,
+  geoliteCountryDbPath: parsedEnv.GEOLITE_COUNTRY_DB_PATH.trim(),
   ingestToken: parsedEnv.REALTIME_INGEST_TOKEN,
   pollIntervalMs: parsedEnv.POLL_INTERVAL_MS,
   port: parsedEnv.PORT,

@@ -1,5 +1,6 @@
 import path from "node:path";
 import maxmind, { type CountryResponse, type Reader } from "maxmind";
+import { config } from "./config.js";
 
 let countryReaderPromise: Promise<Reader<CountryResponse> | null> | null = null;
 
@@ -9,15 +10,22 @@ function extractHost(addr: string) {
 }
 
 function mmdbPath() {
-  return path.resolve(process.cwd(), "GeoLite2-Country.mmdb");
+  return path.resolve(process.cwd(), config.geoliteCountryDbPath);
 }
 
 async function getCountryReader() {
   if (!countryReaderPromise) {
+    const databasePath = mmdbPath();
     countryReaderPromise = maxmind
-      .open<CountryResponse>(mmdbPath())
+      .open<CountryResponse>(databasePath)
       .then((reader) => reader)
-      .catch(() => null);
+      .catch((error) => {
+        console.warn(
+          `GeoLite lookup disabled. Failed to open ${databasePath}:`,
+          error
+        );
+        return null;
+      });
   }
 
   return countryReaderPromise;
