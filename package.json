@@ -1,7 +1,7 @@
 {
   "name": "qltracker",
   "private": true,
-  "version": "0.0.1-beta.6",
+  "version": "0.0.1-beta.7",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -59,6 +59,7 @@
     "react-i18next": "^16.5.8",
     "react-resizable-panels": "^4.7.2",
     "recharts": "^2.15.4",
+    "socket.io-client": "^4.8.1",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",
     "vaul": "^1.1.2",

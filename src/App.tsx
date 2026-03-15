@@ -14,11 +14,13 @@ import { SettingsPage } from "@/components/settings-page";
 import { useAppSettings } from "@/hooks/use-app-settings";
 import { useDiscordPresence } from "@/hooks/use-discord-presence";
 import { useLocalStorage } from "@/hooks/use-local-storage";
+import { useRealtimeSnapshots } from "@/hooks/use-realtime-snapshots";
 import type { DiscordPresenceServerContext } from "@/lib/discord-presence";
 import type { PageId } from "@/lib/navigation";
 import {
   fetchSteamServers,
   isQuakeLiveRunning,
+  mergeSteamServerSnapshot,
   type SteamServer,
 } from "@/lib/steam";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -142,6 +144,15 @@ export function App() {
     staleTime: 30_000,
     refetchInterval: activePresenceSession ? 15_000 : 60_000,
   });
+  const { snapshotsByAddr } = useRealtimeSnapshots(serversQuery.data ?? []);
+  const mergedServers = useMemo(
+    () =>
+      (serversQuery.data ?? []).map((server) => {
+        const snapshot = snapshotsByAddr[server.addr];
+        return snapshot ? mergeSteamServerSnapshot(server, snapshot) : server;
+      }),
+    [serversQuery.data, snapshotsByAddr]
+  );
   const serversErrorMessage = getQueryErrorMessage(serversQuery.error);
   const activePresenceServer =
     useMemo<DiscordPresenceServerContext | null>(() => {
@@ -150,7 +161,7 @@ export function App() {
       }
 
       const liveServer =
-        (serversQuery.data ?? []).find(
+        mergedServers.find(
           (server) => server.addr === activePresenceSession.addr
         ) ?? activePresenceSession.fallbackServer;
 
@@ -158,7 +169,7 @@ export function App() {
         server: liveServer,
         modeLabel: activePresenceSession.modeLabel,
       };
-    }, [activePresenceSession, serversQuery.data]);
+    }, [activePresenceSession, mergedServers]);
 
   useDiscordPresence({
     enabled: settings.discordPresenceEnabled,
@@ -234,7 +245,7 @@ export function App() {
               }}
             />
             <ServerList
-              servers={serversQuery.data ?? []}
+              servers={mergedServers}
               filters={filters}
               isLoading={serversQuery.isLoading}
               isRefreshing={
@@ -260,7 +271,7 @@ export function App() {
           </>
         ) : page === "favorites" ? (
           <FavoritesPage
-            servers={serversQuery.data ?? []}
+            servers={mergedServers}
             isLoading={serversQuery.isLoading}
             isRefreshing={
               serversQuery.fetchStatus === "fetching" && !serversQuery.isLoading

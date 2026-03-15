@@ -369,6 +369,13 @@ function getPingIconClassName(ping: number) {
   return "text-red-400";
 }
 
+function haveSameAddresses(left: string[], right: string[]) {
+  return (
+    left.length === right.length &&
+    left.every((value, index) => value === right[index])
+  );
+}
+
 const playerTeamSectionMeta = {
   blue: {
     labelKey: "serverList.drawer.teams.blue",
@@ -1036,6 +1043,16 @@ export function ServerList({
   const [cachedModesByAddr, setCachedModesByAddr] = useState<
     Record<string, string | null>
   >({});
+  const [enrichmentAddresses, setEnrichmentAddresses] = useState<string[]>([]);
+  const [attemptedCountriesByAddr, setAttemptedCountriesByAddr] = useState<
+    Record<string, true>
+  >({});
+  const [attemptedModesByAddr, setAttemptedModesByAddr] = useState<
+    Record<string, true>
+  >({});
+  const [attemptedPingsByAddr, setAttemptedPingsByAddr] = useState<
+    Record<string, true>
+  >({});
 
   const staticFilteredServers = useMemo(() => {
     const search = deferredSearch.trim().toLowerCase();
@@ -1243,7 +1260,6 @@ export function ServerList({
   const ratingFilterActive =
     filters.ratingRange[0] !== RATING_FILTER_MIN ||
     filters.ratingRange[1] !== RATING_FILTER_MAX;
-  const searchEnrichmentEnabled = filters.search.trim().length === 0;
   const ratingCandidateAddresses = useMemo(
     () => visibilityFilteredServers.map((server) => server.addr),
     [visibilityFilteredServers]
@@ -1324,10 +1340,28 @@ export function ServerList({
         .map((server) => server.addr),
     [pageSliceEnd, pageSliceStart, sortedServersForPage]
   );
+  useEffect(() => {
+    const searchDelay = filters.search.trim().length > 0 ? 250 : 0;
+    const timeoutId = window.setTimeout(() => {
+      setEnrichmentAddresses((current) =>
+        haveSameAddresses(current, visiblePageAddresses)
+          ? current
+          : visiblePageAddresses
+      );
+    }, searchDelay);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [filters.search, visiblePageAddresses]);
+  const enrichmentSyncPending = !haveSameAddresses(
+    enrichmentAddresses,
+    visiblePageAddresses
+  );
   const countryQuery = useQuery({
-    queryKey: ["steam", "server-countries", visiblePageAddresses],
-    queryFn: () => fetchSteamServerCountries(visiblePageAddresses),
-    enabled: searchEnrichmentEnabled && visiblePageAddresses.length > 0,
+    queryKey: ["steam", "server-countries", enrichmentAddresses],
+    queryFn: () => fetchSteamServerCountries(enrichmentAddresses),
+    enabled: enrichmentAddresses.length > 0,
     staleTime: 1000 * 60 * 60,
   });
   const latestVisibleCountriesByAddr = useMemo<
@@ -1366,11 +1400,10 @@ export function ServerList({
     ]
   );
   const pingQuery = useQuery({
-    queryKey: ["steam", "server-pings", visiblePageAddresses],
-    queryFn: () => fetchSteamServerPings(visiblePageAddresses),
-    enabled: searchEnrichmentEnabled && visiblePageAddresses.length > 0,
-    staleTime: 0,
-    refetchOnMount: "always",
+    queryKey: ["steam", "server-pings", enrichmentAddresses],
+    queryFn: () => fetchSteamServerPings(enrichmentAddresses),
+    enabled: enrichmentAddresses.length > 0,
+    staleTime: 15_000,
     placeholderData: (previousData) => previousData,
   });
   const latestPingsByAddr = useMemo<Record<string, number | null>>(
@@ -1433,9 +1466,9 @@ export function ServerList({
     [cachedRequiresPasswordByAddr, latestRequiresPasswordByAddr]
   );
   const modeQuery = useQuery({
-    queryKey: ["qlstats", "server-modes", visiblePageAddresses],
-    queryFn: () => fetchServerModes(visiblePageAddresses),
-    enabled: searchEnrichmentEnabled && visiblePageAddresses.length > 0,
+    queryKey: ["qlstats", "server-modes", enrichmentAddresses],
+    queryFn: () => fetchServerModes(enrichmentAddresses),
+    enabled: enrichmentAddresses.length > 0,
     staleTime: 1000 * 60 * 5,
   });
   const latestModesByAddr = useMemo<Record<string, string | null>>(
@@ -1486,6 +1519,39 @@ export function ServerList({
     modeQuery.isPending || modeQuery.fetchStatus === "fetching";
   const pingLookupPending =
     pingQuery.isPending || pingQuery.fetchStatus === "fetching";
+
+  useEffect(() => {
+    if (enrichmentAddresses.length === 0 || countryLookupPending) {
+      return;
+    }
+
+    setAttemptedCountriesByAddr((current) => ({
+      ...current,
+      ...Object.fromEntries(enrichmentAddresses.map((addr) => [addr, true])),
+    }));
+  }, [countryLookupPending, enrichmentAddresses]);
+
+  useEffect(() => {
+    if (enrichmentAddresses.length === 0 || modeLookupPending) {
+      return;
+    }
+
+    setAttemptedModesByAddr((current) => ({
+      ...current,
+      ...Object.fromEntries(enrichmentAddresses.map((addr) => [addr, true])),
+    }));
+  }, [modeLookupPending, enrichmentAddresses]);
+
+  useEffect(() => {
+    if (enrichmentAddresses.length === 0 || pingLookupPending) {
+      return;
+    }
+
+    setAttemptedPingsByAddr((current) => ({
+      ...current,
+      ...Object.fromEntries(enrichmentAddresses.map((addr) => [addr, true])),
+    }));
+  }, [pingLookupPending, enrichmentAddresses]);
 
   const columns = useMemo<ColumnDef<SteamServer>[]>(
     () => [
@@ -1589,7 +1655,9 @@ export function ServerList({
         ),
         cell: ({ row }) => {
           if (
+            !enrichmentSyncPending &&
             countryLookupPending &&
+            !attemptedCountriesByAddr[row.original.addr] &&
             !(row.original.addr in resolvedCountriesByAddr)
           ) {
             return <Skeleton className="h-4 w-4 rounded-full" />;
@@ -1637,7 +1705,9 @@ export function ServerList({
         ),
         cell: ({ row }) => {
           if (
+            !enrichmentSyncPending &&
             modeLookupPending &&
+            !attemptedModesByAddr[row.original.addr] &&
             !(row.original.addr in resolvedModesByAddr)
           ) {
             return <Skeleton className="h-4 w-20 rounded-md" />;
@@ -1689,7 +1759,9 @@ export function ServerList({
             resolvedPingsByAddr[row.original.addr] ?? row.original.ping_ms;
 
           if (
+            !enrichmentSyncPending &&
             pingLookupPending &&
+            !attemptedPingsByAddr[row.original.addr] &&
             !(row.original.addr in resolvedPingsByAddr)
           ) {
             return <Skeleton className="h-4 w-14 rounded-md" />;
@@ -1839,6 +1911,10 @@ export function ServerList({
       countryLookupPending,
       modeLookupPending,
       pingLookupPending,
+      enrichmentSyncPending,
+      attemptedCountriesByAddr,
+      attemptedModesByAddr,
+      attemptedPingsByAddr,
       resolvedCountriesByAddr,
       resolvedModesByAddr,
       resolvedPingsByAddr,

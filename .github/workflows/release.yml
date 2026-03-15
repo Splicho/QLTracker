@@ -16,6 +16,7 @@ jobs:
   release:
     env:
       VITE_DISCORD_APPLICATION_ID: ${{ secrets.VITE_DISCORD_APPLICATION_ID || vars.VITE_DISCORD_APPLICATION_ID || '' }}
+      VITE_REALTIME_URL: ${{ secrets.VITE_REALTIME_URL || vars.VITE_REALTIME_URL || '' }}
       VITE_STEAM_API_KEY: ${{ secrets.VITE_STEAM_API_KEY || secrets.STEAM_API_KEY }}
       VITE_STEAM_APP_ID: ${{ secrets.VITE_STEAM_APP_ID || vars.VITE_STEAM_APP_ID || '282440' }}
       VITE_NOTIFICATION_API_URL: ${{ secrets.VITE_NOTIFICATION_API_URL || vars.VITE_NOTIFICATION_API_URL || '' }}

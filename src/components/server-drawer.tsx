@@ -149,7 +149,7 @@ function ServerAverageRatingBadges({
   const ratingsQuery = useQuery({
     queryKey: ["steam", "server", "player-ratings", serverAddress],
     queryFn: () => fetchSteamServerPlayerRatings(serverAddress),
-    staleTime: 30_000,
+    staleTime: 10_000,
   });
   const ratings = ratingsQuery.data ?? [];
 
@@ -278,12 +278,12 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
   const playersQuery = useQuery({
     queryKey: ["steam", "server", "players", serverAddress],
     queryFn: () => fetchSteamServerPlayers(serverAddress),
-    staleTime: 30_000,
+    staleTime: 10_000,
   });
   const ratingsQuery = useQuery({
     queryKey: ["steam", "server", "player-ratings", serverAddress],
     queryFn: () => fetchSteamServerPlayerRatings(serverAddress),
-    staleTime: 30_000,
+    staleTime: 10_000,
   });
 
   const players = playersQuery.data ?? [];

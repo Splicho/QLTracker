@@ -5,7 +5,7 @@ use std::io;
 use std::net::{SocketAddr, UdpSocket};
 use std::process::Command;
 use std::sync::{mpsc, Mutex, OnceLock};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 use tauri::Manager;
 
 #[cfg(target_os = "windows")]
@@ -18,13 +18,17 @@ const A2S_INFO_HEADER: &[u8] = b"\xFF\xFF\xFF\xFFTSource Engine Query\x00";
 const CHECK_HOST_IP_INFO_URL: &str = "https://check-host.net/ip-info";
 #[cfg(target_os = "windows")]
 const CREATE_NO_WINDOW: u32 = 0x08000000;
+const PLAYER_RATING_CACHE_TTL: Duration = Duration::from_secs(15);
 static COUNTRY_CACHE: OnceLock<Mutex<HashMap<String, Option<ServerCountryLocation>>>> =
     OnceLock::new();
 static PASSWORD_CACHE: OnceLock<Mutex<HashMap<String, Option<bool>>>> = OnceLock::new();
 static MODE_CACHE: OnceLock<Mutex<HashMap<String, Option<String>>>> = OnceLock::new();
-static PLAYER_RATING_CACHE: OnceLock<Mutex<HashMap<String, Vec<ServerPlayerRating>>>> =
-    OnceLock::new();
-static RATING_SUMMARY_CACHE: OnceLock<Mutex<HashMap<String, ServerRatingSummary>>> =
+static PLAYER_RATING_CACHE: OnceLock<
+    Mutex<HashMap<String, CachedValue<Vec<ServerPlayerRating>>>>,
+> = OnceLock::new();
+static RATING_SUMMARY_CACHE: OnceLock<
+    Mutex<HashMap<String, CachedValue<ServerRatingSummary>>>,
+> =
     OnceLock::new();
 static DISCORD_PRESENCE_SENDER: OnceLock<mpsc::Sender<DiscordPresenceCommand>> = OnceLock::new();
 
@@ -98,6 +102,12 @@ struct ServerCountryLocation {
     ip: String,
     country_name: Option<String>,
     country_code: Option<String>,
+}
+
+#[derive(Debug, Clone)]
+struct CachedValue<T> {
+    value: T,
+    cached_at: Instant,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -190,11 +200,11 @@ fn mode_cache() -> &'static Mutex<HashMap<String, Option<String>>> {
     MODE_CACHE.get_or_init(|| Mutex::new(HashMap::new()))
 }
 
-fn player_rating_cache() -> &'static Mutex<HashMap<String, Vec<ServerPlayerRating>>> {
+fn player_rating_cache() -> &'static Mutex<HashMap<String, CachedValue<Vec<ServerPlayerRating>>>> {
     PLAYER_RATING_CACHE.get_or_init(|| Mutex::new(HashMap::new()))
 }
 
-fn rating_summary_cache() -> &'static Mutex<HashMap<String, ServerRatingSummary>> {
+fn rating_summary_cache() -> &'static Mutex<HashMap<String, CachedValue<ServerRatingSummary>>> {
     RATING_SUMMARY_CACHE.get_or_init(|| Mutex::new(HashMap::new()))
 }
 
@@ -1289,7 +1299,9 @@ async fn fetch_server_player_ratings_impl(
         .get(&normalized_addr)
         .cloned()
     {
-        return Ok(cached);
+        if cached.cached_at.elapsed() <= PLAYER_RATING_CACHE_TTL {
+            return Ok(cached.value);
+        }
     }
 
     let mut ratings = fetch_qlstats_server_player_ratings(client, qlstats_base_url, &normalized_addr)
@@ -1306,7 +1318,13 @@ async fn fetch_server_player_ratings_impl(
     player_rating_cache()
         .lock()
         .map_err(|error| error.to_string())?
-        .insert(normalized_addr, ratings.clone());
+        .insert(
+            normalized_addr,
+            CachedValue {
+                value: ratings.clone(),
+                cached_at: Instant::now(),
+            },
+        );
 
     Ok(ratings)
 }
@@ -1327,7 +1345,9 @@ async fn fetch_server_rating_summary_impl(
         .get(&cache_key)
         .cloned()
     {
-        return Ok(cached);
+        if cached.cached_at.elapsed() <= PLAYER_RATING_CACHE_TTL {
+            return Ok(cached.value);
+        }
     }
 
     let summary = match rating_kind.trim().to_lowercase().as_str() {
@@ -1364,7 +1384,13 @@ async fn fetch_server_rating_summary_impl(
     rating_summary_cache()
         .lock()
         .map_err(|error| error.to_string())?
-        .insert(cache_key, summary.clone());
+        .insert(
+            cache_key,
+            CachedValue {
+                value: summary.clone(),
+                cached_at: Instant::now(),
+            },
+        );
 
     Ok(summary)
 }
