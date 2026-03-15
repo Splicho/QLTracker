@@ -1,0 +1,239 @@
+{
+  "navigation": {
+    "serverList": "A kiszolgáló listája",
+    "favorites": "Kedvencek",
+    "notifications": "Értesítések",
+    "settings": "Beállítások"
+  },
+  "header": {
+    "unknown": "Ismeretlen",
+    "theme": {
+      "light": "Könnyű téma",
+      "dark": "Sötét téma",
+      "system": "Rendszertéma"
+    }
+  },
+  "sidebar": {
+    "groupLabel": "QLTracker",
+    "about": "QLTracker"
+  },
+  "about": {
+    "version": "Verzió",
+    "author": "Szerző",
+    "socials": "Társadalmak",
+    "stack": "Stack",
+    "repo": "Repo"
+  },
+  "notifications": {
+    "title": "Levonási értesítések",
+    "serviceUnavailable": "Notification service is unavailable in this build. Set `VITE_NOTIFICATION_API_URL` to enable Discord linking and delivery.",
+    "finishBrowser": "Fejezd be a Discord link áramlását a böngésződben.",
+    "loadingStatus": "A Discord értesítési státusz betöltése...",
+    "account": "Számla",
+    "rules": "Szabályok",
+    "rulesSummary": "{{enabled}} active / {{total}} total",
+    "dmRefused": "A QLTracker összekapcsolódott, de Discord még mindig visszautasította a DM ellenőrzést. Ismételje meg a telepítés / link áramlást a DM teszteléséhez.",
+    "relink": "Relink Discord",
+    "retryInstall": "A telepítés visszaállítása",
+    "disconnect": "Váltás",
+    "noAccount": "Még nincs összekapcsolva Discord számla.",
+    "installLink": "& Link diszkord telepítése",
+    "dialog": {
+      "editTitle": "A diszkord bejelentésének szerkesztése",
+      "createTitle": "Felderítési értesítés",
+      "descriptionWithServer": "Configure a Discord DM notification for {{server}}.",
+      "descriptionFallback": "A kiszolgáló Discord DM értesítésének beállítása.",
+      "enabled": "Engedélyezve",
+      "enabledDescription": "Csak akkor küldjön DM-eket, ha ez a szabály engedélyezett.",
+      "thresholdType": "Határérték",
+      "thresholdPlaceholder": "Jelölje ki a küszöbértéket",
+      "mode": {
+        "active_free_slots": {
+          "label": "Lejátszás maradt",
+          "description": "Értesítse, ha egy mérkőzés ilyen közel a kitöltés, a teljes aktív játék rések helyett teljes szerver rések."
+        },
+        "free_slots": {
+          "label": "Ingyenes résidők",
+          "description": "Értesítse, ha a szerver ilyen sok ingyenes rések vagy kevesebb."
+        },
+        "min_players": {
+          "label": "Min játékosok",
+          "description": "Értesítse, ha a kiszolgáló eléri legalább ennyi játékost."
+        }
+      },
+      "totalPlayingSlots": "Összes játékrésidő",
+      "totalPlayingSlotsDescription": "A két csapat együtt, nem a percsapat mérete. 4v4 szerver esetén adja meg a 8-at. Egy 8v8 szerver esetén adja meg a 16-ot. Ez elkülönül a teljes szerver slot szám.",
+      "minimumPlayerCount": "Minimális játékoslétszám",
+      "maximumActiveSlotsLeft": "Maximális aktív résidők",
+      "maximumFreeSlots": "Maximális ingyenes rések",
+      "activeSlotsDescription": "This rule will evaluate against {{count}} total active playing slots.",
+      "serverSupportsDescription": "This server currently supports up to {{count}} players.",
+      "deleteRule": "A szabály törlése",
+      "saveChanges": "Változások mentése",
+      "createRule": "Szabályalkotás"
+    }
+  },
+  "serverList": {
+    "refresh": "Frissítés",
+    "noServersMatch": "A szerverek nem egyeznek az aktuális szűrőkkel.",
+    "pageStatus": "Page {{current}} of {{total}}",
+    "table": {
+      "server": "Szerver",
+      "location": "Hely",
+      "mode": "Mód",
+      "players": "Játékosok",
+      "ping": "Ping",
+      "actions": "Intézkedések"
+    },
+    "locationUnknown": "Ismeretlen",
+    "modeUnknown": "Ismeretlen",
+    "pingUnavailable": "N / A",
+    "passwordSaved": "A jelszó mentése",
+    "passwordRequired": "Jelszó szükséges",
+    "notificationEnabled": "Felbontási értesítés engedélyezve",
+    "actions": {
+      "notificationsPublicOnly": "A bejelentések csak nyilvános szerverek számára érhetők el.",
+      "connectDiscordFavorites": "Csatlakoztassa Discord az értesítések oldalon, hogy az értesítések.",
+      "editNotification": "A Discord értesítésének szerkesztése",
+      "notifyDiscord": "Értesítés a Discordról",
+      "editFavorite": "Kedvenc szerkesztése",
+      "removeFromFavorites": "Eltávolítás a kedvencekből",
+      "addToFavorites": "Hozzáadás a kedvencekhez"
+    },
+    "drawer": {
+      "play": "Játék",
+      "avgQeloTooltip": "Átlagos QElo a kiszolgálón",
+      "avgTrueskillTooltip": "Átlagos TSkill a kiszolgálón",
+      "topQeloTooltip": "A legmagasabb QElo lejátszó a kiszolgálón",
+      "topTrueskillTooltip": "A legmagasabb TSkill lejátszó a szerveren",
+      "playersHeading": "Játékosok",
+      "player": "Játékos",
+      "points": "Pontok",
+      "qelo": "QElo",
+      "trueskill": "TSkill",
+      "time": "Idő",
+      "lookupFailed": "A Steam lejátszó keresése nem sikerült.",
+      "noPlayerData": "Ehhez a szerverhez nincs játékos adat.",
+      "teams": {
+        "blue": "Kék csapat",
+        "free": "Ingyenes",
+        "players": "Játékosok",
+        "red": "Vörös csapat",
+        "spectators": "Spectatorok",
+        "unassigned": "Nem hozzárendelt"
+      }
+    },
+    "favoriteDialog": {
+      "editTitle": "Kedvenc szerkesztése",
+      "addTitle": "Hozzáadás a kedvencekhez",
+      "fallbackDescription": "Adja ezt a szervert az egyik kedvenc helyi listájához.",
+      "selectList": "Válassza ki a listát",
+      "listsUnavailable": "Nincs kedvenc lista. Először készítsünk egy listát a Kedvencek oldalára.",
+      "remove": "Eltávolítás",
+      "saveChanges": "Változások mentése",
+      "addToList": "A lista hozzáadása"
+    },
+    "passwordDialog": {
+      "title": "A kiszolgáló jelszava",
+      "descriptionWithServer": "Enter the password for {{server}}.",
+      "fallbackDescription": "Adja meg a kiszolgáló jelszavát.",
+      "inputPlaceholder": "Adja meg a kiszolgáló jelszavát",
+      "remember": "A jelszó elmentése a jövőbeli csatlakozásokhoz",
+      "join": "Csatlakozás"
+    },
+    "toasts": {
+      "removedFromFavorites": "Eltávolítva a kedvencektől.",
+      "notificationUpdated": "A bejelentés aktualizált.",
+      "notificationCreated": "Értesítés létrehozva.",
+      "notificationRemoved": "Értesítés törölve.",
+      "notificationSaveError": "Nem sikerült elmenteni az értesítési szabályt.",
+      "notificationRemoveError": "Nem sikerült törölni az értesítési szabályt.",
+      "favoriteUpdated": "Kedvenc frissítve.",
+      "addedToFavorites": "Hozzáadva a kedvencekhez."
+    }
+  },
+  "settings": {
+    "title": "Beállítások",
+    "startupTitle": "Statup Windows",
+    "startupDescription": "Automatikusan indítsa el a QLTracker-t, ha bejelentkezett a Windows-ra.",
+    "startupSaving": "Megmentem a kezdő preferenciát...",
+    "unavailable": "A beállítás nem elérhető ebben az épületben.",
+    "languageTitle": "Nyelv",
+    "languageDescription": "V?laszd ki azt a nyelvet, amelyet a QLTracker az eg?sz alkalmaz?sban haszn?ljon.",
+    "languagePlaceholder": "Nyelv kiválasztása"
+  },
+  "language": {
+    "en": "Angol",
+    "de": "Deutsch"
+  },
+  "favorites": {
+    "lists": "Listák",
+    "refresh": "Frissítés",
+    "createList": "Lista létrehozása",
+    "createDialogTitle": "Kedvenc lista létrehozása",
+    "createDialogDescription": "Hozzon létre egy listát a mentett szerverek megszervezéséhez.",
+    "listNamePlaceholder": "Lista neve",
+    "playersTooltip": "A listában szereplő összes élő játékos",
+    "favoriteServers": "Kedvenc kiszolgálók",
+    "savedServers_one": "{{count}} saved server",
+    "savedServers_other": "{{count}} saved servers",
+    "noLists": "Még nincs lista. Az első lista létrehozása a kezdéshez.",
+    "noServers": "Ezen a listán még nem mentettek meg szervereket."
+  },
+  "filters": {
+    "title": "Szűrők",
+    "expand": "Szűrők kibontása",
+    "collapse": "Ütközésszűrők",
+    "searchPlaceholder": "A kiszolgáló neve",
+    "showFull": "Teljes",
+    "showEmpty": "Üres",
+    "showFavorites": "Kedvencek megjelenítése",
+    "clearAll": "Törlés",
+    "regions": {
+      "all": "Valamennyi régió",
+      "eu": "Európa",
+      "na": "Észak-Amerika",
+      "sa": "Dél-Amerika",
+      "za": "Dél-Afrika",
+      "apac": "Ázsia"
+    },
+    "visibility": {
+      "all": "Minden kiszolgáló",
+      "public": "Nyilvános",
+      "private": "Privát"
+    },
+    "modes": {
+      "all": "Minden üzemmód",
+      "ca": "Clan Arena",
+      "duel": "Duel",
+      "ffa": "Ingyenes mindenkinek",
+      "tdm": "Deathmatch csapat",
+      "ctf": "CTF",
+      "ad": "Támadás és védelem",
+      "dom": "Meghatározás",
+      "ft": "A címke befagyasztása",
+      "har": "Harvester",
+      "race": "Rassz",
+      "rr": "Red Rover"
+    },
+    "rating": {
+      "title": "Értékelés",
+      "description": "Szűrő szerverek átlagosan QElo vagy TSkill.",
+      "systemPlaceholder": "Értékelési rendszer",
+      "qelo": "QElo",
+      "trueskill": "TSkill"
+    },
+    "maps": {
+      "all": "Minden térkép",
+      "selectedCount": "{{count}} maps selected",
+      "searchPlaceholder": "Keresés térképek...",
+      "empty": "Nincs térkép."
+    },
+    "tags": {
+      "label": "Címkék",
+      "selectedCount": "{{count}}+ tags",
+      "none": "Nincs kijelölve címke.",
+      "inputPlaceholder": "Típus címke és nyomja meg a Enter"
+    }
+  }
+}

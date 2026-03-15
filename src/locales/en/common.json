@@ -1,0 +1,265 @@
+{
+  "navigation": {
+    "serverList": "Server List",
+    "favorites": "Favorites",
+    "notifications": "Notifications",
+    "settings": "Settings"
+  },
+  "header": {
+    "unknown": "Unknown",
+    "theme": {
+      "light": "Light theme",
+      "dark": "Dark theme",
+      "system": "System theme"
+    }
+  },
+  "sidebar": {
+    "groupLabel": "QLTracker",
+    "about": "About QLTracker"
+  },
+  "about": {
+    "version": "Version",
+    "author": "Author",
+    "socials": "Socials",
+    "stack": "Stack",
+    "repo": "Repo"
+  },
+  "notifications": {
+    "title": "Discord Notifications",
+    "serviceUnavailable": "Notification service is unavailable in this build. Set `VITE_NOTIFICATION_API_URL` to enable Discord linking and delivery.",
+    "finishBrowser": "Finish the Discord link flow in your browser.",
+    "loadingStatus": "Loading Discord notification status...",
+    "account": "Account",
+    "rules": "Rules",
+    "rulesSummary": "{{enabled}} active / {{total}} total",
+    "dmRefused": "QLTracker is linked, but Discord still refused the DM check. Retry the install/link flow to test DMs again.",
+    "relink": "Relink Discord",
+    "retryInstall": "Retry Install Check",
+    "disconnect": "Disconnect",
+    "noAccount": "No Discord account linked yet.",
+    "installLink": "Install & Link Discord",
+    "dialog": {
+      "editTitle": "Edit Discord Notification",
+      "createTitle": "Discord Notification",
+      "descriptionWithServer": "Configure a Discord DM notification for {{server}}.",
+      "descriptionFallback": "Configure a Discord DM notification for this server.",
+      "enabled": "Enabled",
+      "enabledDescription": "Only send DMs while this rule is enabled.",
+      "thresholdType": "Threshold type",
+      "thresholdPlaceholder": "Select a threshold type",
+      "mode": {
+        "active_free_slots": {
+          "label": "Playing slots left",
+          "description": "Notify when a match is this close to filling, using the total active playing slots instead of full server slots."
+        },
+        "free_slots": {
+          "label": "Free slots",
+          "description": "Notify when the server has this many free slots or fewer."
+        },
+        "min_players": {
+          "label": "Min players",
+          "description": "Notify when the server reaches at least this many players."
+        }
+      },
+      "totalPlayingSlots": "Total playing slots",
+      "totalPlayingSlotsDescription": "Use both teams combined, not the per-team size. For a 4v4 server, enter 8. For an 8v8 server, enter 16. This is separate from the full server slot count.",
+      "minimumPlayerCount": "Minimum player count",
+      "maximumActiveSlotsLeft": "Maximum active slots left",
+      "maximumFreeSlots": "Maximum free slots",
+      "activeSlotsDescription": "This rule will evaluate against {{count}} total active playing slots.",
+      "serverSupportsDescription": "This server currently supports up to {{count}} players.",
+      "deleteRule": "Delete Rule",
+      "saveChanges": "Save Changes",
+      "createRule": "Create Rule"
+    }
+  },
+  "serverList": {
+    "refresh": "Refresh",
+    "noServersMatch": "No servers match the current filters.",
+    "pageStatus": "Page {{current}} of {{total}}",
+    "table": {
+      "server": "Server",
+      "location": "Location",
+      "mode": "Mode",
+      "players": "Players",
+      "ping": "Ping",
+      "actions": "Actions"
+    },
+    "locationUnknown": "Unknown",
+    "modeUnknown": "Unknown",
+    "pingUnavailable": "N/A",
+    "passwordSaved": "Password saved",
+    "passwordRequired": "Password required",
+    "notificationEnabled": "Discord notification enabled",
+    "actions": {
+      "notificationsPublicOnly": "Notifications are available only for public servers.",
+      "connectDiscordFavorites": "Connect Discord on the Notifications page to enable notifications.",
+      "editNotification": "Edit Discord notification",
+      "notifyDiscord": "Notify on Discord",
+      "editFavorite": "Edit favorite",
+      "removeFromFavorites": "Remove from favorites",
+      "addToFavorites": "Add to favorites"
+    },
+    "drawer": {
+      "play": "Play",
+      "avgQeloTooltip": "Average QElo on this server",
+      "avgTrueskillTooltip": "Average TSkill on this server",
+      "topQeloTooltip": "Highest QElo player on this server",
+      "topTrueskillTooltip": "Highest TSkill player on this server",
+      "playersHeading": "Players",
+      "player": "Player",
+      "points": "Points",
+      "qelo": "QElo",
+      "trueskill": "TSkill",
+      "time": "Time",
+      "lookupFailed": "Steam player lookup failed.",
+      "noPlayerData": "No player data for this server.",
+      "teams": {
+        "blue": "Blue Team",
+        "free": "Free",
+        "players": "Players",
+        "red": "Red Team",
+        "spectators": "Spectators",
+        "unassigned": "Unassigned"
+      }
+    },
+    "favoriteDialog": {
+      "editTitle": "Edit Favorite",
+      "addTitle": "Add To Favorites",
+      "fallbackDescription": "Assign this server to one of your local favorite lists.",
+      "selectList": "Select a list",
+      "listsUnavailable": "No favorite lists available. Create a list on the Favorites page first.",
+      "remove": "Remove",
+      "saveChanges": "Save Changes",
+      "addToList": "Add To List"
+    },
+    "passwordDialog": {
+      "title": "Server Password",
+      "descriptionWithServer": "Enter the password for {{server}}.",
+      "fallbackDescription": "Enter the password for this server.",
+      "inputPlaceholder": "Enter server password",
+      "remember": "Save this password for future joins",
+      "join": "Join"
+    },
+    "toasts": {
+      "removedFromFavorites": "Removed from favorites.",
+      "notificationUpdated": "Notification updated.",
+      "notificationCreated": "Notification created.",
+      "notificationRemoved": "Notification removed.",
+      "notificationSaveError": "Could not save the notification rule.",
+      "notificationRemoveError": "Could not remove the notification rule.",
+      "favoriteUpdated": "Favorite updated.",
+      "addedToFavorites": "Added to favorites."
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "startupTitle": "Startup on Windows",
+    "startupDescription": "Automatically launch QLTracker when you sign in to Windows.",
+    "startupSaving": "Saving startup preference...",
+    "unavailable": "Setting is unavailable in this build.",
+    "languageTitle": "Language",
+    "languageDescription": "Choose the language used throughout QLTracker.",
+    "languagePlaceholder": "Select language"
+  },
+  "language": {
+    "en": "English",
+    "de": "Deutsch",
+    "bg": "Български",
+    "ru": "Русский",
+    "uk": "Українська",
+    "hr": "Hrvatski",
+    "sr": "Српски",
+    "fr": "Français",
+    "it": "Italiano",
+    "et": "Eesti",
+    "nl": "Nederlands",
+    "fi": "Suomi",
+    "sv": "Svenska",
+    "hu": "Magyar",
+    "da": "Dansk",
+    "lv": "Latviešu",
+    "nb": "Norsk Bokmål",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ka": "ქართული",
+    "zh-Hant": "繁體中文",
+    "zh-Hans": "简体中文",
+    "es": "Español",
+    "pt-BR": "Português (Brasil)",
+    "pl": "Polski",
+    "ro": "Română",
+    "lt": "Lietuvių",
+    "cs": "Čeština"
+  },
+  "favorites": {
+    "lists": "Lists",
+    "refresh": "Refresh",
+    "createList": "Create List",
+    "createDialogTitle": "Create Favorite List",
+    "createDialogDescription": "Create a list to organize your saved servers.",
+    "listNamePlaceholder": "List name",
+    "playersTooltip": "Total live players in this list",
+    "favoriteServers": "Favorite Servers",
+    "savedServers_one": "{{count}} saved server",
+    "savedServers_other": "{{count}} saved servers",
+    "noLists": "No lists yet. Create your first list to get started.",
+    "noServers": "No servers saved in this list yet."
+  },
+  "filters": {
+    "title": "Filters",
+    "expand": "Expand filters",
+    "collapse": "Collapse filters",
+    "searchPlaceholder": "Search server name",
+    "showFull": "Show Full",
+    "showEmpty": "Show Empty",
+    "showFavorites": "Show Favorites",
+    "clearAll": "Clear all",
+    "regions": {
+      "all": "All regions",
+      "eu": "Europe",
+      "na": "North America",
+      "sa": "South America",
+      "za": "South Africa",
+      "apac": "Asia Pacific"
+    },
+    "visibility": {
+      "all": "All servers",
+      "public": "Public",
+      "private": "Private"
+    },
+    "modes": {
+      "all": "All modes",
+      "ca": "Clan Arena",
+      "duel": "Duel",
+      "ffa": "Free For All",
+      "tdm": "Team Deathmatch",
+      "ctf": "CTF",
+      "ad": "Attack & Defend",
+      "dom": "Domination",
+      "ft": "Freeze Tag",
+      "har": "Harvester",
+      "race": "Race",
+      "rr": "Red Rover"
+    },
+    "rating": {
+      "title": "Rating",
+      "description": "Filter servers by average QElo or TSkill.",
+      "systemPlaceholder": "Rating system",
+      "qelo": "QElo",
+      "trueskill": "TSkill"
+    },
+    "maps": {
+      "all": "All maps",
+      "selectedCount": "{{count}} maps selected",
+      "searchPlaceholder": "Search maps...",
+      "empty": "No maps found."
+    },
+    "tags": {
+      "label": "Tags",
+      "selectedCount": "{{count}}+ tags",
+      "none": "No tags selected.",
+      "inputPlaceholder": "Type tag and press Enter"
+    }
+  }
+}

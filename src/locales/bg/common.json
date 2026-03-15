@@ -1,0 +1,239 @@
+{
+  "navigation": {
+    "serverList": "Списък със сървъри",
+    "favorites": "Любими",
+    "notifications": "Уведомления",
+    "settings": "Настройки"
+  },
+  "header": {
+    "unknown": "Неизвестно",
+    "theme": {
+      "light": "Light тема",
+      "dark": "Тъмна тема",
+      "system": "Системна тема"
+    }
+  },
+  "sidebar": {
+    "groupLabel": "QLTracker",
+    "about": "За QLTracker"
+  },
+  "about": {
+    "version": "Версия",
+    "author": "Автор",
+    "socials": "Социално осигуряване",
+    "stack": "Стак",
+    "repo": "Repo"
+  },
+  "notifications": {
+    "title": "Несъгласувани уведомления",
+    "serviceUnavailable": "Notification service is unavailable in this build. Set `VITE_NOTIFICATION_API_URL` to enable Discord linking and delivery.",
+    "finishBrowser": "Завършете потока Discord връзка в браузъра си.",
+    "loadingStatus": "Зареждане на статуса на уведомление за несъгласие...",
+    "account": "Партида",
+    "rules": "Правила",
+    "rulesSummary": "{{enabled}} active / {{total}} total",
+    "dmRefused": "QLTracker е свързан, но Discord все още отказа DM проверка. Ретриция на дебита на инсталацията/линковете за изпитване на DM отново.",
+    "relink": "Превключване на раздор",
+    "retryInstall": "Проверка за инсталиране на данни",
+    "disconnect": "Изключване",
+    "noAccount": "Все още няма разногласие.",
+    "installLink": "Инсталиране на & разногласие на връзката",
+    "dialog": {
+      "editTitle": "Редактиране на уведомление за несъгласие",
+      "createTitle": "Нотификация за несъгласие",
+      "descriptionWithServer": "Configure a Discord DM notification for {{server}}.",
+      "descriptionFallback": "Настройване на Discord DM уведомление за този сървър.",
+      "enabled": "Включване",
+      "enabledDescription": "Пратете DM-та само докато това правило е включено.",
+      "thresholdType": "Вид праг",
+      "thresholdPlaceholder": "Избор на тип праг",
+      "mode": {
+        "active_free_slots": {
+          "label": "Играене на слотове наляво",
+          "description": "Уведомете, когато мач е толкова близо до попълване, като използвате общите активни слотове за игра, вместо пълни сървърни слотове."
+        },
+        "free_slots": {
+          "label": "Безплатни слотове",
+          "description": "Уведомете, когато сървърът има толкова много свободни слотове или по-малко."
+        },
+        "min_players": {
+          "label": "Минни играчи",
+          "description": "Уведомете, когато сървърът достигне поне толкова играчи."
+        }
+      },
+      "totalPlayingSlots": "Общо игрални слотове",
+      "totalPlayingSlotsDescription": "Използвайте двата отбора заедно, а не размера на екипа. За 4v4 сървър, въведете 8. За 8v8 сървър, въведете 16. Това е отделно от броя на сървърите.",
+      "minimumPlayerCount": "Минимален брой играчи",
+      "maximumActiveSlotsLeft": "Максимално активни слотове останали",
+      "maximumFreeSlots": "Максимално свободни слотове",
+      "activeSlotsDescription": "This rule will evaluate against {{count}} total active playing slots.",
+      "serverSupportsDescription": "This server currently supports up to {{count}} players.",
+      "deleteRule": "Изтриване на правило",
+      "saveChanges": "Запис на промените",
+      "createRule": "Създаване на правило"
+    }
+  },
+  "serverList": {
+    "refresh": "Обновяване",
+    "noServersMatch": "Няма сървъри, отговарящи на текущите филтри.",
+    "pageStatus": "Page {{current}} of {{total}}",
+    "table": {
+      "server": "Сървър",
+      "location": "Местоположение",
+      "mode": "Режим",
+      "players": "Играчи",
+      "ping": "Пинг",
+      "actions": "Действия"
+    },
+    "locationUnknown": "Неизвестно",
+    "modeUnknown": "Неизвестно",
+    "pingUnavailable": "НЕ Е ПРИЛОЖИМО",
+    "passwordSaved": "Запис на паролата",
+    "passwordRequired": "Изисква се парола",
+    "notificationEnabled": "Разрешаване на уведомление за несъгласие",
+    "actions": {
+      "notificationsPublicOnly": "Нотификациите са достъпни само за обществени сървъри.",
+      "connectDiscordFavorites": "Свържете Разногласие на страницата Нотификации, за да се даде възможност за уведомления.",
+      "editNotification": "Редактиране на уведомление за несъгласие",
+      "notifyDiscord": "Уведоми за несъгласието",
+      "editFavorite": "Редактиране на любимото",
+      "removeFromFavorites": "Премахване от фаворити",
+      "addToFavorites": "Добавяне към любимите"
+    },
+    "drawer": {
+      "play": "Игра",
+      "avgQeloTooltip": "Средно QElo на този сървър",
+      "avgTrueskillTooltip": "Среден TSkill на този сървър",
+      "topQeloTooltip": "Най-високият QElo плейър на този сървър",
+      "topTrueskillTooltip": "Най-високият играч на TSkill на този сървър",
+      "playersHeading": "Играчи",
+      "player": "Играч",
+      "points": "Точки",
+      "qelo": "QElo",
+      "trueskill": "TSkill",
+      "time": "Време",
+      "lookupFailed": "Прегледът на Steam плейъра се провали.",
+      "noPlayerData": "Няма данни за този сървър.",
+      "teams": {
+        "blue": "Син екип",
+        "free": "Свободно",
+        "players": "Играчи",
+        "red": "Червен екип",
+        "spectators": "Зрители",
+        "unassigned": "Неназначен"
+      }
+    },
+    "favoriteDialog": {
+      "editTitle": "Редактиране на фаворита",
+      "addTitle": "Добавяне към любими",
+      "fallbackDescription": "Подпишете този сървър в един от любимите си местни списъци.",
+      "selectList": "Избор на списък",
+      "listsUnavailable": "Няма любими списъци. Създаване на списък на страницата Любими първо.",
+      "remove": "Премахване",
+      "saveChanges": "Запис на промените",
+      "addToList": "Добавяне към списъка"
+    },
+    "passwordDialog": {
+      "title": "Парола на сървъра",
+      "descriptionWithServer": "Enter the password for {{server}}.",
+      "fallbackDescription": "Въведете паролата за сървъра.",
+      "inputPlaceholder": "Въведете парола на сървъра",
+      "remember": "Запис на паролата за бъдещи присъединявания",
+      "join": "Присъединяване"
+    },
+    "toasts": {
+      "removedFromFavorites": "Премахнат от любимите.",
+      "notificationUpdated": "Нотификацията е актуализирана.",
+      "notificationCreated": "Нотификация създадена.",
+      "notificationRemoved": "Нотификацията е отменена.",
+      "notificationSaveError": "Правилото за уведомяване не може да бъде запазено.",
+      "notificationRemoveError": "Правилото за уведомяване не може да бъде премахнато.",
+      "favoriteUpdated": "Любимо обновяване.",
+      "addedToFavorites": "Добавено към любимите."
+    }
+  },
+  "settings": {
+    "title": "Настройки",
+    "startupTitle": "Стартиране на Windows",
+    "startupDescription": "Автоматично стартиране на QLTracker, когато влезете в Windows.",
+    "startupSaving": "Запис на предпочитанията за стартиране...",
+    "unavailable": "Настройката не е достъпна в тази сграда.",
+    "languageTitle": "Език",
+    "languageDescription": "???????? ?????, ????? QLTracker ?? ???????? ?????????.",
+    "languagePlaceholder": "Избор на език"
+  },
+  "language": {
+    "en": "Английски",
+    "de": "Deutsch"
+  },
+  "favorites": {
+    "lists": "Списък",
+    "refresh": "Обновяване",
+    "createList": "Създаване на списък",
+    "createDialogTitle": "Създаване на любим списък",
+    "createDialogDescription": "Създаване на списък за организиране на записаните сървъри.",
+    "listNamePlaceholder": "Име на списъка",
+    "playersTooltip": "Общо играчи на живо в този списък",
+    "favoriteServers": "Любими сървъри",
+    "savedServers_one": "{{count}} saved server",
+    "savedServers_other": "{{count}} saved servers",
+    "noLists": "Все още няма списъци. Създаване на първия си списък, за да започнете.",
+    "noServers": "Все още няма записани сървъри в този списък."
+  },
+  "filters": {
+    "title": "Филтри",
+    "expand": "Разширяване на филтрите",
+    "collapse": "Сгъваеми филтри",
+    "searchPlaceholder": "Име на сървъра за търсене",
+    "showFull": "Показване на пълния",
+    "showEmpty": "Показване на празни",
+    "showFavorites": "Показване на любими",
+    "clearAll": "Изчистване на всичко",
+    "regions": {
+      "all": "Всички региони",
+      "eu": "Европа",
+      "na": "Северна Америка",
+      "sa": "Южна Америка",
+      "za": "Южна Африка",
+      "apac": "Азия Тихи океан"
+    },
+    "visibility": {
+      "all": "Всички сървъри",
+      "public": "Публично",
+      "private": "Частен"
+    },
+    "modes": {
+      "all": "Всички режими",
+      "ca": "Клан Арена",
+      "duel": "Дуел",
+      "ffa": "Свободен за всички",
+      "tdm": "Отбор Deathmatch",
+      "ctf": "CTF",
+      "ad": "Атака и защита",
+      "dom": "Доминация",
+      "ft": "Замръзнете таг",
+      "har": "Harvester",
+      "race": "Състезание",
+      "rr": "Red Rover"
+    },
+    "rating": {
+      "title": "Рейтинг",
+      "description": "Филтрирайте сървърите със средно QElo или TSkill.",
+      "systemPlaceholder": "Рейтингова система",
+      "qelo": "QElo",
+      "trueskill": "TSkill"
+    },
+    "maps": {
+      "all": "Всички карти",
+      "selectedCount": "{{count}} maps selected",
+      "searchPlaceholder": "Търсене на карти...",
+      "empty": "Не са открити карти."
+    },
+    "tags": {
+      "label": "Етикети",
+      "selectedCount": "{{count}}+ tags",
+      "none": "Няма избрани етикети.",
+      "inputPlaceholder": "Въведете таг и натиснете Enter"
+    }
+  }
+}

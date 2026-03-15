@@ -1,6 +1,7 @@
 import type { MouseEvent } from "react";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useTranslation } from "react-i18next";
 import { navigationItems, type PageId } from "@/lib/navigation";
 import { changeThemeWithTransition } from "@/lib/theme-transition";
 import {
@@ -13,18 +14,19 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const pageTitles: Record<PageId, string> = {
-  "server-list": "Server List",
-  favorites: "Favorites",
-  notifications: "Notifications",
-};
-
 export function Header({ page }: { page: PageId }) {
   const { setTheme, theme } = useTheme();
+  const { t } = useTranslation();
   const currentPage =
-    navigationItems.find((item) => item.id === page)?.title ??
-    pageTitles[page] ??
-    "Unknown";
+    (page === "notifications"
+      ? t("navigation.notifications")
+      : page === "settings"
+        ? t("navigation.settings")
+        : navigationItems.find((item) => item.id === page)
+          ? t(
+              navigationItems.find((item) => item.id === page)!.titleKey
+            )
+          : null) ?? t("header.unknown");
 
   const handleThemeChange = (
     nextTheme: "light" | "dark" | "system",
@@ -65,7 +67,7 @@ export function Header({ page }: { page: PageId }) {
             onClick={(event) => handleThemeChange("light", event)}
           >
             <Sun className="size-4" />
-            <span className="sr-only">Light theme</span>
+            <span className="sr-only">{t("header.theme.light")}</span>
           </TabsTrigger>
           <TabsTrigger
             value="dark"
@@ -73,7 +75,7 @@ export function Header({ page }: { page: PageId }) {
             onClick={(event) => handleThemeChange("dark", event)}
           >
             <Moon className="size-4" />
-            <span className="sr-only">Dark theme</span>
+            <span className="sr-only">{t("header.theme.dark")}</span>
           </TabsTrigger>
           <TabsTrigger
             value="system"
@@ -81,7 +83,7 @@ export function Header({ page }: { page: PageId }) {
             onClick={(event) => handleThemeChange("system", event)}
           >
             <Monitor className="size-4" />
-            <span className="sr-only">System theme</span>
+            <span className="sr-only">{t("header.theme.system")}</span>
           </TabsTrigger>
         </TabsList>
       </Tabs>

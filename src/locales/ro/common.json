@@ -1,0 +1,239 @@
+{
+  "navigation": {
+    "serverList": "Listă server",
+    "favorites": "Favorite",
+    "notifications": "Notificări",
+    "settings": "Configurări"
+  },
+  "header": {
+    "unknown": "Necunoscut",
+    "theme": {
+      "light": "Tematică de lumină",
+      "dark": "Tema întunecată",
+      "system": "Tematică de sistem"
+    }
+  },
+  "sidebar": {
+    "groupLabel": "QLTracker",
+    "about": "Despre QLTracker"
+  },
+  "about": {
+    "version": "Versiune",
+    "author": "Autor",
+    "socials": "Sociale",
+    "stack": "Stack",
+    "repo": "Repo"
+  },
+  "notifications": {
+    "title": "Notificări de discordie",
+    "serviceUnavailable": "Notification service is unavailable in this build. Set `VITE_NOTIFICATION_API_URL` to enable Discord linking and delivery.",
+    "finishBrowser": "Terminați fluxul de legătură Discord în browser.",
+    "loadingStatus": "Se încarcă starea notificării discordiei...",
+    "account": "Cont",
+    "rules": "Reguli",
+    "rulesSummary": "{{enabled}} active / {{total}} total",
+    "dmRefused": "QLTracker este conectat, dar Discordia a refuzat încă verificarea DM. Retrageți fluxul de instalare/link pentru a testa DMs din nou.",
+    "relink": "Reconectează discordia",
+    "retryInstall": "Verificare instalare retry",
+    "disconnect": "Deconectează",
+    "noAccount": "Nici un cont de discordie legat încă.",
+    "installLink": "Instalează discordie & legătură",
+    "dialog": {
+      "editTitle": "Editează notificarea discordiei",
+      "createTitle": "Notificarea discordiei",
+      "descriptionWithServer": "Configure a Discord DM notification for {{server}}.",
+      "descriptionFallback": "Configurează o notificare Discord DM pentru acest server.",
+      "enabled": "Activat",
+      "enabledDescription": "Trimite doar DMs în timp ce această regulă este activată.",
+      "thresholdType": "Tip prag",
+      "thresholdPlaceholder": "Alegeți un tip de prag",
+      "mode": {
+        "active_free_slots": {
+          "label": "Joc sloturi stânga",
+          "description": "Anunță atunci când un meci este atât de aproape de umplere, folosind sloturi active totale de joc în loc de sloturi server complet."
+        },
+        "free_slots": {
+          "label": "Sloturi gratuite",
+          "description": "Anunță când serverul are atât de multe sloturi gratuite sau mai puține."
+        },
+        "min_players": {
+          "label": "Jucători min",
+          "description": "Anunță când serverul ajunge cel puțin atât de mulți jucători."
+        }
+      },
+      "totalPlayingSlots": "Total sloturi de joc",
+      "totalPlayingSlotsDescription": "Foloseşte ambele echipe combinate, nu mărimea pe echipă. Pentru un server 4v4, introduceți 8. Pentru un server 8v8, introduceți 16. Aceasta este separată de numărul întreg al sloturilor serverului.",
+      "minimumPlayerCount": "Număr minim de jucători",
+      "maximumActiveSlotsLeft": "Sloturi active maxime rămase",
+      "maximumFreeSlots": "Sloturi gratuite maxime",
+      "activeSlotsDescription": "This rule will evaluate against {{count}} total active playing slots.",
+      "serverSupportsDescription": "This server currently supports up to {{count}} players.",
+      "deleteRule": "Șterge regula",
+      "saveChanges": "Salvează modificările",
+      "createRule": "Creează reguli"
+    }
+  },
+  "serverList": {
+    "refresh": "Reîmprospătează",
+    "noServersMatch": "Niciun server nu corespunde filtrelor curente.",
+    "pageStatus": "Page {{current}} of {{total}}",
+    "table": {
+      "server": "Server",
+      "location": "Locație",
+      "mode": "Mod",
+      "players": "Jucători",
+      "ping": "Ping",
+      "actions": "Acțiuni"
+    },
+    "locationUnknown": "Necunoscut",
+    "modeUnknown": "Necunoscut",
+    "pingUnavailable": "N/A",
+    "passwordSaved": "Parolă salvată",
+    "passwordRequired": "Parolă necesară",
+    "notificationEnabled": "Notificarea discordiei activată",
+    "actions": {
+      "notificationsPublicOnly": "Notificările sunt disponibile numai pentru serverele publice.",
+      "connectDiscordFavorites": "Conectați discordia pe pagina Notificărilor pentru a permite notificările.",
+      "editNotification": "Editează notificarea discordiei",
+      "notifyDiscord": "Anunță pe discordie",
+      "editFavorite": "Editează favoritul",
+      "removeFromFavorites": "Elimină din favorite",
+      "addToFavorites": "Adaugă la favorite"
+    },
+    "drawer": {
+      "play": "Joacă",
+      "avgQeloTooltip": "QElo mediu pe acest server",
+      "avgTrueskillTooltip": "Media TSkill pe acest server",
+      "topQeloTooltip": "Cel mai mare jucător QElo de pe acest server",
+      "topTrueskillTooltip": "Cel mai mare jucător TSkill de pe acest server",
+      "playersHeading": "Jucători",
+      "player": "Jucător",
+      "points": "Puncte",
+      "qelo": "QElo",
+      "trueskill": "TSkill",
+      "time": "Timp",
+      "lookupFailed": "Căutarea jucătorului cu aburi a eșuat.",
+      "noPlayerData": "Nu există date de jucător pentru acest server.",
+      "teams": {
+        "blue": "Echipa albastră",
+        "free": "Liber",
+        "players": "Jucători",
+        "red": "Echipa roşie",
+        "spectators": "Spectatoare",
+        "unassigned": "Neatribuit"
+      }
+    },
+    "favoriteDialog": {
+      "editTitle": "Editează favoritul",
+      "addTitle": "Adaugă la favorite",
+      "fallbackDescription": "Trimite acest server la una dintre listele preferate locale.",
+      "selectList": "Alegeți o listă",
+      "listsUnavailable": "Nu sunt disponibile liste preferate. Creați o listă pe pagina Favorites primul.",
+      "remove": "Elimină",
+      "saveChanges": "Salvează modificările",
+      "addToList": "Adaugă la listă"
+    },
+    "passwordDialog": {
+      "title": "Parolă server",
+      "descriptionWithServer": "Enter the password for {{server}}.",
+      "fallbackDescription": "Introduceți parola pentru acest server.",
+      "inputPlaceholder": "Introduceți parola serverului",
+      "remember": "Salvează această parolă pentru viitor",
+      "join": "Alătură-te"
+    },
+    "toasts": {
+      "removedFromFavorites": "Eliminat din favorite.",
+      "notificationUpdated": "Notificare actualizată.",
+      "notificationCreated": "Notificare creată.",
+      "notificationRemoved": "Notificare eliminată.",
+      "notificationSaveError": "Nu s-a putut salva regula notificării.",
+      "notificationRemoveError": "Nu s-a putut elimina regula notificării.",
+      "favoriteUpdated": "Favorite actualizate.",
+      "addedToFavorites": "Adaugat la favorite."
+    }
+  },
+  "settings": {
+    "title": "Configurări",
+    "startupTitle": "Pornire pe ferestre",
+    "startupDescription": "Lansați automat QLTracker atunci când vă conectați la Windows.",
+    "startupSaving": "Salvarea preferinței de pornire...",
+    "unavailable": "Setarea nu este disponibilă în această clădire.",
+    "languageTitle": "Limba",
+    "languageDescription": "Alege limba pe care QLTracker o va folosi ?n toat? aplica?ia.",
+    "languagePlaceholder": "Alegeți limba"
+  },
+  "language": {
+    "en": "Engleză",
+    "de": "Deutsch"
+  },
+  "favorites": {
+    "lists": "Liste",
+    "refresh": "Reîmprospătează",
+    "createList": "Creează listă",
+    "createDialogTitle": "Creează lista preferată",
+    "createDialogDescription": "Creați o listă pentru a organiza serverele salvate.",
+    "listNamePlaceholder": "Nume listă",
+    "playersTooltip": "Total jucători live în această listă",
+    "favoriteServers": "Servere preferate",
+    "savedServers_one": "{{count}} saved server",
+    "savedServers_other": "{{count}} saved servers",
+    "noLists": "Nici o listă încă. Creați prima listă pentru a începe.",
+    "noServers": "Nici un server salvat în această listă încă."
+  },
+  "filters": {
+    "title": "Filtre",
+    "expand": "Extinde filtrele",
+    "collapse": "Filtre de colaps",
+    "searchPlaceholder": "Nume server de căutare",
+    "showFull": "Arată complet",
+    "showEmpty": "Arată gol",
+    "showFavorites": "Arată favoritele",
+    "clearAll": "Șterge toate",
+    "regions": {
+      "all": "Toate regiunile",
+      "eu": "Europa",
+      "na": "America de Nord",
+      "sa": "America de Sud",
+      "za": "Africa de Sud",
+      "apac": "Asia Pacific"
+    },
+    "visibility": {
+      "all": "Toate serverele",
+      "public": "Public",
+      "private": "Privat"
+    },
+    "modes": {
+      "all": "Toate modurile",
+      "ca": "Clan Arena",
+      "duel": "Duel",
+      "ffa": "Liber pentru toţi",
+      "tdm": "Echipa Deathmatch",
+      "ctf": "CTF",
+      "ad": "Atacă și apără",
+      "dom": "Dominare",
+      "ft": "Îngheață eticheta",
+      "har": "Recoltator",
+      "race": "Rasă",
+      "rr": "Rover roșu"
+    },
+    "rating": {
+      "title": "Evaluare",
+      "description": "Servere de filtrare în medie QElo sau TSkill.",
+      "systemPlaceholder": "Sistemul de rating",
+      "qelo": "QElo",
+      "trueskill": "TSkill"
+    },
+    "maps": {
+      "all": "Toate hărțile",
+      "selectedCount": "{{count}} maps selected",
+      "searchPlaceholder": "Caută hărţi...",
+      "empty": "Nu s-au găsit hărţi."
+    },
+    "tags": {
+      "label": "Etichete",
+      "selectedCount": "{{count}}+ tags",
+      "none": "Nicio etichetă selectată.",
+      "inputPlaceholder": "Tip etichetă și apăsați Enter"
+    }
+  }
+}

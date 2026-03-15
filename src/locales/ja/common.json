@@ -1,0 +1,239 @@
+{
+  "navigation": {
+    "serverList": "サーバーリスト",
+    "favorites": "お気に入り",
+    "notifications": "お知らせ",
+    "settings": "コンテンツ"
+  },
+  "header": {
+    "unknown": "未知の",
+    "theme": {
+      "light": "ライトテーマ",
+      "dark": "ダークテーマ",
+      "system": "システムテーマ"
+    }
+  },
+  "sidebar": {
+    "groupLabel": "QLTrackerの特長",
+    "about": "QLTrackerについて"
+  },
+  "about": {
+    "version": "バージョン",
+    "author": "プロフィール",
+    "socials": "社会招聘",
+    "stack": "スタック",
+    "repo": "リポ"
+  },
+  "notifications": {
+    "title": "不正通知",
+    "serviceUnavailable": "Notification service is unavailable in this build. Set `VITE_NOTIFICATION_API_URL` to enable Discord linking and delivery.",
+    "finishBrowser": "お使いのブラウザでDiscordリンクフローを終了します.",
+    "loadingStatus": "ディスコード通知ステータスをロードする...",
+    "account": "パスワード",
+    "rules": "ルールルール",
+    "rulesSummary": "{{enabled}} active / {{total}} total",
+    "dmRefused": "QLTrackerはリンクされていますが、DiscordはDMチェックを拒否しました。 インストール/リンクフローを再試行してDMをテストします.",
+    "relink": "リリンク解除",
+    "retryInstall": "再インストールチェック",
+    "disconnect": "接続解除",
+    "noAccount": "まだリンクされていないアカウントはありません.",
+    "installLink": "インストール&リンク解除",
+    "dialog": {
+      "editTitle": "不正通知の編集",
+      "createTitle": "不正通知",
+      "descriptionWithServer": "Configure a Discord DM notification for {{server}}.",
+      "descriptionFallback": "このサーバーのDiscord DM通知の設定.",
+      "enabled": "有効化",
+      "enabledDescription": "この規則が有効になっている間DMのみを送信します.",
+      "thresholdType": "境界タイプ",
+      "thresholdPlaceholder": "しきい値タイプを選択",
+      "mode": {
+        "active_free_slots": {
+          "label": "スロットを左に再生する",
+          "description": "マッチがフィリングに近いときに通知します。, フルサーバースロットの代わりに、総アクティブな再生スロットを使用して."
+        },
+        "free_slots": {
+          "label": "無料スロット",
+          "description": "サーバがこの多くの無料スロットを持っているか、または少ないときに通知します."
+        },
+        "min_players": {
+          "label": "最小限の選手",
+          "description": "サーバが少なくともこの多くのプレーヤーに到達したときに通知します."
+        }
+      },
+      "totalPlayingSlots": "総再生スロット",
+      "totalPlayingSlotsDescription": "チーム単位のサイズではなく、チームを組み合わせて使用してください。 4v4サーバーの場合、8を入力してください。 8v8サーバーの場合は16を入力してください。 これは、フルサーバのスロットカウントとは別です.",
+      "minimumPlayerCount": "最小プレイヤー数",
+      "maximumActiveSlotsLeft": "最大アクティブスロット左",
+      "maximumFreeSlots": "最高の無料スロット",
+      "activeSlotsDescription": "This rule will evaluate against {{count}} total active playing slots.",
+      "serverSupportsDescription": "This server currently supports up to {{count}} players.",
+      "deleteRule": "ルールを削除",
+      "saveChanges": "変更を保存",
+      "createRule": "ルールの作成"
+    }
+  },
+  "serverList": {
+    "refresh": "リフレッシュ",
+    "noServersMatch": "サーバは現在のフィルタにマッチしません.",
+    "pageStatus": "Page {{current}} of {{total}}",
+    "table": {
+      "server": "サーバー",
+      "location": "アクセス",
+      "mode": "モード",
+      "players": "プレイヤー",
+      "ping": "ピン",
+      "actions": "アクション"
+    },
+    "locationUnknown": "未知の",
+    "modeUnknown": "未知の",
+    "pingUnavailable": "N・A",
+    "passwordSaved": "パスワード保存",
+    "passwordRequired": "パスワード必須",
+    "notificationEnabled": "不正通知が有効化",
+    "actions": {
+      "notificationsPublicOnly": "公開サーバのみの通知が可能です.",
+      "connectDiscordFavorites": "通知ページでDiscordを接続して通知を有効にします.",
+      "editNotification": "Discord通知の編集",
+      "notifyDiscord": "Discordの通知",
+      "editFavorite": "お気に入りを編集",
+      "removeFromFavorites": "お気に入りから削除する",
+      "addToFavorites": "お気に入りに追加"
+    },
+    "drawer": {
+      "play": "プレイ",
+      "avgQeloTooltip": "このサーバーで平均QElo",
+      "avgTrueskillTooltip": "このサーバーで平均TSkill",
+      "topQeloTooltip": "このサーバーで一番高いQEloプレーヤー",
+      "topTrueskillTooltip": "このサーバーで一番高いTSkillプレーヤー",
+      "playersHeading": "プレイヤー",
+      "player": "プレイヤー",
+      "points": "ポイント",
+      "qelo": "Qエロ",
+      "trueskill": "ツイート",
+      "time": "タイムタイム",
+      "lookupFailed": "スチームプレーヤーのルックアップが失敗しました.",
+      "noPlayerData": "このサーバーのプレーヤーデータはありません.",
+      "teams": {
+        "blue": "ブルーチーム",
+        "free": "無料",
+        "players": "プレイヤー",
+        "red": "レッドチーム",
+        "spectators": "スペクティブ",
+        "unassigned": "非署名"
+      }
+    },
+    "favoriteDialog": {
+      "editTitle": "お気に入り編集",
+      "addTitle": "お気に入りに追加",
+      "fallbackDescription": "このサーバーをローカルのお気に入りリストに割り当てます.",
+      "selectList": "リストを選択",
+      "listsUnavailable": "お気に入りリストはありません。 お気に入りページの最初のリストを作成します.",
+      "remove": "削除",
+      "saveChanges": "変更を保存",
+      "addToList": "リストに追加"
+    },
+    "passwordDialog": {
+      "title": "サーバーパスワード",
+      "descriptionWithServer": "Enter the password for {{server}}.",
+      "fallbackDescription": "このサーバーのパスワードを入力してください.",
+      "inputPlaceholder": "サーバパスワードを入力",
+      "remember": "将来の参加のためにこのパスワードを保存",
+      "join": "お問い合わせ"
+    },
+    "toasts": {
+      "removedFromFavorites": "お気に入りから削除.",
+      "notificationUpdated": "新着情報.",
+      "notificationCreated": "通知が作成されました.",
+      "notificationRemoved": "通知が削除されました.",
+      "notificationSaveError": "通知ルールを保存できません.",
+      "notificationRemoveError": "通知ルールを削除できません.",
+      "favoriteUpdated": "お気に入り更新.",
+      "addedToFavorites": "お気に入りに追加."
+    }
+  },
+  "settings": {
+    "title": "コンテンツ",
+    "startupTitle": "Windowsで起動",
+    "startupDescription": "Windowsにサインインするときに自動的にQLTrackerを起動します.",
+    "startupSaving": "スタートアップの好みを保存...",
+    "unavailable": "このビルドでは設定が利用できなくなります.",
+    "languageTitle": "用語集",
+    "languageDescription": "QLTracker ????????????????",
+    "languagePlaceholder": "言語を選択"
+  },
+  "language": {
+    "en": "日本語 English",
+    "de": "ドイツ"
+  },
+  "favorites": {
+    "lists": "リスト",
+    "refresh": "リフレッシュ",
+    "createList": "リストの作成",
+    "createDialogTitle": "お気に入りリストを作成する",
+    "createDialogDescription": "保存されたサーバーを整理するためのリストを作成します.",
+    "listNamePlaceholder": "リスト名",
+    "playersTooltip": "このリストのライブプレーヤーの合計",
+    "favoriteServers": "お気に入りサーバー",
+    "savedServers_one": "{{count}} saved server",
+    "savedServers_other": "{{count}} saved servers",
+    "noLists": "リストはまだありません。 最初のリストを作成して開始します.",
+    "noServers": "このリストに保存されていないサーバーはまだ保存されていません."
+  },
+  "filters": {
+    "title": "フィルター",
+    "expand": "フィルターの拡大",
+    "collapse": "崩壊フィルター",
+    "searchPlaceholder": "サーバー名を検索",
+    "showFull": "ショーフル",
+    "showEmpty": "空のショー",
+    "showFavorites": "お気に入りを表示",
+    "clearAll": "すべてクリア",
+    "regions": {
+      "all": "すべての地域",
+      "eu": "ヨーロッパ",
+      "na": "北アメリカ",
+      "sa": "南米",
+      "za": "南アフリカ",
+      "apac": "アジアパシフィック"
+    },
+    "visibility": {
+      "all": "すべてのサーバー",
+      "public": "パブリック",
+      "private": "プライベート"
+    },
+    "modes": {
+      "all": "すべてのモード",
+      "ca": "クラン・アリーナ",
+      "duel": "デュエル",
+      "ffa": "全て無料",
+      "tdm": "チームデスマッチ",
+      "ctf": "CTFについて",
+      "ad": "攻撃と防御",
+      "dom": "ドミネーション",
+      "ft": "凍結タグ",
+      "har": "収穫機",
+      "race": "レース",
+      "rr": "レッド ローバー"
+    },
+    "rating": {
+      "title": "評価",
+      "description": "平均QEloまたはTSkillによるフィルタサーバ.",
+      "systemPlaceholder": "評価システム",
+      "qelo": "Qエロ",
+      "trueskill": "ツイート"
+    },
+    "maps": {
+      "all": "すべてのマップ",
+      "selectedCount": "{{count}} maps selected",
+      "searchPlaceholder": "サイトマップ.",
+      "empty": "地図が見つかりません."
+    },
+    "tags": {
+      "label": "ニュース",
+      "selectedCount": "{{count}}+ tags",
+      "none": "選択したタグはありません.",
+      "inputPlaceholder": "型タグとプレス Enter"
+    }
+  }
+}

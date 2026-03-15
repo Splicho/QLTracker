@@ -1,0 +1,265 @@
+{
+  "navigation": {
+    "serverList": "სერვერების სია",
+    "favorites": "ფავორიტები",
+    "notifications": "შეტყობინებები",
+    "settings": "პარამეტრები"
+  },
+  "header": {
+    "unknown": "უცნობი",
+    "theme": {
+      "light": "ღია თემა",
+      "dark": "მუქი თემა",
+      "system": "სისტემური თემა"
+    }
+  },
+  "sidebar": {
+    "groupLabel": "QLTracker",
+    "about": "QLTracker-ის შესახებ"
+  },
+  "about": {
+    "version": "ვერსია",
+    "author": "ავტორი",
+    "socials": "სოციალური ქსელები",
+    "stack": "სტეკი",
+    "repo": "რეპოზიტორია"
+  },
+  "notifications": {
+    "title": "Discord შეტყობინებები",
+    "serviceUnavailable": "Notification service is unavailable in this build. Set `VITE_NOTIFICATION_API_URL` to enable Discord linking and delivery.",
+    "finishBrowser": "Discord-ის დაკავშირების პროცესი დაასრულეთ ბრაუზერში.",
+    "loadingStatus": "Discord შეტყობინებების სტატუსი იტვირთება...",
+    "account": "ანგარიში",
+    "rules": "წესები",
+    "rulesSummary": "{{enabled}} active / {{total}} total",
+    "dmRefused": "QLTracker დაკავშირებულია, მაგრამ Discord-მა DM შემოწმება მაინც უარყო. DM-ების ხელახლა შესამოწმებლად თავიდან სცადეთ ინსტალაციის/დაკავშირების პროცესი.",
+    "relink": "Discord-ის ხელახლა დაკავშირება",
+    "retryInstall": "ინსტალაციის შემოწმების გამეორება",
+    "disconnect": "გათიშვა",
+    "noAccount": "Discord-ის ანგარიში ჯერ არ არის დაკავშირებული.",
+    "installLink": "Discord-ის ინსტალაცია და დაკავშირება",
+    "dialog": {
+      "editTitle": "Discord შეტყობინების რედაქტირება",
+      "createTitle": "Discord შეტყობინება",
+      "descriptionWithServer": "Configure a Discord DM notification for {{server}}.",
+      "descriptionFallback": "დააყენეთ Discord DM შეტყობინება ამ სერვერისთვის.",
+      "enabled": "ჩართულია",
+      "enabledDescription": "DM-ები გაიგზავნება მხოლოდ მაშინ, როცა ეს წესი ჩართულია.",
+      "thresholdType": "ზღვრის ტიპი",
+      "thresholdPlaceholder": "აირჩიეთ ზღვრის ტიპი",
+      "mode": {
+        "active_free_slots": {
+          "label": "დარჩენილი სათამაშო სლოტები",
+          "description": "შეტყობინება მაშინ, როცა მატჩი შევსებას ამდენით უახლოვდება, სრული სერვერის სლოტების ნაცვლად კი გამოყენებულია აქტიური სათამაშო სლოტების საერთო რაოდენობა."
+        },
+        "free_slots": {
+          "label": "თავისუფალი სლოტები",
+          "description": "შეტყობინება მაშინ, როცა სერვერზე ამდენი ან ნაკლები თავისუფალი სლოტი დარჩება."
+        },
+        "min_players": {
+          "label": "მოთამაშეების მინიმუმი",
+          "description": "შეტყობინება მაშინ, როცა სერვერი სულ მცირე ამდენ მოთამაშეს მიაღწევს."
+        }
+      },
+      "totalPlayingSlots": "სათამაშო სლოტები სულ",
+      "totalPlayingSlotsDescription": "გამოიყენეთ ორივე გუნდის ჯამი და არა თითო გუნდის ზომა. 4v4 სერვერისთვის შეიყვანეთ 8. 8v8 სერვერისთვის შეიყვანეთ 16. ეს განსხვავდება სერვერის სრული სლოტების რაოდენობისგან.",
+      "minimumPlayerCount": "მოთამაშეების მინიმალური რაოდენობა",
+      "maximumActiveSlotsLeft": "დარჩენილი აქტიური სლოტების მაქსიმუმი",
+      "maximumFreeSlots": "თავისუფალი სლოტების მაქსიმუმი",
+      "activeSlotsDescription": "This rule will evaluate against {{count}} total active playing slots.",
+      "serverSupportsDescription": "This server currently supports up to {{count}} players.",
+      "deleteRule": "წესის წაშლა",
+      "saveChanges": "ცვლილებების შენახვა",
+      "createRule": "წესის შექმნა"
+    }
+  },
+  "serverList": {
+    "refresh": "განახლება",
+    "noServersMatch": "არცერთი სერვერი არ შეესაბამება მიმდინარე ფილტრებს.",
+    "pageStatus": "Page {{current}} of {{total}}",
+    "table": {
+      "server": "სერვერი",
+      "location": "ლოკაცია",
+      "mode": "რეჟიმი",
+      "players": "მოთამაშეები",
+      "ping": "პინგი",
+      "actions": "მოქმედებები"
+    },
+    "locationUnknown": "უცნობი",
+    "modeUnknown": "უცნობი",
+    "pingUnavailable": "N/A",
+    "passwordSaved": "პაროლი შენახულია",
+    "passwordRequired": "საჭიროა პაროლი",
+    "notificationEnabled": "Discord შეტყობინება ჩართულია",
+    "actions": {
+      "notificationsPublicOnly": "შეტყობინებები ხელმისაწვდომია მხოლოდ საჯარო სერვერებისთვის.",
+      "connectDiscordFavorites": "შეტყობინებების გვერდზე დააკავშირეთ Discord, რომ შეტყობინებები ჩაირთოს.",
+      "editNotification": "Discord შეტყობინების რედაქტირება",
+      "notifyDiscord": "შეტყობინება Discord-ზე",
+      "editFavorite": "ფავორიტის რედაქტირება",
+      "removeFromFavorites": "ფავორიტებიდან წაშლა",
+      "addToFavorites": "ფავორიტებში დამატება"
+    },
+    "drawer": {
+      "play": "თამაში",
+      "avgQeloTooltip": "ამ სერვერზე საშუალო QElo",
+      "avgTrueskillTooltip": "ამ სერვერზე საშუალო TSkill",
+      "topQeloTooltip": "ამ სერვერზე ყველაზე მაღალი QElo-ის მქონე მოთამაშე",
+      "topTrueskillTooltip": "ამ სერვერზე ყველაზე მაღალი TSkill-ის მქონე მოთამაშე",
+      "playersHeading": "მოთამაშეები",
+      "player": "მოთამაშე",
+      "points": "ქულები",
+      "qelo": "QElo",
+      "trueskill": "TSkill",
+      "time": "დრო",
+      "lookupFailed": "Steam მოთამაშეების მოძიება ვერ მოხერხდა.",
+      "noPlayerData": "ამ სერვერისთვის მოთამაშის მონაცემები არ არის.",
+      "teams": {
+        "blue": "ლურჯი გუნდი",
+        "free": "თავისუფალი",
+        "players": "მოთამაშეები",
+        "red": "წითელი გუნდი",
+        "spectators": "მაყურებლები",
+        "unassigned": "მიუნიჭებელი"
+      }
+    },
+    "favoriteDialog": {
+      "editTitle": "ფავორიტის რედაქტირება",
+      "addTitle": "ფავორიტებში დამატება",
+      "fallbackDescription": "მიანიჭეთ ეს სერვერი თქვენს ერთ-ერთ ლოკალურ ფავორიტების სიას.",
+      "selectList": "აირჩიეთ სია",
+      "listsUnavailable": "ფავორიტების სიები არ არის ხელმისაწვდომი. ჯერ შექმენით სია ფავორიტების გვერდზე.",
+      "remove": "წაშლა",
+      "saveChanges": "ცვლილებების შენახვა",
+      "addToList": "სიაში დამატება"
+    },
+    "passwordDialog": {
+      "title": "სერვერის პაროლი",
+      "descriptionWithServer": "Enter the password for {{server}}.",
+      "fallbackDescription": "შეიყვანეთ ამ სერვერის პაროლი.",
+      "inputPlaceholder": "შეიყვანეთ სერვერის პაროლი",
+      "remember": "შეინახე ეს პაროლი შემდეგი შეერთებებისთვის",
+      "join": "შეერთება"
+    },
+    "toasts": {
+      "removedFromFavorites": "ფავორიტებიდან წაიშალა.",
+      "notificationUpdated": "შეტყობინება განახლდა.",
+      "notificationCreated": "შეტყობინება შეიქმნა.",
+      "notificationRemoved": "შეტყობინება წაიშალა.",
+      "notificationSaveError": "შეტყობინების წესის შენახვა ვერ მოხერხდა.",
+      "notificationRemoveError": "შეტყობინების წესის წაშლა ვერ მოხერხდა.",
+      "favoriteUpdated": "ფავორიტი განახლდა.",
+      "addedToFavorites": "ფავორიტებში დაემატა."
+    }
+  },
+  "settings": {
+    "title": "პარამეტრები",
+    "startupTitle": "Windows-თან ერთად გაშვება",
+    "startupDescription": "Windows-ში შესვლისას QLTracker ავტომატურად გაეშვას.",
+    "startupSaving": "გაშვების პარამეტრი ინახება...",
+    "unavailable": "ეს პარამეტრი ამ ვერსიაში მიუწვდომელია.",
+    "languageTitle": "ენა",
+    "languageDescription": "??????? ???, ???????? QLTracker ???? ???? ???????????.",
+    "languagePlaceholder": "აირჩიეთ ენა"
+  },
+  "language": {
+    "en": "English",
+    "de": "Deutsch",
+    "bg": "Български",
+    "ru": "Русский",
+    "uk": "Українська",
+    "hr": "Hrvatski",
+    "sr": "Српски",
+    "fr": "Français",
+    "it": "Italiano",
+    "et": "Eesti",
+    "nl": "Nederlands",
+    "fi": "Suomi",
+    "sv": "Svenska",
+    "hu": "Magyar",
+    "da": "Dansk",
+    "lv": "Latviešu",
+    "nb": "Norsk Bokmål",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ka": "ქართული",
+    "zh-Hant": "繁體中文",
+    "zh-Hans": "简体中文",
+    "es": "Español",
+    "pt-BR": "Português (Brasil)",
+    "pl": "Polski",
+    "ro": "Română",
+    "lt": "Lietuvių",
+    "cs": "Čeština"
+  },
+  "favorites": {
+    "lists": "სიები",
+    "refresh": "განახლება",
+    "createList": "სიის შექმნა",
+    "createDialogTitle": "ფავორიტების სიის შექმნა",
+    "createDialogDescription": "შექმენით სია თქვენი შენახული სერვერების დასაორგანიზებლად.",
+    "listNamePlaceholder": "სიის სახელი",
+    "playersTooltip": "ამ სიაში მოთამაშეების საერთო ცოცხალი რაოდენობა",
+    "favoriteServers": "ფავორიტი სერვერები",
+    "savedServers_one": "{{count}} saved server",
+    "savedServers_other": "{{count}} saved servers",
+    "noLists": "სიები ჯერ არ არის. დასაწყებად შექმენით თქვენი პირველი სია.",
+    "noServers": "ამ სიაში ჯერ არცერთი სერვერი არ არის შენახული."
+  },
+  "filters": {
+    "title": "ფილტრები",
+    "expand": "ფილტრების გაშლა",
+    "collapse": "ფილტრების ჩაკეცვა",
+    "searchPlaceholder": "მოძებნე სერვერის სახელი",
+    "showFull": "სავსეების ჩვენება",
+    "showEmpty": "ცარიელების ჩვენება",
+    "showFavorites": "ფავორიტების ჩვენება",
+    "clearAll": "ყველაფრის გასუფთავება",
+    "regions": {
+      "all": "ყველა რეგიონი",
+      "eu": "ევროპა",
+      "na": "ჩრდილოეთი ამერიკა",
+      "sa": "სამხრეთი ამერიკა",
+      "za": "სამხრეთი აფრიკა",
+      "apac": "აზია-წყნარი ოკეანე"
+    },
+    "visibility": {
+      "all": "ყველა სერვერი",
+      "public": "საჯარო",
+      "private": "პირადი"
+    },
+    "modes": {
+      "all": "ყველა რეჟიმი",
+      "ca": "Clan Arena",
+      "duel": "დუელი",
+      "ffa": "ყველა ყველას წინააღმდეგ",
+      "tdm": "გუნდური სიკვდილის მატჩი",
+      "ctf": "CTF",
+      "ad": "თავდასხმა და დაცვა",
+      "dom": "დომინაცია",
+      "ft": "გაყინვის ტეგი",
+      "har": "ჰარვესტერი",
+      "race": "რბოლა",
+      "rr": "Red Rover"
+    },
+    "rating": {
+      "title": "რეიტინგი",
+      "description": "გაფილტრეთ სერვერები საშუალო QElo-ს ან TSkill-ის მიხედვით.",
+      "systemPlaceholder": "რეიტინგის სისტემა",
+      "qelo": "QElo",
+      "trueskill": "TSkill"
+    },
+    "maps": {
+      "all": "ყველა რუკა",
+      "selectedCount": "{{count}} maps selected",
+      "searchPlaceholder": "რუკების ძებნა...",
+      "empty": "რუკები ვერ მოიძებნა."
+    },
+    "tags": {
+      "label": "თეგები",
+      "selectedCount": "{{count}}+ tags",
+      "none": "არცერთი თეგი არჩეული არ არის.",
+      "inputPlaceholder": "შეიყვანეთ თეგი და დააჭირეთ Enter-ს"
+    }
+  }
+}

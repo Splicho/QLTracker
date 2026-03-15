@@ -1,0 +1,239 @@
+{
+  "navigation": {
+    "serverList": "服务器列表",
+    "favorites": "爱好",
+    "notifications": "通知",
+    "settings": "设置"
+  },
+  "header": {
+    "unknown": "未知",
+    "theme": {
+      "light": "轻主题",
+      "dark": "黑暗主题",
+      "system": "系统主题"
+    }
+  },
+  "sidebar": {
+    "groupLabel": "QLTcracker 软件",
+    "about": "关于 QLTracker 软件"
+  },
+  "about": {
+    "version": "版本",
+    "author": "作者",
+    "socials": "社会",
+    "stack": "堆栈",
+    "repo": "还原"
+  },
+  "notifications": {
+    "title": "解析通知",
+    "serviceUnavailable": "Notification service is unavailable in this build. Set `VITE_NOTIFICATION_API_URL` to enable Discord linking and delivery.",
+    "finishBrowser": "在浏览器中完成 Discord 链接流 .",
+    "loadingStatus": "正在装入 Discord 通知状态...",
+    "account": "账户",
+    "rules": "规则",
+    "rulesSummary": "{{enabled}} active / {{total}} total",
+    "dmRefused": "QLTracker被链接,但Discord仍然拒绝DM检查. 重试安装/ 链接流以再次测试 DMs .",
+    "relink": "重新链接迪斯科",
+    "retryInstall": "重试安装检查",
+    "disconnect": "断开连接",
+    "noAccount": "尚未链接 Discord 账户 .",
+    "installLink": "安装链接磁盘( L)",
+    "dialog": {
+      "editTitle": "编辑 Discord 通知",
+      "createTitle": "解析通知",
+      "descriptionWithServer": "Configure a Discord DM notification for {{server}}.",
+      "descriptionFallback": "为此服务器配置 Discord DM 通知 .",
+      "enabled": "已启用",
+      "enabledDescription": "仅在启用此规则时发送模式 .",
+      "thresholdType": "阈值类型",
+      "thresholdPlaceholder": "选择阈值类型",
+      "mode": {
+        "active_free_slots": {
+          "label": "播放空档",
+          "description": "当匹配接近填充时通知, 使用全部活动播放槽而不是完整的服务器槽 ."
+        },
+        "free_slots": {
+          "label": "空档",
+          "description": "通知服务器是否有这么多空位或更少空位 ."
+        },
+        "min_players": {
+          "label": "最小玩家",
+          "description": "当服务器到达至少这么多的玩家时通知 ."
+        }
+      },
+      "totalPlayingSlots": "播放槽总数",
+      "totalPlayingSlotsDescription": "使用两支队伍的组合,而不是每支队伍的大小. 对于4v4服务器,请输入8. 对于一个8v8服务器,输入16. 这与服务器的完整位数不同 .",
+      "minimumPlayerCount": "最小玩家数",
+      "maximumActiveSlotsLeft": "剩余最大活动槽",
+      "maximumFreeSlots": "最大空档",
+      "activeSlotsDescription": "This rule will evaluate against {{count}} total active playing slots.",
+      "serverSupportsDescription": "This server currently supports up to {{count}} players.",
+      "deleteRule": "删除规则",
+      "saveChanges": "保存更改",
+      "createRule": "创建规则"
+    }
+  },
+  "serverList": {
+    "refresh": "刷新",
+    "noServersMatch": "没有匹配当前过滤器的服务器 .",
+    "pageStatus": "Page {{current}} of {{total}}",
+    "table": {
+      "server": "服务器",
+      "location": "地点",
+      "mode": "模式",
+      "players": "玩家",
+      "ping": "Ing",
+      "actions": "行动"
+    },
+    "locationUnknown": "未知",
+    "modeUnknown": "未知",
+    "pingUnavailable": "不详",
+    "passwordSaved": "密码已保存",
+    "passwordRequired": "需要密码",
+    "notificationEnabled": "启用了解析通知",
+    "actions": {
+      "notificationsPublicOnly": "通知只提供给公共服务器.",
+      "connectDiscordFavorites": "在通知页面上连接 Discord 以启用通知 .",
+      "editNotification": "编辑 Discord 通知",
+      "notifyDiscord": "在 Discord 上通知",
+      "editFavorite": "编辑最爱",
+      "removeFromFavorites": "从最爱中删除",
+      "addToFavorites": "添加到最爱"
+    },
+    "drawer": {
+      "play": "播放",
+      "avgQeloTooltip": "此服务器上的平均QElo",
+      "avgTrueskillTooltip": "此服务器上的平均 TSkill 值",
+      "topQeloTooltip": "此服务器上最高的QElo 播放器",
+      "topTrueskillTooltip": "此服务器上最高的 TSkill 播放器",
+      "playersHeading": "玩家",
+      "player": "玩家",
+      "points": "点",
+      "qelo": "QElo 数据",
+      "trueskill": "技术技能",
+      "time": "时间",
+      "lookupFailed": "Steam 播放器搜索失败 .",
+      "noPlayerData": "此服务器没有玩家数据 .",
+      "teams": {
+        "blue": "蓝队",
+        "free": "免费",
+        "players": "玩家",
+        "red": "红队",
+        "spectators": "观察者",
+        "unassigned": "未指定"
+      }
+    },
+    "favoriteDialog": {
+      "editTitle": "编辑最爱",
+      "addTitle": "添加到爱好",
+      "fallbackDescription": "指定此服务器为您本地最喜欢的列表 .",
+      "selectList": "选择一个列表",
+      "listsUnavailable": "没有可供选择的列表 。 首先在 Favorites 页面创建列表 .",
+      "remove": "删除",
+      "saveChanges": "保存更改",
+      "addToList": "添加到列表中"
+    },
+    "passwordDialog": {
+      "title": "服务器密码",
+      "descriptionWithServer": "Enter the password for {{server}}.",
+      "fallbackDescription": "输入此服务器的密码 .",
+      "inputPlaceholder": "输入服务器密码",
+      "remember": "保存此密码供将来加入",
+      "join": "联合"
+    },
+    "toasts": {
+      "removedFromFavorites": "从最爱中删除.",
+      "notificationUpdated": "通知更新.",
+      "notificationCreated": "创建通知.",
+      "notificationRemoved": "通知被删除.",
+      "notificationSaveError": "无法保存通知规则 .",
+      "notificationRemoveError": "无法删除通知规则 .",
+      "favoriteUpdated": "最爱更新.",
+      "addedToFavorites": "增入所爱."
+    }
+  },
+  "settings": {
+    "title": "设置",
+    "startupTitle": "在窗口上启动",
+    "startupDescription": "在 Windows 上签名时自动启动 QLTracker .",
+    "startupSaving": "保存启动首选项...",
+    "unavailable": "此建筑没有设置 .",
+    "languageTitle": "语言",
+    "languageDescription": "?? QLTracker ????????????",
+    "languagePlaceholder": "选择语言"
+  },
+  "language": {
+    "en": "联合国",
+    "de": "德国"
+  },
+  "favorites": {
+    "lists": "名单",
+    "refresh": "刷新",
+    "createList": "创建列表",
+    "createDialogTitle": "创建最爱列表",
+    "createDialogDescription": "创建列表来组织您保存的服务器 .",
+    "listNamePlaceholder": "列表名称",
+    "playersTooltip": "本列表中共计活的玩家",
+    "favoriteServers": "最爱的服务器",
+    "savedServers_one": "{{count}} saved server",
+    "savedServers_other": "{{count}} saved servers",
+    "noLists": "还没有名单 创建您的第一个启动列表 .",
+    "noServers": "尚未在此列表中保存服务器 ."
+  },
+  "filters": {
+    "title": "过滤器",
+    "expand": "扩展过滤器",
+    "collapse": "折叠过滤器",
+    "searchPlaceholder": "搜索服务器名称",
+    "showFull": "显示完整",
+    "showEmpty": "显示空",
+    "showFavorites": "显示偏好",
+    "clearAll": "全部清除",
+    "regions": {
+      "all": "所有区域",
+      "eu": "欧洲",
+      "na": "北美",
+      "sa": "南美洲",
+      "za": "南非",
+      "apac": "亚太"
+    },
+    "visibility": {
+      "all": "所有服务器",
+      "public": "公开",
+      "private": "私营"
+    },
+    "modes": {
+      "all": "所有模式",
+      "ca": "部族竞技场",
+      "duel": "决斗",
+      "ffa": "人人免费",
+      "tdm": "团队死亡比赛",
+      "ctf": "真相和友谊委员会",
+      "ad": "攻击并防御",
+      "dom": "支配",
+      "ft": "冻结标签",
+      "har": "收获者",
+      "race": "种族",
+      "rr": "红车"
+    },
+    "rating": {
+      "title": "评级",
+      "description": "通过平均QElo或TSkill过滤服务器.",
+      "systemPlaceholder": "评级制度",
+      "qelo": "QElo 数据",
+      "trueskill": "技术技能"
+    },
+    "maps": {
+      "all": "所有地图",
+      "selectedCount": "{{count}} maps selected",
+      "searchPlaceholder": "搜索地图...",
+      "empty": "未找到地图 ."
+    },
+    "tags": {
+      "label": "标记",
+      "selectedCount": "{{count}}+ tags",
+      "none": "未选择标签 .",
+      "inputPlaceholder": "类型标签并按 Enter"
+    }
+  }
+}

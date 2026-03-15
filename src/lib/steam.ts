@@ -45,6 +45,7 @@ export type ServerMode = {
 export type ServerPlayerRating = {
   name: string;
   steam_id: string | null;
+  team: number | null;
   qelo: number | null;
   trueskill: number | null;
 };

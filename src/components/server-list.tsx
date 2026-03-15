@@ -24,6 +24,7 @@ import {
   Bell,
   BellOff,
   BellRing,
+  Eye,
   Pencil,
   RefreshCw,
 } from "lucide-react";
@@ -69,6 +70,7 @@ import {
   RATING_FILTER_MIN,
   type ServerFiltersValue,
 } from "@/components/server-filters";
+import { ServerDrawer } from "@/components/server-drawer";
 import { ServerNotificationDialog } from "@/components/server-notification-dialog";
 import {
   Dialog,
@@ -78,7 +80,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import {
   Pagination,
   PaginationContent,
@@ -115,6 +116,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTranslation } from "react-i18next";
 
 const regionLabels: Record<string, string> = {
   eu: "EU",
@@ -133,20 +135,20 @@ const steamRegionMap: Record<number, keyof typeof regionLabels> = {
   7: "apac",
 };
 
-const modeLabels: Record<string, string> = {
-  ca: "Clan Arena",
-  duel: "Duel",
-  ffa: "Free For All",
-  tdm: "Team DM",
-  ctf: "CTF",
-  ad: "Attack & Defend",
-  dom: "Domination",
-  ft: "Freeze Tag",
-  har: "Harvester",
-  race: "Race",
-  rr: "Red Rover",
-  td: "Tournament DM",
-  "1f": "1 Flag CTF",
+const modeLabelKeys: Record<string, string> = {
+  ca: "filters.modes.ca",
+  duel: "filters.modes.duel",
+  ffa: "filters.modes.ffa",
+  tdm: "filters.modes.tdm",
+  ctf: "filters.modes.ctf",
+  ad: "filters.modes.ad",
+  dom: "filters.modes.dom",
+  ft: "filters.modes.ft",
+  har: "filters.modes.har",
+  race: "filters.modes.race",
+  rr: "filters.modes.rr",
+  td: "filters.modes.tdm",
+  "1f": "filters.modes.ctf",
 };
 
 function sortServersForPage(
@@ -344,11 +346,68 @@ function getPingIconClassName(ping: number) {
   return "text-red-400";
 }
 
+const playerTeamSectionMeta = {
+  blue: {
+    labelKey: "serverList.drawer.teams.blue",
+    toneClassName: "text-sky-400",
+  },
+  free: {
+    labelKey: "serverList.drawer.teams.free",
+    toneClassName: "text-foreground",
+  },
+  players: {
+    labelKey: "serverList.drawer.teams.players",
+    toneClassName: "text-foreground",
+  },
+  red: {
+    labelKey: "serverList.drawer.teams.red",
+    toneClassName: "text-rose-400",
+  },
+  spectators: {
+    labelKey: "serverList.drawer.teams.spectators",
+    toneClassName: "text-muted-foreground",
+  },
+  unassigned: {
+    labelKey: "serverList.drawer.teams.unassigned",
+    toneClassName: "text-muted-foreground",
+  },
+} as const;
+
+type PlayerTeamSectionKey = keyof typeof playerTeamSectionMeta;
+
+type DrawerPlayer = SteamServer["players_info"][number] & {
+  rating: ServerPlayerRating | null;
+};
+
+function getPlayerTeamSectionKey(
+  team: number | null | undefined,
+  hasRedBlueTeams: boolean
+): PlayerTeamSectionKey {
+  if (team === 1) {
+    return "red";
+  }
+
+  if (team === 2) {
+    return "blue";
+  }
+
+  if (team === 3) {
+    return "spectators";
+  }
+
+  if (team === 0) {
+    return hasRedBlueTeams ? "free" : "players";
+  }
+
+  return "unassigned";
+}
+
 function ServerAverageRatingBadges({
   serverAddress,
 }: {
   serverAddress: string;
 }) {
+  const { t } = useTranslation();
   const ratingsQuery = useQuery({
     queryKey: ["steam", "server", "player-ratings", serverAddress],
     queryFn: () => fetchSteamServerPlayerRatings(serverAddress),
@@ -402,7 +461,9 @@ function ServerAverageRatingBadges({
             </div>
           </Badge>
         </TooltipTrigger>
-        <TooltipContent side="top">Average QElo on this server</TooltipContent>
+        <TooltipContent side="top">
+          {t("serverList.drawer.avgQeloTooltip")}
+        </TooltipContent>
       </Tooltip>
       <Tooltip>
         <TooltipTrigger asChild>
@@ -415,7 +476,7 @@ function ServerAverageRatingBadges({
           </Badge>
         </TooltipTrigger>
         <TooltipContent side="top">
-          Average TSkill on this server
+          {t("serverList.drawer.avgTrueskillTooltip")}
         </TooltipContent>
       </Tooltip>
       <Separator orientation="vertical" className="!h-4 self-center" />
@@ -440,7 +501,7 @@ function ServerAverageRatingBadges({
           </Badge>
         </TooltipTrigger>
         <TooltipContent side="top">
-          Highest QElo player on this server
+          {t("serverList.drawer.topQeloTooltip")}
         </TooltipContent>
       </Tooltip>
       <Tooltip>
@@ -464,7 +525,7 @@ function ServerAverageRatingBadges({
           </Badge>
         </TooltipTrigger>
         <TooltipContent side="top">
-          Highest TSkill player on this server
+          {t("serverList.drawer.topTrueskillTooltip")}
         </TooltipContent>
       </Tooltip>
     </div>
@@ -472,6 +533,7 @@ function ServerAverageRatingBadges({
 }
 
 function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
+  const { t } = useTranslation();
   const [sorting, setSorting] = useState<SortingState>([
     { id: "points", desc: true },
   ]);
@@ -548,7 +610,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
     ratingsQuery.isPending;
   const playerPanelFrameClass = "min-h-[20rem]";
 
-  const columns = useMemo<ColumnDef<(typeof mergedPlayers)[number]>[]>(
+  const columns = useMemo<ColumnDef<DrawerPlayer>[]>(
     () => [
       {
         accessorKey: "name",
@@ -559,7 +621,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
             className="-ml-2 h-8 px-2.5 text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:bg-transparent"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Player
+            {t("serverList.drawer.player")}
             <ArrowUpDown className="size-3.5" />
           </Button>
         ),
@@ -611,7 +673,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
             className="-ml-2 h-8 px-2.5 text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:bg-transparent"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Points
+            {t("serverList.drawer.points")}
             <ArrowUpDown className="size-3.5" />
           </Button>
         ),
@@ -665,7 +727,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
             className="-ml-2 h-8 px-2.5 text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:bg-transparent"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Time
+            {t("serverList.drawer.time")}
             <ArrowUpDown className="size-3.5" />
           </Button>
         ),
@@ -684,12 +746,47 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
+  const sortedRows = table.getRowModel().rows;
+  const hasKnownTeams = mergedPlayers.some((player) => player.rating?.team != null);
+  const hasRedBlueTeams = mergedPlayers.some((player) => {
+    const team = player.rating?.team;
+    return team === 1 || team === 2;
+  });
+  const teamSections = useMemo(() => {
+    if (!hasKnownTeams) {
+      return [];
+    }
+
+    const groupedRows = new Map<PlayerTeamSectionKey, typeof sortedRows>();
+    const sectionOrder: PlayerTeamSectionKey[] = hasRedBlueTeams
+      ? ["red", "blue", "free", "spectators", "unassigned"]
+      : ["players", "spectators", "unassigned"];
+
+    for (const row of sortedRows) {
+      const sectionKey = getPlayerTeamSectionKey(
+        row.original.rating?.team,
+        hasRedBlueTeams
+      );
+      const existingRows = groupedRows.get(sectionKey) ?? [];
+      existingRows.push(row);
+      groupedRows.set(sectionKey, existingRows);
+    }
+
+    return sectionOrder
+      .map((sectionKey) => ({
+        ...playerTeamSectionMeta[sectionKey],
+        key: sectionKey,
+        rows: groupedRows.get(sectionKey) ?? [],
+      }))
+      .filter((section) => section.rows.length > 0);
+  }, [hasKnownTeams, hasRedBlueTeams, sortedRows]);
+  const shouldRenderTeamSections = teamSections.length > 1;
 
   if (playerPanelPending) {
     return (
       <div className={`flex flex-col gap-2 ${playerPanelFrameClass}`}>
         <div className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
-          Players
+          {t("serverList.drawer.playersHeading")}
         </div>
         <div className="overflow-hidden rounded-lg border border-border">
           <Table>
@@ -745,7 +842,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
   if (playersQuery.isError) {
     return (
       <div className="text-sm text-muted-foreground">
-        Steam player lookup failed.
+        {t("serverList.drawer.lookupFailed")}
       </div>
     );
   }
@@ -753,7 +850,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
   if (mergedPlayers.length === 0) {
     return (
       <div className="text-sm text-muted-foreground">
-        No player data for this server.
+        {t("serverList.drawer.noPlayerData")}
       </div>
     );
   }
@@ -761,7 +858,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
   return (
     <div className={`flex flex-col gap-2 ${playerPanelFrameClass}`}>
       <div className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
-        Players
+        {t("serverList.drawer.playersHeading")}
       </div>
       <div className="overflow-hidden rounded-lg border border-border">
         <Table>
@@ -785,27 +882,69 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                className="border-b border-border hover:bg-transparent"
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell
-                    key={cell.id}
-                    className="px-3 py-2 text-sm text-muted-foreground"
+            {shouldRenderTeamSections
+              ? teamSections.map((section) => (
+                  <Fragment key={`player-team-section-${section.key}`}>
+                    <TableRow className="border-b border-border bg-muted/10 hover:bg-muted/10">
+                    <TableCell
+                        colSpan={columns.length}
+                        className={`px-3 py-2 text-[11px] font-medium uppercase tracking-[0.12em] ${section.toneClassName}`}
+                      >
+                        <span className="inline-flex items-center gap-1.5">
+                          <span>{t(section.labelKey)}</span>
+                          {section.key === "spectators" ? (
+                            <Eye className="size-3.5" />
+                          ) : null}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                    {section.rows.map((row) => (
+                      <TableRow
+                        key={row.id}
+                        className="border-b border-border hover:bg-transparent"
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell
+                            key={cell.id}
+                            className="px-3 py-2 text-sm text-muted-foreground"
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))}
+                  </Fragment>
+                ))
+              : sortedRows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    className="border-b border-border hover:bg-transparent"
                   >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell
+                        key={cell.id}
+                        className="px-3 py-2 text-sm text-muted-foreground"
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
                 ))}
-              </TableRow>
-            ))}
           </TableBody>
         </Table>
       </div>
     </div>
   );
 }
+
+const legacyServerDrawerReferences = {
+  ServerAverageRatingBadges,
+  QlStatsPlayersPanel,
+};
+void legacyServerDrawerReferences;
 
 export function ServerList({
   servers,
@@ -833,6 +972,7 @@ export function ServerList({
     deleteRule,
     mutationsPending: notificationMutationPending,
   } = useNotificationService();
+  const { t } = useTranslation();
   const { getPassword, savePassword } = useServerPasswords();
   const [selectedServer, setSelectedServer] = useState<SteamServer | null>(
     null
@@ -893,11 +1033,15 @@ export function ServerList({
         return false;
       }
 
-      if (filters.hideEmpty && server.players === 0) {
+      if (filters.showFull && !filters.showEmpty && server.players === 0) {
         return false;
       }
 
-      if (filters.hideFull && server.players >= server.max_players) {
+      if (filters.showEmpty && !filters.showFull && server.players > 0) {
+        return false;
+      }
+
+      if (filters.showFavorites && !favoriteAddresses.has(server.addr)) {
         return false;
       }
 
@@ -915,10 +1059,12 @@ export function ServerList({
   }, [
     deferredSearch,
     filters.gameMode,
-    filters.hideEmpty,
-    filters.hideFull,
+    filters.showEmpty,
+    filters.showFull,
+    filters.showFavorites,
     filters.maps,
     filters.tags,
+    favoriteAddresses,
     servers,
   ]);
 
@@ -1328,7 +1474,7 @@ export function ServerList({
             className="-ml-2 h-8 px-2.5 text-xs uppercase tracking-[0.12em] text-muted-foreground hover:bg-transparent"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Server
+            {t("serverList.table.server")}
             <ArrowUpDown className="size-3.5" />
           </Button>
         ),
@@ -1380,8 +1526,8 @@ export function ServerList({
                       </TooltipTrigger>
                       <TooltipContent side="top">
                         {hasSavedPassword
-                          ? "Password saved"
-                          : "Password required"}
+                          ? t("serverList.passwordSaved")
+                          : t("serverList.passwordRequired")}
                       </TooltipContent>
                     </Tooltip>
                   ) : null}
@@ -1396,7 +1542,7 @@ export function ServerList({
                         </Badge>
                       </TooltipTrigger>
                       <TooltipContent side="top">
-                        Discord notification enabled
+                        {t("serverList.notificationEnabled")}
                       </TooltipContent>
                     </Tooltip>
                   ) : null}
@@ -1414,7 +1560,7 @@ export function ServerList({
           "",
         header: () => (
           <div className="px-0.5 text-xs uppercase tracking-[0.12em] text-muted-foreground">
-            Location
+            {t("serverList.table.location")}
           </div>
         ),
         cell: ({ row }) => {
@@ -1432,7 +1578,7 @@ export function ServerList({
             const region = resolveServerRegion(row.original, location);
             return (
               <span className="text-sm text-muted-foreground">
-                {region ? regionLabels[region] : "Unknown"}
+                {region ? regionLabels[region] : t("serverList.locationUnknown")}
               </span>
             );
           }
@@ -1459,7 +1605,7 @@ export function ServerList({
             className="-ml-2 h-8 px-2.5 text-xs uppercase tracking-[0.12em] text-muted-foreground hover:bg-transparent"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Mode
+            {t("serverList.table.mode")}
             <ArrowUpDown className="size-3.5" />
           </Button>
         ),
@@ -1474,7 +1620,9 @@ export function ServerList({
           const mode =
             resolvedModesByAddr[row.original.addr] ??
             normalizeGameMode(row.original);
-          return mode ? (modeLabels[mode] ?? mode.toUpperCase()) : "Unknown";
+          return mode
+            ? (modeLabelKeys[mode] ? t(modeLabelKeys[mode]) : mode.toUpperCase())
+            : t("serverList.modeUnknown");
         },
       },
       {
@@ -1487,7 +1635,7 @@ export function ServerList({
             className="-ml-2 h-8 px-2.5 text-xs uppercase tracking-[0.12em] text-muted-foreground hover:bg-transparent"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Players
+            {t("serverList.table.players")}
             <ArrowUpDown className="size-3.5" />
           </Button>
         ),
@@ -1504,7 +1652,7 @@ export function ServerList({
             className="-ml-2 h-8 px-2.5 text-xs uppercase tracking-[0.12em] text-muted-foreground hover:bg-transparent"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Ping
+            {t("serverList.table.ping")}
             <ArrowUpDown className="size-3.5" />
           </Button>
         ),
@@ -1516,7 +1664,7 @@ export function ServerList({
           }
 
           if (ping == null && !pingLookupPending) {
-            return "N/A";
+            return t("serverList.pingUnavailable");
           }
 
           return (
@@ -1531,7 +1679,7 @@ export function ServerList({
         id: "actions",
         header: () => (
           <div className="text-right text-xs uppercase tracking-[0.12em] text-muted-foreground">
-            Actions
+            {t("serverList.table.actions")}
           </div>
         ),
         cell: ({ row }) => {
@@ -1545,15 +1693,17 @@ export function ServerList({
             actionMode !== "edit"
               ? null
               : isPrivateServer
-                ? "Notifications are available only for public servers."
+                ? t("serverList.actions.notificationsPublicOnly")
                 : !notificationUser
-                  ? "Connect Discord in Favorites to enable notifications."
+                  ? t("serverList.actions.connectDiscordFavorites")
                   : null;
           const notificationTooltip =
             actionMode !== "edit"
               ? null
               : notificationDisabledReason ??
-                (notificationRule ? "Edit Discord notification" : "Notify on Discord");
+                (notificationRule
+                  ? t("serverList.actions.editNotification")
+                  : t("serverList.actions.notifyDiscord"));
 
           return (
             <div className="flex justify-end gap-2">
@@ -1600,7 +1750,7 @@ export function ServerList({
                       event.stopPropagation();
                       if (actionMode === "add" && isFavorited) {
                         removeServer(row.original.addr);
-                        toast.success("Removed from favorites.");
+                        toast.success(t("serverList.toasts.removedFromFavorites"));
                         return;
                       }
                       setTargetFavoriteListId(
@@ -1625,10 +1775,10 @@ export function ServerList({
                 </TooltipTrigger>
                 <TooltipContent side="top">
                   {actionMode === "edit"
-                    ? "Edit favorite"
+                    ? t("serverList.actions.editFavorite")
                     : isFavorited
-                      ? "Remove from favorites"
-                      : "Add to favorites"}
+                      ? t("serverList.actions.removeFromFavorites")
+                      : t("serverList.actions.addToFavorites")}
                 </TooltipContent>
               </Tooltip>
               <Button
@@ -1664,6 +1814,7 @@ export function ServerList({
       notificationUser,
       removeServer,
       rulesByServerAddr,
+      t,
     ]
   );
 
@@ -1678,7 +1829,6 @@ export function ServerList({
     getPaginationRowModel: getPaginationRowModel(),
   });
 
-  const selectedMap = selectedServer ? getMapEntry(selectedServer.map) : null;
   const selectedRequiresPassword = selectedServer
     ? resolvedRequiresPasswordByAddr[selectedServer.addr] === true
     : false;
@@ -1719,10 +1869,10 @@ export function ServerList({
           ruleId: existingRuleId,
           patch: input,
         });
-        toast.success("Notification updated.");
+        toast.success(t("serverList.toasts.notificationUpdated"));
       } else {
         await createRule(input);
-        toast.success("Notification created.");
+        toast.success(t("serverList.toasts.notificationCreated"));
       }
 
       setNotificationServer(null);
@@ -1730,20 +1880,20 @@ export function ServerList({
       toast.error(
         error instanceof Error
           ? error.message
-          : "Could not save the notification rule."
+          : t("serverList.toasts.notificationSaveError")
       );
     }
   };
   const handleNotificationDelete = async (ruleId: string) => {
     try {
       await deleteRule(ruleId);
-      toast.success("Notification removed.");
+      toast.success(t("serverList.toasts.notificationRemoved"));
       setNotificationServer(null);
     } catch (error) {
       toast.error(
         error instanceof Error
           ? error.message
-          : "Could not remove the notification rule."
+          : t("serverList.toasts.notificationRemoveError")
       );
     }
   };
@@ -1773,7 +1923,7 @@ export function ServerList({
             className="w-full gap-2"
           >
             <RefreshCw className={`size-4 ${isRefreshing ? "animate-spin" : ""}`} />
-            Refresh
+            {t("serverList.refresh")}
           </Button>
         </div>
         <div className="relative min-h-[24rem] flex-1">
@@ -1873,7 +2023,7 @@ export function ServerList({
                     colSpan={columns.length}
                     className="h-24 px-3 py-2 text-center text-muted-foreground"
                   >
-                    No servers match the current filters.
+                    {t("serverList.noServersMatch")}
                   </TableCell>
                 </TableRow>
               )}
@@ -1896,7 +2046,10 @@ export function ServerList({
           <div className="border-t border-border px-4 py-3">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="text-xs text-muted-foreground">
-                Page {currentPage} of {pageCount}
+                {t("serverList.pageStatus", {
+                  current: currentPage,
+                  total: pageCount,
+                })}
               </div>
               <Pagination className="mx-0 w-auto justify-start sm:justify-end">
                 <PaginationContent>
@@ -1956,94 +2109,18 @@ export function ServerList({
         ) : null}
       </section>
 
-      <Drawer
+      <ServerDrawer
         open={selectedServer !== null}
+        server={selectedServer}
+        requiresPassword={selectedRequiresPassword}
+        hasSavedPassword={selectedHasSavedPassword}
         onOpenChange={(open) => {
           if (!open) {
             setSelectedServer(null);
           }
         }}
-      >
-        <DrawerContent className="h-[85vh] max-h-[85vh] w-full !border-0 rounded-t-2xl shadow-none overflow-hidden">
-          {selectedServer ? (
-            <>
-              <div className="relative overflow-hidden border-b border-border">
-                {selectedMap ? (
-                  <div className="pointer-events-none absolute inset-0">
-                    <div
-                      className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
-                      style={{
-                        backgroundImage: `url(${selectedMap.image})`,
-                        maskImage:
-                          "linear-gradient(to bottom, black 0%, black 58%, transparent 100%)",
-                        WebkitMaskImage:
-                          "linear-gradient(to bottom, black 0%, black 58%, transparent 100%)",
-                        maskSize: "100% 100%",
-                        WebkitMaskSize: "100% 100%",
-                        maskRepeat: "no-repeat",
-                        WebkitMaskRepeat: "no-repeat",
-                      }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-background/15 via-background/55 to-background" />
-                    <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-background to-transparent" />
-                  </div>
-                ) : null}
-                <div className="relative z-10 h-40">
-                  <div className="pointer-events-none absolute inset-x-0 top-11 text-center text-[11px] uppercase tracking-[0.14em] text-muted-foreground/80">
-                    {selectedMap?.name ?? selectedServer.map}
-                  </div>
-                  <div className="absolute inset-x-5 bottom-5 flex items-end justify-between gap-4">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex min-w-0 items-center gap-2">
-                        <div className="truncate text-left text-lg font-semibold leading-tight text-foreground drop-shadow-[0_1px_10px_rgba(0,0,0,0.55)]">
-                          {stripQuakeColors(selectedServer.name)}
-                        </div>
-                        {selectedRequiresPassword ? (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Badge
-                                variant="outline"
-                                className="h-5 shrink-0 gap-1 rounded-md border-amber-500/40 bg-amber-500/10 px-1.5 text-[10px] font-medium text-amber-300"
-                              >
-                                {selectedHasSavedPassword ? (
-                                  <Unlock className="size-3" />
-                                ) : (
-                                  <Lock className="size-3" />
-                                )}
-                              </Badge>
-                            </TooltipTrigger>
-                            <TooltipContent side="top">
-                              {selectedHasSavedPassword
-                                ? "Password saved"
-                                : "Password required"}
-                            </TooltipContent>
-                          </Tooltip>
-                        ) : null}
-                      </div>
-                      <ServerAverageRatingBadges
-                        serverAddress={selectedServer.addr}
-                      />
-                    </div>
-                    <Button
-                      type="button"
-                      className="h-9 shrink-0 gap-2 bg-success text-success-foreground shadow-[0_0_28px_color-mix(in_oklch,var(--color-success)_28%,transparent)] hover:bg-success-hover hover:shadow-[0_0_34px_color-mix(in_oklch,var(--color-success-hover)_34%,transparent)]"
-                      onClick={() => handleJoinServer(selectedServer)}
-                    >
-                      <Play className="size-4" />
-                      Play
-                    </Button>
-                  </div>
-                </div>
-              </div>
-              <div className="min-h-0 flex-1 overflow-y-auto">
-                <div className="px-5 py-4">
-                  <QlStatsPlayersPanel serverAddress={selectedServer.addr} />
-                </div>
-              </div>
-            </>
-          ) : null}
-        </DrawerContent>
-      </Drawer>
+        onJoin={handleJoinServer}
+      />
 
       <Dialog
         open={favoriteServer !== null}
@@ -2057,7 +2134,9 @@ export function ServerList({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {actionMode === "edit" ? "Edit Favorite" : "Add To Favorites"}
+              {actionMode === "edit"
+                ? t("serverList.favoriteDialog.editTitle")
+                : t("serverList.favoriteDialog.addTitle")}
             </DialogTitle>
             <DialogDescription>
               {favoriteServer ? (
@@ -2065,7 +2144,7 @@ export function ServerList({
                   <QuakeText text={favoriteServer.name} />
                 </span>
               ) : (
-                "Assign this server to one of your local favorite lists."
+                t("serverList.favoriteDialog.fallbackDescription")
               )}
             </DialogDescription>
           </DialogHeader>
@@ -2076,7 +2155,9 @@ export function ServerList({
               onValueChange={setTargetFavoriteListId}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a list" />
+                <SelectValue
+                  placeholder={t("serverList.favoriteDialog.selectList")}
+                />
               </SelectTrigger>
               <SelectContent>
                 {favoritesState.lists.map((list) => (
@@ -2088,8 +2169,7 @@ export function ServerList({
             </Select>
           ) : (
             <p className="text-sm text-muted-foreground">
-              No favorite lists available. Create a list on the Favorites page
-              first.
+              {t("serverList.favoriteDialog.listsUnavailable")}
             </p>
           )}
 
@@ -2104,12 +2184,12 @@ export function ServerList({
                   }
 
                   removeServerFromList(favoriteServer.addr, favoriteListId);
-                  toast.success("Removed from favorites.");
+                  toast.success(t("serverList.toasts.removedFromFavorites"));
                   setFavoriteServer(null);
                   setTargetFavoriteListId("");
                 }}
               >
-                Remove
+                {t("serverList.favoriteDialog.remove")}
               </Button>
             ) : null}
             <Button
@@ -2132,7 +2212,7 @@ export function ServerList({
                     favoriteListId,
                     targetFavoriteListId
                   );
-                  toast.success("Favorite updated.");
+                  toast.success(t("serverList.toasts.favoriteUpdated"));
                 } else {
                   addServerToList(
                     {
@@ -2142,14 +2222,16 @@ export function ServerList({
                     },
                     targetFavoriteListId
                   );
-                  toast.success("Added to favorites.");
+                  toast.success(t("serverList.toasts.addedToFavorites"));
                 }
 
                 setFavoriteServer(null);
                 setTargetFavoriteListId("");
               }}
             >
-              {actionMode === "edit" ? "Save Changes" : "Add To List"}
+              {actionMode === "edit"
+                ? t("serverList.favoriteDialog.saveChanges")
+                : t("serverList.favoriteDialog.addToList")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -2181,18 +2263,14 @@ export function ServerList({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Server Password</DialogTitle>
+            <DialogTitle>{t("serverList.passwordDialog.title")}</DialogTitle>
             <DialogDescription>
               {passwordServer ? (
-                <>
-                  Enter the password for{" "}
-                  <span className="font-medium text-foreground">
-                    {stripQuakeColors(passwordServer.name)}
-                  </span>
-                  .
-                </>
+                t("serverList.passwordDialog.descriptionWithServer", {
+                  server: stripQuakeColors(passwordServer.name),
+                })
               ) : (
-                "Enter the password for this server."
+                t("serverList.passwordDialog.fallbackDescription")
               )}
             </DialogDescription>
           </DialogHeader>
@@ -2220,7 +2298,7 @@ export function ServerList({
               setJoinPassword("");
               setRememberServerPassword(false);
             }}
-            placeholder="Enter server password"
+            placeholder={t("serverList.passwordDialog.inputPlaceholder")}
           />
 
           <div className="flex items-start gap-3 rounded-md border border-border px-3 py-2">
@@ -2236,7 +2314,7 @@ export function ServerList({
               htmlFor="remember-server-password"
               className="cursor-pointer text-sm font-normal leading-snug text-muted-foreground"
             >
-              Save this password locally for future join requests.
+              {t("serverList.passwordDialog.remember")}
             </Label>
           </div>
 
@@ -2263,7 +2341,7 @@ export function ServerList({
                 setRememberServerPassword(false);
               }}
             >
-              Join
+              {t("serverList.passwordDialog.join")}
             </Button>
           </DialogFooter>
         </DialogContent>

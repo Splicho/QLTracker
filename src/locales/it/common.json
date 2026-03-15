@@ -1,0 +1,239 @@
+{
+  "navigation": {
+    "serverList": "Elenco dei server",
+    "favorites": "Preferiti",
+    "notifications": "Notifiche",
+    "settings": "Impostazioni impostazioni"
+  },
+  "header": {
+    "unknown": "Sconosciuto",
+    "theme": {
+      "light": "Tema della luce",
+      "dark": "Tema scuro",
+      "system": "Tema del sistema"
+    }
+  },
+  "sidebar": {
+    "groupLabel": "QLTracker",
+    "about": "Informazioni su QLTracker"
+  },
+  "about": {
+    "version": "Versione",
+    "author": "Autore",
+    "socials": "Sociali",
+    "stack": "Stack",
+    "repo": "Rischio"
+  },
+  "notifications": {
+    "title": "Notifiche di discordia",
+    "serviceUnavailable": "Notification service is unavailable in this build. Set `VITE_NOTIFICATION_API_URL` to enable Discord linking and delivery.",
+    "finishBrowser": "Termina il flusso di collegamento Discord nel tuo browser.",
+    "loadingStatus": "Caricamento stato di notifica Discord...",
+    "account": "Account",
+    "rules": "Regolamento",
+    "rulesSummary": "{{enabled}} active / {{total}} total",
+    "dmRefused": "QLTracker è collegato, ma Discord ha ancora rifiutato il controllo DM. Ripristinare il flusso di installazione/link per testare nuovamente i DM.",
+    "relink": "Relink Discord",
+    "retryInstall": "Recuperare l'installazione",
+    "disconnect": "Scollegamento",
+    "noAccount": "Nessun account Discord ancora collegato.",
+    "installLink": "Install & Link Discord",
+    "dialog": {
+      "editTitle": "Modifica Notifica di Discordia",
+      "createTitle": "Notifica di discordia",
+      "descriptionWithServer": "Configure a Discord DM notification for {{server}}.",
+      "descriptionFallback": "Configurare una notifica Discord DM per questo server.",
+      "enabled": "Abilitato",
+      "enabledDescription": "Invia solo DMs mentre questa regola è abilitata.",
+      "thresholdType": "Tipo di soglia",
+      "thresholdPlaceholder": "Selezionare un tipo di soglia",
+      "mode": {
+        "active_free_slots": {
+          "label": "Giocare slot sinistra",
+          "description": "Informare quando una partita Ã ̈ vicina al riempimento, utilizzando le slot di gioco attive totali invece di slot server completi."
+        },
+        "free_slots": {
+          "label": "Fessure libere",
+          "description": "Informare quando il server ha questo molti slot gratuiti o meno."
+        },
+        "min_players": {
+          "label": "Min giocatori",
+          "description": "Informare quando il server raggiunge almeno questo molti giocatori."
+        }
+      },
+      "totalPlayingSlots": "Totale slot di gioco",
+      "totalPlayingSlotsDescription": "Utilizzare entrambe le squadre combinate, non la dimensione per-team. Per un server 4v4, inserire 8. Per un server 8v8, immettere 16. Questo è separato dal numero di slot server completo.",
+      "minimumPlayerCount": "Conto minimo del giocatore",
+      "maximumActiveSlotsLeft": "Massimo slot attivi sinistra",
+      "maximumFreeSlots": "Massime slot gratuite",
+      "activeSlotsDescription": "This rule will evaluate against {{count}} total active playing slots.",
+      "serverSupportsDescription": "This server currently supports up to {{count}} players.",
+      "deleteRule": "Cancella la regola",
+      "saveChanges": "Salvare le modifiche",
+      "createRule": "Crea la regola"
+    }
+  },
+  "serverList": {
+    "refresh": "Rifiuti",
+    "noServersMatch": "Nessun server corrisponde ai filtri attuali.",
+    "pageStatus": "Page {{current}} of {{total}}",
+    "table": {
+      "server": "Server",
+      "location": "Location",
+      "mode": "Modalità",
+      "players": "Giocatori",
+      "ping": "Ping",
+      "actions": "Azioni"
+    },
+    "locationUnknown": "Sconosciuto",
+    "modeUnknown": "Sconosciuto",
+    "pingUnavailable": "N/A",
+    "passwordSaved": "Password salvata",
+    "passwordRequired": "Password richiesta",
+    "notificationEnabled": "Notifica discord abilitata",
+    "actions": {
+      "notificationsPublicOnly": "Le notifiche sono disponibili solo per i server pubblici.",
+      "connectDiscordFavorites": "Collegare Discord nella pagina Notifiche per abilitare le notifiche.",
+      "editNotification": "Modifica notifica Discord",
+      "notifyDiscord": "Informare su Discord",
+      "editFavorite": "Modifica preferiti",
+      "removeFromFavorites": "Rimuovi dai preferiti",
+      "addToFavorites": "Aggiungi ai preferiti"
+    },
+    "drawer": {
+      "play": "Gioca",
+      "avgQeloTooltip": "QElo medio su questo server",
+      "avgTrueskillTooltip": "TSkill medio su questo server",
+      "topQeloTooltip": "Giocatore QElo più alto su questo server",
+      "topTrueskillTooltip": "Giocatore TSkill più alto su questo server",
+      "playersHeading": "Giocatori",
+      "player": "Giocatore",
+      "points": "Punti",
+      "qelo": "QElo",
+      "trueskill": "TSkill",
+      "time": "Tempo",
+      "lookupFailed": "La ricerca del giocatore di vapore non è riuscita.",
+      "noPlayerData": "Nessun dato del giocatore per questo server.",
+      "teams": {
+        "blue": "Squadra Blu",
+        "free": "Gratis",
+        "players": "Giocatori",
+        "red": "Squadra Rossa",
+        "spectators": "Spettacoli",
+        "unassigned": "Non firmata"
+      }
+    },
+    "favoriteDialog": {
+      "editTitle": "Modifica preferito",
+      "addTitle": "Aggiungi ai preferiti",
+      "fallbackDescription": "Assegna questo server a uno dei tuoi elenchi preferiti locali.",
+      "selectList": "Seleziona un elenco",
+      "listsUnavailable": "Nessuna lista preferita disponibile. Crea prima un elenco sulla pagina Preferiti.",
+      "remove": "Rimuovi",
+      "saveChanges": "Salvare le modifiche",
+      "addToList": "Aggiungi alla lista"
+    },
+    "passwordDialog": {
+      "title": "Password del server",
+      "descriptionWithServer": "Enter the password for {{server}}.",
+      "fallbackDescription": "Inserisci la password per questo server.",
+      "inputPlaceholder": "Inserisci la password del server",
+      "remember": "Salvare questa password per future unioni",
+      "join": "Iscriviti"
+    },
+    "toasts": {
+      "removedFromFavorites": "Rimuovi dai preferiti.",
+      "notificationUpdated": "Notifica aggiornata.",
+      "notificationCreated": "Notifica creata.",
+      "notificationRemoved": "Notifica rimossa.",
+      "notificationSaveError": "Non poteva salvare la regola di notifica.",
+      "notificationRemoveError": "Non è possibile rimuovere la regola di notifica.",
+      "favoriteUpdated": "Preferito aggiornato.",
+      "addedToFavorites": "Aggiunto ai preferiti."
+    }
+  },
+  "settings": {
+    "title": "Impostazioni impostazioni",
+    "startupTitle": "Avvio su Windows",
+    "startupDescription": "Lancia automaticamente QLTracker quando accedi a Windows.",
+    "startupSaving": "Salvataggio delle preferenze di avvio...",
+    "unavailable": "L'impostazione non è disponibile in questa costruzione.",
+    "languageTitle": "Lingua",
+    "languageDescription": "Scegli la lingua che QLTracker user? in tutta l'app.",
+    "languagePlaceholder": "Seleziona la lingua"
+  },
+  "language": {
+    "en": "Inglese",
+    "de": "Italia"
+  },
+  "favorites": {
+    "lists": "Elenco",
+    "refresh": "Rifiuti",
+    "createList": "Crea elenco",
+    "createDialogTitle": "Crea un elenco preferito",
+    "createDialogDescription": "Creare un elenco per organizzare i server salvati.",
+    "listNamePlaceholder": "Nome elenco",
+    "playersTooltip": "Totale giocatori in diretta in questa lista",
+    "favoriteServers": "Server preferiti",
+    "savedServers_one": "{{count}} saved server",
+    "savedServers_other": "{{count}} saved servers",
+    "noLists": "Ancora nessuna lista. Crea la tua prima lista per iniziare.",
+    "noServers": "Nessun server salvato in questa lista."
+  },
+  "filters": {
+    "title": "Filtri",
+    "expand": "Rimuovere i filtri",
+    "collapse": "Filtri di caduta",
+    "searchPlaceholder": "Nome del server",
+    "showFull": "Mostra tutto",
+    "showEmpty": "Mostra vuoto",
+    "showFavorites": "Mostra preferiti",
+    "clearAll": "Cancella tutto",
+    "regions": {
+      "all": "Tutte le regioni",
+      "eu": "Europa",
+      "na": "Nord America",
+      "sa": "Sud America",
+      "za": "Sudafrica",
+      "apac": "Asia Pacifico"
+    },
+    "visibility": {
+      "all": "Tutti i server",
+      "public": "Pubblico",
+      "private": "Privato"
+    },
+    "modes": {
+      "all": "Tutte le modalità",
+      "ca": "Clan Arena",
+      "duel": "Duello",
+      "ffa": "Gratis per tutti",
+      "tdm": "Squadra Deathmatch",
+      "ctf": "CTF",
+      "ad": "Attacco e difesa",
+      "dom": "Dominazione",
+      "ft": "Congelare Tag",
+      "har": "Harvester",
+      "race": "Gara",
+      "rr": "Red Rover"
+    },
+    "rating": {
+      "title": "Valutazione",
+      "description": "Filtra i server in media QElo o TSkill.",
+      "systemPlaceholder": "Sistema di valutazione",
+      "qelo": "QElo",
+      "trueskill": "TSkill"
+    },
+    "maps": {
+      "all": "Tutte le mappe",
+      "selectedCount": "{{count}} maps selected",
+      "searchPlaceholder": "Cerca mappe...",
+      "empty": "Nessuna mappa trovata."
+    },
+    "tags": {
+      "label": "Tags",
+      "selectedCount": "{{count}}+ tags",
+      "none": "Nessun tag selezionato.",
+      "inputPlaceholder": "Digitare il tag e premere Invio"
+    }
+  }
+}

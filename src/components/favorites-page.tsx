@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { RefreshCw } from "lucide-react";
 import {
   createDefaultServerFilters,
   type ServerFiltersValue,
@@ -21,6 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { SteamServer } from "@/lib/steam";
+import { useTranslation } from "react-i18next";
 
 const emptyFilters: ServerFiltersValue = createDefaultServerFilters();
 
@@ -37,6 +37,7 @@ export function FavoritesPage({
   error?: string | null;
   onRefresh: () => void;
 }) {
+  const { t } = useTranslation();
   const { state, createList } = useFavorites();
   const [selectedListId, setSelectedListId] = useState<string | null>(null);
   const [listName, setListName] = useState("");
@@ -96,31 +97,18 @@ export function FavoritesPage({
     <section className="flex min-h-0 flex-1 flex-col px-4 py-4">
       <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4">
         <div className="flex flex-col gap-3 rounded-lg border border-border p-3">
-          <div className="flex items-center justify-between gap-3">
-            <div className="text-sm font-medium text-foreground">Lists</div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="gap-2"
-              onClick={onRefresh}
-              disabled={isRefreshing}
-            >
-              <RefreshCw
-                className={`size-4 ${isRefreshing ? "animate-spin" : ""}`}
-              />
-              Refresh
-            </Button>
+          <div className="text-sm font-medium text-foreground">
+            {t("favorites.lists")}
           </div>
           <Dialog open={createListOpen} onOpenChange={setCreateListOpen}>
             <DialogTrigger asChild>
-              <Button className="w-full">Create List</Button>
+              <Button className="w-full">{t("favorites.createList")}</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Create Favorite List</DialogTitle>
+                <DialogTitle>{t("favorites.createDialogTitle")}</DialogTitle>
                 <DialogDescription>
-                  Create a list to organize your saved servers.
+                  {t("favorites.createDialogDescription")}
                 </DialogDescription>
               </DialogHeader>
               <Input
@@ -138,7 +126,7 @@ export function FavoritesPage({
                     setCreateListOpen(false);
                   }
                 }}
-                placeholder="List name"
+                placeholder={t("favorites.listNamePlaceholder")}
                 autoFocus
               />
               <DialogFooter>
@@ -154,7 +142,7 @@ export function FavoritesPage({
                     setCreateListOpen(false);
                   }}
                 >
-                  Create List
+                  {t("favorites.createList")}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -183,7 +171,7 @@ export function FavoritesPage({
                     </Badge>
                   </TooltipTrigger>
                   <TooltipContent side="top">
-                    Total live players in this list
+                    {t("favorites.playersTooltip")}
                   </TooltipContent>
                 </Tooltip>
               </button>
@@ -195,12 +183,14 @@ export function FavoritesPage({
           <div className="flex items-start justify-between gap-3 border-b border-border px-4 py-3">
             <div>
               <div className="text-sm font-medium text-foreground">
-                {selectedList?.name ?? "Favorite Servers"}
+                {selectedList?.name ?? t("favorites.favoriteServers")}
               </div>
               <p className="mt-1 text-sm text-muted-foreground">
                 {selectedList
-                  ? `${serversForSelectedList.length} saved server${serversForSelectedList.length === 1 ? "" : "s"}`
-                  : "Create a list to start saving servers."}
+                  ? t("favorites.savedServers", {
+                      count: serversForSelectedList.length,
+                    })
+                  : t("favorites.noLists")}
               </p>
             </div>
           </div>
@@ -209,13 +199,13 @@ export function FavoritesPage({
             {!selectedList ? (
               <div className="flex h-full items-center justify-center px-4 py-6">
                 <p className="text-sm text-muted-foreground">
-                  No lists yet. Create your first list to get started.
+                  {t("favorites.noLists")}
                 </p>
               </div>
             ) : serversForSelectedList.length === 0 ? (
               <div className="flex h-full items-center justify-center px-4 py-6">
                 <p className="text-sm text-muted-foreground">
-                  No servers saved in this list yet.
+                  {t("favorites.noServers")}
                 </p>
               </div>
             ) : (
@@ -224,6 +214,7 @@ export function FavoritesPage({
                 filters={emptyFilters}
                 isLoading={isLoading}
                 isRefreshing={isRefreshing}
+                onRefresh={onRefresh}
                 error={error}
                 actionMode="edit"
                 favoriteListId={selectedList.id}

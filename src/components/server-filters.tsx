@@ -4,6 +4,7 @@ import {
   Check,
   ChevronDown,
   ChevronsUpDown,
+  Heart,
   Search,
   X,
 } from "lucide-react";
@@ -47,35 +48,36 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTranslation } from "react-i18next";
 
 const regionOptions = [
-  { value: "all", label: "All regions", icon: RegionAll },
-  { value: "eu", label: "Europe", icon: RegionEurope },
-  { value: "na", label: "North America", icon: RegionNorthAmerica },
-  { value: "sa", label: "South America", icon: RegionSouthAmerica },
-  { value: "za", label: "South Africa", icon: RegionSouthAfrica },
-  { value: "apac", label: "Asia Pacific", icon: RegionApac },
+  { value: "all", labelKey: "filters.regions.all", icon: RegionAll },
+  { value: "eu", labelKey: "filters.regions.eu", icon: RegionEurope },
+  { value: "na", labelKey: "filters.regions.na", icon: RegionNorthAmerica },
+  { value: "sa", labelKey: "filters.regions.sa", icon: RegionSouthAmerica },
+  { value: "za", labelKey: "filters.regions.za", icon: RegionSouthAfrica },
+  { value: "apac", labelKey: "filters.regions.apac", icon: RegionApac },
 ];
 
 const visibilityOptions = [
-  { value: "all", label: "All servers" },
-  { value: "public", label: "Public" },
-  { value: "private", label: "Private" },
+  { value: "all", labelKey: "filters.visibility.all" },
+  { value: "public", labelKey: "filters.visibility.public" },
+  { value: "private", labelKey: "filters.visibility.private" },
 ];
 
 const gameModeOptions = [
-  { value: "all", label: "All modes" },
-  { value: "ca", label: "Clan Arena" },
-  { value: "duel", label: "Duel" },
-  { value: "ffa", label: "Free For All" },
-  { value: "tdm", label: "Team Deathmatch" },
-  { value: "ctf", label: "CTF" },
-  { value: "ad", label: "Attack & Defend" },
-  { value: "dom", label: "Domination" },
-  { value: "ft", label: "Freeze Tag" },
-  { value: "har", label: "Harvester" },
-  { value: "race", label: "Race" },
-  { value: "rr", label: "Red Rover" },
+  { value: "all", labelKey: "filters.modes.all" },
+  { value: "ca", labelKey: "filters.modes.ca" },
+  { value: "duel", labelKey: "filters.modes.duel" },
+  { value: "ffa", labelKey: "filters.modes.ffa" },
+  { value: "tdm", labelKey: "filters.modes.tdm" },
+  { value: "ctf", labelKey: "filters.modes.ctf" },
+  { value: "ad", labelKey: "filters.modes.ad" },
+  { value: "dom", labelKey: "filters.modes.dom" },
+  { value: "ft", labelKey: "filters.modes.ft" },
+  { value: "har", labelKey: "filters.modes.har" },
+  { value: "race", labelKey: "filters.modes.race" },
+  { value: "rr", labelKey: "filters.modes.rr" },
 ];
 
 export const RATING_FILTER_MIN = 0;
@@ -96,8 +98,9 @@ export type ServerFiltersValue = {
   ratingSystem: RatingSystem;
   ratingRange: [number, number];
   tags: string[];
-  hideEmpty: boolean;
-  hideFull: boolean;
+  showEmpty: boolean;
+  showFull: boolean;
+  showFavorites: boolean;
 };
 
 export function createDefaultServerFilters(): ServerFiltersValue {
@@ -110,8 +113,9 @@ export function createDefaultServerFilters(): ServerFiltersValue {
     ratingSystem: "qelo",
     ratingRange: createDefaultRatingRange(),
     tags: [],
-    hideEmpty: false,
-    hideFull: false,
+    showEmpty: false,
+    showFull: false,
+    showFavorites: false,
   };
 }
 
@@ -124,6 +128,7 @@ export function ServerFilters({
   onChange: (next: ServerFiltersValue) => void;
   onReset: () => void;
 }) {
+  const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
   const hasActiveFilters =
     value.search.trim().length > 0 ||
@@ -134,8 +139,9 @@ export function ServerFilters({
     value.ratingRange[0] !== RATING_FILTER_MIN ||
     value.ratingRange[1] !== RATING_FILTER_MAX ||
     value.tags.length > 0 ||
-    value.hideEmpty ||
-    value.hideFull;
+    value.showEmpty ||
+    value.showFull ||
+    value.showFavorites;
   const selectedRegion =
     regionOptions.find((option) => option.value === value.region) ??
     regionOptions[0];
@@ -145,7 +151,7 @@ export function ServerFilters({
     <section className="border-b border-border px-4 py-4">
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-sm font-medium">Filters</h2>
+          <h2 className="text-sm font-medium">{t("filters.title")}</h2>
           <div className="flex items-center gap-1">
             <TooltipProvider>
               <Tooltip>
@@ -157,9 +163,7 @@ export function ServerFilters({
                     onClick={() => setCollapsed((current) => !current)}
                     className="size-8"
                     aria-expanded={!collapsed}
-                    aria-label={
-                      collapsed ? "Expand filters" : "Collapse filters"
-                    }
+                    aria-label={collapsed ? t("filters.expand") : t("filters.collapse")}
                   >
                     <ChevronDown
                       className={`size-4 transition-transform duration-200 ${collapsed ? "" : "rotate-180"}`}
@@ -167,7 +171,7 @@ export function ServerFilters({
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent side="top">
-                  {collapsed ? "Expand filters" : "Collapse filters"}
+                  {collapsed ? t("filters.expand") : t("filters.collapse")}
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -193,7 +197,7 @@ export function ServerFilters({
                     onChange={(event) =>
                       onChange({ ...value, search: event.target.value })
                     }
-                    placeholder="Search server name"
+                    placeholder={t("filters.searchPlaceholder")}
                     className="pl-9"
                   />
                 </div>
@@ -214,7 +218,7 @@ export function ServerFilters({
                       <SelectValue placeholder="Region">
                         <span className="flex items-center gap-2">
                           <SelectedRegionIcon className="size-4 shrink-0" />
-                          <span>{selectedRegion.label}</span>
+                          <span>{t(selectedRegion.labelKey)}</span>
                         </span>
                       </SelectValue>
                     </SelectTrigger>
@@ -223,7 +227,7 @@ export function ServerFilters({
                         <SelectItem key={option.value} value={option.value}>
                           <option.icon className="size-4 shrink-0" />
                           <span className="flex items-center gap-2">
-                            <span>{option.label}</span>
+                            <span>{t(option.labelKey)}</span>
                           </span>
                         </SelectItem>
                       ))}
@@ -246,7 +250,7 @@ export function ServerFilters({
                     <SelectContent>
                       {visibilityOptions.map((option) => (
                         <SelectItem key={option.value} value={option.value}>
-                          {option.label}
+                          {t(option.labelKey)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -264,7 +268,7 @@ export function ServerFilters({
                     <SelectContent>
                       {gameModeOptions.map((option) => (
                         <SelectItem key={option.value} value={option.value}>
-                          {option.label}
+                          {t(option.labelKey)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -291,32 +295,46 @@ export function ServerFilters({
                   />
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-3 sm:grid-cols-3">
                   <Button
-                    variant={value.hideEmpty ? "default" : "outline"}
+                    variant={value.showFull ? "default" : "outline"}
                     onClick={() =>
-                      onChange({ ...value, hideEmpty: !value.hideEmpty })
+                      onChange({ ...value, showFull: !value.showFull })
                     }
                     className="w-full"
                   >
-                    Hide Empty
+                    {t("filters.showFull")}
                   </Button>
 
                   <Button
-                    variant={value.hideFull ? "default" : "outline"}
+                    variant={value.showEmpty ? "default" : "outline"}
                     onClick={() =>
-                      onChange({ ...value, hideFull: !value.hideFull })
+                      onChange({ ...value, showEmpty: !value.showEmpty })
                     }
                     className="w-full"
                   >
-                    Hide Full
+                    {t("filters.showEmpty")}
+                  </Button>
+
+                  <Button
+                    variant={value.showFavorites ? "default" : "outline"}
+                    onClick={() =>
+                      onChange({
+                        ...value,
+                        showFavorites: !value.showFavorites,
+                      })
+                    }
+                    className="w-full gap-2"
+                  >
+                    <Heart className="size-4" />
+                    {t("filters.showFavorites")}
                   </Button>
                 </div>
 
                 {hasActiveFilters ? (
                   <Button variant="ghost" onClick={onReset} className="w-full">
                     <X className="size-4" />
-                    Clear all
+                    {t("filters.clearAll")}
                   </Button>
                 ) : null}
               </div>
@@ -352,6 +370,7 @@ function RatingRangeFilter({
   onSystemChange: (system: RatingSystem) => void;
   onRangeChange: (range: [number, number]) => void;
 }) {
+  const { t } = useTranslation();
   const [draftRange, setDraftRange] = useState<[number, number]>(range);
 
   useEffect(() => {
@@ -374,9 +393,9 @@ function RatingRangeFilter({
     <div className="rounded-lg border border-border p-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-sm font-medium">Rating</div>
+          <div className="text-sm font-medium">{t("filters.rating.title")}</div>
           <div className="text-xs text-muted-foreground">
-            Filter servers by average QElo or TSkill.
+            {t("filters.rating.description")}
           </div>
         </div>
 
@@ -396,11 +415,13 @@ function RatingRangeFilter({
           onValueChange={(value) => onSystemChange(value as RatingSystem)}
         >
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Rating system" />
+            <SelectValue placeholder={t("filters.rating.systemPlaceholder")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="qelo">QElo</SelectItem>
-            <SelectItem value="trueskill">TSkill</SelectItem>
+            <SelectItem value="qelo">{t("filters.rating.qelo")}</SelectItem>
+            <SelectItem value="trueskill">
+              {t("filters.rating.trueskill")}
+            </SelectItem>
           </SelectContent>
         </Select>
 
@@ -427,6 +448,7 @@ function MapMultiSelect({
   value: string[];
   onChange: (maps: string[]) => void;
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   const selectedMaps = useMemo(
@@ -436,10 +458,10 @@ function MapMultiSelect({
 
   const label =
     selectedMaps.length === 0
-      ? "All maps"
+      ? t("filters.maps.all")
       : selectedMaps.length === 1
         ? selectedMaps[0].name
-        : `${selectedMaps.length} maps selected`;
+        : t("filters.maps.selectedCount", { count: selectedMaps.length });
 
   function toggleMap(mapId: string) {
     if (value.includes(mapId)) {
@@ -465,9 +487,9 @@ function MapMultiSelect({
       </PopoverTrigger>
       <PopoverContent className="w-[26rem] p-0" align="start">
         <Command>
-          <CommandInput placeholder="Search maps..." />
+          <CommandInput placeholder={t("filters.maps.searchPlaceholder")} />
           <CommandList className="max-h-80">
-            <CommandEmpty>No maps found.</CommandEmpty>
+            <CommandEmpty>{t("filters.maps.empty")}</CommandEmpty>
             <CommandGroup>
               {selectedMaps.length > 0 ? (
                 <div className="flex flex-wrap gap-1 border-b border-border p-2">
@@ -524,6 +546,7 @@ function TagFilter({
   value: string[];
   onChange: (tags: string[]) => void;
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [tagInput, setTagInput] = useState("");
 
@@ -541,10 +564,10 @@ function TagFilter({
 
   const label =
     value.length === 0
-      ? "Tags"
+      ? t("filters.tags.label")
       : value.length === 1
         ? value[0]
-        : `${value.length}+ tags`;
+        : t("filters.tags.selectedCount", { count: value.length });
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -577,7 +600,7 @@ function TagFilter({
               ))
             ) : (
               <span className="text-sm text-muted-foreground">
-                No tags selected.
+                {t("filters.tags.none")}
               </span>
             )}
           </div>
@@ -609,7 +632,7 @@ function TagFilter({
                   setTagInput("");
                 }
               }}
-              placeholder="Type tag and press Enter"
+              placeholder={t("filters.tags.inputPlaceholder")}
               className="h-8 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
             />
           </div>

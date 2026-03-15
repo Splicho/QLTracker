@@ -1,0 +1,239 @@
+{
+  "navigation": {
+    "serverList": "Server List",
+    "favorites": "Favoriter",
+    "notifications": "Meddelanden",
+    "settings": "Inställningar"
+  },
+  "header": {
+    "unknown": "Okänd",
+    "theme": {
+      "light": "Ljus tema",
+      "dark": "Mörk tema",
+      "system": "Systemtema"
+    }
+  },
+  "sidebar": {
+    "groupLabel": "QLTracker",
+    "about": "Om QLTracker"
+  },
+  "about": {
+    "version": "Version",
+    "author": "Författare",
+    "socials": "Sociala",
+    "stack": "Stack",
+    "repo": "Repo"
+  },
+  "notifications": {
+    "title": "Discord Notifications",
+    "serviceUnavailable": "Notification service is unavailable in this build. Set `VITE_NOTIFICATION_API_URL` to enable Discord linking and delivery.",
+    "finishBrowser": "Avsluta länkflödet Discord i din webbläsare.",
+    "loadingStatus": "Loading Discord Notification status...",
+    "account": "Kontokonto",
+    "rules": "Regler",
+    "rulesSummary": "{{enabled}} active / {{total}} total",
+    "dmRefused": "QLTracker är kopplad, men Discord vägrade fortfarande DM-kontrollen. Försök installera / länk flöde för att testa DM igen.",
+    "relink": "Relink Discord",
+    "retryInstall": "Retry Installera Check",
+    "disconnect": "Disconnect",
+    "noAccount": "Inget Discord-konto länkat ännu.",
+    "installLink": "Installera & Link Discord",
+    "dialog": {
+      "editTitle": "Edit Discord Notification",
+      "createTitle": "Discord Notification",
+      "descriptionWithServer": "Configure a Discord DM notification for {{server}}.",
+      "descriptionFallback": "Konfigurera en Discord DM-meddelande för denna server.",
+      "enabled": "Enabled",
+      "enabledDescription": "Skicka bara DM medan denna regel är aktiverad.",
+      "thresholdType": "Tröskeltyp",
+      "thresholdPlaceholder": "Välj en tröskeltyp",
+      "mode": {
+        "active_free_slots": {
+          "label": "Spela slots kvar",
+          "description": "Meddela när en match är detta nära att fylla, med de totala aktiva spelautomaterna istället för full server slots."
+        },
+        "free_slots": {
+          "label": "Gratis slots",
+          "description": "Meddela när servern har många gratis slots eller färre."
+        },
+        "min_players": {
+          "label": "Mina spelare",
+          "description": "Meddela när servern når åtminstone så många spelare."
+        }
+      },
+      "totalPlayingSlots": "Totalt spelautomater",
+      "totalPlayingSlotsDescription": "Använd båda lagen i kombination, inte per-team storlek. För en 4v4-server, ange 8. För en 8v8-server, ange 16. Detta är separat från hela server slot räkna.",
+      "minimumPlayerCount": "Minsta spelarantal",
+      "maximumActiveSlotsLeft": "Maximala aktiva slots kvar",
+      "maximumFreeSlots": "Maximal gratis slots",
+      "activeSlotsDescription": "This rule will evaluate against {{count}} total active playing slots.",
+      "serverSupportsDescription": "This server currently supports up to {{count}} players.",
+      "deleteRule": "Radera regel",
+      "saveChanges": "Spara förändringar",
+      "createRule": "Skapa regel"
+    }
+  },
+  "serverList": {
+    "refresh": "Refresh",
+    "noServersMatch": "Inga servrar matchar nuvarande filter.",
+    "pageStatus": "Page {{current}} of {{total}}",
+    "table": {
+      "server": "Server",
+      "location": "Plats",
+      "mode": "Mode",
+      "players": "Spelare",
+      "ping": "Ping",
+      "actions": "Aktiviteter"
+    },
+    "locationUnknown": "Okänd",
+    "modeUnknown": "Okänd",
+    "pingUnavailable": "N/A",
+    "passwordSaved": "Lösenord sparat",
+    "passwordRequired": "Lösenord krävs",
+    "notificationEnabled": "Discord-meddelande aktiverat",
+    "actions": {
+      "notificationsPublicOnly": "Meddelanden är endast tillgängliga för offentliga servrar.",
+      "connectDiscordFavorites": "Anslut Discord på sidan Meddelanden för att aktivera meddelanden.",
+      "editNotification": "Edit Discord-meddelande",
+      "notifyDiscord": "Meddela på Discord",
+      "editFavorite": "Redigera favorit",
+      "removeFromFavorites": "Ta bort från favoriter",
+      "addToFavorites": "Lägg till favoriter"
+    },
+    "drawer": {
+      "play": "Spela",
+      "avgQeloTooltip": "Genomsnittlig QElo på denna server",
+      "avgTrueskillTooltip": "Genomsnittlig TSKill på denna server",
+      "topQeloTooltip": "Högsta QElo-spelare på denna server",
+      "topTrueskillTooltip": "Högsta TSKill-spelare på denna server",
+      "playersHeading": "Spelare",
+      "player": "Spelare",
+      "points": "Poäng",
+      "qelo": "QElo",
+      "trueskill": "TSKill",
+      "time": "Tid",
+      "lookupFailed": "Steam player lookup misslyckades.",
+      "noPlayerData": "Ingen spelardata för denna server.",
+      "teams": {
+        "blue": "Blue Team",
+        "free": "Gratis gratis",
+        "players": "Spelare",
+        "red": "Red Team",
+        "spectators": "Spectatorer",
+        "unassigned": "Unassigned"
+      }
+    },
+    "favoriteDialog": {
+      "editTitle": "Redigera favorit",
+      "addTitle": "Lägg till favoriter",
+      "fallbackDescription": "Tilldela denna server till en av dina lokala favoritlistor.",
+      "selectList": "Välj en lista",
+      "listsUnavailable": "Inga favoritlistor tillgängliga. Skapa en lista på favoritsidan först.",
+      "remove": "Ta bort",
+      "saveChanges": "Spara förändringar",
+      "addToList": "Lägg till lista"
+    },
+    "passwordDialog": {
+      "title": "Server lösenord",
+      "descriptionWithServer": "Enter the password for {{server}}.",
+      "fallbackDescription": "Ange lösenordet för denna server.",
+      "inputPlaceholder": "Ange server lösenord",
+      "remember": "Spara detta lösenord för framtida anslutningar",
+      "join": "Gå med"
+    },
+    "toasts": {
+      "removedFromFavorites": "Tas bort från favoriter.",
+      "notificationUpdated": "Notifiering uppdaterad.",
+      "notificationCreated": "Anmälan skapad.",
+      "notificationRemoved": "Avisering bort.",
+      "notificationSaveError": "Kunde inte spara anmälningsregeln.",
+      "notificationRemoveError": "Kunde inte ta bort anmälningsregeln.",
+      "favoriteUpdated": "Favorit uppdaterad.",
+      "addedToFavorites": "Tillsatt till favoriter."
+    }
+  },
+  "settings": {
+    "title": "Inställningar",
+    "startupTitle": "Starta på Windows",
+    "startupDescription": "Automatiskt starta QLTracker när du loggar in på Windows.",
+    "startupSaving": "Spara startpreferens...",
+    "unavailable": "Inställningen är inte tillgänglig i denna byggnad.",
+    "languageTitle": "Språkspråk",
+    "languageDescription": "V?lj spr?ket som QLTracker ska anv?nda i hela appen.",
+    "languagePlaceholder": "Välj språk"
+  },
+  "language": {
+    "en": "Engelska",
+    "de": "Deutsch"
+  },
+  "favorites": {
+    "lists": "Listor",
+    "refresh": "Refresh",
+    "createList": "Skapa lista",
+    "createDialogTitle": "Skapa favoritlista",
+    "createDialogDescription": "Skapa en lista för att organisera dina sparade servrar.",
+    "listNamePlaceholder": "List namn",
+    "playersTooltip": "Totala livespelare i denna lista",
+    "favoriteServers": "Favoritservrar",
+    "savedServers_one": "{{count}} saved server",
+    "savedServers_other": "{{count}} saved servers",
+    "noLists": "Inga listor ännu. Skapa din första lista för att komma igång.",
+    "noServers": "Inga servrar sparade i denna lista ännu."
+  },
+  "filters": {
+    "title": "Filter",
+    "expand": "Expandera filter",
+    "collapse": "Kollapsfilter",
+    "searchPlaceholder": "Sök servernamn",
+    "showFull": "Visa full",
+    "showEmpty": "Visa Tom",
+    "showFavorites": "Visa favoriter",
+    "clearAll": "Tydliga alla",
+    "regions": {
+      "all": "Alla regioner",
+      "eu": "Europa",
+      "na": "Nordamerika",
+      "sa": "Sydamerika",
+      "za": "Sydafrika",
+      "apac": "Asia Pacific"
+    },
+    "visibility": {
+      "all": "Alla servrar",
+      "public": "Offentliga",
+      "private": "Privat privat"
+    },
+    "modes": {
+      "all": "Alla lägen",
+      "ca": "Clan Arena",
+      "duel": "Duell",
+      "ffa": "Gratis för alla",
+      "tdm": "Team Deathmatch",
+      "ctf": "CTF",
+      "ad": "Attack & Defend",
+      "dom": "Dominans",
+      "ft": "Freeze Tag",
+      "har": "Harvester",
+      "race": "Ras",
+      "rr": "Röd Rover"
+    },
+    "rating": {
+      "title": "Rating",
+      "description": "Filterservrar i genomsnitt QElo eller TSkill.",
+      "systemPlaceholder": "Rating system",
+      "qelo": "QElo",
+      "trueskill": "TSKill"
+    },
+    "maps": {
+      "all": "Alla kartor",
+      "selectedCount": "{{count}} maps selected",
+      "searchPlaceholder": "Sök kartor...",
+      "empty": "Inga kartor hittades."
+    },
+    "tags": {
+      "label": "Taggar",
+      "selectedCount": "{{count}}+ tags",
+      "none": "Inga taggar valda.",
+      "inputPlaceholder": "Typ tag och tryck på Enter"
+    }
+  }
+}

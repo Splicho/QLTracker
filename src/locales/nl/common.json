@@ -1,0 +1,239 @@
+{
+  "navigation": {
+    "serverList": "Serverlijst",
+    "favorites": "Favorieten",
+    "notifications": "Kennisgevingen",
+    "settings": "Instellingen"
+  },
+  "header": {
+    "unknown": "Onbekend",
+    "theme": {
+      "light": "Lichtthema",
+      "dark": "Donker thema",
+      "system": "Systeemthema"
+    }
+  },
+  "sidebar": {
+    "groupLabel": "QLTracker",
+    "about": "Over QLTracker"
+  },
+  "about": {
+    "version": "Versie",
+    "author": "Auteur",
+    "socials": "Sociaal",
+    "stack": "Stack",
+    "repo": "Repo"
+  },
+  "notifications": {
+    "title": "Discordmeldingen",
+    "serviceUnavailable": "Notification service is unavailable in this build. Set `VITE_NOTIFICATION_API_URL` to enable Discord linking and delivery.",
+    "finishBrowser": "Maak de Discord-linkstroom in uw browser af.",
+    "loadingStatus": "Discord-notificatiestatus wordt geladen...",
+    "account": "Account",
+    "rules": "Regels",
+    "rulesSummary": "{{enabled}} active / {{total}} total",
+    "dmRefused": "QLTracker is gekoppeld, maar Discord weigerde nog steeds de DM check. Probeer de installatie/linkstroom opnieuw om DMs te testen.",
+    "relink": "Discord herlinken",
+    "retryInstall": "Controle opnieuw installeren",
+    "disconnect": "Verbinding verbreken",
+    "noAccount": "Nog geen Discord-account gekoppeld.",
+    "installLink": "& Koppelingsdiscord installeren",
+    "dialog": {
+      "editTitle": "Discordnotificatie bewerken",
+      "createTitle": "Discord notificatie",
+      "descriptionWithServer": "Configure a Discord DM notification for {{server}}.",
+      "descriptionFallback": "Configureer een Discord DM notificatie voor deze server.",
+      "enabled": "Ingeschakeld",
+      "enabledDescription": "Stuur alleen DM's terwijl deze regel is ingeschakeld.",
+      "thresholdType": "Drempeltype",
+      "thresholdPlaceholder": "Selecteer een drempeltype",
+      "mode": {
+        "active_free_slots": {
+          "label": "Speelautomaten links",
+          "description": "Waarschuwen wanneer een wedstrijd is zo dicht bij het vullen, met behulp van de totale actieve speelautomaten in plaats van volledige server slots."
+        },
+        "free_slots": {
+          "label": "Gratis slots",
+          "description": "Waarschuw wanneer de server zoveel gratis slots of minder heeft."
+        },
+        "min_players": {
+          "label": "Minspelers",
+          "description": "Waarschuw wanneer de server minstens zoveel spelers bereikt."
+        }
+      },
+      "totalPlayingSlots": "Totaal speelautomaten",
+      "totalPlayingSlotsDescription": "Gebruik beide teams gecombineerd, niet de per-team grootte. Voor een 4v4 server, voer 8. Voer voor een 8v8 server 16. Dit is gescheiden van de volledige server slot tellen.",
+      "minimumPlayerCount": "Minimum aantal spelers",
+      "maximumActiveSlotsLeft": "Maximum actieve slots links",
+      "maximumFreeSlots": "Maximale vrije slots",
+      "activeSlotsDescription": "This rule will evaluate against {{count}} total active playing slots.",
+      "serverSupportsDescription": "This server currently supports up to {{count}} players.",
+      "deleteRule": "Regel schrappen",
+      "saveChanges": "Wijzigingen opslaan",
+      "createRule": "Regel aanmaken"
+    }
+  },
+  "serverList": {
+    "refresh": "Verversen",
+    "noServersMatch": "Geen servers die overeenkomen met de huidige filters.",
+    "pageStatus": "Page {{current}} of {{total}}",
+    "table": {
+      "server": "Server",
+      "location": "Locatie",
+      "mode": "Modus",
+      "players": "Spelers",
+      "ping": "Ping",
+      "actions": "Acties"
+    },
+    "locationUnknown": "Onbekend",
+    "modeUnknown": "Onbekend",
+    "pingUnavailable": "NVT",
+    "passwordSaved": "Wachtwoord opgeslagen",
+    "passwordRequired": "Wachtwoord vereist",
+    "notificationEnabled": "Discord notificatie ingeschakeld",
+    "actions": {
+      "notificationsPublicOnly": "Meldingen zijn alleen beschikbaar voor openbare servers.",
+      "connectDiscordFavorites": "Verbind Discord op de pagina Meldingen om meldingen in te schakelen.",
+      "editNotification": "Discord notificatie bewerken",
+      "notifyDiscord": "Op Discord aanmelden",
+      "editFavorite": "Favoriet bewerken",
+      "removeFromFavorites": "Uit favorieten verwijderen",
+      "addToFavorites": "Aan favorieten toevoegen"
+    },
+    "drawer": {
+      "play": "Afspelen",
+      "avgQeloTooltip": "Gemiddelde QElo op deze server",
+      "avgTrueskillTooltip": "Gemiddelde TSkill op deze server",
+      "topQeloTooltip": "Hoogste QElo-speler op deze server",
+      "topTrueskillTooltip": "Hoogste TSkill-speler op deze server",
+      "playersHeading": "Spelers",
+      "player": "Speler",
+      "points": "Punten",
+      "qelo": "QElo",
+      "trueskill": "TSkill",
+      "time": "Tijd",
+      "lookupFailed": "Opzoeken van stoomspeler is mislukt.",
+      "noPlayerData": "Geen spelergegevens voor deze server.",
+      "teams": {
+        "blue": "Blauw team",
+        "free": "Vrij",
+        "players": "Spelers",
+        "red": "Rood team",
+        "spectators": "Toeschouwers",
+        "unassigned": "Niet toegewezen"
+      }
+    },
+    "favoriteDialog": {
+      "editTitle": "Favoriet bewerken",
+      "addTitle": "Aan favorieten toevoegen",
+      "fallbackDescription": "Geef deze server toe aan een van uw lokale favoriete lijsten.",
+      "selectList": "Een lijst selecteren",
+      "listsUnavailable": "Geen favoriete lijsten beschikbaar. Maak eerst een lijst op de pagina Favorieten.",
+      "remove": "Verwijderen",
+      "saveChanges": "Wijzigingen opslaan",
+      "addToList": "Aan lijst toevoegen"
+    },
+    "passwordDialog": {
+      "title": "Serverwachtwoord",
+      "descriptionWithServer": "Enter the password for {{server}}.",
+      "fallbackDescription": "Voer het wachtwoord in voor deze server.",
+      "inputPlaceholder": "Serverwachtwoord invoeren",
+      "remember": "Dit wachtwoord opslaan voor toekomstige joins",
+      "join": "Sluiten"
+    },
+    "toasts": {
+      "removedFromFavorites": "Uit favorieten verwijderd.",
+      "notificationUpdated": "Kennisgeving bijgewerkt.",
+      "notificationCreated": "Kennisgeving gemaakt.",
+      "notificationRemoved": "Kennisgeving verwijderd.",
+      "notificationSaveError": "Kon de meldingsregel niet opslaan.",
+      "notificationRemoveError": "Kon de meldingsregel niet verwijderen.",
+      "favoriteUpdated": "Favoriet bijgewerkt.",
+      "addedToFavorites": "Aan favorieten toegevoegd."
+    }
+  },
+  "settings": {
+    "title": "Instellingen",
+    "startupTitle": "Opstarten op Windows",
+    "startupDescription": "Automatisch QLTracker starten wanneer u zich aanmeldt bij Windows.",
+    "startupSaving": "Opstartvoorkeur opslaan...",
+    "unavailable": "Instellingen zijn niet beschikbaar in deze build.",
+    "languageTitle": "Taal",
+    "languageDescription": "Kies de taal die QLTracker in de hele app gebruikt.",
+    "languagePlaceholder": "Taal selecteren"
+  },
+  "language": {
+    "en": "Engels",
+    "de": "Deutsch"
+  },
+  "favorites": {
+    "lists": "Lijsten",
+    "refresh": "Verversen",
+    "createList": "Lijst aanmaken",
+    "createDialogTitle": "Favoriete lijst aanmaken",
+    "createDialogDescription": "Maak een lijst om uw opgeslagen servers te organiseren.",
+    "listNamePlaceholder": "Lijstnaam",
+    "playersTooltip": "Totaal aantal live spelers in deze lijst",
+    "favoriteServers": "Favoriete servers",
+    "savedServers_one": "{{count}} saved server",
+    "savedServers_other": "{{count}} saved servers",
+    "noLists": "Nog geen lijsten. Maak je eerste lijst om aan de slag te gaan.",
+    "noServers": "Nog geen servers opgeslagen in deze lijst."
+  },
+  "filters": {
+    "title": "Filters",
+    "expand": "Filters uitvouwen",
+    "collapse": "Filters invouwen",
+    "searchPlaceholder": "Zoekservernaam",
+    "showFull": "Volledig tonen",
+    "showEmpty": "Leeg tonen",
+    "showFavorites": "Favorieten tonen",
+    "clearAll": "Alles wissen",
+    "regions": {
+      "all": "Alle regio's",
+      "eu": "Europa",
+      "na": "Noord-Amerika",
+      "sa": "Zuid-Amerika",
+      "za": "Zuid-Afrika",
+      "apac": "Azië"
+    },
+    "visibility": {
+      "all": "Alle servers",
+      "public": "Openbaar",
+      "private": "Privé"
+    },
+    "modes": {
+      "all": "Alle modi",
+      "ca": "Clan Arena",
+      "duel": "Duel",
+      "ffa": "Gratis voor iedereen",
+      "tdm": "Team Deathmatch",
+      "ctf": "CTF",
+      "ad": "Aanvallen en verdedigen",
+      "dom": "Dominatie",
+      "ft": "Freeze Tag",
+      "har": "Harvester",
+      "race": "Ras",
+      "rr": "Rode Rover"
+    },
+    "rating": {
+      "title": "Waardering",
+      "description": "Filter servers op gemiddelde QElo of TSkill.",
+      "systemPlaceholder": "Waarderingssysteem",
+      "qelo": "QElo",
+      "trueskill": "TSkill"
+    },
+    "maps": {
+      "all": "Alle kaarten",
+      "selectedCount": "{{count}} maps selected",
+      "searchPlaceholder": "Kaarten zoeken...",
+      "empty": "Geen kaarten gevonden."
+    },
+    "tags": {
+      "label": "Tags",
+      "selectedCount": "{{count}}+ tags",
+      "none": "Geen tags geselecteerd.",
+      "inputPlaceholder": "Typ tag en druk op Enter"
+    }
+  }
+}

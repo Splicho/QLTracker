@@ -1,0 +1,239 @@
+{
+  "navigation": {
+    "serverList": "Palvelinluettelo",
+    "favorites": "Suosikit",
+    "notifications": "Ilmoitukset",
+    "settings": "Asetukset"
+  },
+  "header": {
+    "unknown": "Tuntematon",
+    "theme": {
+      "light": "Valon teema",
+      "dark": "Tumma teema",
+      "system": "Järjestelmän teema"
+    }
+  },
+  "sidebar": {
+    "groupLabel": "QLTracker",
+    "about": "Tietoja QLTrackeristä"
+  },
+  "about": {
+    "version": "Versio",
+    "author": "Tekijä",
+    "socials": "Sosiaalipalvelut",
+    "stack": "Pino",
+    "repo": "Repo"
+  },
+  "notifications": {
+    "title": "Discord-ilmoitukset",
+    "serviceUnavailable": "Notification service is unavailable in this build. Set `VITE_NOTIFICATION_API_URL` to enable Discord linking and delivery.",
+    "finishBrowser": "Viimeistele Discord-linkin virtaus selaimessasi.",
+    "loadingStatus": "Ladataan discordin ilmoitustilaa...",
+    "account": "Tili",
+    "rules": "Säännöt",
+    "rulesSummary": "{{enabled}} active / {{total}} total",
+    "dmRefused": "QLTracker on yhteydessä, mutta DM-shekki hylättiin. Kokeile uudelleen asennus-/linkkivirtaa testataksesi DMs:iä uudelleen.",
+    "relink": "Relink discord",
+    "retryInstall": "Yritä asentaa uudelleen tarkistus",
+    "disconnect": "Katkaise yhteys",
+    "noAccount": "-Ei vielä.",
+    "installLink": "Asenna & linkki discord",
+    "dialog": {
+      "editTitle": "Muokkaa discord- ilmoitusta",
+      "createTitle": "Epätasapainoilmoitus",
+      "descriptionWithServer": "Configure a Discord DM notification for {{server}}.",
+      "descriptionFallback": "Aseta Discord DM-ilmoitus tälle palvelimelle.",
+      "enabled": "Käytössä",
+      "enabledDescription": "Lähetä DM:t vain, kun tämä sääntö on käytössä.",
+      "thresholdType": "Kynnysarvon tyyppi",
+      "thresholdPlaceholder": "Valitse kynnysarvotyyppi",
+      "mode": {
+        "active_free_slots": {
+          "label": "Soittopaikat vasemmalle",
+          "description": "Ilmoita, kun ottelu on näin lähellä täyttämistä, käyttäen aktiivisia pelipaikkoja täyden palvelimen sijaan."
+        },
+        "free_slots": {
+          "label": "Vapaat lähtö- ja saapumisajat",
+          "description": "Ilmoita, kun palvelimella on näin monta vapaata lähtöä tai vähemmän."
+        },
+        "min_players": {
+          "label": "Minipelaajat",
+          "description": "Ilmoita, kun palvelin saavuttaa ainakin näin monta pelaajaa."
+        }
+      },
+      "totalPlayingSlots": "Yhteensä",
+      "totalPlayingSlotsDescription": "Käytä molempia joukkueita yhdessä, ei per-tiimi kokoa. 4v4-palvelimelle syötä 8. 8v8-palvelin, syötä 16. Tämä on erillinen koko palvelimen lähtölaskenta.",
+      "minimumPlayerCount": "Pelaajien vähimmäismäärä",
+      "maximumActiveSlotsLeft": "Aktiivisia lähtö- ja saapumisaikoja jäljellä enintään",
+      "maximumFreeSlots": "Suurimmat vapaat lähtö- ja saapumisajat",
+      "activeSlotsDescription": "This rule will evaluate against {{count}} total active playing slots.",
+      "serverSupportsDescription": "This server currently supports up to {{count}} players.",
+      "deleteRule": "Poista sääntö",
+      "saveChanges": "Tallenna muutokset",
+      "createRule": "Luo sääntö"
+    }
+  },
+  "serverList": {
+    "refresh": "Päivitä",
+    "noServersMatch": "Mikään palvelin ei vastaa nykyisiä suodattimia.",
+    "pageStatus": "Page {{current}} of {{total}}",
+    "table": {
+      "server": "Palvelin",
+      "location": "Sijainti",
+      "mode": "Tila",
+      "players": "Pelaajat",
+      "ping": "Ping",
+      "actions": "Toimet"
+    },
+    "locationUnknown": "Tuntematon",
+    "modeUnknown": "Tuntematon",
+    "pingUnavailable": "EI SOVELLETA",
+    "passwordSaved": "Salasana tallennettu",
+    "passwordRequired": "Salasana vaaditaan",
+    "notificationEnabled": "Discord-ilmoitus käytössä",
+    "actions": {
+      "notificationsPublicOnly": "Ilmoitukset ovat saatavilla vain julkisille palvelimille.",
+      "connectDiscordFavorites": "Connect Discord ilmoituksen sivulla mahdollistaa ilmoitukset.",
+      "editNotification": "Muokkaa discord-ilmoitusta",
+      "notifyDiscord": "Ilmoita discordille",
+      "editFavorite": "Muokkaa suosikkia",
+      "removeFromFavorites": "Poista suosikeista",
+      "addToFavorites": "Lisää suosikkeihin"
+    },
+    "drawer": {
+      "play": "Soita",
+      "avgQeloTooltip": "Keskimääräinen QElo tällä palvelimella",
+      "avgTrueskillTooltip": "Keskimääräinen TSkill tällä palvelimella",
+      "topQeloTooltip": "Korkein QElo-soitin tällä palvelimella",
+      "topTrueskillTooltip": "Korkein TSkill-soitin tällä palvelimella",
+      "playersHeading": "Pelaajat",
+      "player": "Pelaaja",
+      "points": "Pisteet",
+      "qelo": "QElo",
+      "trueskill": "TSkill",
+      "time": "Aika",
+      "lookupFailed": "Höyrysoittimen haku epäonnistui.",
+      "noPlayerData": "Ei pelaajatietoja tälle palvelimelle.",
+      "teams": {
+        "blue": "Sininen ryhmä",
+        "free": "Vapaa",
+        "players": "Pelaajat",
+        "red": "Punainen ryhmä",
+        "spectators": "Katselijat",
+        "unassigned": "Määräämätön"
+      }
+    },
+    "favoriteDialog": {
+      "editTitle": "Muokkaa suosikkia",
+      "addTitle": "Lisää suosikkeihin",
+      "fallbackDescription": "Antakaa tämä palvelin jollekin paikallisista listoistanne.",
+      "selectList": "Valitse lista",
+      "listsUnavailable": "Suosikkilistoja ei ole saatavilla. Luo lista suosikkisivulle ensin.",
+      "remove": "Poista",
+      "saveChanges": "Tallenna muutokset",
+      "addToList": "Lisää luetteloon"
+    },
+    "passwordDialog": {
+      "title": "Palvelimen salasana",
+      "descriptionWithServer": "Enter the password for {{server}}.",
+      "fallbackDescription": "Anna tämän palvelimen salasana.",
+      "inputPlaceholder": "Anna palvelimen salasana",
+      "remember": "Tallenna tämä salasana tuleville liitoille",
+      "join": "Liity"
+    },
+    "toasts": {
+      "removedFromFavorites": "Poistettu suosikeista.",
+      "notificationUpdated": "Ilmoitus päivitetty.",
+      "notificationCreated": "Ilmoitus luotu.",
+      "notificationRemoved": "Ilmoitus poistettu.",
+      "notificationSaveError": "Ilmoitussääntöä ei voitu tallentaa.",
+      "notificationRemoveError": "Ilmoitussääntöä ei voitu poistaa.",
+      "favoriteUpdated": "Suosikki päivitetty.",
+      "addedToFavorites": "Lisätty suosikkeihin."
+    }
+  },
+  "settings": {
+    "title": "Asetukset",
+    "startupTitle": "Käynnistys Windowsissa",
+    "startupDescription": "Käynnistä QLTracker automaattisesti, kun kirjaudut sisään Windowsiin.",
+    "startupSaving": "Säästän aloitusmieltymystä...",
+    "unavailable": "Asetusta ei ole saatavilla tässä rakennuksessa.",
+    "languageTitle": "Kieli",
+    "languageDescription": "Valitse kieli, jota QLTracker k?ytt?? koko sovelluksessa.",
+    "languagePlaceholder": "Valitse kieli"
+  },
+  "language": {
+    "en": "Englanti",
+    "de": "Deutsch"
+  },
+  "favorites": {
+    "lists": "Luettelot",
+    "refresh": "Päivitä",
+    "createList": "Luo lista",
+    "createDialogTitle": "Luo suosikkilista",
+    "createDialogDescription": "Luo lista tallentaa palvelimet.",
+    "listNamePlaceholder": "Luettelon nimi",
+    "playersTooltip": "Live-pelaajat yhteensä",
+    "favoriteServers": "Suosikkipalvelimet",
+    "savedServers_one": "{{count}} saved server",
+    "savedServers_other": "{{count}} saved servers",
+    "noLists": "Ei vielä listoja. Luo ensimmäinen lista aloittaaksesi.",
+    "noServers": "Tässä listassa ei ole vielä tallennettuja palvelimia."
+  },
+  "filters": {
+    "title": "Suodattimet",
+    "expand": "Laajenna suodattimet",
+    "collapse": "Romahdussuodattimet",
+    "searchPlaceholder": "Etsi palvelimen nimi",
+    "showFull": "Näytä täysi",
+    "showEmpty": "Näytä tyhjä",
+    "showFavorites": "Näytä suosikit",
+    "clearAll": "Tyhjennä kaikki",
+    "regions": {
+      "all": "Kaikki alueet",
+      "eu": "Eurooppa",
+      "na": "Yhdysvallat",
+      "sa": "Etelä- Amerikka",
+      "za": "Afrikka",
+      "apac": "Aasia"
+    },
+    "visibility": {
+      "all": "Kaikki palvelimet",
+      "public": "Julkinen",
+      "private": "Yksityiset"
+    },
+    "modes": {
+      "all": "Kaikki tilat",
+      "ca": "Clan Arena",
+      "duel": "Kaksintaistelu",
+      "ffa": "Vapaa kaikille",
+      "tdm": "Team Deathmatch",
+      "ctf": "CTF",
+      "ad": "Hyökkää ja puolusta",
+      "dom": "Hallitseminen",
+      "ft": "Pysäytä merkki",
+      "har": "Harvesteri",
+      "race": "Rotu",
+      "rr": "Punainen Rover"
+    },
+    "rating": {
+      "title": "Arvostelu",
+      "description": "Suodata palvelimet keskimäärin QElo tai TSkill.",
+      "systemPlaceholder": "Luokitusjärjestelmä",
+      "qelo": "QElo",
+      "trueskill": "TSkill"
+    },
+    "maps": {
+      "all": "Kaikki kartat",
+      "selectedCount": "{{count}} maps selected",
+      "searchPlaceholder": "Etsi karttoja...",
+      "empty": "Karttoja ei löytynyt."
+    },
+    "tags": {
+      "label": "Tunnisteet",
+      "selectedCount": "{{count}}+ tags",
+      "none": "Tunnisteita ei ole valittu.",
+      "inputPlaceholder": "Kirjoita ja paina Enter"
+    }
+  }
+}

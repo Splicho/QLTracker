@@ -71,6 +71,7 @@ struct ServerPlayer {
 struct ServerPlayerRating {
     name: String,
     steam_id: Option<String>,
+    team: Option<i32>,
     qelo: Option<f64>,
     trueskill: Option<f64>,
 }
@@ -794,6 +795,16 @@ fn qlstats_value_as_f64(value: &serde_json::Value, key: &str) -> Option<f64> {
     }
 }
 
+fn qlstats_value_as_i32(value: &serde_json::Value, key: &str) -> Option<i32> {
+    let field = value.get(key)?;
+
+    match field {
+        serde_json::Value::Number(number) => number.as_i64().and_then(|value| i32::try_from(value).ok()),
+        serde_json::Value::String(string) => string.trim().parse::<i32>().ok(),
+        _ => None,
+    }
+}
+
 fn calculate_average(values: impl IntoIterator<Item = Option<f64>>) -> Option<f64> {
     let mut total = 0.0;
     let mut count = 0_u32;
@@ -821,10 +832,12 @@ fn qlstats_player_to_rating(player: &serde_json::Value) -> ServerPlayerRating {
         .unwrap_or_else(|| "Unknown player".into());
     let qelo = qlstats_value_as_f64(player, "rating")
         .or_else(|| qlstats_value_as_f64(player, "elo"));
+    let team = qlstats_value_as_i32(player, "team");
 
     ServerPlayerRating {
         name,
         steam_id,
+        team,
         qelo,
         trueskill: None,
     }
@@ -1377,6 +1390,10 @@ fn focus_window(window: &tauri::WebviewWindow) {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_autostart::init(
+            tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+            None,
+        ))
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {

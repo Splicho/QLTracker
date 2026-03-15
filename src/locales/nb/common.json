@@ -1,0 +1,239 @@
+{
+  "navigation": {
+    "serverList": "Serverliste",
+    "favorites": "Favoritter",
+    "notifications": "Varsler",
+    "settings": "Innstillinger"
+  },
+  "header": {
+    "unknown": "Ukjend",
+    "theme": {
+      "light": "Lett tema",
+      "dark": "Mørkt tema",
+      "system": "Systemtema"
+    }
+  },
+  "sidebar": {
+    "groupLabel": "QLTracker",
+    "about": "Om QLTracker"
+  },
+  "about": {
+    "version": "Utgave",
+    "author": "Forfatter",
+    "socials": "Sosiale",
+    "stack": "Stack",
+    "repo": "Repo"
+  },
+  "notifications": {
+    "title": "Discord-varsler",
+    "serviceUnavailable": "Notification service is unavailable in this build. Set `VITE_NOTIFICATION_API_URL` to enable Discord linking and delivery.",
+    "finishBrowser": "Fullfør Discord-lenkestrømmen i nettleseren din.",
+    "loadingStatus": "Laster inn diskordvarslingsstatus...",
+    "account": "Konto",
+    "rules": "Regler",
+    "rulesSummary": "{{enabled}} active / {{total}} total",
+    "dmRefused": "QLTracker er koblet, men Discord nektet fortsatt DM-kontrollen. Prøv installasjons-/link-strømmen på nytt for å teste DMs.",
+    "relink": "Relink Discord",
+    "retryInstall": "Prøv å installere igjen",
+    "disconnect": "Koble fra",
+    "noAccount": "Ingen Discord-konto koblet ennå.",
+    "installLink": "Installer & lenke diskord",
+    "dialog": {
+      "editTitle": "Rediger diskordvarsel",
+      "createTitle": "Diskordvarsel",
+      "descriptionWithServer": "Configure a Discord DM notification for {{server}}.",
+      "descriptionFallback": "Konfigurer et diskord DM-varsling for denne serveren.",
+      "enabled": "Aktivert",
+      "enabledDescription": "Send bare DMs mens denne regelen er aktivert.",
+      "thresholdType": "Terskeltype",
+      "thresholdPlaceholder": "Velg en terskeltype",
+      "mode": {
+        "active_free_slots": {
+          "label": "Spille spor til venstre",
+          "description": "Varsle når en kamp er så nær å fylle, ved å bruke de totale aktive spilleautomatene i stedet for hele serverspor."
+        },
+        "free_slots": {
+          "label": "Gratis slots",
+          "description": "Varsle når serveren har så mange gratis spilleautomater eller færre."
+        },
+        "min_players": {
+          "label": "Min spillere",
+          "description": "Varsle når serveren når minst så mange spillere."
+        }
+      },
+      "totalPlayingSlots": "Totalt spilleautomater",
+      "totalPlayingSlotsDescription": "Bruk begge lag sammen, ikke per lag størrelse. For en 4v4-server, skriv inn 8. For en 8v8 server, skriv inn 16. Dette er forskjellig fra hele server slot-tellingen.",
+      "minimumPlayerCount": "Minimum spillertall",
+      "maximumActiveSlotsLeft": "Største aktive spor venstre",
+      "maximumFreeSlots": "Maksimalt gratis slots",
+      "activeSlotsDescription": "This rule will evaluate against {{count}} total active playing slots.",
+      "serverSupportsDescription": "This server currently supports up to {{count}} players.",
+      "deleteRule": "Slett regel",
+      "saveChanges": "Lagre endringer",
+      "createRule": "Opprett regel"
+    }
+  },
+  "serverList": {
+    "refresh": "Oppdater",
+    "noServersMatch": "Ingen servere passer til gjeldende filtre.",
+    "pageStatus": "Page {{current}} of {{total}}",
+    "table": {
+      "server": "Server",
+      "location": "Beliggenhet",
+      "mode": "Mode",
+      "players": "Spillere",
+      "ping": "Ping",
+      "actions": "Handlinger"
+    },
+    "locationUnknown": "Ukjend",
+    "modeUnknown": "Ukjend",
+    "pingUnavailable": "N/A",
+    "passwordSaved": "Passord lagret",
+    "passwordRequired": "Passord kreves",
+    "notificationEnabled": "Diskordvarsel aktivert",
+    "actions": {
+      "notificationsPublicOnly": "Varsler er kun tilgjengelige for offentlige servere.",
+      "connectDiscordFavorites": "Koble diskord på varslingssiden for å aktivere varslinger.",
+      "editNotification": "Rediger diskordvarsel",
+      "notifyDiscord": "Varsle om diskord",
+      "editFavorite": "Rediger favoritt",
+      "removeFromFavorites": "Fjern fra favoritter",
+      "addToFavorites": "Legg til i favoritter"
+    },
+    "drawer": {
+      "play": "Spill",
+      "avgQeloTooltip": "Gjennomsnittlig QElo på denne serveren",
+      "avgTrueskillTooltip": "Gjennomsnittlig TSkill på denne serveren",
+      "topQeloTooltip": "Høyeste QElo-spiller på denne tjeneren",
+      "topTrueskillTooltip": "Høyeste TSkill-spiller på denne tjeneren",
+      "playersHeading": "Spillere",
+      "player": "Spiller",
+      "points": "Poeng",
+      "qelo": "QElo",
+      "trueskill": "TSkill",
+      "time": "Tid",
+      "lookupFailed": "Dampspilleroppslag mislyktes.",
+      "noPlayerData": "Ingen spillerdata for denne serveren.",
+      "teams": {
+        "blue": "Blåt lag",
+        "free": "Gratis",
+        "players": "Spillere",
+        "red": "Rødt lag",
+        "spectators": "Tilskuere",
+        "unassigned": "Utilordnet"
+      }
+    },
+    "favoriteDialog": {
+      "editTitle": "Rediger favoritt",
+      "addTitle": "Legg til i favoritter",
+      "fallbackDescription": "Tildel denne serveren til en av dine lokale favorittlister.",
+      "selectList": "Velg en liste",
+      "listsUnavailable": "Ingen favorittlister tilgjengelig. Opprett en liste på favorittsiden først.",
+      "remove": "Fjern",
+      "saveChanges": "Lagre endringer",
+      "addToList": "Legg til i listen"
+    },
+    "passwordDialog": {
+      "title": "Serverpassord",
+      "descriptionWithServer": "Enter the password for {{server}}.",
+      "fallbackDescription": "Skriv inn passordet for denne serveren.",
+      "inputPlaceholder": "Skriv inn passord for server",
+      "remember": "Lagre dette passordet for fremtidige bli med",
+      "join": "Bli med"
+    },
+    "toasts": {
+      "removedFromFavorites": "Fjernet fra favoritter.",
+      "notificationUpdated": "Varsel oppdatert.",
+      "notificationCreated": "Varsel opprettet.",
+      "notificationRemoved": "Varsel fjernet.",
+      "notificationSaveError": "Kunne ikke lagre varslingsregelen.",
+      "notificationRemoveError": "Kunne ikke fjerne varslingsreglen.",
+      "favoriteUpdated": "Favoritt oppdatert.",
+      "addedToFavorites": "Lagt til favoritter."
+    }
+  },
+  "settings": {
+    "title": "Innstillinger",
+    "startupTitle": "Start på Windows",
+    "startupDescription": "Start automatisk QLTracker når du logger på Windows.",
+    "startupSaving": "Lagre oppstartsinnstillinger...",
+    "unavailable": "Innstilling er ikke tilgjengelig i denne bygningen.",
+    "languageTitle": "Språk",
+    "languageDescription": "Velg spr?ket QLTracker skal bruke i hele appen.",
+    "languagePlaceholder": "Velg språk"
+  },
+  "language": {
+    "en": "Engelsk",
+    "de": "Deutsch"
+  },
+  "favorites": {
+    "lists": "Lister",
+    "refresh": "Oppdater",
+    "createList": "Lag liste",
+    "createDialogTitle": "Opprett favorittliste",
+    "createDialogDescription": "Opprett en liste for å organisere lagrede servere.",
+    "listNamePlaceholder": "Listenavn",
+    "playersTooltip": "Totalt levende spillere på denne listen",
+    "favoriteServers": "Favorittservere",
+    "savedServers_one": "{{count}} saved server",
+    "savedServers_other": "{{count}} saved servers",
+    "noLists": "Ingen lister ennå. Opprett din første liste for å komme i gang.",
+    "noServers": "Ingen servere som er lagret i denne listen ennå."
+  },
+  "filters": {
+    "title": "Filtre",
+    "expand": "Utvid filtre",
+    "collapse": "Slå sammen filtre",
+    "searchPlaceholder": "Søk etter servernavn",
+    "showFull": "Vis hele",
+    "showEmpty": "Vis tom",
+    "showFavorites": "Vis favoritter",
+    "clearAll": "Fjern alle",
+    "regions": {
+      "all": "Alle regioner",
+      "eu": "Europa",
+      "na": "Nord-Amerika",
+      "sa": "Sør-Amerika",
+      "za": "Sør-Afrika",
+      "apac": "Asia Pacific"
+    },
+    "visibility": {
+      "all": "Alle servere",
+      "public": "Offentlig",
+      "private": "Privat"
+    },
+    "modes": {
+      "all": "Alle moduser",
+      "ca": "Clan Arena",
+      "duel": "Duel",
+      "ffa": "Gratis for alle",
+      "tdm": "Team Deathmatch",
+      "ctf": "CTF",
+      "ad": "Angrep & Forsvar",
+      "dom": "Dominans",
+      "ft": "Freeze Tag",
+      "har": "Harvester",
+      "race": "Rase",
+      "rr": "Rød Rover"
+    },
+    "rating": {
+      "title": "Vurdering",
+      "description": "Filtrer servere etter gjennomsnittlig QElo eller TSkill.",
+      "systemPlaceholder": "Vurderingssystem",
+      "qelo": "QElo",
+      "trueskill": "TSkill"
+    },
+    "maps": {
+      "all": "Alle kart",
+      "selectedCount": "{{count}} maps selected",
+      "searchPlaceholder": "Søk i kart...",
+      "empty": "Ingen kart funnet."
+    },
+    "tags": {
+      "label": "Tags",
+      "selectedCount": "{{count}}+ tags",
+      "none": "Ingen merker valgt.",
+      "inputPlaceholder": "Skriv inn merket og trykk Enter"
+    }
+  }
+}

@@ -10,6 +10,7 @@ import {
 import { ServerList } from "@/components/server-list";
 import { FavoritesPage } from "@/components/favorites-page";
 import { NotificationsPage } from "@/components/notifications-page";
+import { SettingsPage } from "@/components/settings-page";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import type { PageId } from "@/lib/navigation";
 import { fetchSteamServers } from "@/lib/steam";
@@ -39,7 +40,12 @@ function parseStoredFilters(rawValue: string): ServerFiltersValue {
   const defaults = createDefaultServerFilters();
 
   try {
-    const parsed = JSON.parse(rawValue) as Partial<ServerFiltersValue> | null;
+    const parsed = JSON.parse(rawValue) as
+      | (Partial<ServerFiltersValue> & {
+          hideEmpty?: boolean;
+          hideFull?: boolean;
+        })
+      | null;
     if (!parsed || typeof parsed !== "object") {
       return defaults;
     }
@@ -85,14 +91,20 @@ function parseStoredFilters(rawValue: string): ServerFiltersValue {
             (value): value is string => typeof value === "string"
           )
         : defaults.tags,
-      hideEmpty:
-        typeof parsed.hideEmpty === "boolean"
-          ? parsed.hideEmpty
-          : defaults.hideEmpty,
-      hideFull:
-        typeof parsed.hideFull === "boolean"
-          ? parsed.hideFull
-          : defaults.hideFull,
+      showEmpty:
+        typeof parsed.showEmpty === "boolean"
+          ? parsed.showEmpty
+          : defaults.showEmpty,
+      showFull:
+        typeof parsed.showFull === "boolean"
+          ? parsed.showFull
+          : typeof parsed.hideEmpty === "boolean"
+            ? parsed.hideEmpty
+            : defaults.showFull,
+      showFavorites:
+        typeof parsed.showFavorites === "boolean"
+          ? parsed.showFavorites
+          : defaults.showFavorites,
     };
   } catch {
     return defaults;
@@ -179,8 +191,10 @@ export function App() {
               void serversQuery.refetch();
             }}
           />
-        ) : (
+        ) : page === "notifications" ? (
           <NotificationsPage />
+        ) : (
+          <SettingsPage />
         )}
       </SidebarInset>
     </SidebarProvider>

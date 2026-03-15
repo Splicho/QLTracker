@@ -1,0 +1,266 @@
+{
+  "navigation": {
+    "serverList": "Листа сервера",
+    "favorites": "Фаворитес",
+    "notifications": "Обавештења",
+    "settings": "Подешавања"
+  },
+  "header": {
+    "unknown": "Непознато",
+    "theme": {
+      "light": "Светла тема",
+      "dark": "Мрачна тема",
+      "system": "Системска тема"
+    }
+  },
+  "sidebar": {
+    "groupLabel": "КЛТрацкер",
+    "about": "О КЛТрацкеру"
+  },
+  "about": {
+    "version": "Версион",
+    "author": "Аутор",
+    "socials": "Социалс",
+    "stack": "Стацк",
+    "repo": "Репо"
+  },
+  "notifications": {
+    "title": "Дисцорд Нотифицатионс",
+    "serviceUnavailable": "Notification service is unavailable in this build. Set `VITE_NOTIFICATION_API_URL` to enable Discord linking and delivery.",
+    "finishBrowser": "Завршите ток везе Дисцорд у свом претраживачу.",
+    "loadingStatus": "Учитавање статуса Дисцорд обавештења...",
+    "account": "Рачун",
+    "rules": "Правила",
+    "rulesSummary": "{{enabled}} active / {{total}} total",
+    "dmRefused": "КЛТрацкер је повезан, али Дисцорд је и даље одбио ДМ проверу. ",
+    "relink": "Поново повежите Дисцорд",
+    "retryInstall": "Поновите проверу инсталације",
+    "disconnect": "Прекини везу",
+    "noAccount": "Још ниједан Дисцорд налог није повезан.",
+    "installLink": "Инсталирајте и повежите Дисцорд",
+    "dialog": {
+      "editTitle": "Уредите Дисцорд обавештење",
+      "createTitle": "Дисцорд Нотифицатион",
+      "descriptionWithServer": "Configure a Discord DM notification for {{server}}.",
+      "descriptionFallback": "Конфигуришите Дисцорд ДМ обавештење за овај сервер.",
+      "enabled": "Омогућено",
+      "enabledDescription": "Шаљите ДМ само док је ово правило омогућено.",
+      "thresholdType": "Тип прага",
+      "thresholdPlaceholder": "Изаберите тип прага",
+      "mode": {
+        "active_free_slots": {
+          "label": "Играње слотова је остало",
+          "description": "Обавестите када је утакмица толико близу да се попуни, користећи укупан број активних слотова за играње уместо пуних места на серверу."
+        },
+        "free_slots": {
+          "label": "Бесплатни слотови",
+          "description": "Обавестите када сервер има оволико слободних слотова или мање."
+        },
+        "min_players": {
+          "label": "Мин играча",
+          "description": "Обавестите када сервер достигне најмање оволико играча."
+        }
+      },
+      "totalPlayingSlots": "Укупан број слотова",
+      "totalPlayingSlotsDescription": "Користите оба тима заједно, а не величину по тиму. ",
+      "minimumPlayerCount": "Минимални број играча",
+      "maximumActiveSlotsLeft": "Преостало је највише активних слотова",
+      "maximumFreeSlots": "Максимално слободних слотова",
+      "activeSlotsDescription": "This rule will evaluate against {{count}} total active playing slots.",
+      "serverSupportsDescription": "This server currently supports up to {{count}} players.",
+      "deleteRule": "Избриши правило",
+      "saveChanges": "Сачувај промене",
+      "createRule": "Креирајте правило"
+    }
+  },
+  "serverList": {
+    "refresh": "Освежи",
+    "noServersMatch": "Ниједан сервер не одговара тренутним филтерима.",
+    "pageStatus": "Page {{current}} of {{total}}",
+    "table": {
+      "server": "Сервер",
+      "location": "Локација",
+      "mode": "Режим",
+      "players": "Играчи",
+      "ping": "Пинг",
+      "actions": "Акције"
+    },
+    "locationUnknown": "Непознато",
+    "modeUnknown": "Непознато",
+    "pingUnavailable": "Н/А",
+    "passwordSaved": "Лозинка је сачувана",
+    "passwordRequired": "Потребна је лозинка",
+    "notificationEnabled": "Дисцорд обавештење је омогућено",
+    "actions": {
+      "notificationsPublicOnly": "Обавештења су доступна само за јавне сервере.",
+      "connectDiscordFavorites": "Повежите Дисцорд на страници Обавештења да бисте омогућили обавештења.",
+      "editNotification": "Уредите Дисцорд обавештење",
+      "notifyDiscord": "Обавести у Дисцорд-у",
+      "editFavorite": "Уреди омиљено",
+      "removeFromFavorites": "Уклони из омиљених",
+      "addToFavorites": "Додај у фаворите"
+    },
+    "drawer": {
+      "play": "Играј",
+      "avgQeloTooltip": "Просечан КЕло на овом серверу",
+      "avgTrueskillTooltip": "Просечна Тскилл на овом серверу",
+      "topQeloTooltip": "Најбољи КЕло играч на овом серверу",
+      "topTrueskillTooltip": "Највећи Тскилл играч на овом серверу",
+      "playersHeading": "Играчи",
+      "player": "Плаиер",
+      "points": "Поени",
+      "qelo": "КЕло",
+      "trueskill": "ТСкилл",
+      "time": "Време",
+      "lookupFailed": "Проналажење Стеам плејера није успело.",
+      "noPlayerData": "Нема података о играчу за овај сервер.",
+      "teams": {
+        "blue": "Блуе Теам",
+        "free": "Бесплатно",
+        "players": "Играчи",
+        "red": "Црвени тим",
+        "spectators": "Гледаоци",
+        "unassigned": "Унассигнед"
+      }
+    },
+    "favoriteDialog": {
+      "editTitle": "Уреди омиљено",
+      "addTitle": "Додај у фаворите",
+      "fallbackDescription": "Доделите овај сервер једној од ваших локалних листа фаворита.",
+      "selectList": "Изаберите листу",
+      "listsUnavailable": "Нема доступних листа фаворита. ",
+      "remove": "Уклони",
+      "saveChanges": "Сачувај промене",
+      "addToList": "Додај на листу"
+    },
+    "passwordDialog": {
+      "title": "Лозинка сервера",
+      "descriptionWithServer": "Enter the password for {{server}}.",
+      "fallbackDescription": "Унесите лозинку за овај сервер.",
+      "inputPlaceholder": "Унесите лозинку сервера",
+      "remember": "Сачувајте ову лозинку за будућа придруживања",
+      "join": "Придружите се"
+    },
+    "toasts": {
+      "removedFromFavorites": "Уклоњено из омиљених.",
+      "notificationUpdated": "Обавештење је ажурирано.",
+      "notificationCreated": "Обавештење је направљено.",
+      "notificationRemoved": "Обавештење је уклоњено.",
+      "notificationSaveError": "Није могуће сачувати правило обавештења.",
+      "notificationRemoveError": "Није могуће уклонити правило обавештења.",
+      "favoriteUpdated": "Фаворит је ажуриран.",
+      "addedToFavorites": "Додато у фаворите."
+    }
+  },
+  "settings": {
+    "title": "Подешавања",
+    "startupTitle": "Покретање на Виндовс-у",
+    "startupDescription": "Аутоматски покрените КЛТрацкер када се пријавите на Виндовс.",
+    "startupSaving": "Чување подешавања покретања...",
+    "unavailable": "Подешавање није доступно у овој верзији.",
+    "languageTitle": "Језик",
+    "languageDescription": "????????? ????? ???? ?? QLTracker ????????? ? ????? ??????????.",
+    "languagePlaceholder": "Изаберите језик"
+  },
+  "language": {
+    "en": "енглески",
+    "de": "Деутсцх",
+    "bg": "Български",
+    "ru": "Русскиј",
+    "uk": "Украинська",
+    "hr": "Хрватски",
+    "sr": "Српски",
+    "fr": "Францаис",
+    "it": "Италиано",
+    "et": "Еести",
+    "nl": "Недерландс",
+    "fi": "Суоми",
+    "sv": "Свенска",
+    "hu": "Магиар",
+    "da": "Данск",
+    "lv": "Латвиешу",
+    "nb": "Норск Бокмал",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ka": "ქართული",
+    "zh-Hant": "繁體中文",
+    "zh-Hans": "简体中文",
+    "es": "Еспанол",
+    "pt-BR": "португуес (Бразил)",
+    "pl": "Полски",
+    "ro": "Романа",
+    "lt": "Лиетувиу",
+    "cs": "Чештина"
+  },
+  "favorites": {
+    "lists": "Листе",
+    "refresh": "Освежи",
+    "createList": "Креирајте листу",
+    "createDialogTitle": "Креирајте листу омиљених",
+    "createDialogDescription": "Направите листу да бисте организовали своје сачуване сервере.",
+    "listNamePlaceholder": "Име листе",
+    "playersTooltip": "Укупно живих играча на овој листи",
+    "favoriteServers": "Омиљени сервери",
+    "noLists": "Још нема спискова. ",
+    "noServers": "Још увек нема сачуваних сервера на овој листи.",
+    "savedServers_one": "{{count}} saved server",
+    "savedServers_few": "{{count}} сачувани сервери",
+    "savedServers_other": "{{count}} saved servers"
+  },
+  "filters": {
+    "title": "Филтери",
+    "expand": "Проширите филтере",
+    "collapse": "Скупи филтере",
+    "searchPlaceholder": "Претражи име сервера",
+    "showFull": "Схов Фулл",
+    "showEmpty": "Прикажи празно",
+    "showFavorites": "Прикажи омиљене",
+    "clearAll": "Обриши све",
+    "regions": {
+      "all": "Сви региони",
+      "eu": "Европа",
+      "na": "Северна Америка",
+      "sa": "Јужна Америка",
+      "za": "Јужна Африка",
+      "apac": "Асиа Пацифиц"
+    },
+    "visibility": {
+      "all": "Сви сервери",
+      "public": "Јавно",
+      "private": "Приватно"
+    },
+    "modes": {
+      "all": "Сви режими",
+      "ca": "Цлан Арена",
+      "duel": "Дуел",
+      "ffa": "Бесплатно за све",
+      "tdm": "Теам Деатхматцх",
+      "ctf": "ЦТФ",
+      "ad": "Напад и одбрана",
+      "dom": "Доминација",
+      "ft": "Фреезе Таг",
+      "har": "Харвестер",
+      "race": "Раце",
+      "rr": "Црвени Ровер"
+    },
+    "rating": {
+      "title": "Оцена",
+      "description": "Филтрирајте сервере према просечном КЕло или Тскилл-у.",
+      "systemPlaceholder": "Систем оцењивања",
+      "qelo": "КЕло",
+      "trueskill": "ТСкилл"
+    },
+    "maps": {
+      "all": "Све карте",
+      "selectedCount": "{{count}} maps selected",
+      "searchPlaceholder": "Претражи мапе...",
+      "empty": "Нема пронађених мапа."
+    },
+    "tags": {
+      "label": "Ознаке",
+      "selectedCount": "{{count}}+ tags",
+      "none": "Није изабрана ниједна ознака.",
+      "inputPlaceholder": "Откуцајте ознаку и притисните Ентер"
+    }
+  }
+}

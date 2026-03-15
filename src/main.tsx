@@ -4,8 +4,10 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
 import { App } from "@/App";
+import { AppLanguageSync } from "@/components/app-language-sync";
 import { BootstrapPage } from "@/components/bootstrap-page";
 import { Toaster } from "@/components/ui/sonner";
+import "@/i18n";
 import "@/index.css";
 
 const queryClient = new QueryClient();
@@ -27,6 +29,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       storageKey="qlist-theme"
     >
       <QueryClientProvider client={queryClient}>
+        <AppLanguageSync />
         {isBootstrapWindow ? <BootstrapPage /> : <App />}
         <Toaster position="bottom-right" richColors />
       </QueryClientProvider>

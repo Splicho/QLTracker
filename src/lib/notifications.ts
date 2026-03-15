@@ -3,7 +3,10 @@ const notificationApiUrl =
 
 export const NOTIFICATION_API_URL = notificationApiUrl;
 
-export type ThresholdMode = "min_players" | "free_slots";
+export type ThresholdMode =
+  | "min_players"
+  | "free_slots"
+  | "active_free_slots";
 export type LinkSessionStatus = "pending" | "complete" | "expired" | "error";
 
 export type NotificationUser = {
@@ -23,6 +26,7 @@ export type NotificationRule = {
   enabled: boolean;
   thresholdMode: ThresholdMode;
   thresholdValue: number;
+  matchCapacity: number | null;
   lastMatched: boolean;
   lastNotifiedAt: string | null;
   createdAt: string;
@@ -34,6 +38,7 @@ export type NotificationRuleInput = {
   serverNameSnapshot: string;
   thresholdMode: ThresholdMode;
   thresholdValue: number;
+  matchCapacity: number | null;
   enabled: boolean;
 };
 
