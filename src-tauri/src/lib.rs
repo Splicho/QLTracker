@@ -8,11 +8,16 @@ use std::sync::{mpsc, Mutex, OnceLock};
 use std::time::Duration;
 use tauri::Manager;
 
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
+
 const STEAM_SERVER_LIST_URL: &str =
     "https://api.steampowered.com/IGameServersService/GetServerList/v1/";
 const A2S_PLAYER_HEADER: &[u8] = b"\xFF\xFF\xFF\xFFU\xFF\xFF\xFF\xFF";
 const A2S_INFO_HEADER: &[u8] = b"\xFF\xFF\xFF\xFFTSource Engine Query\x00";
 const CHECK_HOST_IP_INFO_URL: &str = "https://check-host.net/ip-info";
+#[cfg(target_os = "windows")]
+const CREATE_NO_WINDOW: u32 = 0x08000000;
 static COUNTRY_CACHE: OnceLock<Mutex<HashMap<String, Option<ServerCountryLocation>>>> =
     OnceLock::new();
 static PASSWORD_CACHE: OnceLock<Mutex<HashMap<String, Option<bool>>>> = OnceLock::new();
@@ -621,6 +626,7 @@ fn query_ping(addr: &str) -> Result<A2sProbeResult, String> {
 fn query_system_ping(host: &str) -> Result<u128, String> {
     #[cfg(target_os = "windows")]
     let output = Command::new("ping")
+        .creation_flags(CREATE_NO_WINDOW)
         .args(["-n", "1", "-w", "1200", host])
         .output()
         .map_err(|error| format!("System ping failed to start: {error}"))?;
@@ -673,6 +679,7 @@ fn quake_live_process_running() -> bool {
     #[cfg(target_os = "windows")]
     {
         let output = Command::new("tasklist")
+            .creation_flags(CREATE_NO_WINDOW)
             .args(["/FO", "CSV", "/NH"])
             .output();
 

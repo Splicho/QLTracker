@@ -46,11 +46,15 @@ export function BootstrapPage() {
   const startedRef = useRef(false);
 
   useEffect(() => {
+    document.documentElement.classList.remove("bootstrap-preload");
     document.documentElement.classList.add("bootstrap-window");
+    document.documentElement.classList.add("dark");
     document.body.classList.add("dark");
 
     return () => {
+      document.documentElement.classList.remove("bootstrap-preload");
       document.documentElement.classList.remove("bootstrap-window");
+      document.documentElement.classList.remove("dark");
       document.body.classList.remove("dark");
     };
   }, []);

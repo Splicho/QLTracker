@@ -4,6 +4,30 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>QLTracker</title>
+    <style>
+      html,
+      body,
+      #root {
+        min-height: 100%;
+        margin: 0;
+      }
+
+      html.bootstrap-preload {
+        color-scheme: dark;
+      }
+
+      html.bootstrap-preload,
+      html.bootstrap-preload body,
+      html.bootstrap-preload #root {
+        background: transparent;
+        overflow: hidden;
+      }
+    </style>
+    <script>
+      if (window.location.search.includes("bootstrap=1")) {
+        document.documentElement.classList.add("bootstrap-preload", "dark");
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
