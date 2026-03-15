@@ -5,4 +5,6 @@ export const navigationItems = [
   { id: "favorites", title: "Favorites", icon: HeartOutline },
 ] as const;
 
-export type PageId = (typeof navigationItems)[number]["id"];
+export type PageId =
+  | (typeof navigationItems)[number]["id"]
+  | "notifications";

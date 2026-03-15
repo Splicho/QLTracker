@@ -4,6 +4,7 @@ import {
   createDefaultServerFilters,
   type ServerFiltersValue,
 } from "@/components/server-filters";
+import { Headset } from "@/components/icon";
 import { useFavorites } from "@/hooks/use-favorites";
 import { ServerList } from "@/components/server-list";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { SteamServer } from "@/lib/steam";
 
 const emptyFilters: ServerFiltersValue = createDefaultServerFilters();
@@ -35,7 +37,7 @@ export function FavoritesPage({
   error?: string | null;
   onRefresh: () => void;
 }) {
-  const { state, createList, countServersForList } = useFavorites();
+  const { state, createList } = useFavorites();
   const [selectedListId, setSelectedListId] = useState<string | null>(null);
   const [listName, setListName] = useState("");
   const [createListOpen, setCreateListOpen] = useState(false);
@@ -74,12 +76,42 @@ export function FavoritesPage({
     () => servers.filter((server) => favoriteAddresses.includes(server.addr)),
     [favoriteAddresses, servers]
   );
+  const playerCountsByList = useMemo(() => {
+    const serverMap = new Map(servers.map((server) => [server.addr, server]));
+
+    return Object.fromEntries(
+      state.lists.map((list) => {
+        const totalPlayers = state.servers
+          .filter((server) => server.listIds.includes(list.id))
+          .reduce((sum, favoriteServer) => {
+            return sum + (serverMap.get(favoriteServer.addr)?.players ?? 0);
+          }, 0);
+
+        return [list.id, totalPlayers];
+      })
+    ) as Record<string, number>;
+  }, [servers, state.lists, state.servers]);
 
   return (
     <section className="flex min-h-0 flex-1 flex-col px-4 py-4">
-      <div className="grid min-h-0 min-w-0 flex-1 gap-4 lg:grid-cols-[12.5rem_minmax(0,1fr)]">
-        <aside className="flex min-h-0 flex-col gap-3 rounded-lg border border-border p-3">
-          <div className="text-sm font-medium text-foreground">Lists</div>
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4">
+        <div className="flex flex-col gap-3 rounded-lg border border-border p-3">
+          <div className="flex items-center justify-between gap-3">
+            <div className="text-sm font-medium text-foreground">Lists</div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={onRefresh}
+              disabled={isRefreshing}
+            >
+              <RefreshCw
+                className={`size-4 ${isRefreshing ? "animate-spin" : ""}`}
+              />
+              Refresh
+            </Button>
+          </div>
           <Dialog open={createListOpen} onOpenChange={setCreateListOpen}>
             <DialogTrigger asChild>
               <Button className="w-full">Create List</Button>
@@ -127,30 +159,37 @@ export function FavoritesPage({
               </DialogFooter>
             </DialogContent>
           </Dialog>
-
-          <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto">
+          <div className="flex gap-2 overflow-x-auto pb-1">
             {state.lists.map((list) => (
               <button
                 key={list.id}
                 type="button"
                 onClick={() => setSelectedListId(list.id)}
-                className={`flex cursor-pointer items-center justify-between rounded-md pl-2.5 pr-2 py-1.5 text-left text-sm ${
+                className={`flex min-w-fit cursor-pointer items-center justify-between gap-2 rounded-md pl-2.5 pr-2 py-1.5 text-left text-sm whitespace-nowrap ${
                   selectedList?.id === list.id
                     ? "bg-accent text-accent-foreground"
                     : "text-foreground hover:bg-accent/50"
                 }`}
               >
                 <span className="truncate">{list.name}</span>
-                <Badge
-                  variant="outline"
-                  className="size-6 justify-center rounded-md px-0 text-xs leading-none"
-                >
-                  {countServersForList(list.id)}
-                </Badge>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge
+                      variant="outline"
+                      className="flex h-6 min-w-6 items-center justify-center gap-1 rounded-md px-1.5 text-xs leading-none"
+                    >
+                      <Headset className="size-3" />
+                      <span>{playerCountsByList[list.id] ?? 0}</span>
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">
+                    Total live players in this list
+                  </TooltipContent>
+                </Tooltip>
               </button>
             ))}
           </div>
-        </aside>
+        </div>
 
         <div className="flex min-h-0 min-w-0 flex-col rounded-lg border border-border">
           <div className="flex items-start justify-between gap-3 border-b border-border px-4 py-3">
@@ -164,19 +203,6 @@ export function FavoritesPage({
                   : "Create a list to start saving servers."}
               </p>
             </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="gap-2"
-              onClick={onRefresh}
-              disabled={isRefreshing}
-            >
-              <RefreshCw
-                className={`size-4 ${isRefreshing ? "animate-spin" : ""}`}
-              />
-              Refresh
-            </Button>
           </div>
 
           <div className="min-h-[18rem] flex-1">

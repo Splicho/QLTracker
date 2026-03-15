@@ -13,10 +13,18 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+const pageTitles: Record<PageId, string> = {
+  "server-list": "Server List",
+  favorites: "Favorites",
+  notifications: "Notifications",
+};
+
 export function Header({ page }: { page: PageId }) {
   const { setTheme, theme } = useTheme();
   const currentPage =
-    navigationItems.find((item) => item.id === page)?.title ?? "Unknown";
+    navigationItems.find((item) => item.id === page)?.title ??
+    pageTitles[page] ??
+    "Unknown";
 
   const handleThemeChange = (
     nextTheme: "light" | "dark" | "system",

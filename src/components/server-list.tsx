@@ -18,7 +18,14 @@ import {
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ArrowUpRight, Pencil } from "lucide-react";
+import {
+  ArrowUpDown,
+  ArrowUpRight,
+  Bell,
+  BellOff,
+  BellRing,
+  Pencil,
+} from "lucide-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import {
   HeartCrossed,
@@ -32,6 +39,7 @@ import {
   Unlock,
 } from "@/components/icon";
 import { useFavorites } from "@/hooks/use-favorites";
+import { useNotificationService } from "@/hooks/use-notification-service";
 import { useServerPasswords } from "@/hooks/use-server-passwords";
 import {
   getCountryFlagSrc,
@@ -54,11 +62,13 @@ import {
   type SteamServer,
 } from "@/lib/steam";
 import { formatDurationHoursMinutes } from "@/lib/time";
+import type { NotificationRuleInput } from "@/lib/notifications";
 import {
   RATING_FILTER_MAX,
   RATING_FILTER_MIN,
   type ServerFiltersValue,
 } from "@/components/server-filters";
+import { ServerNotificationDialog } from "@/components/server-notification-dialog";
 import {
   Dialog,
   DialogContent,
@@ -477,6 +487,43 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
       })),
     [playerRatingsByName, players]
   );
+  const topRatedPlayerNames = useMemo(() => {
+    let highestQelo = Number.NEGATIVE_INFINITY;
+    let highestTrueskill = Number.NEGATIVE_INFINITY;
+
+    for (const player of mergedPlayers) {
+      const qelo = player.rating?.qelo ?? Number.NEGATIVE_INFINITY;
+      const trueskill =
+        player.rating?.trueskill ?? Number.NEGATIVE_INFINITY;
+
+      if (qelo > highestQelo) {
+        highestQelo = qelo;
+      }
+      if (trueskill > highestTrueskill) {
+        highestTrueskill = trueskill;
+      }
+    }
+
+    const names = new Set<string>();
+
+    for (const player of mergedPlayers) {
+      if (
+        player.rating?.qelo != null &&
+        player.rating.qelo === highestQelo
+      ) {
+        names.add(normalizePlayerName(player.name));
+      }
+
+      if (
+        player.rating?.trueskill != null &&
+        player.rating.trueskill === highestTrueskill
+      ) {
+        names.add(normalizePlayerName(player.name));
+      }
+    }
+
+    return names;
+  }, [mergedPlayers]);
   const playerPanelPending =
     playersQuery.isPending ||
     (playersQuery.fetchStatus === "fetching" && !playersQuery.data) ||
@@ -500,11 +547,19 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
         ),
         cell: ({ row }) => {
           const steamId = row.original.rating?.steam_id;
+          const isTopRated = topRatedPlayerNames.has(
+            normalizePlayerName(row.original.name)
+          );
 
           if (!steamId) {
             return (
-              <div className="truncate text-sm font-medium text-foreground">
-                <QuakeText text={row.original.name} />
+              <div className="flex min-w-0 items-center gap-1.5 truncate text-sm font-medium text-foreground">
+                <span className="truncate">
+                  <QuakeText text={row.original.name} />
+                </span>
+                {isTopRated ? (
+                  <Medal className="size-3.5 shrink-0 text-amber-400" />
+                ) : null}
               </div>
             );
           }
@@ -520,6 +575,9 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
               <span className="truncate">
                 <QuakeText text={row.original.name} />
               </span>
+              {isTopRated ? (
+                <Medal className="size-3.5 shrink-0 text-amber-400" />
+              ) : null}
               <ArrowUpRight className="size-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
             </button>
           );
@@ -597,7 +655,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
           formatDurationHoursMinutes(row.original.duration_seconds),
       },
     ],
-    []
+    [topRatedPlayerNames]
   );
 
   const table = useReactTable({
@@ -747,11 +805,23 @@ export function ServerList({
     removeServer,
     removeServerFromList,
   } = useFavorites();
+  const {
+    notificationsAvailable,
+    notificationUser,
+    rulesByServerAddr,
+    createRule,
+    updateRule,
+    deleteRule,
+    mutationsPending: notificationMutationPending,
+  } = useNotificationService();
   const { getPassword, savePassword } = useServerPasswords();
   const [selectedServer, setSelectedServer] = useState<SteamServer | null>(
     null
   );
   const [favoriteServer, setFavoriteServer] = useState<SteamServer | null>(
+    null
+  );
+  const [notificationServer, setNotificationServer] = useState<SteamServer | null>(
     null
   );
   const [targetFavoriteListId, setTargetFavoriteListId] = useState<string>("");
@@ -1245,6 +1315,9 @@ export function ServerList({
           const requiresPassword =
             resolvedRequiresPasswordByAddr[row.original.addr] === true;
           const hasSavedPassword = Boolean(getPassword(row.original.addr));
+          const notificationRule = rulesByServerAddr[row.original.addr];
+          const hasActiveNotification =
+            actionMode === "edit" && notificationRule?.enabled === true;
 
           return (
             <div className="relative h-11 min-w-0 overflow-hidden">
@@ -1287,6 +1360,21 @@ export function ServerList({
                         {hasSavedPassword
                           ? "Password saved"
                           : "Password required"}
+                      </TooltipContent>
+                    </Tooltip>
+                  ) : null}
+                  {hasActiveNotification ? (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge
+                          variant="outline"
+                          className="h-5 shrink-0 gap-1 rounded-md border-primary/30 bg-primary/10 px-1.5 text-[10px] font-medium text-primary"
+                        >
+                          <BellRing className="size-3" />
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">
+                        Discord notification enabled
                       </TooltipContent>
                     </Tooltip>
                   ) : null}
@@ -1422,9 +1510,59 @@ export function ServerList({
         ),
         cell: ({ row }) => {
           const isFavorited = favoriteAddresses.has(row.original.addr);
+          const notificationRule = rulesByServerAddr[row.original.addr] ?? null;
+          const isPrivateServer =
+            resolvedRequiresPasswordByAddr[row.original.addr] === true;
+          const hasDmWarning =
+            notificationUser != null && notificationUser.dmAvailable === false;
+          const notificationDisabledReason =
+            actionMode !== "edit"
+              ? null
+              : isPrivateServer
+                ? "Notifications are available only for public servers."
+                : !notificationUser
+                  ? "Connect Discord in Favorites to enable notifications."
+                  : null;
+          const notificationTooltip =
+            actionMode !== "edit"
+              ? null
+              : notificationDisabledReason ??
+                (notificationRule ? "Edit Discord notification" : "Notify on Discord");
 
           return (
             <div className="flex justify-end gap-2">
+              {actionMode === "edit" && notificationsAvailable ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="outline"
+                      className="size-8"
+                      disabled={notificationDisabledReason !== null}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        if (notificationDisabledReason) {
+                          return;
+                        }
+
+                        setNotificationServer(row.original);
+                      }}
+                    >
+                      {notificationRule?.enabled ? (
+                        <BellRing className="size-4 text-primary" />
+                      ) : hasDmWarning ? (
+                        <BellOff className="size-4 text-muted-foreground" />
+                      ) : notificationRule ? (
+                        <BellOff className="size-4 text-muted-foreground" />
+                      ) : (
+                        <Bell className="size-4" />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">{notificationTooltip}</TooltipContent>
+                </Tooltip>
+              ) : null}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
@@ -1496,7 +1634,10 @@ export function ServerList({
       favoriteAddresses,
       favoriteListId,
       favoritesState.lists,
+      notificationsAvailable,
+      notificationUser,
       removeServer,
+      rulesByServerAddr,
     ]
   );
 
@@ -1538,6 +1679,47 @@ export function ServerList({
     setPasswordServer(server);
     setJoinPassword("");
     setRememberServerPassword(false);
+  };
+  const notificationRuleForDialog = notificationServer
+    ? (rulesByServerAddr[notificationServer.addr] ?? null)
+    : null;
+  const handleNotificationSave = async (
+    input: NotificationRuleInput,
+    existingRuleId: string | null
+  ) => {
+    try {
+      if (existingRuleId) {
+        await updateRule({
+          ruleId: existingRuleId,
+          patch: input,
+        });
+        toast.success("Notification updated.");
+      } else {
+        await createRule(input);
+        toast.success("Notification created.");
+      }
+
+      setNotificationServer(null);
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Could not save the notification rule."
+      );
+    }
+  };
+  const handleNotificationDelete = async (ruleId: string) => {
+    try {
+      await deleteRule(ruleId);
+      toast.success("Notification removed.");
+      setNotificationServer(null);
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Could not remove the notification rule."
+      );
+    }
   };
   const pageCount = table.getPageCount();
   const currentPage = table.getState().pagination.pageIndex + 1;
@@ -1934,6 +2116,20 @@ export function ServerList({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ServerNotificationDialog
+        open={notificationServer !== null}
+        server={notificationServer}
+        existingRule={notificationRuleForDialog}
+        pending={notificationMutationPending}
+        onOpenChange={(open) => {
+          if (!open) {
+            setNotificationServer(null);
+          }
+        }}
+        onSave={handleNotificationSave}
+        onDelete={handleNotificationDelete}
+      />
 
       <Dialog
         open={passwordServer !== null}

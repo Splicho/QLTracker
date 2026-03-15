@@ -2,6 +2,7 @@ import appIcon from "@/assets/images/appicon.png";
 import logo from "@/assets/images/logo.png";
 import logoDark from "@/assets/images/logo_dark.png";
 import {
+  Bell,
   Discord,
   Github,
   InfoCircle,
@@ -20,7 +21,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -117,20 +117,48 @@ export function AppSidebar({
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="border-t border-sidebar-border px-2 py-2 group-data-[collapsible=icon]:px-0">
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              className="w-full justify-start gap-2 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+      <SidebarFooter className="px-2 py-2 group-data-[collapsible=icon]:px-0">
+        <SidebarMenu>
+          <SidebarMenuItem className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
+            <SidebarMenuButton
+              asChild
+              tooltip="Notifications"
+              isActive={page === "notifications"}
+              size="lg"
+              className="cursor-pointer group-data-[collapsible=icon]:!size-10 group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!p-0 [&_svg]:size-5!"
             >
-              <InfoCircle className="size-4" />
-              <span className="group-data-[collapsible=icon]:hidden">
-                About QLTracker
-              </span>
-            </Button>
-          </DialogTrigger>
+              <button
+                type="button"
+                onClick={() => onNavigate("notifications")}
+              >
+                <Bell />
+                <span className="group-data-[collapsible=icon]:hidden">
+                  Notifications
+                </span>
+              </button>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+        <div className="border-t border-sidebar-border" />
+        <Dialog>
+          <SidebarMenu>
+            <SidebarMenuItem className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
+              <SidebarMenuButton
+                asChild
+                size="lg"
+                className="cursor-pointer group-data-[collapsible=icon]:!size-10 group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!p-0 [&_svg]:size-5!"
+              >
+                <DialogTrigger asChild>
+                  <button type="button">
+                    <InfoCircle />
+                    <span className="group-data-[collapsible=icon]:hidden">
+                      About QLTracker
+                    </span>
+                  </button>
+                </DialogTrigger>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
 
           <DialogContent
             className="sm:max-w-md"

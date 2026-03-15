@@ -17,6 +17,7 @@ jobs:
     env:
       VITE_STEAM_API_KEY: ${{ secrets.VITE_STEAM_API_KEY || secrets.STEAM_API_KEY }}
       VITE_STEAM_APP_ID: ${{ secrets.VITE_STEAM_APP_ID || vars.VITE_STEAM_APP_ID || '282440' }}
+      VITE_NOTIFICATION_API_URL: ${{ secrets.VITE_NOTIFICATION_API_URL || vars.VITE_NOTIFICATION_API_URL || '' }}
       VITE_QLSTATS_API_URL: ${{ secrets.VITE_QLSTATS_API_URL || vars.VITE_QLSTATS_API_URL || 'https://qlstats.net/api' }}
       VITE_TRUESKILL_URL_TEMPLATE: ${{ secrets.VITE_TRUESKILL_URL_TEMPLATE || vars.VITE_TRUESKILL_URL_TEMPLATE || 'http://qlrelax.freemyip.com/elo/bn/%s' }}
     strategy:
@@ -49,12 +50,12 @@ jobs:
 
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20
           cache: npm

@@ -9,6 +9,7 @@ import {
 } from "@/components/server-filters";
 import { ServerList } from "@/components/server-list";
 import { FavoritesPage } from "@/components/favorites-page";
+import { NotificationsPage } from "@/components/notifications-page";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import type { PageId } from "@/lib/navigation";
 import { fetchSteamServers } from "@/lib/steam";
@@ -163,7 +164,7 @@ export function App() {
               }
             />
           </>
-        ) : (
+        ) : page === "favorites" ? (
           <FavoritesPage
             servers={serversQuery.data ?? []}
             isLoading={serversQuery.isLoading}
@@ -179,6 +180,8 @@ export function App() {
               void serversQuery.refetch();
             }}
           />
+        ) : (
+          <NotificationsPage />
         )}
       </SidebarInset>
     </SidebarProvider>

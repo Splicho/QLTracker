@@ -456,3 +456,11 @@ export function HeartCrossed(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function Bell(props: SVGProps<SVGSVGElement>) {
+	return (<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" {...props}><path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.5 18a3.5 3.5 0 1 1-7 0m10.731 0H4.77a1.769 1.769 0 0 1-1.25-3.02l.602-.603A3 3 0 0 0 5 12.256V9.5a7 7 0 0 1 14 0v2.756a3 3 0 0 0 .879 2.121l.603.603a1.77 1.77 0 0 1-1.25 3.02"></path></svg>);
+}
+
+export function Headset(props: SVGProps<SVGSVGElement>) {
+	return (<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" {...props}><g fill="none" stroke="currentColor" strokeWidth={1.5}><path d="M15 12a2 2 0 0 1 2-2a4 4 0 0 1 0 8a2 2 0 0 1-2-2zm-6 0a2 2 0 0 0-2-2a4 4 0 0 0 0 8a2 2 0 0 0 2-2z"></path><path strokeLinecap="round" strokeLinejoin="round" d="M3 14v-3a9 9 0 0 1 18 0v4.846c0 2.009 0 3.013-.352 3.796a4 4 0 0 1-2.006 2.006c-.783.352-1.787.352-3.796.352H12"></path></g></svg>);
+}
