@@ -1153,12 +1153,14 @@ export function ServerList({
     return staticFilteredServers.filter((server) => {
       const region = resolveServerRegion(
         server,
-        resolvedRegionCountriesByAddr[server.addr]
+        cachedCountriesByAddr[server.addr] ??
+          resolvedRegionCountriesByAddr[server.addr]
       );
       return region === filters.region;
     });
   }, [
     filters.region,
+    cachedCountriesByAddr,
     regionCountryQuery.data,
     regionCountryQuery.isPending,
     resolvedRegionCountriesByAddr,

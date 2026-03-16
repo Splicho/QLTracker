@@ -133,10 +133,12 @@ export function App() {
     SERVER_FILTERS_STORAGE_KEY,
     serializeServerFilters(createDefaultServerFilters())
   );
-  const filters = useMemo(
-    () => parseStoredServerFilters(rawFilters),
-    [rawFilters]
+  const [filters, setFilters] = useState(() =>
+    parseStoredServerFilters(rawFilters)
   );
+  useEffect(() => {
+    setRawFilters(serializeServerFilters(filters));
+  }, [filters, setRawFilters]);
   const serversQuery = useQuery({
     queryKey: ["steam", "servers"],
     queryFn: () => fetchSteamServers(steamApiKey),
@@ -350,12 +352,10 @@ export function App() {
             <ServerFilters
               value={filters}
               onChange={(next) => {
-                setRawFilters(serializeServerFilters(next));
+                setFilters(next);
               }}
               onReset={() => {
-                setRawFilters(
-                  serializeServerFilters(createDefaultServerFilters())
-                );
+                setFilters(createDefaultServerFilters());
               }}
             />
             <ServerList
