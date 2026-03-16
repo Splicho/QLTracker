@@ -7,6 +7,7 @@ import {
 } from "@/lib/notifications";
 import { getDefaultNotificationThreshold } from "@/hooks/use-notification-service";
 import { stripQuakeColors } from "@/lib/quake";
+import { Spinner } from "@/components/icon";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -77,6 +78,7 @@ type ServerNotificationDialogProps = {
   server: SteamServer | null;
   existingRule: NotificationRule | null;
   pending?: boolean;
+  pendingAction?: "save" | "delete" | null;
   onOpenChange: (open: boolean) => void;
   onSave: (input: NotificationRuleInput, existingRuleId: string | null) => void;
   onDelete: (ruleId: string) => void;
@@ -87,6 +89,7 @@ export function ServerNotificationDialog({
   server,
   existingRule,
   pending = false,
+  pendingAction = null,
   onOpenChange,
   onSave,
   onDelete,
@@ -285,7 +288,14 @@ export function ServerNotificationDialog({
                 onDelete(existingRule.id);
               }}
             >
-              {t("notifications.dialog.deleteRule")}
+              {pending && pendingAction === "delete" ? (
+                <span className="inline-flex items-center gap-2">
+                  <Spinner className="size-4" />
+                  {t("notifications.dialog.deleteRule")}
+                </span>
+              ) : (
+                t("notifications.dialog.deleteRule")
+              )}
             </Button>
           ) : null}
           <Button
@@ -312,9 +322,18 @@ export function ServerNotificationDialog({
               );
             }}
           >
-            {existingRule
-              ? t("notifications.dialog.saveChanges")
-              : t("notifications.dialog.createRule")}
+            {pending && pendingAction === "save" ? (
+              <span className="inline-flex items-center gap-2">
+                <Spinner className="size-4" />
+                {existingRule
+                  ? t("notifications.dialog.saveChanges")
+                  : t("notifications.dialog.createRule")}
+              </span>
+            ) : existingRule ? (
+              t("notifications.dialog.saveChanges")
+            ) : (
+              t("notifications.dialog.createRule")
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

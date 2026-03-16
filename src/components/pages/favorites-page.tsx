@@ -2,10 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import {
   createDefaultServerFilters,
   type ServerFiltersValue,
-} from "@/components/server-filters";
+} from "@/components/server/server-filters";
 import { Headset } from "@/components/icon";
 import { useFavorites } from "@/hooks/use-favorites";
-import { ServerList } from "@/components/server-list";
+import { ServerList } from "@/components/server/server-list";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {

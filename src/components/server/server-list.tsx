@@ -51,14 +51,14 @@ import {
   type ServerCountryLocation,
 } from "@/lib/countries";
 import { getMapEntry } from "@/lib/maps";
-import { QuakeText, stripQuakeColors } from "@/lib/quake";
+import { QuakeText } from "@/lib/quake";
 import {
   fetchServerModes,
-  fetchSteamServerRatingSummaries,
-  fetchSteamServerPlayerRatings,
   fetchSteamServerCountries,
   fetchSteamServerPings,
+  fetchSteamServerPlayerRatings,
   fetchSteamServerPlayers,
+  fetchSteamServerRatingSummaries,
   type ServerMode,
   type ServerPlayerRating,
   type ServerRatingSummary,
@@ -71,23 +71,17 @@ import {
   RATING_FILTER_MAX,
   RATING_FILTER_MIN,
   type ServerFiltersValue,
-} from "@/components/server-filters";
-import { ServerDrawer } from "@/components/server-drawer";
-import { ServerNotificationDialog } from "@/components/server-notification-dialog";
+} from "@/components/server/server-filters";
+import { ServerDrawer } from "@/components/server/server-drawer";
+import { ServerFavoriteDialog } from "@/components/server/server-favorite-dialog";
+import { ServerNotificationDialog } from "@/components/server/server-notification-dialog";
+import { ServerPasswordDialog } from "@/components/server/server-password-dialog";
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   Pagination,
   PaginationContent,
@@ -98,13 +92,6 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Table,
   TableBody,
   TableCell,
@@ -114,9 +101,6 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -1014,6 +998,12 @@ export function ServerList({
   );
   const [notificationServer, setNotificationServer] =
     useState<SteamServer | null>(null);
+  const [favoriteDialogAction, setFavoriteDialogAction] = useState<
+    "save" | "remove" | null
+  >(null);
+  const [notificationDialogAction, setNotificationDialogAction] = useState<
+    "save" | "delete" | null
+  >(null);
   const [targetFavoriteListId, setTargetFavoriteListId] = useState<string>("");
   const [passwordServer, setPasswordServer] = useState<SteamServer | null>(
     null
@@ -1983,6 +1973,7 @@ export function ServerList({
     existingRuleId: string | null
   ) => {
     try {
+      setNotificationDialogAction("save");
       if (existingRuleId) {
         await updateRule({
           ruleId: existingRuleId,
@@ -2001,10 +1992,13 @@ export function ServerList({
           ? error.message
           : t("serverList.toasts.notificationSaveError")
       );
+    } finally {
+      setNotificationDialogAction(null);
     }
   };
   const handleNotificationDelete = async (ruleId: string) => {
     try {
+      setNotificationDialogAction("delete");
       await deleteRule(ruleId);
       toast.success(t("serverList.toasts.notificationRemoved"));
       setNotificationServer(null);
@@ -2014,6 +2008,8 @@ export function ServerList({
           ? error.message
           : t("serverList.toasts.notificationRemoveError")
       );
+    } finally {
+      setNotificationDialogAction(null);
     }
   };
   const pageCount = table.getPageCount();
@@ -2264,137 +2260,92 @@ export function ServerList({
         onJoin={handleJoinServer}
       />
 
-      <Dialog
+      <ServerFavoriteDialog
         open={favoriteServer !== null}
+        server={favoriteServer}
+        actionMode={actionMode}
+        favoriteListId={favoriteListId}
+        lists={favoritesState.lists}
+        targetListId={targetFavoriteListId}
+        pendingAction={favoriteDialogAction}
         onOpenChange={(open) => {
           if (!open) {
             setFavoriteServer(null);
             setTargetFavoriteListId("");
+            setFavoriteDialogAction(null);
           }
         }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {actionMode === "edit"
-                ? t("serverList.favoriteDialog.editTitle")
-                : t("serverList.favoriteDialog.addTitle")}
-            </DialogTitle>
-            <DialogDescription>
-              {favoriteServer ? (
-                <span className="block truncate">
-                  <QuakeText text={favoriteServer.name} />
-                </span>
-              ) : (
-                t("serverList.favoriteDialog.fallbackDescription")
-              )}
-            </DialogDescription>
-          </DialogHeader>
+        onTargetListChange={setTargetFavoriteListId}
+        onRemove={() => {
+          if (!favoriteServer || !favoriteListId) {
+            return;
+          }
 
-          {favoritesState.lists.length > 0 ? (
-            <Select
-              value={targetFavoriteListId}
-              onValueChange={setTargetFavoriteListId}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue
-                  placeholder={t("serverList.favoriteDialog.selectList")}
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {favoritesState.lists.map((list) => (
-                  <SelectItem key={list.id} value={list.id}>
-                    {list.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              {t("serverList.favoriteDialog.listsUnavailable")}
-            </p>
-          )}
+          setFavoriteDialogAction("remove");
+          try {
+            removeServerFromList(favoriteServer.addr, favoriteListId);
+            toast.success(t("serverList.toasts.removedFromFavorites"));
+            setFavoriteServer(null);
+            setTargetFavoriteListId("");
+          } finally {
+            setFavoriteDialogAction(null);
+          }
+        }}
+        onSave={() => {
+          if (!favoriteServer || !targetFavoriteListId) {
+            return;
+          }
 
-          <DialogFooter>
-            {actionMode === "edit" && favoriteListId ? (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  if (!favoriteServer) {
-                    return;
-                  }
+          setFavoriteDialogAction("save");
+          try {
+            if (actionMode === "edit" && favoriteListId) {
+              moveServerToList(
+                favoriteServer.addr,
+                favoriteListId,
+                targetFavoriteListId
+              );
+              toast.success(t("serverList.toasts.favoriteUpdated"));
+            } else {
+              addServerToList(
+                {
+                  addr: favoriteServer.addr,
+                  name: favoriteServer.name,
+                  map: favoriteServer.map,
+                },
+                targetFavoriteListId
+              );
+              toast.success(t("serverList.toasts.addedToFavorites"));
+            }
 
-                  removeServerFromList(favoriteServer.addr, favoriteListId);
-                  toast.success(t("serverList.toasts.removedFromFavorites"));
-                  setFavoriteServer(null);
-                  setTargetFavoriteListId("");
-                }}
-              >
-                {t("serverList.favoriteDialog.remove")}
-              </Button>
-            ) : null}
-            <Button
-              type="button"
-              disabled={
-                !favoriteServer ||
-                !targetFavoriteListId ||
-                favoritesState.lists.length === 0 ||
-                (actionMode === "edit" &&
-                  targetFavoriteListId === favoriteListId)
-              }
-              onClick={() => {
-                if (!favoriteServer || !targetFavoriteListId) {
-                  return;
-                }
-
-                if (actionMode === "edit" && favoriteListId) {
-                  moveServerToList(
-                    favoriteServer.addr,
-                    favoriteListId,
-                    targetFavoriteListId
-                  );
-                  toast.success(t("serverList.toasts.favoriteUpdated"));
-                } else {
-                  addServerToList(
-                    {
-                      addr: favoriteServer.addr,
-                      name: favoriteServer.name,
-                      map: favoriteServer.map,
-                    },
-                    targetFavoriteListId
-                  );
-                  toast.success(t("serverList.toasts.addedToFavorites"));
-                }
-
-                setFavoriteServer(null);
-                setTargetFavoriteListId("");
-              }}
-            >
-              {actionMode === "edit"
-                ? t("serverList.favoriteDialog.saveChanges")
-                : t("serverList.favoriteDialog.addToList")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            setFavoriteServer(null);
+            setTargetFavoriteListId("");
+          } finally {
+            setFavoriteDialogAction(null);
+          }
+        }}
+      />
 
       <ServerNotificationDialog
         open={notificationServer !== null}
         server={notificationServer}
         existingRule={notificationRuleForDialog}
         pending={notificationMutationPending}
+        pendingAction={notificationDialogAction}
         onOpenChange={(open) => {
           if (!open) {
             setNotificationServer(null);
+            setNotificationDialogAction(null);
           }
         }}
         onSave={handleNotificationSave}
         onDelete={handleNotificationDelete}
       />
 
-      <Dialog
+      <ServerPasswordDialog
         open={passwordServer !== null}
+        server={passwordServer}
+        password={joinPassword}
+        rememberPassword={rememberServerPassword}
         onOpenChange={(open) => {
           if (!open) {
             setPasswordServer(null);
@@ -2402,92 +2353,28 @@ export function ServerList({
             setRememberServerPassword(false);
           }
         }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("serverList.passwordDialog.title")}</DialogTitle>
-            <DialogDescription>
-              {passwordServer
-                ? t("serverList.passwordDialog.descriptionWithServer", {
-                    server: stripQuakeColors(passwordServer.name),
-                  })
-                : t("serverList.passwordDialog.fallbackDescription")}
-            </DialogDescription>
-          </DialogHeader>
+        onPasswordChange={setJoinPassword}
+        onRememberPasswordChange={setRememberServerPassword}
+        onSubmit={() => {
+          if (!passwordServer) {
+            return;
+          }
 
-          <Input
-            type="password"
-            autoFocus
-            value={joinPassword}
-            onChange={(event) => setJoinPassword(event.target.value)}
-            onKeyDown={(event) => {
-              if (
-                event.key !== "Enter" ||
-                !passwordServer ||
-                !joinPassword.trim()
-              ) {
-                return;
-              }
+          const password = joinPassword.trim();
+          if (!password) {
+            return;
+          }
 
-              const password = joinPassword.trim();
-              if (rememberServerPassword) {
-                savePassword(passwordServer.addr, password);
-              }
-              launchPresenceServer(passwordServer);
-              launchServer(passwordServer.addr, password);
-              setPasswordServer(null);
-              setJoinPassword("");
-              setRememberServerPassword(false);
-            }}
-            placeholder={t("serverList.passwordDialog.inputPlaceholder")}
-          />
-
-          <div className="flex items-start gap-3 rounded-md border border-border px-3 py-2">
-            <Checkbox
-              id="remember-server-password"
-              checked={rememberServerPassword}
-              onCheckedChange={(checked) =>
-                setRememberServerPassword(checked === true)
-              }
-              className="mt-0.5"
-            />
-            <Label
-              htmlFor="remember-server-password"
-              className="cursor-pointer text-sm font-normal leading-snug text-muted-foreground"
-            >
-              {t("serverList.passwordDialog.remember")}
-            </Label>
-          </div>
-
-          <DialogFooter>
-            <Button
-              type="button"
-              disabled={!passwordServer || !joinPassword.trim()}
-              onClick={() => {
-                if (!passwordServer) {
-                  return;
-                }
-
-                const password = joinPassword.trim();
-                if (!password) {
-                  return;
-                }
-
-                if (rememberServerPassword) {
-                  savePassword(passwordServer.addr, password);
-                }
-                launchPresenceServer(passwordServer);
-                launchServer(passwordServer.addr, password);
-                setPasswordServer(null);
-                setJoinPassword("");
-                setRememberServerPassword(false);
-              }}
-            >
-              {t("serverList.passwordDialog.join")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          if (rememberServerPassword) {
+            savePassword(passwordServer.addr, password);
+          }
+          launchPresenceServer(passwordServer);
+          launchServer(passwordServer.addr, password);
+          setPasswordServer(null);
+          setJoinPassword("");
+          setRememberServerPassword(false);
+        }}
+      />
     </>
   );
 }

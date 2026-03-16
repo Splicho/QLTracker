@@ -5,12 +5,11 @@ import { AppSidebar } from "@/components/layout/app-sidebar";
 import {
   createDefaultServerFilters,
   ServerFilters,
-  type ServerFiltersValue,
-} from "@/components/server-filters";
-import { ServerList } from "@/components/server-list";
-import { FavoritesPage } from "@/components/favorites-page";
-import { NotificationsPage } from "@/components/notifications-page";
-import { SettingsPage } from "@/components/settings-page";
+} from "@/components/server/server-filters";
+import { ServerList } from "@/components/server/server-list";
+import { FavoritesPage } from "@/components/pages/favorites-page";
+import { NotificationsPage } from "@/components/pages/notifications-page";
+import { SettingsPage } from "@/components/pages/settings-page";
 import { useAppSettings } from "@/hooks/use-app-settings";
 import { useDiscordPresence } from "@/hooks/use-discord-presence";
 import { useLocalStorage } from "@/hooks/use-local-storage";
@@ -19,6 +18,11 @@ import { useRealtimeSnapshots } from "@/hooks/use-realtime-snapshots";
 import type { DiscordPresenceServerContext } from "@/lib/discord-presence";
 import type { PageId } from "@/lib/navigation";
 import { isRealtimeEnabled } from "@/lib/realtime";
+import {
+  parseStoredServerFilters,
+  serializeServerFilters,
+  SERVER_FILTERS_STORAGE_KEY,
+} from "@/lib/server-filters-storage";
 import {
   fetchSteamServers,
   isQuakeLiveRunning,
@@ -29,7 +33,6 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useTranslation } from "react-i18next";
 
 const steamApiKey = import.meta.env.VITE_STEAM_API_KEY?.trim() ?? "";
-const SERVER_FILTERS_STORAGE_KEY = "qltracker-server-filters";
 const steamAppId =
   Number(import.meta.env.VITE_STEAM_APP_ID?.trim() ?? "282440") || 282440;
 
@@ -64,85 +67,6 @@ function getQueryErrorMessage(error: unknown) {
   }
 
   return null;
-}
-
-function parseStoredFilters(rawValue: string): ServerFiltersValue {
-  const defaults = createDefaultServerFilters();
-
-  try {
-    const parsed = JSON.parse(rawValue) as
-      | (Partial<ServerFiltersValue> & {
-          hideEmpty?: boolean;
-          hideFull?: boolean;
-        })
-      | null;
-    if (!parsed || typeof parsed !== "object") {
-      return defaults;
-    }
-
-    const ratingRange = Array.isArray(parsed.ratingRange)
-      ? parsed.ratingRange
-      : null;
-
-    return {
-      search:
-        typeof parsed.search === "string" ? parsed.search : defaults.search,
-      region:
-        typeof parsed.region === "string" ? parsed.region : defaults.region,
-      visibility:
-        parsed.visibility === "all" ||
-        parsed.visibility === "public" ||
-        parsed.visibility === "private"
-          ? parsed.visibility
-          : defaults.visibility,
-      maps: Array.isArray(parsed.maps)
-        ? parsed.maps.filter(
-            (value): value is string => typeof value === "string"
-          )
-        : defaults.maps,
-      gameMode:
-        typeof parsed.gameMode === "string"
-          ? parsed.gameMode
-          : defaults.gameMode,
-      ratingSystem:
-        parsed.ratingSystem === "qelo" || parsed.ratingSystem === "trueskill"
-          ? parsed.ratingSystem
-          : defaults.ratingSystem,
-      ratingRange: [
-        typeof ratingRange?.[0] === "number"
-          ? ratingRange[0]
-          : defaults.ratingRange[0],
-        typeof ratingRange?.[1] === "number"
-          ? ratingRange[1]
-          : defaults.ratingRange[1],
-      ],
-      tags: Array.isArray(parsed.tags)
-        ? parsed.tags.filter(
-            (value): value is string => typeof value === "string"
-          )
-        : defaults.tags,
-      showEmpty:
-        typeof parsed.showEmpty === "boolean"
-          ? parsed.showEmpty
-          : defaults.showEmpty,
-      showFull:
-        typeof parsed.showFull === "boolean"
-          ? parsed.showFull
-          : typeof parsed.hideEmpty === "boolean"
-            ? parsed.hideEmpty
-            : defaults.showFull,
-      showFavorites:
-        typeof parsed.showFavorites === "boolean"
-          ? parsed.showFavorites
-          : defaults.showFavorites,
-    };
-  } catch {
-    return defaults;
-  }
-}
-
-function serializeFilters(filters: ServerFiltersValue) {
-  return JSON.stringify(filters);
 }
 
 function getDiscordModeLabel(
@@ -207,9 +131,12 @@ export function App() {
     trackLiveServerPresence && isRealtimeEnabled();
   const [rawFilters, setRawFilters] = useLocalStorage(
     SERVER_FILTERS_STORAGE_KEY,
-    serializeFilters(createDefaultServerFilters())
+    serializeServerFilters(createDefaultServerFilters())
   );
-  const filters = useMemo(() => parseStoredFilters(rawFilters), [rawFilters]);
+  const filters = useMemo(
+    () => parseStoredServerFilters(rawFilters),
+    [rawFilters]
+  );
   const serversQuery = useQuery({
     queryKey: ["steam", "servers"],
     queryFn: () => fetchSteamServers(steamApiKey),
@@ -423,10 +350,12 @@ export function App() {
             <ServerFilters
               value={filters}
               onChange={(next) => {
-                setRawFilters(serializeFilters(next));
+                setRawFilters(serializeServerFilters(next));
               }}
               onReset={() => {
-                setRawFilters(serializeFilters(createDefaultServerFilters()));
+                setRawFilters(
+                  serializeServerFilters(createDefaultServerFilters())
+                );
               }}
             />
             <ServerList
