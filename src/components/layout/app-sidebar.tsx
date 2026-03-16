@@ -37,6 +37,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import type { SteamServer } from "@/lib/steam";
 import { useMemo } from "react";
@@ -83,7 +88,7 @@ export function AppSidebar({
     <Sidebar
       variant="inset"
       collapsible="icon"
-      className="!border-r !border-sidebar-border !p-0"
+      className="!p-0"
     >
       <SidebarHeader>
         <div className="relative h-14 px-2">
@@ -133,10 +138,17 @@ export function AppSidebar({
                     </button>
                   </SidebarMenuButton>
                   {item.id === "favorites" && shouldShowFavoritesBadge ? (
-                    <SidebarMenuBadge className="right-2 top-1/2 h-6 min-w-6 -translate-y-1/2 gap-1.5 rounded-md border border-sidebar-border/70 bg-sidebar px-2 text-xs leading-none peer-data-[size=sm]/menu-button:top-1/2 peer-data-[size=default]/menu-button:top-1/2 peer-data-[size=lg]/menu-button:top-1/2">
-                      <Headset className="size-3" />
-                      <span>{favoritePlayerCount}</span>
-                    </SidebarMenuBadge>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <SidebarMenuBadge className="pointer-events-auto z-[150] right-2 top-1/2 h-6 min-w-6 -translate-y-1/2 gap-1.5 rounded-md border border-sidebar-border/70 bg-muted px-2 text-xs leading-none peer-data-[size=sm]/menu-button:top-1/2 peer-data-[size=default]/menu-button:top-1/2 peer-data-[size=lg]/menu-button:top-1/2">
+                          <Headset className="size-3" />
+                          <span>{favoritePlayerCount}</span>
+                        </SidebarMenuBadge>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="z-[200]">
+                        {t("favorites.playersTooltip")}
+                      </TooltipContent>
+                    </Tooltip>
                   ) : null}
                 </SidebarMenuItem>
               ))}

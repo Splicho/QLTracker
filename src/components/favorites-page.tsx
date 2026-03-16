@@ -177,7 +177,7 @@ export function FavoritesPage({
                       <span>{playerCountsByList[list.id] ?? 0}</span>
                     </Badge>
                   </TooltipTrigger>
-                  <TooltipContent side="top">
+                  <TooltipContent side="top" className="z-[200]">
                     {t("favorites.playersTooltip")}
                   </TooltipContent>
                 </Tooltip>

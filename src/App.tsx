@@ -416,7 +416,7 @@ export function App() {
           servers={mergedServers}
         />
       </div>
-      <SidebarInset className="md:m-0! md:ml-0! md:!rounded-none md:shadow-none">
+      <SidebarInset className="!z-10 !rounded-tl-[1.5rem] !rounded-bl-[1.5rem] !border-l !border-l-border !shadow-lg">
         <Header page={page} />
         {page === "server-list" ? (
           <>
