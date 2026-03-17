@@ -18,6 +18,7 @@ import { useRealtimePlayerPresence } from "@/hooks/use-realtime-player-presence"
 import { useRealtimeSnapshots } from "@/hooks/use-realtime-snapshots";
 import { useServerInteractions } from "@/hooks/use-server-interactions";
 import type { DiscordPresenceServerContext } from "@/lib/discord-presence";
+import { registerGlobalErrorLogging } from "@/lib/error-log";
 import type { PageId } from "@/lib/navigation";
 import { isRealtimeEnabled } from "@/lib/realtime";
 import {
@@ -83,6 +84,7 @@ export function App() {
   const [filters, setFilters] = useState(() =>
     parseStoredServerFilters(rawFilters)
   );
+  useEffect(() => registerGlobalErrorLogging(), []);
   useEffect(() => {
     setRawFilters(serializeServerFilters(filters));
   }, [filters, setRawFilters]);

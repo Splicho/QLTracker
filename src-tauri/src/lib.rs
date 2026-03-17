@@ -1,8 +1,11 @@
 use discord_rich_presence::{activity, DiscordIpc, DiscordIpcClient};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::fs::{self, OpenOptions};
 use std::io;
+use std::io::Write;
 use std::net::{SocketAddr, UdpSocket};
+use std::path::PathBuf;
 use std::process::Command;
 use std::sync::{mpsc, Mutex, OnceLock};
 use std::time::{Duration, Instant};
@@ -1687,6 +1690,39 @@ fn focus_window(window: &tauri::WebviewWindow) {
     let _ = window.set_focus();
 }
 
+fn resolve_error_log_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
+    let log_dir = app
+        .path()
+        .app_log_dir()
+        .map_err(|error| format!("Failed to resolve app log directory: {error}"))?;
+    fs::create_dir_all(&log_dir)
+        .map_err(|error| format!("Failed to create app log directory: {error}"))?;
+    Ok(log_dir.join("error.log"))
+}
+
+#[tauri::command]
+fn append_error_log(app: tauri::AppHandle, source: String, message: String) -> Result<(), String> {
+    let source = source.trim();
+    let message = message.trim();
+
+    if source.is_empty() || message.is_empty() {
+        return Ok(());
+    }
+
+    let log_path = resolve_error_log_path(&app)?;
+    let mut file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(&log_path)
+        .map_err(|error| format!("Failed to open error log file: {error}"))?;
+
+    let timestamp = chrono::Utc::now().to_rfc3339();
+    writeln!(file, "[{timestamp}] [{source}] {message}")
+        .map_err(|error| format!("Failed to write error log entry: {error}"))?;
+
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -1707,6 +1743,7 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            append_error_log,
             app_is_packaged,
             clear_discord_presence,
             fetch_quake_live_servers,
