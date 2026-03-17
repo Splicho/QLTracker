@@ -2,8 +2,12 @@
   "navigation": {
     "serverList": "Листа сервера",
     "favorites": "Фаворитес",
+    "watchlist": "Праћење",
     "notifications": "Обавештења",
     "settings": "Подешавања"
+  },
+  "common": {
+    "updated": "Ажурирано"
   },
   "header": {
     "unknown": "Непознато",
@@ -37,7 +41,7 @@
     "retryInstall": "Поновите проверу инсталације",
     "disconnect": "Прекини везу",
     "noAccount": "Још ниједан Дисцорд налог није повезан.",
-    "installLink": "Инсталирајте и повежите Дисцорд",
+    "installLink": "Повежи Discord",
     "dialog": {
       "editTitle": "Уредите Дисцорд обавештење",
       "createTitle": "Дисцорд Нотифицатион",
@@ -103,6 +107,7 @@
     },
     "drawer": {
       "play": "Играј",
+      "map": "Мапа",
       "avgQeloTooltip": "Просечан КЕло на овом серверу",
       "avgTrueskillTooltip": "Просечна Тскилл на овом серверу",
       "topQeloTooltip": "Најбољи КЕло играч на овом серверу",
@@ -113,6 +118,16 @@
       "qelo": "КЕло",
       "trueskill": "ТСкилл",
       "time": "Време",
+      "watch": "Прати",
+      "trackPlayer": "Прати играча",
+      "untrackPlayer": "Уклони са листе праћења",
+      "historyTitle": "Историја",
+      "historyWindow": "Последњих 7 дана",
+      "historyLastSeen": "Последњи пут виђен",
+      "historyPeakPlayers": "Највише играча",
+      "historyTimePopulated": "Време са играчима",
+      "historyUnavailable": "Историја сервера није доступна. Омогући realtime backend и постави endpoint за историју да би се ова картица учитала.",
+      "historyEmpty": "За овај сервер још нема недавне историје.",
       "lookupFailed": "Проналажење Стеам плејера није успело.",
       "noPlayerData": "Нема података о играчу за овај сервер.",
       "teams": {
@@ -209,13 +224,40 @@
     "createDialogTitle": "Креирајте листу омиљених",
     "createDialogDescription": "Направите листу да бисте организовали своје сачуване сервере.",
     "listNamePlaceholder": "Име листе",
-    "playersTooltip": "Укупно живих играча на овој листи",
+    "playersTooltip": "Укупно играча уживо",
     "favoriteServers": "Омиљени сервери",
     "noLists": "Још нема спискова. ",
     "noServers": "Још увек нема сачуваних сервера на овој листи.",
     "savedServers_one": "{{count}} saved server",
     "savedServers_few": "{{count}} сачувани сервери",
     "savedServers_other": "{{count}} saved servers"
+  },
+  "watchlist": {
+    "title": "Листа праћених играча",
+    "summary_one": "{{online}} на мрежи од {{count}} праћеног играча",
+    "summary_other": "{{online}} на мрежи од {{count}} праћених играча",
+    "onlineCount": "{{count}} онлајн",
+    "serviceUnavailableBadge": "Статус уживо није доступан",
+    "emptyTitle": "Још нема праћених играча",
+    "emptyDescription": "Прати играче из панела сервера да би видео где играју.",
+    "emptyHint": "Отвори било који сервер и користи дугме за праћење поред играча са препознатим SteamID-ом.",
+    "offline": "Ван мреже",
+    "updatedUnavailable": "Недоступно",
+    "statusOnline": "На мрежи",
+    "statusOffline": "Ван мреже",
+    "statusUnavailable": "Недоступно",
+    "toasts": {
+      "tracked": "{{player}} је додат на листу праћења.",
+      "untracked": "{{player}} је уклоњен са листе праћења."
+    },
+    "columns": {
+      "player": "Плаиер",
+      "status": "Статус",
+      "server": "Сервер",
+      "map": "Мапа",
+      "mode": "Режим",
+      "actions": "Акције"
+    }
   },
   "filters": {
     "title": "Филтери",

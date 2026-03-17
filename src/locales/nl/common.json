@@ -2,8 +2,12 @@
   "navigation": {
     "serverList": "Serverlijst",
     "favorites": "Favorieten",
+    "watchlist": "Volglijst",
     "notifications": "Kennisgevingen",
     "settings": "Instellingen"
+  },
+  "common": {
+    "updated": "Bijgewerkt"
   },
   "header": {
     "unknown": "Onbekend",
@@ -37,7 +41,7 @@
     "retryInstall": "Controle opnieuw installeren",
     "disconnect": "Verbinding verbreken",
     "noAccount": "Nog geen Discord-account gekoppeld.",
-    "installLink": "& Koppelingsdiscord installeren",
+    "installLink": "Discord koppelen",
     "dialog": {
       "editTitle": "Discordnotificatie bewerken",
       "createTitle": "Discord notificatie",
@@ -103,6 +107,7 @@
     },
     "drawer": {
       "play": "Afspelen",
+      "map": "Map",
       "avgQeloTooltip": "Gemiddelde QElo op deze server",
       "avgTrueskillTooltip": "Gemiddelde TSkill op deze server",
       "topQeloTooltip": "Hoogste QElo-speler op deze server",
@@ -113,6 +118,16 @@
       "qelo": "QElo",
       "trueskill": "TSkill",
       "time": "Tijd",
+      "watch": "Volgen",
+      "trackPlayer": "Speler volgen",
+      "untrackPlayer": "Van volglijst verwijderen",
+      "historyTitle": "Geschiedenis",
+      "historyWindow": "Afgelopen 7 dagen",
+      "historyLastSeen": "Laatst gezien",
+      "historyPeakPlayers": "Piekspelers",
+      "historyTimePopulated": "Tijd met spelers",
+      "historyUnavailable": "Servergeschiedenis is niet beschikbaar. Schakel de realtime-backend in en implementeer het geschiedenis-endpoint om deze kaart te laden.",
+      "historyEmpty": "Er is nog geen recente geschiedenis voor deze server beschikbaar.",
       "lookupFailed": "Opzoeken van stoomspeler is mislukt.",
       "noPlayerData": "Geen spelergegevens voor deze server.",
       "teams": {
@@ -209,12 +224,39 @@
     "createDialogTitle": "Favoriete lijst aanmaken",
     "createDialogDescription": "Maak een lijst om uw opgeslagen servers te organiseren.",
     "listNamePlaceholder": "Lijstnaam",
-    "playersTooltip": "Totaal aantal live spelers in deze lijst",
+    "playersTooltip": "Totaal aantal live spelers",
     "favoriteServers": "Favoriete servers",
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Nog geen lijsten. Maak je eerste lijst om aan de slag te gaan.",
     "noServers": "Nog geen servers opgeslagen in deze lijst."
+  },
+  "watchlist": {
+    "title": "Spelersvolglijst",
+    "summary_one": "{{online}} online van {{count}} gevolgde speler",
+    "summary_other": "{{online}} online van {{count}} gevolgde spelers",
+    "onlineCount": "{{count}} online",
+    "serviceUnavailableBadge": "Live-status niet beschikbaar",
+    "emptyTitle": "Nog geen gevolgde spelers",
+    "emptyDescription": "Volg spelers vanuit het serverpaneel om te zien waar ze spelen.",
+    "emptyHint": "Open een server en gebruik daarna de volgknop naast een speler met een opgeloste SteamID.",
+    "offline": "Offline",
+    "updatedUnavailable": "Niet beschikbaar",
+    "statusOnline": "Online",
+    "statusOffline": "Offline",
+    "statusUnavailable": "Niet beschikbaar",
+    "toasts": {
+      "tracked": "{{player}} is aan de volglijst toegevoegd.",
+      "untracked": "{{player}} is van de volglijst verwijderd."
+    },
+    "columns": {
+      "player": "Speler",
+      "status": "Status",
+      "server": "Server",
+      "map": "Map",
+      "mode": "Modus",
+      "actions": "Acties"
+    }
   },
   "filters": {
     "title": "Filters",

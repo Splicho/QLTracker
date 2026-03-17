@@ -2,8 +2,12 @@
   "navigation": {
     "serverList": "Listă server",
     "favorites": "Favorite",
+    "watchlist": "Urmărire",
     "notifications": "Notificări",
     "settings": "Configurări"
+  },
+  "common": {
+    "updated": "Actualizat"
   },
   "header": {
     "unknown": "Necunoscut",
@@ -37,7 +41,7 @@
     "retryInstall": "Verificare instalare retry",
     "disconnect": "Deconectează",
     "noAccount": "Nici un cont de discordie legat încă.",
-    "installLink": "Instalează discordie & legătură",
+    "installLink": "Conectează Discord",
     "dialog": {
       "editTitle": "Editează notificarea discordiei",
       "createTitle": "Notificarea discordiei",
@@ -103,6 +107,7 @@
     },
     "drawer": {
       "play": "Joacă",
+      "map": "Hartă",
       "avgQeloTooltip": "QElo mediu pe acest server",
       "avgTrueskillTooltip": "Media TSkill pe acest server",
       "topQeloTooltip": "Cel mai mare jucător QElo de pe acest server",
@@ -113,6 +118,16 @@
       "qelo": "QElo",
       "trueskill": "TSkill",
       "time": "Timp",
+      "watch": "Urmărește",
+      "trackPlayer": "Urmărește jucătorul",
+      "untrackPlayer": "Elimină din lista de urmărire",
+      "historyTitle": "Istoric",
+      "historyWindow": "Ultimele 7 zile",
+      "historyLastSeen": "Văzut ultima dată",
+      "historyPeakPlayers": "Vârf de jucători",
+      "historyTimePopulated": "Timp cu jucători",
+      "historyUnavailable": "Istoricul serverului nu este disponibil. Activează backendul realtime și publică endpointul de istoric pentru a încărca acest card.",
+      "historyEmpty": "Încă nu există istoric recent pentru acest server.",
       "lookupFailed": "Căutarea jucătorului cu aburi a eșuat.",
       "noPlayerData": "Nu există date de jucător pentru acest server.",
       "teams": {
@@ -209,12 +224,39 @@
     "createDialogTitle": "Creează lista preferată",
     "createDialogDescription": "Creați o listă pentru a organiza serverele salvate.",
     "listNamePlaceholder": "Nume listă",
-    "playersTooltip": "Total jucători live în această listă",
+    "playersTooltip": "Total jucători live",
     "favoriteServers": "Servere preferate",
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Nici o listă încă. Creați prima listă pentru a începe.",
     "noServers": "Nici un server salvat în această listă încă."
+  },
+  "watchlist": {
+    "title": "Lista de urmărire a jucătorilor",
+    "summary_one": "{{online}} online din {{count}} jucător urmărit",
+    "summary_other": "{{online}} online din {{count}} jucători urmăriți",
+    "onlineCount": "{{count}} online",
+    "serviceUnavailableBadge": "Starea live nu este disponibilă",
+    "emptyTitle": "Nu există încă jucători urmăriți",
+    "emptyDescription": "Urmărește jucători din panoul serverului ca să vezi unde joacă.",
+    "emptyHint": "Deschide orice server, apoi folosește butonul de urmărire de lângă un jucător cu SteamID rezolvat.",
+    "offline": "Offline",
+    "updatedUnavailable": "Indisponibil",
+    "statusOnline": "Online",
+    "statusOffline": "Offline",
+    "statusUnavailable": "Indisponibil",
+    "toasts": {
+      "tracked": "{{player}} a fost adăugat în lista de urmărire.",
+      "untracked": "{{player}} a fost eliminat din lista de urmărire."
+    },
+    "columns": {
+      "player": "Jucător",
+      "status": "Stare",
+      "server": "Server",
+      "map": "Hartă",
+      "mode": "Mod",
+      "actions": "Acțiuni"
+    }
   },
   "filters": {
     "title": "Filtre",

@@ -2,8 +2,12 @@
   "navigation": {
     "serverList": "Server 목록",
     "favorites": "이름 *",
+    "watchlist": "추적",
     "notifications": "공지사항",
     "settings": "지원하다"
+  },
+  "common": {
+    "updated": "업데이트"
   },
   "header": {
     "unknown": "이름 *",
@@ -37,7 +41,7 @@
     "retryInstall": "Retry 설치 체크",
     "disconnect": "연결하기",
     "noAccount": "아직 연결된 Discord 계정 없음.",
-    "installLink": "설치 및 링크 Discord",
+    "installLink": "Discord 연결",
     "dialog": {
       "editTitle": "Discord 알림",
       "createTitle": "공지사항",
@@ -103,6 +107,7 @@
     },
     "drawer": {
       "play": "뚱 베어",
+      "map": "맵",
       "avgQeloTooltip": "이 서버에 평균 QElo",
       "avgTrueskillTooltip": "이 서버의 평균 TSkill",
       "topQeloTooltip": "이 서버에 가장 높은 QElo 플레이어",
@@ -113,6 +118,16 @@
       "qelo": "사이트맵",
       "trueskill": "채용 정보",
       "time": "(주)",
+      "watch": "추적",
+      "trackPlayer": "플레이어 추적",
+      "untrackPlayer": "워치리스트에서 제거",
+      "historyTitle": "기록",
+      "historyWindow": "지난 7일",
+      "historyLastSeen": "마지막 확인",
+      "historyPeakPlayers": "최대 플레이어 수",
+      "historyTimePopulated": "플레이어가 있던 시간",
+      "historyUnavailable": "서버 기록을 사용할 수 없습니다. 이 카드를 불러오려면 실시간 백엔드를 활성화하고 기록 엔드포인트를 배포하세요.",
+      "historyEmpty": "이 서버에는 아직 최근 기록이 없습니다.",
       "lookupFailed": "Steam Player가 실패했습니다.",
       "noPlayerData": "이 서버에 대한 플레이어 데이터 없음.",
       "teams": {
@@ -209,12 +224,39 @@
     "createDialogTitle": "자주 묻는 질문",
     "createDialogDescription": "저장된 서버를 구성하는 목록을 만듭니다.",
     "listNamePlaceholder": "이름 *",
-    "playersTooltip": "이 목록에서 총 라이브 플레이어",
+    "playersTooltip": "총 라이브 플레이어 수",
     "favoriteServers": "좋아하는 서버",
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "아직 목록이 없습니다. 첫 번째 목록 만들기 시작.",
     "noServers": "아직이 목록에 저장되지 않았습니다."
+  },
+  "watchlist": {
+    "title": "플레이어 워치리스트",
+    "summary_one": "추적 중인 플레이어 {{count}}명 중 {{online}}명 온라인",
+    "summary_other": "추적 중인 플레이어 {{count}}명 중 {{online}}명 온라인",
+    "onlineCount": "{{count}}명 온라인",
+    "serviceUnavailableBadge": "실시간 상태를 사용할 수 없음",
+    "emptyTitle": "추적 중인 플레이어가 없습니다",
+    "emptyDescription": "플레이어가 어디에서 게임 중인지 확인하려면 서버 패널에서 플레이어를 추적하세요.",
+    "emptyHint": "아무 서버나 열고 SteamID가 확인된 플레이어 옆의 추적 버튼을 사용하세요.",
+    "offline": "오프라인",
+    "updatedUnavailable": "사용할 수 없음",
+    "statusOnline": "온라인",
+    "statusOffline": "오프라인",
+    "statusUnavailable": "사용할 수 없음",
+    "toasts": {
+      "tracked": "{{player}} 님을 워치리스트에 추가했습니다.",
+      "untracked": "{{player}} 님을 워치리스트에서 제거했습니다."
+    },
+    "columns": {
+      "player": "지원하다",
+      "status": "상태",
+      "server": "계정 관리",
+      "map": "맵",
+      "mode": "주요 특징",
+      "actions": "팟캐스트"
+    }
   },
   "filters": {
     "title": "필터링",

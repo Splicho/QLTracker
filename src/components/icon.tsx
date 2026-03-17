@@ -478,25 +478,8 @@ export function Bell(props: SVGProps<SVGSVGElement>) {
   );
 }
 
-export function Headset(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="1em"
-      height="1em"
-      viewBox="0 0 24 24"
-      {...props}
-    >
-      <g fill="none" stroke="currentColor" strokeWidth={1.5}>
-        <path d="M15 12a2 2 0 0 1 2-2a4 4 0 0 1 0 8a2 2 0 0 1-2-2zm-6 0a2 2 0 0 0-2-2a4 4 0 0 0 0 8a2 2 0 0 0 2-2z"></path>
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M3 14v-3a9 9 0 0 1 18 0v4.846c0 2.009 0 3.013-.352 3.796a4 4 0 0 1-2.006 2.006c-.783.352-1.787.352-3.796.352H12"
-        ></path>
-      </g>
-    </svg>
-  );
+export function GameController(props: SVGProps<SVGSVGElement>) {
+	return (<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" {...props}><g fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth={1}><path strokeLinejoin="round" strokeWidth={1.5} d="M2.008 15.81c.223-3.494.88-6.05 1.435-7.535c.281-.75.885-1.308 1.658-1.495c4.3-1.04 9.498-1.04 13.798 0c.773.187 1.377.745 1.658 1.495c.556 1.485 1.212 4.041 1.435 7.534c.133 2.09-1.377 3.241-3.05 4.083c-1.064.537-1.883-1.046-2.427-2.272a1.82 1.82 0 0 0-1.687-1.084H9.172c-.739 0-1.39.415-1.687 1.084c-.544 1.226-1.363 2.809-2.428 2.272c-1.655-.833-3.183-1.976-3.049-4.083M5 4.5L6.963 4M19 4.5L17 4"></path><path strokeWidth={1.5} d="m9 13l-1.5-1.5m0 0L6 10m1.5 1.5L6 13m1.5-1.5L9 10"></path><path strokeLinejoin="round" strokeWidth={2} d="M15.988 10h.01m1.99 3h.01"></path></g></svg>);
 }
 
 export function Cog(props: SVGProps<SVGSVGElement>) {

@@ -8,12 +8,26 @@ import {
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ArrowUpRight, Eye } from "lucide-react";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import {
+  ArrowUpDown,
+  ArrowUpRight,
+  Eye,
+  UserMinus,
+  UserPlus,
+} from "lucide-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { format, formatDistanceToNowStrict, parseISO } from "date-fns";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { Lock, Medal, Play, SlashCircle, Unlock } from "@/components/icon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -30,8 +44,15 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTrackedPlayers } from "@/hooks/use-tracked-players";
 import { getMapEntry } from "@/lib/maps";
 import { QuakeText, stripQuakeColors } from "@/lib/quake";
+import {
+  fetchRealtimeServerHistory,
+  isRealtimeEnabled,
+  type ServerHistoryPoint,
+} from "@/lib/realtime";
+import { getGameModeLabel } from "@/lib/server-utils";
 import {
   fetchSteamServerPlayerRatings,
   fetchSteamServerPlayers,
@@ -272,6 +293,7 @@ function ServerAverageRatingBadges({
 
 function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
   const { t } = useTranslation();
+  const { isTracked, trackPlayer, untrackPlayer } = useTrackedPlayers();
   const [sorting, setSorting] = useState<SortingState>([
     { id: "points", desc: true },
   ]);
@@ -468,8 +490,68 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
         cell: ({ row }) =>
           formatDurationHoursMinutes(row.original.duration_seconds),
       },
+      {
+        id: "watch",
+        header: () => (
+          <div className="text-right text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+            {t("serverList.drawer.watch")}
+          </div>
+        ),
+        cell: ({ row }) => {
+          const steamId = row.original.rating?.steam_id;
+          if (!steamId) {
+            return null;
+          }
+
+          const tracked = isTracked(steamId);
+          return (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="ml-auto size-8"
+                  onClick={() => {
+                    const playerName = stripQuakeColors(row.original.name);
+                    if (tracked) {
+                      if (untrackPlayer(steamId)) {
+                        toast.success(
+                          t("watchlist.toasts.untracked", {
+                            player: playerName,
+                          })
+                        );
+                      }
+                      return;
+                    }
+
+                    if (trackPlayer(steamId, row.original.name)) {
+                      toast.success(
+                        t("watchlist.toasts.tracked", {
+                          player: playerName,
+                        })
+                      );
+                    }
+                  }}
+                >
+                  {tracked ? (
+                    <UserMinus className="size-4" />
+                  ) : (
+                    <UserPlus className="size-4" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                {tracked
+                  ? t("serverList.drawer.untrackPlayer")
+                  : t("serverList.drawer.trackPlayer")}
+              </TooltipContent>
+            </Tooltip>
+          );
+        },
+      },
     ],
-    [t, topRatedPlayerNames]
+    [isTracked, t, topRatedPlayerNames, trackPlayer, untrackPlayer]
   );
 
   const table = useReactTable({
@@ -528,21 +610,14 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
           <Table>
             <TableHeader>
               <TableRow className="border-b border-border hover:bg-transparent">
-                <TableHead className="h-10 px-4">
-                  <Skeleton className="h-4 w-14" />
-                </TableHead>
-                <TableHead className="h-10 px-4">
-                  <Skeleton className="h-4 w-12" />
-                </TableHead>
-                <TableHead className="h-10 px-4">
-                  <Skeleton className="h-4 w-12" />
-                </TableHead>
-                <TableHead className="h-10 px-4">
-                  <Skeleton className="h-4 w-12" />
-                </TableHead>
-                <TableHead className="h-10 px-4">
-                  <Skeleton className="h-4 w-12" />
-                </TableHead>
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <TableHead
+                    key={`player-header-skeleton-${index}`}
+                    className="h-10 px-4"
+                  >
+                    <Skeleton className="h-4 w-12" />
+                  </TableHead>
+                ))}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -565,6 +640,9 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
                   </TableCell>
                   <TableCell className="px-3 py-2">
                     <Skeleton className="h-4 w-14" />
+                  </TableCell>
+                  <TableCell className="px-3 py-2">
+                    <Skeleton className="ml-auto h-8 w-8 rounded-md" />
                   </TableCell>
                 </TableRow>
               ))}
@@ -679,11 +757,265 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
   );
 }
 
+function HistoryMetric({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-md border border-border/60 bg-background/40 p-3">
+      <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+        {label}
+      </div>
+      <div className="mt-1 text-sm font-medium text-foreground">{value}</div>
+    </div>
+  );
+}
+
+function formatHistoryTick(timestamp: string) {
+  const parsed = parseISO(timestamp);
+  return Number.isNaN(parsed.getTime()) ? timestamp : format(parsed, "EEE");
+}
+
+function formatHistoryLabel(timestamp: string) {
+  const parsed = parseISO(timestamp);
+  return Number.isNaN(parsed.getTime())
+    ? timestamp
+    : format(parsed, "MMM d, HH:mm");
+}
+
+function ServerHistoryCard({ serverAddress }: { serverAddress: string }) {
+  const { t } = useTranslation();
+  const realtimeAvailable = isRealtimeEnabled();
+  const historyQuery = useQuery({
+    queryKey: ["realtime", "server-history", serverAddress, "7d", "15m"],
+    queryFn: () => fetchRealtimeServerHistory(serverAddress, "7d", "15m"),
+    enabled: realtimeAvailable,
+    staleTime: 60_000,
+  });
+  const history = historyQuery.data;
+  const timeline = history?.timeline ?? [];
+
+  const summary = useMemo(() => {
+    if (history?.summary) {
+      return history.summary;
+    }
+
+    if (timeline.length === 0) {
+      return null;
+    }
+
+    return {
+      lastSeenAt: timeline[timeline.length - 1]?.timestamp ?? null,
+      peakPlayers: Math.max(...timeline.map((point) => point.players), 0),
+      populatedSampleRatio:
+        timeline.filter((point) => point.players > 0).length / timeline.length,
+    };
+  }, [history?.summary, timeline]);
+  const chartData = useMemo(
+    () =>
+      timeline.map((point: ServerHistoryPoint) => ({
+        ...point,
+      })),
+    [timeline]
+  );
+
+  if (!realtimeAvailable) {
+    return (
+      <div className="rounded-lg border border-border p-4">
+        <div className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+          {t("serverList.drawer.historyTitle")}
+        </div>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {t("serverList.drawer.historyUnavailable")}
+        </p>
+      </div>
+    );
+  }
+
+  if (
+    historyQuery.isPending ||
+    (historyQuery.fetchStatus === "fetching" && historyQuery.data == null)
+  ) {
+    return (
+      <div className="rounded-lg border border-border p-4">
+        <div className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+          {t("serverList.drawer.historyTitle")}
+        </div>
+        <div className="mt-3 grid gap-3 sm:grid-cols-3">
+          <Skeleton className="h-16 rounded-md" />
+          <Skeleton className="h-16 rounded-md" />
+          <Skeleton className="h-16 rounded-md" />
+        </div>
+        <Skeleton className="mt-4 h-52 rounded-lg" />
+      </div>
+    );
+  }
+
+  if (historyQuery.isError) {
+    return (
+      <div className="rounded-lg border border-border p-4">
+        <div className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+          {t("serverList.drawer.historyTitle")}
+        </div>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {t("serverList.drawer.historyUnavailable")}
+        </p>
+      </div>
+    );
+  }
+
+  if (!summary || chartData.length === 0) {
+    return (
+      <div className="rounded-lg border border-border p-4">
+        <div className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+          {t("serverList.drawer.historyTitle")}
+        </div>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {t("serverList.drawer.historyEmpty")}
+        </p>
+      </div>
+    );
+  }
+
+  const lastSeenLabel = summary.lastSeenAt
+    ? formatDistanceToNowStrict(parseISO(summary.lastSeenAt), {
+        addSuffix: true,
+      })
+    : t("serverList.pingUnavailable");
+  const populatedPercentage = `${Math.round(
+    summary.populatedSampleRatio * 100
+  )}%`;
+
+  return (
+    <div className="rounded-lg border border-border p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+          {t("serverList.drawer.historyTitle")}
+        </div>
+        <Badge variant="outline" className="rounded-md">
+          {t("serverList.drawer.historyWindow")}
+        </Badge>
+      </div>
+
+      <div className="mt-3 grid gap-3 sm:grid-cols-3">
+        <HistoryMetric
+          label={t("serverList.drawer.historyLastSeen")}
+          value={lastSeenLabel}
+        />
+        <HistoryMetric
+          label={t("serverList.drawer.historyPeakPlayers")}
+          value={`${summary.peakPlayers}`}
+        />
+        <HistoryMetric
+          label={t("serverList.drawer.historyTimePopulated")}
+          value={populatedPercentage}
+        />
+      </div>
+
+      <ChartContainer
+        className="mt-4 h-52 w-full"
+        config={{
+          players: {
+            label: t("serverList.table.players"),
+            theme: {
+              light: "oklch(0.62 0.14 244)",
+              dark: "oklch(0.76 0.11 213)",
+            },
+          },
+        }}
+      >
+        <AreaChart data={chartData}>
+          <defs>
+            <linearGradient id="history-players" x1="0" y1="0" x2="0" y2="1">
+              <stop
+                offset="5%"
+                stopColor="var(--color-players)"
+                stopOpacity={0.35}
+              />
+              <stop
+                offset="95%"
+                stopColor="var(--color-players)"
+                stopOpacity={0.05}
+              />
+            </linearGradient>
+          </defs>
+          <CartesianGrid vertical={false} />
+          <XAxis
+            dataKey="timestamp"
+            tickLine={false}
+            axisLine={false}
+            minTickGap={32}
+            tickFormatter={formatHistoryTick}
+          />
+          <YAxis
+            allowDecimals={false}
+            tickLine={false}
+            axisLine={false}
+            width={28}
+          />
+          <ChartTooltip
+            content={
+              <ChartTooltipContent
+                labelFormatter={(label) =>
+                  typeof label === "string" ? formatHistoryLabel(label) : ""
+                }
+                formatter={(value, _name, item) => {
+                  const payload = item.payload as ServerHistoryPoint;
+                  return (
+                    <div className="flex min-w-40 flex-col gap-1">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-muted-foreground">
+                          {t("serverList.table.players")}
+                        </span>
+                        <span className="font-medium text-foreground">
+                          {value}/{payload.maxPlayers}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-muted-foreground">
+                          {t("serverList.table.mode")}
+                        </span>
+                        <span className="font-medium text-foreground">
+                          {getGameModeLabel(payload.gameMode, t) ??
+                            t("serverList.modeUnknown")}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-muted-foreground">
+                          {t("serverList.drawer.map")}
+                        </span>
+                        <span className="font-medium text-foreground">
+                          {payload.map ?? "-"}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                }}
+              />
+            }
+          />
+          <Area
+            type="monotone"
+            dataKey="players"
+            stroke="var(--color-players)"
+            fill="url(#history-players)"
+            strokeWidth={2}
+          />
+        </AreaChart>
+      </ChartContainer>
+    </div>
+  );
+}
+
 type ServerDrawerProps = {
   server: SteamServer | null;
   open: boolean;
   requiresPassword: boolean;
   hasSavedPassword: boolean;
+  canJoin?: boolean;
   onOpenChange: (open: boolean) => void;
   onJoin: (server: SteamServer) => void;
 };
@@ -693,6 +1025,7 @@ export function ServerDrawer({
   open,
   requiresPassword,
   hasSavedPassword,
+  canJoin = true,
   onOpenChange,
   onJoin,
 }: ServerDrawerProps) {
@@ -759,20 +1092,23 @@ export function ServerDrawer({
                     </div>
                     <ServerAverageRatingBadges serverAddress={server.addr} />
                   </div>
-                  <Button
-                    type="button"
-                    className="h-9 shrink-0 gap-2 bg-success text-success-foreground shadow-[0_0_28px_color-mix(in_oklch,var(--color-success)_28%,transparent)] hover:bg-success-hover hover:shadow-[0_0_34px_color-mix(in_oklch,var(--color-success-hover)_34%,transparent)]"
-                    onClick={() => onJoin(server)}
-                  >
-                    <Play className="size-4" />
-                    {t("serverList.drawer.play")}
-                  </Button>
+                  {canJoin ? (
+                    <Button
+                      type="button"
+                      className="h-9 shrink-0 gap-2 bg-success text-success-foreground shadow-[0_0_28px_color-mix(in_oklch,var(--color-success)_28%,transparent)] hover:bg-success-hover hover:shadow-[0_0_34px_color-mix(in_oklch,var(--color-success-hover)_34%,transparent)]"
+                      onClick={() => onJoin(server)}
+                    >
+                      <Play className="size-4" />
+                      {t("serverList.drawer.play")}
+                    </Button>
+                  ) : null}
                 </div>
               </div>
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto">
-              <div className="px-5 py-4">
+              <div className="space-y-4 px-5 py-4">
                 <QlStatsPlayersPanel serverAddress={server.addr} />
+                <ServerHistoryCard serverAddress={server.addr} />
               </div>
             </div>
           </>

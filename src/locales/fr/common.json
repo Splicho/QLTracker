@@ -2,8 +2,12 @@
   "navigation": {
     "serverList": "Liste des serveurs",
     "favorites": "Favoris",
+    "watchlist": "Suivi",
     "notifications": "Notifications",
     "settings": "Paramètres"
+  },
+  "common": {
+    "updated": "Mis à jour"
   },
   "header": {
     "unknown": "Inconnu",
@@ -37,7 +41,7 @@
     "retryInstall": "Réessayer la vérification d'installation",
     "disconnect": "Déconnecter",
     "noAccount": "Pas encore de compte Discord lié.",
-    "installLink": "Installer la discorde de & lien",
+    "installLink": "Lier Discord",
     "dialog": {
       "editTitle": "Modifier la notification de discorde",
       "createTitle": "Notification de discorde",
@@ -103,6 +107,7 @@
     },
     "drawer": {
       "play": "Jouer",
+      "map": "Carte",
       "avgQeloTooltip": "Moyenne QElo sur ce serveur",
       "avgTrueskillTooltip": "Moyenne TSkill sur ce serveur",
       "topQeloTooltip": "Le plus haut joueur QElo sur ce serveur",
@@ -113,6 +118,16 @@
       "qelo": "QElo",
       "trueskill": "TSkill",
       "time": "Heure",
+      "watch": "Suivre",
+      "trackPlayer": "Suivre le joueur",
+      "untrackPlayer": "Retirer de la liste de suivi",
+      "historyTitle": "Historique",
+      "historyWindow": "7 derniers jours",
+      "historyLastSeen": "Vu pour la dernière fois",
+      "historyPeakPlayers": "Pic de joueurs",
+      "historyTimePopulated": "Temps avec joueurs",
+      "historyUnavailable": "L'historique du serveur est indisponible. Active le backend temps réel et déploie l'endpoint d'historique pour charger cette carte.",
+      "historyEmpty": "Aucun historique récent n'est encore disponible pour ce serveur.",
       "lookupFailed": "La recherche de Steam Player a échoué.",
       "noPlayerData": "Pas de données de lecteur pour ce serveur.",
       "teams": {
@@ -209,12 +224,39 @@
     "createDialogTitle": "Créer une liste de favoris",
     "createDialogDescription": "Créez une liste pour organiser vos serveurs enregistrés.",
     "listNamePlaceholder": "Nom de la liste",
-    "playersTooltip": "Total des joueurs en direct dans cette liste",
+    "playersTooltip": "Total des joueurs en direct",
     "favoriteServers": "Serveurs favoris",
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Pas encore de liste. Créez votre première liste pour commencer.",
     "noServers": "Aucun serveur enregistré dans cette liste."
+  },
+  "watchlist": {
+    "title": "Liste de suivi des joueurs",
+    "summary_one": "{{online}} en ligne sur {{count}} joueur suivi",
+    "summary_other": "{{online}} en ligne sur {{count}} joueurs suivis",
+    "onlineCount": "{{count}} en ligne",
+    "serviceUnavailableBadge": "Statut en direct indisponible",
+    "emptyTitle": "Aucun joueur suivi pour le moment",
+    "emptyDescription": "Suivez des joueurs depuis le panneau du serveur pour voir où ils jouent.",
+    "emptyHint": "Ouvrez n'importe quel serveur, puis utilisez le bouton de suivi à côté d'un joueur avec un SteamID résolu.",
+    "offline": "Hors ligne",
+    "updatedUnavailable": "Indisponible",
+    "statusOnline": "En ligne",
+    "statusOffline": "Hors ligne",
+    "statusUnavailable": "Indisponible",
+    "toasts": {
+      "tracked": "{{player}} a été ajouté à la liste de suivi.",
+      "untracked": "{{player}} a été retiré de la liste de suivi."
+    },
+    "columns": {
+      "player": "Joueur",
+      "status": "Statut",
+      "server": "Serveur",
+      "map": "Carte",
+      "mode": "Mode",
+      "actions": "Actions"
+    }
   },
   "filters": {
     "title": "Filtres",

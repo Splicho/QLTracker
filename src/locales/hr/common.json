@@ -2,8 +2,12 @@
   "navigation": {
     "serverList": "Popis poslužitelja",
     "favorites": "Favoriti",
+    "watchlist": "Praćenje",
     "notifications": "Obavijesti",
     "settings": "postavke"
+  },
+  "common": {
+    "updated": "Ažurirano"
   },
   "header": {
     "unknown": "Nepoznato",
@@ -37,7 +41,7 @@
     "retryInstall": "Ponovo pokušajte provjeriti instalaciju",
     "disconnect": "Prekini vezu",
     "noAccount": "Još nije povezan nijedan Discord račun.",
-    "installLink": "Instalirajte i povežite Discord",
+    "installLink": "Poveži Discord",
     "dialog": {
       "editTitle": "Uredi obavijest o Discordu",
       "createTitle": "!!!>>> Unexpected token '<', \"<html lang\"... is not valid JSON <<<!!!",
@@ -103,6 +107,7 @@
     },
     "drawer": {
       "play": "Igrati",
+      "map": "Mapa",
       "avgQeloTooltip": "Prosječni QElo na ovom poslužitelju",
       "avgTrueskillTooltip": "Prosječna TSkill na ovom poslužitelju",
       "topQeloTooltip": "Najbolji QElo igrač na ovom poslužitelju",
@@ -113,6 +118,16 @@
       "qelo": "QElo",
       "trueskill": "TSkill",
       "time": "Vrijeme",
+      "watch": "Prati",
+      "trackPlayer": "Prati igrača",
+      "untrackPlayer": "Ukloni s popisa praćenja",
+      "historyTitle": "Povijest",
+      "historyWindow": "Zadnjih 7 dana",
+      "historyLastSeen": "Zadnji put viđen",
+      "historyPeakPlayers": "Najviše igrača",
+      "historyTimePopulated": "Vrijeme s igračima",
+      "historyUnavailable": "Povijest servera nije dostupna. Omogući realtime pozadinski servis i postavi endpoint za povijest kako bi se ova kartica učitala.",
+      "historyEmpty": "Za ovaj server još nema nedavne povijesti.",
       "lookupFailed": "Traženje Steam playera nije uspjelo.",
       "noPlayerData": "Nema podataka o igračima za ovaj poslužitelj.",
       "teams": {
@@ -209,13 +224,40 @@
     "createDialogTitle": "Stvorite popis favorita",
     "createDialogDescription": "Napravite popis za organiziranje spremljenih poslužitelja.",
     "listNamePlaceholder": "Naziv popisa",
-    "playersTooltip": "Ukupan broj igrača uživo na ovom popisu",
+    "playersTooltip": "Ukupno igrača uživo",
     "favoriteServers": "Omiljeni poslužitelji",
     "noLists": "Još nema popisa. ",
     "noServers": "Na ovom popisu još nema spremljenih poslužitelja.",
     "savedServers_one": "{{count}} saved server",
     "savedServers_few": "{{count}} spremljeni poslužitelji",
     "savedServers_other": "{{count}} saved servers"
+  },
+  "watchlist": {
+    "title": "Popis praćenih igrača",
+    "summary_one": "{{online}} online od {{count}} praćenog igrača",
+    "summary_other": "{{online}} online od {{count}} praćenih igrača",
+    "onlineCount": "{{count}} online",
+    "serviceUnavailableBadge": "Status uživo nije dostupan",
+    "emptyTitle": "Još nema praćenih igrača",
+    "emptyDescription": "Prati igrače iz prikaza servera kako bi vidio gdje igraju.",
+    "emptyHint": "Otvori bilo koji server i koristi gumb za praćenje pored igrača s razriješenim SteamID-om.",
+    "offline": "Offline",
+    "updatedUnavailable": "Nedostupno",
+    "statusOnline": "Online",
+    "statusOffline": "Offline",
+    "statusUnavailable": "Nedostupno",
+    "toasts": {
+      "tracked": "{{player}} je dodan na popis praćenja.",
+      "untracked": "{{player}} je uklonjen s popisa praćenja."
+    },
+    "columns": {
+      "player": "Igrač",
+      "status": "Status",
+      "server": "poslužitelj",
+      "map": "Mapa",
+      "mode": "Način rada",
+      "actions": "Radnje"
+    }
   },
   "filters": {
     "title": "Filteri",

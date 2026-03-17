@@ -2,8 +2,12 @@
   "navigation": {
     "serverList": "Server List",
     "favorites": "Favorites",
+    "watchlist": "Watchlist",
     "notifications": "Notifications",
     "settings": "Settings"
+  },
+  "common": {
+    "updated": "Updated"
   },
   "header": {
     "unknown": "Unknown",
@@ -37,7 +41,7 @@
     "retryInstall": "Retry Install Check",
     "disconnect": "Disconnect",
     "noAccount": "No Discord account linked yet.",
-    "installLink": "Install & Link Discord",
+    "installLink": "Link Discord",
     "dialog": {
       "editTitle": "Edit Discord Notification",
       "createTitle": "Discord Notification",
@@ -103,6 +107,7 @@
     },
     "drawer": {
       "play": "Play",
+      "map": "Map",
       "avgQeloTooltip": "Average QElo on this server",
       "avgTrueskillTooltip": "Average TSkill on this server",
       "topQeloTooltip": "Highest QElo player on this server",
@@ -113,6 +118,16 @@
       "qelo": "QElo",
       "trueskill": "TSkill",
       "time": "Time",
+      "watch": "Watch",
+      "trackPlayer": "Track player",
+      "untrackPlayer": "Remove from watchlist",
+      "historyTitle": "History",
+      "historyWindow": "Last 7 days",
+      "historyLastSeen": "Last seen",
+      "historyPeakPlayers": "Peak players",
+      "historyTimePopulated": "Time populated",
+      "historyUnavailable": "Server history is unavailable. Enable the realtime backend and deploy the history endpoint to load this card.",
+      "historyEmpty": "No recent history is available for this server yet.",
       "lookupFailed": "Steam player lookup failed.",
       "noPlayerData": "No player data for this server.",
       "teams": {
@@ -209,12 +224,39 @@
     "createDialogTitle": "Create Favorite List",
     "createDialogDescription": "Create a list to organize your saved servers.",
     "listNamePlaceholder": "List name",
-    "playersTooltip": "Total live players in this list",
+    "playersTooltip": "Total live players",
     "favoriteServers": "Favorite Servers",
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "No lists yet. Create your first list to get started.",
     "noServers": "No servers saved in this list yet."
+  },
+  "watchlist": {
+    "title": "Player Watchlist",
+    "summary_one": "{{online}} online out of {{count}} tracked player",
+    "summary_other": "{{online}} online out of {{count}} tracked players",
+    "onlineCount": "{{count}} online",
+    "serviceUnavailableBadge": "Live status unavailable",
+    "emptyTitle": "No tracked players yet",
+    "emptyDescription": "Track players from a server drawer to keep an eye on where they are playing.",
+    "emptyHint": "Open any server, then use the watch button next to a player with a resolved SteamID.",
+    "offline": "Offline",
+    "updatedUnavailable": "Unavailable",
+    "statusOnline": "Online",
+    "statusOffline": "Offline",
+    "statusUnavailable": "Unavailable",
+    "toasts": {
+      "tracked": "{{player}} added to watchlist.",
+      "untracked": "{{player}} removed from watchlist."
+    },
+    "columns": {
+      "player": "Player",
+      "status": "Status",
+      "server": "Server",
+      "map": "Map",
+      "mode": "Mode",
+      "actions": "Actions"
+    }
   },
   "filters": {
     "title": "Filters",

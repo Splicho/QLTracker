@@ -2,8 +2,12 @@
   "navigation": {
     "serverList": "Список серверов",
     "favorites": "Любимые",
+    "watchlist": "Отслеживание",
     "notifications": "Уведомления",
     "settings": "Настройки"
+  },
+  "common": {
+    "updated": "Обновлено"
   },
   "header": {
     "unknown": "Неизвестный",
@@ -37,7 +41,7 @@
     "retryInstall": "Retry Install Проверка",
     "disconnect": "Отключить",
     "noAccount": "Пока нет аккаунта Discord.",
-    "installLink": "Дискография Install & Link Discord",
+    "installLink": "Связать Discord",
     "dialog": {
       "editTitle": "Уведомление Discord Notification",
       "createTitle": "Уведомление о разногласиях",
@@ -103,6 +107,7 @@
     },
     "drawer": {
       "play": "Играть",
+      "map": "Карта",
       "avgQeloTooltip": "Средний QElo на этом сервере",
       "avgTrueskillTooltip": "Средний уровень TSkill на этом сервере",
       "topQeloTooltip": "Самый высокий плеер QElo на этом сервере",
@@ -113,6 +118,16 @@
       "qelo": "Кело",
       "trueskill": "TSkill",
       "time": "Время",
+      "watch": "Следить",
+      "trackPlayer": "Следить за игроком",
+      "untrackPlayer": "Удалить из списка отслеживания",
+      "historyTitle": "История",
+      "historyWindow": "Последние 7 дней",
+      "historyLastSeen": "Последний раз замечен",
+      "historyPeakPlayers": "Пиковое число игроков",
+      "historyTimePopulated": "Время с игроками",
+      "historyUnavailable": "История сервера недоступна. Включите realtime-бэкенд и разверните endpoint истории, чтобы загрузить эту карточку.",
+      "historyEmpty": "Для этого сервера пока нет недавней истории.",
       "lookupFailed": "Поиск игроков Steam провалился.",
       "noPlayerData": "Никаких данных об этом сервере.",
       "teams": {
@@ -209,12 +224,39 @@
     "createDialogTitle": "Создайте любимый список",
     "createDialogDescription": "Создайте список для организации сохраненных серверов.",
     "listNamePlaceholder": "Название списка",
-    "playersTooltip": "Живые игроки в этом списке",
+    "playersTooltip": "Всего игроков онлайн",
     "favoriteServers": "Любимые серверы",
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Пока нет списков. Создайте свой первый список, чтобы начать.",
     "noServers": "Серверов в этом списке пока нет."
+  },
+  "watchlist": {
+    "title": "Список отслеживания игроков",
+    "summary_one": "{{online}} в сети из {{count}} отслеживаемого игрока",
+    "summary_other": "{{online}} в сети из {{count}} отслеживаемых игроков",
+    "onlineCount": "{{count}} онлайн",
+    "serviceUnavailableBadge": "Онлайн-статус недоступен",
+    "emptyTitle": "Пока нет отслеживаемых игроков",
+    "emptyDescription": "Отслеживайте игроков из панели сервера, чтобы видеть, где они играют.",
+    "emptyHint": "Откройте любой сервер и используйте кнопку отслеживания рядом с игроком с определённым SteamID.",
+    "offline": "Не в сети",
+    "updatedUnavailable": "Недоступно",
+    "statusOnline": "В сети",
+    "statusOffline": "Не в сети",
+    "statusUnavailable": "Недоступно",
+    "toasts": {
+      "tracked": "{{player}} добавлен в список отслеживания.",
+      "untracked": "{{player}} удалён из списка отслеживания."
+    },
+    "columns": {
+      "player": "Игрок",
+      "status": "Статус",
+      "server": "Сервер",
+      "map": "Карта",
+      "mode": "Режим",
+      "actions": "Меры"
+    }
   },
   "filters": {
     "title": "Фильтры",

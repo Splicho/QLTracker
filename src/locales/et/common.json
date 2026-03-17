@@ -2,8 +2,12 @@
   "navigation": {
     "serverList": "Serverite nimekiri",
     "favorites": "Lemmikloomad",
+    "watchlist": "Jälgimine",
     "notifications": "Teatised",
     "settings": "Seadistused"
+  },
+  "common": {
+    "updated": "Uuendatud"
   },
   "header": {
     "unknown": "Tundmatu",
@@ -37,7 +41,7 @@
     "retryInstall": "Paigaldamise proovimine",
     "disconnect": "Lahutage",
     "noAccount": "Ebakõla kontot pole veel ühendatud.",
-    "installLink": "Paigalda & lingi ebakõla",
+    "installLink": "Ühenda Discord",
     "dialog": {
       "editTitle": "Muuda ebakõla märguannet",
       "createTitle": "Lahknevusteade",
@@ -103,6 +107,7 @@
     },
     "drawer": {
       "play": "Mängi",
+      "map": "Kaart",
       "avgQeloTooltip": "Keskmine QElo selles serveris",
       "avgTrueskillTooltip": "Keskmine TSK antud serveris",
       "topQeloTooltip": "Suurim QElo mängija selles serveris",
@@ -113,6 +118,16 @@
       "qelo": "QElo",
       "trueskill": "TSkill",
       "time": "Aeg",
+      "watch": "Jälgi",
+      "trackPlayer": "Jälgi mängijat",
+      "untrackPlayer": "Eemalda jälgimisloendist",
+      "historyTitle": "Ajalugu",
+      "historyWindow": "Viimased 7 päeva",
+      "historyLastSeen": "Viimati nähtud",
+      "historyPeakPlayers": "Suurim mängijate arv",
+      "historyTimePopulated": "Aeg mängijatega",
+      "historyUnavailable": "Serveri ajalugu pole saadaval. Selle kaardi laadimiseks luba reaalaja taustateenus ja juuruta ajaloo lõpp-punkt.",
+      "historyEmpty": "Selle serveri kohta pole veel hiljutist ajalugu saadaval.",
       "lookupFailed": "Aurumängija otsing nurjus.",
       "noPlayerData": "Selle serveri mängija andmed puuduvad.",
       "teams": {
@@ -209,12 +224,39 @@
     "createDialogTitle": "Lemmiknimekirja loomine",
     "createDialogDescription": "Looge nimekiri salvestatud serverite korraldamiseks.",
     "listNamePlaceholder": "Nimekirja nimi",
-    "playersTooltip": "Selles nimekirjas elavate mängijate koguarv",
+    "playersTooltip": "Hetkel aktiivseid mängijaid kokku",
     "favoriteServers": "Lemmikserverid",
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Nimekirja veel pole. Looge oma esimene nimekiri, et alustada.",
     "noServers": "Siia nimekirja pole veel salvestatud ühtegi serverit."
+  },
+  "watchlist": {
+    "title": "Mängijate jälgimisloend",
+    "summary_one": "{{online}} võrgus {{count}} jälgitavast mängijast",
+    "summary_other": "{{online}} võrgus {{count}} jälgitavast mängijast",
+    "onlineCount": "{{count}} võrgus",
+    "serviceUnavailableBadge": "Reaalajas olek pole saadaval",
+    "emptyTitle": "Jälgitavaid mängijaid veel pole",
+    "emptyDescription": "Jälgi mängijaid serveri paneelist, et näha, kus nad mängivad.",
+    "emptyHint": "Ava suvaline server ja kasuta jälgimisnuppu lahendatud SteamID-ga mängija kõrval.",
+    "offline": "Võrgust maas",
+    "updatedUnavailable": "Pole saadaval",
+    "statusOnline": "Võrgus",
+    "statusOffline": "Võrgust maas",
+    "statusUnavailable": "Pole saadaval",
+    "toasts": {
+      "tracked": "{{player}} lisati jälgimisloendisse.",
+      "untracked": "{{player}} eemaldati jälgimisloendist."
+    },
+    "columns": {
+      "player": "Mängija",
+      "status": "Olek",
+      "server": "Server",
+      "map": "Kaart",
+      "mode": "Mode",
+      "actions": "Tegevused"
+    }
   },
   "filters": {
     "title": "Filtrid",

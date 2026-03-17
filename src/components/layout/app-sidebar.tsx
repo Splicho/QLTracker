@@ -1,12 +1,13 @@
 import appIcon from "@/assets/images/appicon.png";
 import logo from "@/assets/images/logo.png";
 import logoDark from "@/assets/images/logo_dark.png";
+import { useQuery } from "@tanstack/react-query";
 import {
   Bell,
   Cog,
   Discord,
+  GameController,
   Github,
-  Headset,
   InfoCircle,
   Steam,
   XSocial,
@@ -14,8 +15,13 @@ import {
 } from "@/components/icon";
 import { aboutConfig, type AboutSocialId } from "@/config/about";
 import { useFavorites } from "@/hooks/use-favorites";
+import { useTrackedPlayers } from "@/hooks/use-tracked-players";
 import packageJson from "../../../package.json";
 import { navigationItems, type PageId } from "@/lib/navigation";
+import {
+  fetchRealtimePlayerPresenceLookup,
+  isRealtimeEnabled,
+} from "@/lib/realtime";
 import {
   Dialog,
   DialogContent,
@@ -69,10 +75,24 @@ export function AppSidebar({
 }) {
   const { t } = useTranslation();
   const { state: favoritesState } = useFavorites();
+  const { players: trackedPlayers } = useTrackedPlayers();
+  const realtimeAvailable = isRealtimeEnabled();
   const populatedSocials = aboutConfig.socials.filter(
     (social) => social.url.trim().length > 0
   );
   const hasRepoLink = aboutConfig.repo.url.trim().length > 0;
+  const trackedSteamIds = useMemo(
+    () => trackedPlayers.map((player) => player.steamId),
+    [trackedPlayers]
+  );
+  const trackedPresenceQuery = useQuery({
+    queryKey: ["realtime", "presence-lookup", trackedSteamIds],
+    queryFn: () => fetchRealtimePlayerPresenceLookup(trackedSteamIds),
+    enabled: realtimeAvailable && trackedSteamIds.length > 0,
+    staleTime: 10_000,
+    refetchInterval: 15_000,
+    placeholderData: (previousData) => previousData,
+  });
   const favoritePlayerCount = useMemo(() => {
     const favoriteAddresses = new Set(
       favoritesState.servers.map((server) => server.addr)
@@ -83,6 +103,17 @@ export function AppSidebar({
     }, 0);
   }, [favoritesState.servers, servers]);
   const shouldShowFavoritesBadge = favoritesState.servers.length > 0;
+  const onlineTrackedPlayerCount = useMemo(
+    () =>
+      Object.values(trackedPresenceQuery.data ?? {}).filter(
+        (presence) => presence != null
+      ).length,
+    [trackedPresenceQuery.data]
+  );
+  const shouldShowWatchlistBadge =
+    trackedPlayers.length > 0 &&
+    realtimeAvailable &&
+    !trackedPresenceQuery.isError;
 
   return (
     <Sidebar
@@ -139,14 +170,28 @@ export function AppSidebar({
                   </SidebarMenuButton>
                   {item.id === "favorites" && shouldShowFavoritesBadge ? (
                     <Tooltip>
-                      <TooltipTrigger asChild>
-                        <SidebarMenuBadge className="pointer-events-auto z-[150] right-2 top-1/2 h-6 min-w-6 -translate-y-1/2 gap-1.5 rounded-md border border-sidebar-border/70 bg-muted px-2 text-xs leading-none peer-data-[size=sm]/menu-button:top-1/2 peer-data-[size=default]/menu-button:top-1/2 peer-data-[size=lg]/menu-button:top-1/2">
-                          <Headset className="size-3" />
+                        <TooltipTrigger asChild>
+                          <SidebarMenuBadge className="pointer-events-auto z-[150] right-2 top-1/2 h-6 min-w-6 -translate-y-1/2 gap-1.5 rounded-md border border-sidebar-border/70 bg-muted px-2 text-xs leading-none peer-data-[size=sm]/menu-button:top-1/2 peer-data-[size=default]/menu-button:top-1/2 peer-data-[size=lg]/menu-button:top-1/2">
+                          <GameController className="size-3" />
                           <span>{favoritePlayerCount}</span>
                         </SidebarMenuBadge>
                       </TooltipTrigger>
                       <TooltipContent side="top" className="z-[200]">
                         {t("favorites.playersTooltip")}
+                      </TooltipContent>
+                    </Tooltip>
+                  ) : item.id === "watchlist" && shouldShowWatchlistBadge ? (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <SidebarMenuBadge className="pointer-events-auto z-[150] right-2 top-1/2 h-6 min-w-6 -translate-y-1/2 gap-1.5 rounded-md border border-sidebar-border/70 bg-muted px-2 text-xs leading-none peer-data-[size=sm]/menu-button:top-1/2 peer-data-[size=default]/menu-button:top-1/2 peer-data-[size=lg]/menu-button:top-1/2">
+                          <GameController className="size-3" />
+                          <span>{onlineTrackedPlayerCount}</span>
+                        </SidebarMenuBadge>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="z-[200] capitalize">
+                        {t("watchlist.onlineCount", {
+                          count: onlineTrackedPlayerCount,
+                        })}
                       </TooltipContent>
                     </Tooltip>
                   ) : null}

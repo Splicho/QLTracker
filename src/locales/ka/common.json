@@ -2,8 +2,12 @@
   "navigation": {
     "serverList": "სერვერების სია",
     "favorites": "ფავორიტები",
+    "watchlist": "მონიტორინგი",
     "notifications": "შეტყობინებები",
     "settings": "პარამეტრები"
+  },
+  "common": {
+    "updated": "განახლდა"
   },
   "header": {
     "unknown": "უცნობი",
@@ -37,7 +41,7 @@
     "retryInstall": "ინსტალაციის შემოწმების გამეორება",
     "disconnect": "გათიშვა",
     "noAccount": "Discord-ის ანგარიში ჯერ არ არის დაკავშირებული.",
-    "installLink": "Discord-ის ინსტალაცია და დაკავშირება",
+    "installLink": "Discord-ის დაკავშირება",
     "dialog": {
       "editTitle": "Discord შეტყობინების რედაქტირება",
       "createTitle": "Discord შეტყობინება",
@@ -103,6 +107,7 @@
     },
     "drawer": {
       "play": "თამაში",
+      "map": "რუკა",
       "avgQeloTooltip": "ამ სერვერზე საშუალო QElo",
       "avgTrueskillTooltip": "ამ სერვერზე საშუალო TSkill",
       "topQeloTooltip": "ამ სერვერზე ყველაზე მაღალი QElo-ის მქონე მოთამაშე",
@@ -113,6 +118,16 @@
       "qelo": "QElo",
       "trueskill": "TSkill",
       "time": "დრო",
+      "watch": "თვალი ადევნე",
+      "trackPlayer": "თვალი ადევნე მოთამაშეს",
+      "untrackPlayer": "ამოშლა დაკვირვების სიიდან",
+      "historyTitle": "ისტორია",
+      "historyWindow": "ბოლო 7 დღე",
+      "historyLastSeen": "ბოლოს ნანახი",
+      "historyPeakPlayers": "მოთამაშეთა პიკი",
+      "historyTimePopulated": "მოთამაშეებით დატვირთული დრო",
+      "historyUnavailable": "სერვერის ისტორია მიუწვდომელია. ამ ბარათის ჩასატვირთად ჩართე realtime backend და განათავსე ისტორიის endpoint.",
+      "historyEmpty": "ამ სერვერისთვის ბოლო ისტორია ჯერ ხელმისაწვდომი არ არის.",
       "lookupFailed": "Steam მოთამაშეების მოძიება ვერ მოხერხდა.",
       "noPlayerData": "ამ სერვერისთვის მოთამაშის მონაცემები არ არის.",
       "teams": {
@@ -209,12 +224,39 @@
     "createDialogTitle": "ფავორიტების სიის შექმნა",
     "createDialogDescription": "შექმენით სია თქვენი შენახული სერვერების დასაორგანიზებლად.",
     "listNamePlaceholder": "სიის სახელი",
-    "playersTooltip": "ამ სიაში მოთამაშეების საერთო ცოცხალი რაოდენობა",
+    "playersTooltip": "სულ აქტიური მოთამაშეები",
     "favoriteServers": "ფავორიტი სერვერები",
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "სიები ჯერ არ არის. დასაწყებად შექმენით თქვენი პირველი სია.",
     "noServers": "ამ სიაში ჯერ არცერთი სერვერი არ არის შენახული."
+  },
+  "watchlist": {
+    "title": "მოთამაშეთა დაკვირვების სია",
+    "summary_one": "{{online}} ონლაინ {{count}} დაკვირვებული მოთამაშიდან",
+    "summary_other": "{{online}} ონლაინ {{count}} დაკვირვებული მოთამაშიდან",
+    "onlineCount": "{{count}} ონლაინ",
+    "serviceUnavailableBadge": "ცოცხალი სტატუსი მიუწვდომელია",
+    "emptyTitle": "ჯერ დაკვირვებული მოთამაშეები არ არის",
+    "emptyDescription": "დააკვირდი მოთამაშეებს სერვერის ფანჯრიდან, რომ ნახო სად თამაშობენ.",
+    "emptyHint": "გახსენი ნებისმიერი სერვერი და გამოიყენე თვალთვალის ღილაკი მოთამაშის გვერდით, რომელსაც განსაზღვრული SteamID აქვს.",
+    "offline": "ოფლაინ",
+    "updatedUnavailable": "მიუწვდომელია",
+    "statusOnline": "ონლაინ",
+    "statusOffline": "ოფლაინ",
+    "statusUnavailable": "მიუწვდომელია",
+    "toasts": {
+      "tracked": "{{player}} დაემატა დაკვირვების სიას.",
+      "untracked": "{{player}} წაიშალა დაკვირვების სიიდან."
+    },
+    "columns": {
+      "player": "მოთამაშე",
+      "status": "სტატუსი",
+      "server": "სერვერი",
+      "map": "რუკა",
+      "mode": "რეჟიმი",
+      "actions": "მოქმედებები"
+    }
   },
   "filters": {
     "title": "ფილტრები",

@@ -19,9 +19,34 @@ export type RealtimePlayerPresence = {
   updatedAt: string;
 };
 
+export type ServerHistoryPoint = {
+  timestamp: string;
+  players: number;
+  maxPlayers: number;
+  map: string | null;
+  gameMode: string | null;
+};
+
+export type ServerHistorySummary = {
+  lastSeenAt: string | null;
+  peakPlayers: number;
+  populatedSampleRatio: number;
+};
+
 type RealtimePresenceResponse = {
   ok: boolean;
   presence: RealtimePlayerPresence | null;
+};
+
+type RealtimePresenceLookupResponse = {
+  ok: boolean;
+  presences: Record<string, RealtimePlayerPresence | null>;
+};
+
+type RealtimeServerHistoryResponse = {
+  ok: boolean;
+  summary: ServerHistorySummary | null;
+  timeline: ServerHistoryPoint[];
 };
 
 export function isRealtimeEnabled() {
@@ -61,4 +86,57 @@ export async function fetchRealtimePlayerPresence(steamId: string) {
 
   const payload = (await response.json()) as RealtimePresenceResponse;
   return payload.presence ?? null;
+}
+
+export async function fetchRealtimePlayerPresenceLookup(steamIds: string[]) {
+  if (!isRealtimeEnabled() || steamIds.length === 0) {
+    return {};
+  }
+
+  const response = await fetch(`${realtimeUrl}/api/presence/lookup`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      steamIds,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Realtime presence lookup failed with HTTP ${response.status}.`
+    );
+  }
+
+  const payload = (await response.json()) as RealtimePresenceLookupResponse;
+  return payload.presences ?? {};
+}
+
+export async function fetchRealtimeServerHistory(
+  addr: string,
+  range = "7d",
+  bucket = "15m"
+) {
+  if (!isRealtimeEnabled()) {
+    throw new Error("Realtime history is unavailable.");
+  }
+
+  const searchParams = new URLSearchParams({
+    range,
+    bucket,
+  });
+  const response = await fetch(
+    `${realtimeUrl}/api/servers/${encodeURIComponent(addr)}/history?${searchParams.toString()}`
+  );
+
+  if (!response.ok) {
+    throw new Error(`Realtime history failed with HTTP ${response.status}.`);
+  }
+
+  const payload = (await response.json()) as RealtimeServerHistoryResponse;
+  return {
+    summary: payload.summary,
+    timeline: payload.timeline ?? [],
+  };
 }

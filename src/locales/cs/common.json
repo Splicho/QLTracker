@@ -2,8 +2,12 @@
   "navigation": {
     "serverList": "Seznam serverů",
     "favorites": "Oblíbené",
+    "watchlist": "Sledování",
     "notifications": "Oznámení",
     "settings": "Nastavení"
+  },
+  "common": {
+    "updated": "Aktualizováno"
   },
   "header": {
     "unknown": "Neznámé",
@@ -37,7 +41,7 @@
     "retryInstall": "Znovu nainstalovat kontrolu",
     "disconnect": "Odpojení",
     "noAccount": "Zatím žádný Discordův účet.",
-    "installLink": "Nainstalovat discord",
+    "installLink": "Propojit Discord",
     "dialog": {
       "editTitle": "Upravit oznámení o nesouladu",
       "createTitle": "Oznámení sporů",
@@ -103,6 +107,7 @@
     },
     "drawer": {
       "play": "Přehrát",
+      "map": "Mapa",
       "avgQeloTooltip": "Průměr QElo na tomto serveru",
       "avgTrueskillTooltip": "Průměrný TSkill na tomto serveru",
       "topQeloTooltip": "Nejvyšší QElo přehrávač na tomto serveru",
@@ -113,6 +118,16 @@
       "qelo": "QElo",
       "trueskill": "TSkill",
       "time": "Čas",
+      "watch": "Sledovat",
+      "trackPlayer": "Sledovat hráče",
+      "untrackPlayer": "Odebrat ze sledování",
+      "historyTitle": "Historie",
+      "historyWindow": "Posledních 7 dní",
+      "historyLastSeen": "Naposledy viděn",
+      "historyPeakPlayers": "Maximum hráčů",
+      "historyTimePopulated": "Doba obsazení",
+      "historyUnavailable": "Historie serveru není dostupná. Pro načtení této karty povol realtime backend a nasaď endpoint historie.",
+      "historyEmpty": "Pro tento server zatím není k dispozici žádná nedávná historie.",
       "lookupFailed": "Vyhledávání parních přehrávačů selhalo.",
       "noPlayerData": "Pro tento server žádná data.",
       "teams": {
@@ -209,12 +224,39 @@
     "createDialogTitle": "Vytvořit oblíbený seznam",
     "createDialogDescription": "Vytvořte si seznam pro organizaci uložených serverů.",
     "listNamePlaceholder": "Název seznamu",
-    "playersTooltip": "Celkem živých hráčů v tomto seznamu",
+    "playersTooltip": "Celkem živých hráčů",
     "favoriteServers": "Oblíbené servery",
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Zatím žádné seznamy. Vytvořte si svůj první seznam začít.",
     "noServers": "V tomto seznamu ještě nejsou uloženy žádné servery."
+  },
+  "watchlist": {
+    "title": "Sledování hráčů",
+    "summary_one": "{{online}} online z {{count}} sledovaného hráče",
+    "summary_other": "{{online}} online z {{count}} sledovaných hráčů",
+    "onlineCount": "{{count}} online",
+    "serviceUnavailableBadge": "Živý stav není dostupný",
+    "emptyTitle": "Zatím žádní sledovaní hráči",
+    "emptyDescription": "Sleduj hráče z detailu serveru a měj přehled, kde právě hrají.",
+    "emptyHint": "Otevři libovolný server a použij tlačítko sledování vedle hráče s vyřešeným SteamID.",
+    "offline": "Offline",
+    "updatedUnavailable": "Nedostupné",
+    "statusOnline": "Online",
+    "statusOffline": "Offline",
+    "statusUnavailable": "Nedostupné",
+    "toasts": {
+      "tracked": "{{player}} byl přidán do sledování.",
+      "untracked": "{{player}} byl odebrán ze sledování."
+    },
+    "columns": {
+      "player": "Hráč",
+      "status": "Stav",
+      "server": "Server",
+      "map": "Mapa",
+      "mode": "Režim",
+      "actions": "Akce"
+    }
   },
   "filters": {
     "title": "Filtry",

@@ -2,8 +2,12 @@
   "navigation": {
     "serverList": "Lista de Servidores",
     "favorites": "Favoritos",
+    "watchlist": "Acompanhamento",
     "notifications": "Notificações",
     "settings": "Configurações"
+  },
+  "common": {
+    "updated": "Atualizado"
   },
   "header": {
     "unknown": "Desconhecido",
@@ -37,7 +41,7 @@
     "retryInstall": "Tentar novamente a verificação de instalação",
     "disconnect": "Desconectar",
     "noAccount": "Nenhuma conta de Discórdia ligada ainda.",
-    "installLink": "Instalar discórdia de & Link",
+    "installLink": "Vincular Discord",
     "dialog": {
       "editTitle": "Editar notificação de discórdia",
       "createTitle": "Notificação de Discórdia",
@@ -103,6 +107,7 @@
     },
     "drawer": {
       "play": "Toque",
+      "map": "Mapa",
       "avgQeloTooltip": "QElo médio neste servidor",
       "avgTrueskillTooltip": "A média de TSkill neste servidor",
       "topQeloTooltip": "O maior jogador de QElo neste servidor",
@@ -113,6 +118,16 @@
       "qelo": "QElo",
       "trueskill": "TSkill",
       "time": "Tempo",
+      "watch": "Acompanhar",
+      "trackPlayer": "Acompanhar jogador",
+      "untrackPlayer": "Remover da lista",
+      "historyTitle": "Histórico",
+      "historyWindow": "Últimos 7 dias",
+      "historyLastSeen": "Visto por último",
+      "historyPeakPlayers": "Pico de jogadores",
+      "historyTimePopulated": "Tempo com jogadores",
+      "historyUnavailable": "O histórico do servidor não está disponível. Ative o backend em tempo real e publique o endpoint de histórico para carregar este cartão.",
+      "historyEmpty": "Ainda não há histórico recente disponível para este servidor.",
       "lookupFailed": "O player de vapor falhou.",
       "noPlayerData": "Sem dados do jogador para este servidor.",
       "teams": {
@@ -209,12 +224,39 @@
     "createDialogTitle": "Criar lista favorita",
     "createDialogDescription": "Crie uma lista para organizar seus servidores salvos.",
     "listNamePlaceholder": "Nome da lista",
-    "playersTooltip": "Jogadores ao vivo nesta lista",
+    "playersTooltip": "Total de jogadores ao vivo",
     "favoriteServers": "Servidores favoritos",
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Nenhuma lista ainda. Crie sua primeira lista para começar.",
     "noServers": "Nenhum servidor salvo nesta lista ainda."
+  },
+  "watchlist": {
+    "title": "Lista de acompanhamento de jogadores",
+    "summary_one": "{{online}} online de {{count}} jogador acompanhado",
+    "summary_other": "{{online}} online de {{count}} jogadores acompanhados",
+    "onlineCount": "{{count}} online",
+    "serviceUnavailableBadge": "Status ao vivo indisponível",
+    "emptyTitle": "Ainda não há jogadores acompanhados",
+    "emptyDescription": "Acompanhe jogadores pelo painel do servidor para ver onde eles estão jogando.",
+    "emptyHint": "Abra qualquer servidor e use o botão de acompanhamento ao lado de um jogador com SteamID resolvido.",
+    "offline": "Offline",
+    "updatedUnavailable": "Indisponível",
+    "statusOnline": "Online",
+    "statusOffline": "Offline",
+    "statusUnavailable": "Indisponível",
+    "toasts": {
+      "tracked": "{{player}} foi adicionado à lista de acompanhamento.",
+      "untracked": "{{player}} foi removido da lista de acompanhamento."
+    },
+    "columns": {
+      "player": "Jogador",
+      "status": "Status",
+      "server": "Servidor",
+      "map": "Mapa",
+      "mode": "Modo",
+      "actions": "Ações"
+    }
   },
   "filters": {
     "title": "Filtros",

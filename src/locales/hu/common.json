@@ -2,8 +2,12 @@
   "navigation": {
     "serverList": "A kiszolgáló listája",
     "favorites": "Kedvencek",
+    "watchlist": "Figyelőlista",
     "notifications": "Értesítések",
     "settings": "Beállítások"
+  },
+  "common": {
+    "updated": "Frissítve"
   },
   "header": {
     "unknown": "Ismeretlen",
@@ -37,7 +41,7 @@
     "retryInstall": "A telepítés visszaállítása",
     "disconnect": "Váltás",
     "noAccount": "Még nincs összekapcsolva Discord számla.",
-    "installLink": "& Link diszkord telepítése",
+    "installLink": "Discord összekapcsolása",
     "dialog": {
       "editTitle": "A diszkord bejelentésének szerkesztése",
       "createTitle": "Felderítési értesítés",
@@ -103,6 +107,7 @@
     },
     "drawer": {
       "play": "Játék",
+      "map": "Pálya",
       "avgQeloTooltip": "Átlagos QElo a kiszolgálón",
       "avgTrueskillTooltip": "Átlagos TSkill a kiszolgálón",
       "topQeloTooltip": "A legmagasabb QElo lejátszó a kiszolgálón",
@@ -113,6 +118,16 @@
       "qelo": "QElo",
       "trueskill": "TSkill",
       "time": "Idő",
+      "watch": "Figyelés",
+      "trackPlayer": "Játékos figyelése",
+      "untrackPlayer": "Eltávolítás a figyelőlistáról",
+      "historyTitle": "Előzmények",
+      "historyWindow": "Elmúlt 7 nap",
+      "historyLastSeen": "Utoljára látva",
+      "historyPeakPlayers": "Játékoscsúcs",
+      "historyTimePopulated": "Játékosokkal töltött idő",
+      "historyUnavailable": "A szerverelőzmények nem érhetők el. A kártya betöltéséhez engedélyezd a realtime backendet és telepítsd az előzmény endpointot.",
+      "historyEmpty": "Ehhez a szerverhez még nincs elérhető friss előzmény.",
       "lookupFailed": "A Steam lejátszó keresése nem sikerült.",
       "noPlayerData": "Ehhez a szerverhez nincs játékos adat.",
       "teams": {
@@ -209,12 +224,39 @@
     "createDialogTitle": "Kedvenc lista létrehozása",
     "createDialogDescription": "Hozzon létre egy listát a mentett szerverek megszervezéséhez.",
     "listNamePlaceholder": "Lista neve",
-    "playersTooltip": "A listában szereplő összes élő játékos",
+    "playersTooltip": "Élő játékosok összesen",
     "favoriteServers": "Kedvenc kiszolgálók",
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Még nincs lista. Az első lista létrehozása a kezdéshez.",
     "noServers": "Ezen a listán még nem mentettek meg szervereket."
+  },
+  "watchlist": {
+    "title": "Játékos figyelőlista",
+    "summary_one": "{{online}} online a követett {{count}} játékosból",
+    "summary_other": "{{online}} online a követett {{count}} játékosból",
+    "onlineCount": "{{count}} online",
+    "serviceUnavailableBadge": "Az élő állapot nem érhető el",
+    "emptyTitle": "Még nincs figyelt játékos",
+    "emptyDescription": "Figyelj játékosokat a szerverpanelről, hogy lásd, hol játszanak.",
+    "emptyHint": "Nyiss meg bármelyik szervert, majd használd a figyelés gombot egy feloldott SteamID-jű játékos mellett.",
+    "offline": "Offline",
+    "updatedUnavailable": "Nem érhető el",
+    "statusOnline": "Online",
+    "statusOffline": "Offline",
+    "statusUnavailable": "Nem érhető el",
+    "toasts": {
+      "tracked": "{{player}} hozzáadva a figyelőlistához.",
+      "untracked": "{{player}} eltávolítva a figyelőlistáról."
+    },
+    "columns": {
+      "player": "Játékos",
+      "status": "Állapot",
+      "server": "Szerver",
+      "map": "Pálya",
+      "mode": "Mód",
+      "actions": "Intézkedések"
+    }
   },
   "filters": {
     "title": "Szűrők",

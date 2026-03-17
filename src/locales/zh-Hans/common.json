@@ -2,8 +2,12 @@
   "navigation": {
     "serverList": "服务器列表",
     "favorites": "爱好",
+    "watchlist": "关注列表",
     "notifications": "通知",
     "settings": "设置"
+  },
+  "common": {
+    "updated": "更新"
   },
   "header": {
     "unknown": "未知",
@@ -37,7 +41,7 @@
     "retryInstall": "重试安装检查",
     "disconnect": "断开连接",
     "noAccount": "尚未链接 Discord 账户 .",
-    "installLink": "安装链接磁盘( L)",
+    "installLink": "关联 Discord",
     "dialog": {
       "editTitle": "编辑 Discord 通知",
       "createTitle": "解析通知",
@@ -103,6 +107,7 @@
     },
     "drawer": {
       "play": "播放",
+      "map": "地图",
       "avgQeloTooltip": "此服务器上的平均QElo",
       "avgTrueskillTooltip": "此服务器上的平均 TSkill 值",
       "topQeloTooltip": "此服务器上最高的QElo 播放器",
@@ -113,6 +118,16 @@
       "qelo": "QElo 数据",
       "trueskill": "技术技能",
       "time": "时间",
+      "watch": "关注",
+      "trackPlayer": "关注玩家",
+      "untrackPlayer": "从关注列表移除",
+      "historyTitle": "历史",
+      "historyWindow": "最近 7 天",
+      "historyLastSeen": "最后出现",
+      "historyPeakPlayers": "峰值玩家数",
+      "historyTimePopulated": "有玩家时长",
+      "historyUnavailable": "服务器历史记录不可用。请启用实时后端并部署历史记录接口以加载此卡片。",
+      "historyEmpty": "该服务器暂时还没有最近历史记录。",
       "lookupFailed": "Steam 播放器搜索失败 .",
       "noPlayerData": "此服务器没有玩家数据 .",
       "teams": {
@@ -209,12 +224,39 @@
     "createDialogTitle": "创建最爱列表",
     "createDialogDescription": "创建列表来组织您保存的服务器 .",
     "listNamePlaceholder": "列表名称",
-    "playersTooltip": "本列表中共计活的玩家",
+    "playersTooltip": "实时玩家总数",
     "favoriteServers": "最爱的服务器",
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "还没有名单 创建您的第一个启动列表 .",
     "noServers": "尚未在此列表中保存服务器 ."
+  },
+  "watchlist": {
+    "title": "玩家关注列表",
+    "summary_one": "已关注 {{count}} 名玩家，其中 {{online}} 名在线",
+    "summary_other": "已关注 {{count}} 名玩家，其中 {{online}} 名在线",
+    "onlineCount": "{{count}} 在线",
+    "serviceUnavailableBadge": "实时状态不可用",
+    "emptyTitle": "还没有关注的玩家",
+    "emptyDescription": "在服务器详情面板中关注玩家，以便查看他们正在什么服务器游玩。",
+    "emptyHint": "打开任意服务器，然后使用已解析 SteamID 的玩家旁边的关注按钮。",
+    "offline": "离线",
+    "updatedUnavailable": "不可用",
+    "statusOnline": "在线",
+    "statusOffline": "离线",
+    "statusUnavailable": "不可用",
+    "toasts": {
+      "tracked": "{{player}} 已加入关注列表。",
+      "untracked": "{{player}} 已从关注列表移除。"
+    },
+    "columns": {
+      "player": "玩家",
+      "status": "状态",
+      "server": "服务器",
+      "map": "地图",
+      "mode": "模式",
+      "actions": "行动"
+    }
   },
   "filters": {
     "title": "过滤器",

@@ -44,7 +44,7 @@ import {
 import { useFavorites } from "@/hooks/use-favorites";
 import { useNotificationService } from "@/hooks/use-notification-service";
 import { useServerPasswords } from "@/hooks/use-server-passwords";
-import type { DiscordPresenceServerContext } from "@/lib/discord-presence";
+import type { ServerInteractionContext } from "@/hooks/use-server-interactions";
 import {
   getCountryFlagSrc,
   getRegionFromCountryCode,
@@ -72,10 +72,8 @@ import {
   RATING_FILTER_MIN,
   type ServerFiltersValue,
 } from "@/components/server/server-filters";
-import { ServerDrawer } from "@/components/server/server-drawer";
 import { ServerFavoriteDialog } from "@/components/server/server-favorite-dialog";
 import { ServerNotificationDialog } from "@/components/server/server-notification-dialog";
-import { ServerPasswordDialog } from "@/components/server/server-password-dialog";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -203,7 +201,8 @@ type ServerListProps = {
   error?: string | null;
   actionMode?: "add" | "edit";
   favoriteListId?: string | null;
-  onServerLaunched?: (context: DiscordPresenceServerContext) => void;
+  onOpenServer?: (context: ServerInteractionContext) => void;
+  onJoinServer?: (context: ServerInteractionContext) => void;
 };
 
 function normalizeSteamServerRegion(server: SteamServer) {
@@ -328,13 +327,6 @@ function calculateHighestRatedPlayer(
 
 function getQlStatsPlayerProfileUrl(steamId: string) {
   return `https://qlstats.net/player/${steamId}`;
-}
-
-function buildSteamConnectUrl(serverAddress: string, password?: string) {
-  const trimmedPassword = password?.trim();
-  return trimmedPassword
-    ? `steam://connect/${serverAddress}/${encodeURIComponent(trimmedPassword)}`
-    : `steam://connect/${serverAddress}`;
 }
 
 function getPingIconClassName(ping: number) {
@@ -970,7 +962,8 @@ export function ServerList({
   error = null,
   actionMode = "add",
   favoriteListId = null,
-  onServerLaunched,
+  onOpenServer,
+  onJoinServer,
 }: ServerListProps) {
   const {
     state: favoritesState,
@@ -989,10 +982,7 @@ export function ServerList({
     mutationsPending: notificationMutationPending,
   } = useNotificationService();
   const { t } = useTranslation();
-  const { getPassword, savePassword } = useServerPasswords();
-  const [selectedServer, setSelectedServer] = useState<SteamServer | null>(
-    null
-  );
+  const { getPassword } = useServerPasswords();
   const [favoriteServer, setFavoriteServer] = useState<SteamServer | null>(
     null
   );
@@ -1005,11 +995,6 @@ export function ServerList({
     "save" | "delete" | null
   >(null);
   const [targetFavoriteListId, setTargetFavoriteListId] = useState<string>("");
-  const [passwordServer, setPasswordServer] = useState<SteamServer | null>(
-    null
-  );
-  const [joinPassword, setJoinPassword] = useState("");
-  const [rememberServerPassword, setRememberServerPassword] = useState(false);
   const [sorting, setSorting] = useState<SortingState>([
     { id: "players", desc: true },
   ]);
@@ -1544,6 +1529,17 @@ export function ServerList({
       ...Object.fromEntries(enrichmentAddresses.map((addr) => [addr, true])),
     }));
   }, [pingLookupPending, enrichmentAddresses]);
+  const createServerInteractionContext = (
+    server: SteamServer
+  ): ServerInteractionContext => ({
+    server,
+    modeLabel: getGameModeLabel(
+      resolvedModesByAddr[server.addr] ?? normalizeGameMode(server),
+      t
+    ),
+    canJoin: true,
+    requiresPassword: resolvedRequiresPasswordByAddr[server.addr] === true,
+  });
 
   const columns = useMemo<ColumnDef<SteamServer>[]>(
     () => [
@@ -1883,7 +1879,7 @@ export function ServerList({
                 className="size-8 bg-success text-success-foreground hover:bg-success-hover"
                 onClick={(event) => {
                   event.stopPropagation();
-                  handleJoinServer(row.original);
+                  onJoinServer?.(createServerInteractionContext(row.original));
                 }}
               >
                 <Play className="size-4" />
@@ -1912,9 +1908,11 @@ export function ServerList({
       favoritesState.lists,
       notificationsAvailable,
       notificationUser,
+      onJoinServer,
       removeServer,
       rulesByServerAddr,
       t,
+      createServerInteractionContext,
     ]
   );
 
@@ -1928,45 +1926,6 @@ export function ServerList({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
-
-  const selectedRequiresPassword = selectedServer
-    ? resolvedRequiresPasswordByAddr[selectedServer.addr] === true
-    : false;
-  const selectedHasSavedPassword = selectedServer
-    ? Boolean(getPassword(selectedServer.addr))
-    : false;
-  const launchPresenceServer = (server: SteamServer) => {
-    onServerLaunched?.({
-      server,
-      modeLabel: getGameModeLabel(
-        resolvedModesByAddr[server.addr] ?? normalizeGameMode(server),
-        t
-      ),
-    });
-  };
-  const launchServer = (serverAddress: string, password?: string) => {
-    void openUrl(buildSteamConnectUrl(serverAddress, password));
-  };
-  const handleJoinServer = (server: SteamServer) => {
-    const requiresPassword =
-      resolvedRequiresPasswordByAddr[server.addr] === true;
-    if (!requiresPassword) {
-      launchPresenceServer(server);
-      launchServer(server.addr);
-      return;
-    }
-
-    const savedPassword = getPassword(server.addr);
-    if (savedPassword) {
-      launchPresenceServer(server);
-      launchServer(server.addr, savedPassword);
-      return;
-    }
-
-    setPasswordServer(server);
-    setJoinPassword("");
-    setRememberServerPassword(false);
-  };
   const notificationRuleForDialog = notificationServer
     ? (rulesByServerAddr[notificationServer.addr] ?? null)
     : null;
@@ -2126,7 +2085,11 @@ export function ServerList({
                     <ContextMenuTrigger asChild>
                       <TableRow
                         className="h-11 cursor-pointer border-b border-border"
-                        onClick={() => setSelectedServer(row.original)}
+                        onClick={() => {
+                          onOpenServer?.(
+                            createServerInteractionContext(row.original)
+                          );
+                        }}
                       >
                         {row.getVisibleCells().map((cell) => (
                           <TableCell
@@ -2249,19 +2212,6 @@ export function ServerList({
         ) : null}
       </section>
 
-      <ServerDrawer
-        open={selectedServer !== null}
-        server={selectedServer}
-        requiresPassword={selectedRequiresPassword}
-        hasSavedPassword={selectedHasSavedPassword}
-        onOpenChange={(open) => {
-          if (!open) {
-            setSelectedServer(null);
-          }
-        }}
-        onJoin={handleJoinServer}
-      />
-
       <ServerFavoriteDialog
         open={favoriteServer !== null}
         server={favoriteServer}
@@ -2341,41 +2291,6 @@ export function ServerList({
         }}
         onSave={handleNotificationSave}
         onDelete={handleNotificationDelete}
-      />
-
-      <ServerPasswordDialog
-        open={passwordServer !== null}
-        server={passwordServer}
-        password={joinPassword}
-        rememberPassword={rememberServerPassword}
-        onOpenChange={(open) => {
-          if (!open) {
-            setPasswordServer(null);
-            setJoinPassword("");
-            setRememberServerPassword(false);
-          }
-        }}
-        onPasswordChange={setJoinPassword}
-        onRememberPasswordChange={setRememberServerPassword}
-        onSubmit={() => {
-          if (!passwordServer) {
-            return;
-          }
-
-          const password = joinPassword.trim();
-          if (!password) {
-            return;
-          }
-
-          if (rememberServerPassword) {
-            savePassword(passwordServer.addr, password);
-          }
-          launchPresenceServer(passwordServer);
-          launchServer(passwordServer.addr, password);
-          setPasswordServer(null);
-          setJoinPassword("");
-          setRememberServerPassword(false);
-        }}
       />
     </>
   );

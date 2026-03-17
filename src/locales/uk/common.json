@@ -2,8 +2,12 @@
   "navigation": {
     "serverList": "Статус на сервери",
     "favorites": "Вибрані",
+    "watchlist": "Відстеження",
     "notifications": "Повідомлення",
     "settings": "Налаштування"
+  },
+  "common": {
+    "updated": "Оновлено"
   },
   "header": {
     "unknown": "Невідомо",
@@ -37,7 +41,7 @@
     "retryInstall": "Ретри Встановіть перевірити",
     "disconnect": "Відключення",
     "noAccount": "Немає облікового запису, пов'язаного ще.",
-    "installLink": "Встановіть & Посилання Discord",
+    "installLink": "Прив’язати Discord",
     "dialog": {
       "editTitle": "Редагування повідомлень",
       "createTitle": "Повідомлення",
@@ -103,6 +107,7 @@
     },
     "drawer": {
       "play": "Грати",
+      "map": "Карта",
       "avgQeloTooltip": "Середній QElo на цьому сервері",
       "avgTrueskillTooltip": "Середня навичка на цьому сервері",
       "topQeloTooltip": "Найвищий QElo-плеєр на цьому сервері",
@@ -113,6 +118,16 @@
       "qelo": "Кело",
       "trueskill": "Навички",
       "time": "Час",
+      "watch": "Стежити",
+      "trackPlayer": "Стежити за гравцем",
+      "untrackPlayer": "Видалити зі списку відстеження",
+      "historyTitle": "Історія",
+      "historyWindow": "Останні 7 днів",
+      "historyLastSeen": "Востаннє помічений",
+      "historyPeakPlayers": "Пік гравців",
+      "historyTimePopulated": "Час із гравцями",
+      "historyUnavailable": "Історія сервера недоступна. Увімкніть realtime-бекенд і розгорніть endpoint історії, щоб завантажити цю картку.",
+      "historyEmpty": "Для цього сервера ще немає недавньої історії.",
       "lookupFailed": "Не вдалося подивитись Steam Player.",
       "noPlayerData": "Немає даних про гравця для цього сервера.",
       "teams": {
@@ -209,12 +224,39 @@
     "createDialogTitle": "Створення списку",
     "createDialogDescription": "Створення списку для організації збережених серверів.",
     "listNamePlaceholder": "Назва списку",
-    "playersTooltip": "Всього гравців в цьому списку",
+    "playersTooltip": "Всього гравців онлайн",
     "favoriteServers": "Популярні сервери",
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Немає списку. Створіть перший список, щоб розпочати роботу.",
     "noServers": "Немає серверів, що зберігаються в цьому списку."
+  },
+  "watchlist": {
+    "title": "Список відстеження гравців",
+    "summary_one": "{{online}} онлайн із {{count}} відстежуваного гравця",
+    "summary_other": "{{online}} онлайн із {{count}} відстежуваних гравців",
+    "onlineCount": "{{count}} онлайн",
+    "serviceUnavailableBadge": "Живий статус недоступний",
+    "emptyTitle": "Поки немає відстежуваних гравців",
+    "emptyDescription": "Стежте за гравцями з панелі сервера, щоб бачити, де вони грають.",
+    "emptyHint": "Відкрийте будь-який сервер і скористайтеся кнопкою відстеження поруч із гравцем із визначеним SteamID.",
+    "offline": "Не в мережі",
+    "updatedUnavailable": "Недоступно",
+    "statusOnline": "Онлайн",
+    "statusOffline": "Не в мережі",
+    "statusUnavailable": "Недоступно",
+    "toasts": {
+      "tracked": "{{player}} додано до списку відстеження.",
+      "untracked": "{{player}} видалено зі списку відстеження."
+    },
+    "columns": {
+      "player": "Гравці",
+      "status": "Статус",
+      "server": "Статус на сервери",
+      "map": "Карта",
+      "mode": "Режими",
+      "actions": "Акції"
+    }
   },
   "filters": {
     "title": "Фільтри",

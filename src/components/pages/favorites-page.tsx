@@ -3,7 +3,7 @@ import {
   createDefaultServerFilters,
   type ServerFiltersValue,
 } from "@/components/server/server-filters";
-import { Headset } from "@/components/icon";
+import { GameController } from "@/components/icon";
 import { useFavorites } from "@/hooks/use-favorites";
 import { ServerList } from "@/components/server/server-list";
 import { Badge } from "@/components/ui/badge";
@@ -23,7 +23,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { DiscordPresenceServerContext } from "@/lib/discord-presence";
+import type { ServerInteractionContext } from "@/hooks/use-server-interactions";
 import type { SteamServer } from "@/lib/steam";
 import { useTranslation } from "react-i18next";
 
@@ -35,14 +35,16 @@ export function FavoritesPage({
   isRefreshing = false,
   error = null,
   onRefresh,
-  onServerLaunched,
+  onOpenServer,
+  onJoinServer,
 }: {
   servers: SteamServer[];
   isLoading?: boolean;
   isRefreshing?: boolean;
   error?: string | null;
   onRefresh: () => void;
-  onServerLaunched?: (context: DiscordPresenceServerContext) => void;
+  onOpenServer: (context: ServerInteractionContext) => void;
+  onJoinServer: (context: ServerInteractionContext) => void;
 }) {
   const { t } = useTranslation();
   const { state, createList } = useFavorites();
@@ -173,7 +175,7 @@ export function FavoritesPage({
                       variant="outline"
                       className="flex h-6 min-w-6 items-center justify-center gap-1 rounded-md px-1.5 text-xs leading-none"
                     >
-                      <Headset className="size-3" />
+                      <GameController className="size-3" />
                       <span>{playerCountsByList[list.id] ?? 0}</span>
                     </Badge>
                   </TooltipTrigger>
@@ -225,7 +227,8 @@ export function FavoritesPage({
                 error={error}
                 actionMode="edit"
                 favoriteListId={selectedList.id}
-                onServerLaunched={onServerLaunched}
+                onOpenServer={onOpenServer}
+                onJoinServer={onJoinServer}
               />
             )}
           </div>

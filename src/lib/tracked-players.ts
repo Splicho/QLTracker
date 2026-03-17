@@ -1,0 +1,59 @@
+export const TRACKED_PLAYERS_STORAGE_KEY = "qlist-tracked-players";
+
+export type TrackedPlayer = {
+  steamId: string;
+  playerName: string;
+  addedAt: string;
+};
+
+function isTrackedPlayer(value: unknown): value is TrackedPlayer {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const candidate = value as Record<string, unknown>;
+  return (
+    typeof candidate.steamId === "string" &&
+    typeof candidate.playerName === "string" &&
+    typeof candidate.addedAt === "string"
+  );
+}
+
+export function parseTrackedPlayers(rawValue: string) {
+  try {
+    const parsed = JSON.parse(rawValue) as unknown;
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    const deduped = new Map<string, TrackedPlayer>();
+
+    for (const entry of parsed) {
+      if (!isTrackedPlayer(entry)) {
+        continue;
+      }
+
+      const steamId = entry.steamId.trim();
+      const playerName = entry.playerName.trim();
+      if (!steamId || !playerName) {
+        continue;
+      }
+
+      deduped.set(steamId, {
+        steamId,
+        playerName,
+        addedAt: entry.addedAt,
+      });
+    }
+
+    return Array.from(deduped.values()).sort((left, right) =>
+      left.addedAt.localeCompare(right.addedAt)
+    );
+  } catch {
+    return [];
+  }
+}
+
+export function serializeTrackedPlayers(players: TrackedPlayer[]) {
+  return JSON.stringify(players);
+}

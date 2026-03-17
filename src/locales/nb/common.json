@@ -2,8 +2,12 @@
   "navigation": {
     "serverList": "Serverliste",
     "favorites": "Favoritter",
+    "watchlist": "Overvåking",
     "notifications": "Varsler",
     "settings": "Innstillinger"
+  },
+  "common": {
+    "updated": "Oppdatert"
   },
   "header": {
     "unknown": "Ukjend",
@@ -37,7 +41,7 @@
     "retryInstall": "Prøv å installere igjen",
     "disconnect": "Koble fra",
     "noAccount": "Ingen Discord-konto koblet ennå.",
-    "installLink": "Installer & lenke diskord",
+    "installLink": "Koble til Discord",
     "dialog": {
       "editTitle": "Rediger diskordvarsel",
       "createTitle": "Diskordvarsel",
@@ -103,6 +107,7 @@
     },
     "drawer": {
       "play": "Spill",
+      "map": "Kart",
       "avgQeloTooltip": "Gjennomsnittlig QElo på denne serveren",
       "avgTrueskillTooltip": "Gjennomsnittlig TSkill på denne serveren",
       "topQeloTooltip": "Høyeste QElo-spiller på denne tjeneren",
@@ -113,6 +118,16 @@
       "qelo": "QElo",
       "trueskill": "TSkill",
       "time": "Tid",
+      "watch": "Følg",
+      "trackPlayer": "Følg spiller",
+      "untrackPlayer": "Fjern fra overvåkingslisten",
+      "historyTitle": "Historikk",
+      "historyWindow": "Siste 7 dager",
+      "historyLastSeen": "Sist sett",
+      "historyPeakPlayers": "Flest spillere",
+      "historyTimePopulated": "Tid med spillere",
+      "historyUnavailable": "Serverhistorikk er ikke tilgjengelig. Aktiver realtime-backenden og distribuer historikk-endepunktet for å laste dette kortet.",
+      "historyEmpty": "Det finnes ingen nyere historikk for denne serveren ennå.",
       "lookupFailed": "Dampspilleroppslag mislyktes.",
       "noPlayerData": "Ingen spillerdata for denne serveren.",
       "teams": {
@@ -209,12 +224,39 @@
     "createDialogTitle": "Opprett favorittliste",
     "createDialogDescription": "Opprett en liste for å organisere lagrede servere.",
     "listNamePlaceholder": "Listenavn",
-    "playersTooltip": "Totalt levende spillere på denne listen",
+    "playersTooltip": "Totalt antall live-spillere",
     "favoriteServers": "Favorittservere",
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Ingen lister ennå. Opprett din første liste for å komme i gang.",
     "noServers": "Ingen servere som er lagret i denne listen ennå."
+  },
+  "watchlist": {
+    "title": "Spillerovervåking",
+    "summary_one": "{{online}} pålogget av {{count}} overvåket spiller",
+    "summary_other": "{{online}} pålogget av {{count}} overvåkede spillere",
+    "onlineCount": "{{count}} online",
+    "serviceUnavailableBadge": "Live-status er utilgjengelig",
+    "emptyTitle": "Ingen overvåkede spillere ennå",
+    "emptyDescription": "Følg spillere fra serverpanelet for å se hvor de spiller.",
+    "emptyHint": "Åpne en hvilken som helst server og bruk følg-knappen ved siden av en spiller med løst SteamID.",
+    "offline": "Frakoblet",
+    "updatedUnavailable": "Utilgjengelig",
+    "statusOnline": "Pålogget",
+    "statusOffline": "Frakoblet",
+    "statusUnavailable": "Utilgjengelig",
+    "toasts": {
+      "tracked": "{{player}} ble lagt til i overvåkingslisten.",
+      "untracked": "{{player}} ble fjernet fra overvåkingslisten."
+    },
+    "columns": {
+      "player": "Spiller",
+      "status": "Status",
+      "server": "Server",
+      "map": "Kart",
+      "mode": "Mode",
+      "actions": "Handlinger"
+    }
   },
   "filters": {
     "title": "Filtre",

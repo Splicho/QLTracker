@@ -2,8 +2,12 @@
   "navigation": {
     "serverList": "Serverių sąrašas",
     "favorites": "Mėgiamos",
+    "watchlist": "Stebėjimas",
     "notifications": "Pranešimai",
     "settings": "Nustatymai"
+  },
+  "common": {
+    "updated": "Atnaujinta"
   },
   "header": {
     "unknown": "Nežinoma",
@@ -37,7 +41,7 @@
     "retryInstall": "Bandyti iš naujo įdiegti tikrinimą",
     "disconnect": "NAME OF TRANSLATORS",
     "noAccount": "Naršymo sąskaitos dar nėra susietos.",
-    "installLink": "Install & Link Dicord",
+    "installLink": "Susieti Discord",
     "dialog": {
       "editTitle": "@ info: whatsthis",
       "createTitle": "Pranešimas apie skirtumus",
@@ -103,6 +107,7 @@
     },
     "drawer": {
       "play": "Groti",
+      "map": "Žemėlapis",
       "avgQeloTooltip": "Name",
       "avgTrueskillTooltip": "Vidutinis TSmurt šiame serveryje",
       "topQeloTooltip": "Aukščiausias QElo grotuvas šiame serveryje",
@@ -113,6 +118,16 @@
       "qelo": "QElo",
       "trueskill": "Tslave",
       "time": "Laikas",
+      "watch": "Stebėti",
+      "trackPlayer": "Stebėti žaidėją",
+      "untrackPlayer": "Pašalinti iš stebimųjų sąrašo",
+      "historyTitle": "Istorija",
+      "historyWindow": "Paskutinės 7 dienos",
+      "historyLastSeen": "Paskutinį kartą matytas",
+      "historyPeakPlayers": "Didžiausias žaidėjų skaičius",
+      "historyTimePopulated": "Laikas su žaidėjais",
+      "historyUnavailable": "Serverio istorija nepasiekiama. Įjunk realtime posistemę ir įdiek istorijos endpointą, kad ši kortelė būtų įkelta.",
+      "historyEmpty": "Šiam serveriui dar nėra naujausios istorijos.",
       "lookupFailed": "Garo grotuvo peržiūra nepavyko.",
       "noPlayerData": "Nėra grotuvo duomenų šiam serveriui.",
       "teams": {
@@ -209,12 +224,39 @@
     "createDialogTitle": "Sukurti mėgiamų sąrašą",
     "createDialogDescription": "@ info: whatsthis.",
     "listNamePlaceholder": "Sąrašo pavadinimas",
-    "playersTooltip": "Viso gyvų žaidėjų sąraše",
+    "playersTooltip": "Iš viso gyvų žaidėjų",
     "favoriteServers": "Mėgstamiausi serveriai",
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Dar nėra sąrašų. Sukurti savo pirmąjį sąrašą pradėti.",
     "noServers": "Nr serveriai įrašyti šiame sąraše dar."
+  },
+  "watchlist": {
+    "title": "Žaidėjų stebėjimo sąrašas",
+    "summary_one": "{{online}} prisijungęs iš {{count}} stebimo žaidėjo",
+    "summary_other": "{{online}} prisijungę iš {{count}} stebimų žaidėjų",
+    "onlineCount": "{{count}} prisijungę",
+    "serviceUnavailableBadge": "Tiesioginė būsena nepasiekiama",
+    "emptyTitle": "Dar nėra stebimų žaidėjų",
+    "emptyDescription": "Stebėk žaidėjus serverio skydelyje, kad matytum, kur jie žaidžia.",
+    "emptyHint": "Atidaryk bet kurį serverį ir naudok stebėjimo mygtuką šalia žaidėjo, kurio SteamID jau nustatytas.",
+    "offline": "Atsijungęs",
+    "updatedUnavailable": "Nepasiekiama",
+    "statusOnline": "Prisijungęs",
+    "statusOffline": "Atsijungęs",
+    "statusUnavailable": "Nepasiekiama",
+    "toasts": {
+      "tracked": "{{player}} pridėtas į stebėjimo sąrašą.",
+      "untracked": "{{player}} pašalintas iš stebėjimo sąrašo."
+    },
+    "columns": {
+      "player": "Žaidėjas",
+      "status": "Būsena",
+      "server": "Serveris",
+      "map": "Žemėlapis",
+      "mode": "Ręžimas",
+      "actions": "Veiksmai"
+    }
   },
   "filters": {
     "title": "Filtrai",

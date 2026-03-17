@@ -2,8 +2,12 @@
   "navigation": {
     "serverList": "Списък със сървъри",
     "favorites": "Любими",
+    "watchlist": "Наблюдение",
     "notifications": "Уведомления",
     "settings": "Настройки"
+  },
+  "common": {
+    "updated": "Обновено"
   },
   "header": {
     "unknown": "Неизвестно",
@@ -37,7 +41,7 @@
     "retryInstall": "Проверка за инсталиране на данни",
     "disconnect": "Изключване",
     "noAccount": "Все още няма разногласие.",
-    "installLink": "Инсталиране на & разногласие на връзката",
+    "installLink": "Свържи Discord",
     "dialog": {
       "editTitle": "Редактиране на уведомление за несъгласие",
       "createTitle": "Нотификация за несъгласие",
@@ -103,6 +107,7 @@
     },
     "drawer": {
       "play": "Игра",
+      "map": "Карта",
       "avgQeloTooltip": "Средно QElo на този сървър",
       "avgTrueskillTooltip": "Среден TSkill на този сървър",
       "topQeloTooltip": "Най-високият QElo плейър на този сървър",
@@ -113,6 +118,16 @@
       "qelo": "QElo",
       "trueskill": "TSkill",
       "time": "Време",
+      "watch": "Следи",
+      "trackPlayer": "Следи играч",
+      "untrackPlayer": "Премахни от списъка за следене",
+      "historyTitle": "История",
+      "historyWindow": "Последните 7 дни",
+      "historyLastSeen": "Последно видян",
+      "historyPeakPlayers": "Пиков брой играчи",
+      "historyTimePopulated": "Време с играчи",
+      "historyUnavailable": "Историята на сървъра не е налична. Активирай realtime бекенда и пусни history endpoint-а, за да се зареди тази карта.",
+      "historyEmpty": "Все още няма скорошна история за този сървър.",
       "lookupFailed": "Прегледът на Steam плейъра се провали.",
       "noPlayerData": "Няма данни за този сървър.",
       "teams": {
@@ -209,12 +224,39 @@
     "createDialogTitle": "Създаване на любим списък",
     "createDialogDescription": "Създаване на списък за организиране на записаните сървъри.",
     "listNamePlaceholder": "Име на списъка",
-    "playersTooltip": "Общо играчи на живо в този списък",
+    "playersTooltip": "Общо играчи на живо",
     "favoriteServers": "Любими сървъри",
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Все още няма списъци. Създаване на първия си списък, за да започнете.",
     "noServers": "Все още няма записани сървъри в този списък."
+  },
+  "watchlist": {
+    "title": "Списък за следене на играчи",
+    "summary_one": "{{online}} онлайн от {{count}} следен играч",
+    "summary_other": "{{online}} онлайн от {{count}} следени играчи",
+    "onlineCount": "{{count}} онлайн",
+    "serviceUnavailableBadge": "Статусът на живо не е наличен",
+    "emptyTitle": "Все още няма следени играчи",
+    "emptyDescription": "Следи играчи от панела на сървъра, за да виждаш къде играят.",
+    "emptyHint": "Отвори който и да е сървър и използвай бутона за следене до играч с разпознат SteamID.",
+    "offline": "Офлайн",
+    "updatedUnavailable": "Недостъпно",
+    "statusOnline": "Онлайн",
+    "statusOffline": "Офлайн",
+    "statusUnavailable": "Недостъпно",
+    "toasts": {
+      "tracked": "{{player}} е добавен в списъка за следене.",
+      "untracked": "{{player}} е премахнат от списъка за следене."
+    },
+    "columns": {
+      "player": "Играч",
+      "status": "Статус",
+      "server": "Сървър",
+      "map": "Карта",
+      "mode": "Режим",
+      "actions": "Действия"
+    }
   },
   "filters": {
     "title": "Филтри",

@@ -10,11 +10,13 @@ import { ServerList } from "@/components/server/server-list";
 import { FavoritesPage } from "@/components/pages/favorites-page";
 import { NotificationsPage } from "@/components/pages/notifications-page";
 import { SettingsPage } from "@/components/pages/settings-page";
+import { WatchlistPage } from "@/components/pages/watchlist-page";
 import { useAppSettings } from "@/hooks/use-app-settings";
 import { useDiscordPresence } from "@/hooks/use-discord-presence";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useRealtimePlayerPresence } from "@/hooks/use-realtime-player-presence";
 import { useRealtimeSnapshots } from "@/hooks/use-realtime-snapshots";
+import { useServerInteractions } from "@/hooks/use-server-interactions";
 import type { DiscordPresenceServerContext } from "@/lib/discord-presence";
 import type { PageId } from "@/lib/navigation";
 import { isRealtimeEnabled } from "@/lib/realtime";
@@ -29,28 +31,14 @@ import {
   mergeSteamServerSnapshot,
   type SteamServer,
 } from "@/lib/steam";
+import {
+  createFallbackServerFromPresence,
+  getGameModeLabel,
+} from "@/lib/server-utils";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useTranslation } from "react-i18next";
 
 const steamApiKey = import.meta.env.VITE_STEAM_API_KEY?.trim() ?? "";
-const steamAppId =
-  Number(import.meta.env.VITE_STEAM_APP_ID?.trim() ?? "282440") || 282440;
-
-const modeLabelKeys: Record<string, string> = {
-  ca: "filters.modes.ca",
-  duel: "filters.modes.duel",
-  ffa: "filters.modes.ffa",
-  tdm: "filters.modes.tdm",
-  ctf: "filters.modes.ctf",
-  ad: "filters.modes.ad",
-  dom: "filters.modes.dom",
-  ft: "filters.modes.ft",
-  har: "filters.modes.har",
-  race: "filters.modes.race",
-  rr: "filters.modes.rr",
-  td: "filters.modes.tdm",
-  "1f": "filters.modes.ctf",
-};
 
 function getQueryErrorMessage(error: unknown) {
   if (typeof error === "string") {
@@ -67,47 +55,6 @@ function getQueryErrorMessage(error: unknown) {
   }
 
   return null;
-}
-
-function getDiscordModeLabel(
-  gameMode: string | null | undefined,
-  t: (key: string) => string
-) {
-  if (!gameMode) {
-    return null;
-  }
-
-  const normalizedMode = gameMode.trim().toLowerCase();
-  const key = modeLabelKeys[normalizedMode];
-
-  return key ? t(key) : normalizedMode.toUpperCase();
-}
-
-function createPresenceFallbackServer(
-  addr: string,
-  serverName: string,
-  map: string,
-  players: number,
-  maxPlayers: number
-): SteamServer {
-  return {
-    addr,
-    steamid: null,
-    name: serverName,
-    map,
-    game_directory: "baseq3",
-    game_description: "Quake Live",
-    app_id: steamAppId,
-    players,
-    max_players: maxPlayers,
-    bots: 0,
-    ping_ms: null,
-    region: null,
-    version: null,
-    keywords: null,
-    connect_url: `steam://connect/${addr}`,
-    players_info: [],
-  };
 }
 
 export function App() {
@@ -163,6 +110,16 @@ export function App() {
     [serversQuery.data, snapshotsByAddr]
   );
   const serversErrorMessage = getQueryErrorMessage(serversQuery.error);
+  const handleServerLaunched = (context: DiscordPresenceServerContext) => {
+    setActivePresenceSession({
+      addr: context.server.addr,
+      modeLabel: context.modeLabel,
+      fallbackServer: context.server,
+    });
+  };
+  const serverInteractions = useServerInteractions({
+    onServerLaunched: handleServerLaunched,
+  });
   const launchedPresenceServer =
     useMemo<DiscordPresenceServerContext | null>(() => {
       if (!activePresenceSession) {
@@ -188,18 +145,11 @@ export function App() {
       const liveServer =
         mergedServers.find(
           (server) => server.addr === trackedPlayerPresence.addr
-        ) ??
-        createPresenceFallbackServer(
-          trackedPlayerPresence.addr,
-          trackedPlayerPresence.serverName,
-          trackedPlayerPresence.map,
-          trackedPlayerPresence.players,
-          trackedPlayerPresence.maxPlayers
-        );
+        ) ?? createFallbackServerFromPresence(trackedPlayerPresence);
 
       return {
         server: liveServer,
-        modeLabel: getDiscordModeLabel(trackedPlayerPresence.gameMode, t),
+        modeLabel: getGameModeLabel(trackedPlayerPresence.gameMode, t),
       };
     }, [isTrackedQuakeLiveRunning, mergedServers, t, trackedPlayerPresence]);
   const activePresenceServer =
@@ -374,13 +324,8 @@ export function App() {
                   ? "Set VITE_STEAM_API_KEY to load servers."
                   : serversErrorMessage
               }
-              onServerLaunched={(context) => {
-                setActivePresenceSession({
-                  addr: context.server.addr,
-                  modeLabel: context.modeLabel,
-                  fallbackServer: context.server,
-                });
-              }}
+              onOpenServer={serverInteractions.openServerDetails}
+              onJoinServer={serverInteractions.requestJoin}
             />
           </>
         ) : page === "favorites" ? (
@@ -398,13 +343,14 @@ export function App() {
             onRefresh={() => {
               void serversQuery.refetch();
             }}
-            onServerLaunched={(context) => {
-              setActivePresenceSession({
-                addr: context.server.addr,
-                modeLabel: context.modeLabel,
-                fallbackServer: context.server,
-              });
-            }}
+            onOpenServer={serverInteractions.openServerDetails}
+            onJoinServer={serverInteractions.requestJoin}
+          />
+        ) : page === "watchlist" ? (
+          <WatchlistPage
+            servers={mergedServers}
+            onOpenServer={serverInteractions.openServerDetails}
+            onJoinServer={serverInteractions.requestJoin}
           />
         ) : page === "notifications" ? (
           <NotificationsPage />
@@ -412,6 +358,7 @@ export function App() {
           <SettingsPage />
         )}
       </SidebarInset>
+      {serverInteractions.overlays}
     </SidebarProvider>
   );
 }

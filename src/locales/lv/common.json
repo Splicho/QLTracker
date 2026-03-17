@@ -2,8 +2,12 @@
   "navigation": {
     "serverList": "Serveru saraksts",
     "favorites": "Iecienītās",
+    "watchlist": "Novērošana",
     "notifications": "Paziņojumi",
     "settings": "Iestatījumi"
+  },
+  "common": {
+    "updated": "Atjaunināts"
   },
   "header": {
     "unknown": "Nezināms",
@@ -37,7 +41,7 @@
     "retryInstall": "Mēģināt vēlreiz instalēt pārbaudi",
     "disconnect": "Atslēgties",
     "noAccount": "Vēl nav nesaskaņām piesaistīta konta.",
-    "installLink": "Instalēt & saites neatbilstības",
+    "installLink": "Saistīt Discord",
     "dialog": {
       "editTitle": "Rediģēt nesaskaņu paziņojumu",
       "createTitle": "Neatbilstošs paziņojums",
@@ -103,6 +107,7 @@
     },
     "drawer": {
       "play": "Atskaņot",
+      "map": "Karte",
       "avgQeloTooltip": "Vidējais QElo šajā serverī",
       "avgTrueskillTooltip": "Vidēji TSkill uz šī servera",
       "topQeloTooltip": "Augstākais QElo atskaņotājs šajā serverī",
@@ -113,6 +118,16 @@
       "qelo": "QElo",
       "trueskill": "TSkill",
       "time": "Laiks",
+      "watch": "Sekot",
+      "trackPlayer": "Sekot spēlētājam",
+      "untrackPlayer": "Noņemt no novērošanas saraksta",
+      "historyTitle": "Vēsture",
+      "historyWindow": "Pēdējās 7 dienas",
+      "historyLastSeen": "Pēdējo reizi redzēts",
+      "historyPeakPlayers": "Lielākais spēlētāju skaits",
+      "historyTimePopulated": "Laiks ar spēlētājiem",
+      "historyUnavailable": "Servera vēsture nav pieejama. Lai ielādētu šo kartīti, iespējo reāllaika aizmugursistēmu un izvieto vēstures galapunktu.",
+      "historyEmpty": "Šim serverim vēl nav pieejama nesena vēsture.",
       "lookupFailed": "Neveiksmīga Steam atskaņotāja meklēšana.",
       "noPlayerData": "Šim serverim nav spēlētāju datu.",
       "teams": {
@@ -209,12 +224,39 @@
     "createDialogTitle": "Izveidot iecienīto sarakstu",
     "createDialogDescription": "Izveidot sarakstu, lai organizētu jūsu saglabātos serverus.",
     "listNamePlaceholder": "Saraksta nosaukums",
-    "playersTooltip": "Kopā dzīvie spēlētāji šajā sarakstā",
+    "playersTooltip": "Kopā dzīvie spēlētāji",
     "favoriteServers": "Iecienītie serveri",
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Vēl nav sarakstu. Izveidot savu pirmo sarakstu, lai sāktu.",
     "noServers": "Šajā sarakstā vēl nav saglabāts neviens serveris."
+  },
+  "watchlist": {
+    "title": "Spēlētāju novērošanas saraksts",
+    "summary_one": "{{online}} tiešsaistē no {{count}} novērotā spēlētāja",
+    "summary_other": "{{online}} tiešsaistē no {{count}} novērotajiem spēlētājiem",
+    "onlineCount": "{{count}} tiešsaistē",
+    "serviceUnavailableBadge": "Tiešsaistes statuss nav pieejams",
+    "emptyTitle": "Vēl nav novēroto spēlētāju",
+    "emptyDescription": "Seko spēlētājiem no servera paneļa, lai redzētu, kur viņi spēlē.",
+    "emptyHint": "Atver jebkuru serveri un izmanto sekošanas pogu blakus spēlētājam ar atrisinātu SteamID.",
+    "offline": "Bezsaistē",
+    "updatedUnavailable": "Nav pieejams",
+    "statusOnline": "Tiešsaistē",
+    "statusOffline": "Bezsaistē",
+    "statusUnavailable": "Nav pieejams",
+    "toasts": {
+      "tracked": "{{player}} pievienots novērošanas sarakstam.",
+      "untracked": "{{player}} noņemts no novērošanas saraksta."
+    },
+    "columns": {
+      "player": "Spēlētājs",
+      "status": "Statuss",
+      "server": "Serveris",
+      "map": "Karte",
+      "mode": "Režīms",
+      "actions": "Darbības"
+    }
   },
   "filters": {
     "title": "Filtri",

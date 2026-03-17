@@ -2,8 +2,12 @@
   "navigation": {
     "serverList": "伺服器清單",
     "favorites": "有喜好者",
+    "watchlist": "關注清單",
     "notifications": "通知",
     "settings": "設定值"
+  },
+  "common": {
+    "updated": "更新"
   },
   "header": {
     "unknown": "未知",
@@ -37,7 +41,7 @@
     "retryInstall": "重試安裝檢查",
     "disconnect": "斷接",
     "noAccount": "Discord 帳號尚未連接 .",
-    "installLink": "安裝通訊錄( L)",
+    "installLink": "連結 Discord",
     "dialog": {
       "editTitle": "編輯分解通知",
       "createTitle": "分解通知",
@@ -103,6 +107,7 @@
     },
     "drawer": {
       "play": "播放",
+      "map": "地圖",
       "avgQeloTooltip": "此伺服器上的平均 QElo",
       "avgTrueskillTooltip": "此伺服器上的平均 TSkill",
       "topQeloTooltip": "此伺服器上最高的 QElo 播放器",
@@ -113,6 +118,16 @@
       "qelo": "QEL",
       "trueskill": "TSkill (通訊錄)",
       "time": "時間",
+      "watch": "關注",
+      "trackPlayer": "關注玩家",
+      "untrackPlayer": "從關注清單移除",
+      "historyTitle": "歷史",
+      "historyWindow": "最近 7 天",
+      "historyLastSeen": "最後出現",
+      "historyPeakPlayers": "玩家峰值",
+      "historyTimePopulated": "有玩家的時間",
+      "historyUnavailable": "伺服器歷史記錄無法使用。請啟用即時後端並部署歷史記錄端點來載入這張卡片。",
+      "historyEmpty": "這個伺服器目前還沒有最近的歷史記錄。",
       "lookupFailed": "Steam 播放器找取失敗 .",
       "noPlayerData": "此伺服器沒有玩家資料 .",
       "teams": {
@@ -209,12 +224,39 @@
     "createDialogTitle": "建立最愛清單",
     "createDialogDescription": "建立列表以整理您已儲存的伺服器 .",
     "listNamePlaceholder": "列表名",
-    "playersTooltip": "此清單中總有活的玩家",
+    "playersTooltip": "即時玩家總數",
     "favoriteServers": "最愛的伺服器",
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "還沒有清單。建立您的第一個清單以開始使用。",
     "noServers": "此清單中尚未儲存伺服器 ."
+  },
+  "watchlist": {
+    "title": "玩家關注清單",
+    "summary_one": "已關注 {{count}} 名玩家，其中 {{online}} 名在線",
+    "summary_other": "已關注 {{count}} 名玩家，其中 {{online}} 名在線",
+    "onlineCount": "{{count}} 在線",
+    "serviceUnavailableBadge": "即時狀態無法使用",
+    "emptyTitle": "還沒有關注的玩家",
+    "emptyDescription": "在伺服器詳細面板中關注玩家，方便查看他們目前在哪裡遊玩。",
+    "emptyHint": "打開任意伺服器，然後使用已解析 SteamID 的玩家旁邊的關注按鈕。",
+    "offline": "離線",
+    "updatedUnavailable": "無法使用",
+    "statusOnline": "在線",
+    "statusOffline": "離線",
+    "statusUnavailable": "無法使用",
+    "toasts": {
+      "tracked": "{{player}} 已加入關注清單。",
+      "untracked": "{{player}} 已從關注清單移除。"
+    },
+    "columns": {
+      "player": "玩家",
+      "status": "狀態",
+      "server": "伺服器",
+      "map": "地圖",
+      "mode": "模式",
+      "actions": "動作"
+    }
   },
   "filters": {
     "title": "分頁",

@@ -2,8 +2,12 @@
   "navigation": {
     "serverList": "Palvelinluettelo",
     "favorites": "Suosikit",
+    "watchlist": "Seuranta",
     "notifications": "Ilmoitukset",
     "settings": "Asetukset"
+  },
+  "common": {
+    "updated": "Päivitetty"
   },
   "header": {
     "unknown": "Tuntematon",
@@ -37,7 +41,7 @@
     "retryInstall": "Yritä asentaa uudelleen tarkistus",
     "disconnect": "Katkaise yhteys",
     "noAccount": "-Ei vielä.",
-    "installLink": "Asenna & linkki discord",
+    "installLink": "Yhdistä Discord",
     "dialog": {
       "editTitle": "Muokkaa discord- ilmoitusta",
       "createTitle": "Epätasapainoilmoitus",
@@ -103,6 +107,7 @@
     },
     "drawer": {
       "play": "Soita",
+      "map": "Kartta",
       "avgQeloTooltip": "Keskimääräinen QElo tällä palvelimella",
       "avgTrueskillTooltip": "Keskimääräinen TSkill tällä palvelimella",
       "topQeloTooltip": "Korkein QElo-soitin tällä palvelimella",
@@ -113,6 +118,16 @@
       "qelo": "QElo",
       "trueskill": "TSkill",
       "time": "Aika",
+      "watch": "Seuraa",
+      "trackPlayer": "Seuraa pelaajaa",
+      "untrackPlayer": "Poista seurannasta",
+      "historyTitle": "Historia",
+      "historyWindow": "Viimeiset 7 päivää",
+      "historyLastSeen": "Viimeksi nähty",
+      "historyPeakPlayers": "Eniten pelaajia",
+      "historyTimePopulated": "Aika pelaajien kanssa",
+      "historyUnavailable": "Palvelimen historia ei ole saatavilla. Ota reaaliaikainen taustapalvelu käyttöön ja julkaise historia-endpointti, jotta tämä kortti latautuu.",
+      "historyEmpty": "Tälle palvelimelle ei ole vielä saatavilla tuoretta historiaa.",
       "lookupFailed": "Höyrysoittimen haku epäonnistui.",
       "noPlayerData": "Ei pelaajatietoja tälle palvelimelle.",
       "teams": {
@@ -215,6 +230,33 @@
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Ei vielä listoja. Luo ensimmäinen lista aloittaaksesi.",
     "noServers": "Tässä listassa ei ole vielä tallennettuja palvelimia."
+  },
+  "watchlist": {
+    "title": "Pelaajien seurantalista",
+    "summary_one": "{{online}} verkossa {{count}} seurattavasta pelaajasta",
+    "summary_other": "{{online}} verkossa {{count}} seurattavasta pelaajasta",
+    "onlineCount": "{{count}} online",
+    "serviceUnavailableBadge": "Live-tila ei ole saatavilla",
+    "emptyTitle": "Ei seurattavia pelaajia vielä",
+    "emptyDescription": "Seuraa pelaajia palvelinpaneelista, jotta näet missä he pelaavat.",
+    "emptyHint": "Avaa mikä tahansa palvelin ja käytä seuraa-painiketta pelaajan vieressä, jolla on ratkaistu SteamID.",
+    "offline": "Poissa verkosta",
+    "updatedUnavailable": "Ei saatavilla",
+    "statusOnline": "Verkossa",
+    "statusOffline": "Poissa verkosta",
+    "statusUnavailable": "Ei saatavilla",
+    "toasts": {
+      "tracked": "{{player}} lisättiin seurantalistalle.",
+      "untracked": "{{player}} poistettiin seurantalistalta."
+    },
+    "columns": {
+      "player": "Pelaaja",
+      "status": "Tila",
+      "server": "Palvelin",
+      "map": "Kartta",
+      "mode": "Tila",
+      "actions": "Toimet"
+    }
   },
   "filters": {
     "title": "Suodattimet",
