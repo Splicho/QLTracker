@@ -62,3 +62,17 @@ export type PlayerPresence = {
   countryName: string | null;
   updatedAt: string;
 };
+
+export type ServerHistoryPoint = {
+  timestamp: string;
+  players: number;
+  maxPlayers: number;
+  map: string | null;
+  gameMode: string | null;
+};
+
+export type ServerHistorySummary = {
+  lastSeenAt: string | null;
+  peakPlayers: number;
+  populatedSampleRatio: number;
+};
