@@ -1,3 +1,4 @@
+import { invoke } from "@tauri-apps/api/core";
 import { io, type Socket } from "socket.io-client";
 import { appendErrorLog } from "@/lib/error-log";
 
@@ -72,21 +73,28 @@ export function getRealtimeSocket() {
   return socket;
 }
 
+async function realtimeGet<T>(url: string) {
+  const payload = await invoke<string>("realtime_http_get", { url });
+  return JSON.parse(payload) as T;
+}
+
+async function realtimePost<T>(url: string, body: unknown) {
+  const payload = await invoke<string>("realtime_http_post", {
+    url,
+    body: JSON.stringify(body),
+  });
+  return JSON.parse(payload) as T;
+}
+
 export async function fetchRealtimePlayerPresence(steamId: string) {
   if (!isRealtimeEnabled()) {
     return null;
   }
 
   try {
-    const response = await fetch(
+    const payload = await realtimeGet<RealtimePresenceResponse>(
       `${realtimeUrl}/api/presence/${encodeURIComponent(steamId)}`
     );
-
-    if (!response.ok) {
-      throw new Error(`Realtime presence failed with HTTP ${response.status}.`);
-    }
-
-    const payload = (await response.json()) as RealtimePresenceResponse;
     return payload.presence ?? null;
   } catch (error) {
     await appendErrorLog("realtime.presence", {
@@ -105,23 +113,12 @@ export async function fetchRealtimePlayerPresenceLookup(steamIds: string[]) {
   }
 
   try {
-    const response = await fetch(`${realtimeUrl}/api/presence/lookup`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    const payload = await realtimePost<RealtimePresenceLookupResponse>(
+      `${realtimeUrl}/api/presence/lookup`,
+      {
         steamIds,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Realtime presence lookup failed with HTTP ${response.status}.`
-      );
-    }
-
-    const payload = (await response.json()) as RealtimePresenceLookupResponse;
+      }
+    );
     return payload.presences ?? {};
   } catch (error) {
     await appendErrorLog("realtime.presenceLookup", {
@@ -157,15 +154,9 @@ export async function fetchRealtimeServerHistory(
   });
 
   try {
-    const response = await fetch(
+    const payload = await realtimeGet<RealtimeServerHistoryResponse>(
       `${realtimeUrl}/api/servers/${encodeURIComponent(addr)}/history?${searchParams.toString()}`
     );
-
-    if (!response.ok) {
-      throw new Error(`Realtime history failed with HTTP ${response.status}.`);
-    }
-
-    const payload = (await response.json()) as RealtimeServerHistoryResponse;
     return {
       summary: payload.summary,
       timeline: payload.timeline ?? [],

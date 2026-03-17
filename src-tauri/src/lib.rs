@@ -1690,6 +1690,36 @@ fn focus_window(window: &tauri::WebviewWindow) {
     let _ = window.set_focus();
 }
 
+fn build_http_client(timeout: Duration) -> Result<reqwest::Client, String> {
+    reqwest::Client::builder()
+        .timeout(timeout)
+        .user_agent("QLTracker/0.1.0")
+        .build()
+        .map_err(|error| error.to_string())
+}
+
+async fn send_json_request(
+    request: reqwest::RequestBuilder,
+    source: &str,
+) -> Result<String, String> {
+    let response = request
+        .send()
+        .await
+        .map_err(|error| format!("{source} request failed: {error}"))?;
+    let status = response.status();
+    let body = response
+        .text()
+        .await
+        .map_err(|error| format!("{source} response read failed: {error}"))?;
+
+    if !status.is_success() {
+        let preview: String = body.chars().take(400).collect();
+        return Err(format!("{source} returned HTTP {status}: {preview}"));
+    }
+
+    Ok(body)
+}
+
 fn resolve_error_log_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
     let log_dir = app
         .path()
@@ -1723,6 +1753,25 @@ fn append_error_log(app: tauri::AppHandle, source: String, message: String) -> R
     Ok(())
 }
 
+#[tauri::command]
+async fn realtime_http_get(url: String) -> Result<String, String> {
+    let client = build_http_client(Duration::from_secs(12))?;
+    send_json_request(client.get(url.trim()), "Realtime GET").await
+}
+
+#[tauri::command]
+async fn realtime_http_post(url: String, body: String) -> Result<String, String> {
+    let client = build_http_client(Duration::from_secs(12))?;
+    send_json_request(
+        client
+            .post(url.trim())
+            .header("Content-Type", "application/json")
+            .body(body),
+        "Realtime POST",
+    )
+    .await
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -1752,6 +1801,8 @@ pub fn run() {
             launcher_restart_app,
             is_quake_live_running,
             initialize_discord_presence,
+            realtime_http_get,
+            realtime_http_post,
             fetch_server_players,
             fetch_server_player_ratings,
             fetch_server_rating_summaries,

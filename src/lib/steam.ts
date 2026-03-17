@@ -131,33 +131,18 @@ function isRealtimeEnabled() {
 }
 
 async function fetchRealtimeLookup(addrs: string[]) {
-  const response = await fetch(`${realtimeUrl}/api/servers/lookup`, {
+  const payload = await invoke<string>("realtime_http_post", {
+    url: `${realtimeUrl}/api/servers/lookup`,
     body: JSON.stringify({ addrs }),
-    headers: {
-      "Content-Type": "application/json",
-    },
-    method: "POST",
   });
-
-  if (!response.ok) {
-    throw new Error(`Realtime lookup failed with HTTP ${response.status}.`);
-  }
-
-  const payload = (await response.json()) as RealtimeLookupResponse;
-  return payload.snapshots ?? [];
+  return (JSON.parse(payload) as RealtimeLookupResponse).snapshots ?? [];
 }
 
 async function fetchRealtimeSnapshot(addr: string) {
-  const response = await fetch(
-    `${realtimeUrl}/api/servers/${encodeURIComponent(addr)}`
-  );
-
-  if (!response.ok) {
-    throw new Error(`Realtime snapshot failed with HTTP ${response.status}.`);
-  }
-
-  const payload = (await response.json()) as RealtimeSnapshotResponse;
-  return payload.snapshot;
+  const payload = await invoke<string>("realtime_http_get", {
+    url: `${realtimeUrl}/api/servers/${encodeURIComponent(addr)}`,
+  });
+  return (JSON.parse(payload) as RealtimeSnapshotResponse).snapshot;
 }
 
 export async function fetchSteamServers(apiKey: string) {
