@@ -229,7 +229,14 @@
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Még nincs lista. Az első lista létrehozása a kezdéshez.",
-    "noServers": "Ezen a listán még nem mentettek meg szervereket."
+    "noServers": "Ezen a listán még nem mentettek meg szervereket.",
+    "deleteList": "Lista törlése",
+    "deleteDialogTitle": "Kedvenclista törlése",
+    "deleteDialogDescription": "Törlöd ezt: \"{{list}}\"? Azok a szerverek, amelyek csak ebben a listában vannak elmentve, el lesznek távolítva a Kedvencek közül.",
+    "deleteDialogCancel": "Mégse",
+    "toasts": {
+      "listDeleted": "A(z) \"{{list}}\" törölve lett."
+    }
   },
   "watchlist": {
     "title": "Játékos figyelőlista",
@@ -247,7 +254,11 @@
     "statusUnavailable": "Nem érhető el",
     "toasts": {
       "tracked": "{{player}} hozzáadva a figyelőlistához.",
-      "untracked": "{{player}} eltávolítva a figyelőlistáról."
+      "untracked": "{{player}} eltávolítva a figyelőlistáról.",
+      "noteSaved": "{{player}} megjegyzése mentve.",
+      "noteCleared": "{{player}} megjegyzése eltávolítva.",
+      "steamIdCopied": "SteamID másolva.",
+      "steamIdCopyError": "A SteamID másolása nem sikerült."
     },
     "columns": {
       "player": "Játékos",
@@ -256,6 +267,20 @@
       "map": "Pálya",
       "mode": "Mód",
       "actions": "Intézkedések"
+    },
+    "noteDialog": {
+      "clear": "Megjegyzés törlése",
+      "description": "Adj hozzá helyi megjegyzést ehhez a játékoshoz: {{player}}.",
+      "hint": "A megjegyzések csak ezen az eszközön vannak tárolva.",
+      "label": "Megjegyzés",
+      "placeholder": "Adj hozzá megjegyzést ehhez a játékoshoz...",
+      "save": "Megjegyzés mentése",
+      "title": "Játékos megjegyzés"
+    },
+    "actions": {
+      "copySteamId": "SteamID másolása",
+      "editNote": "Megjegyzés szerkesztése",
+      "viewServer": "Szerver megtekintése"
     }
   },
   "filters": {

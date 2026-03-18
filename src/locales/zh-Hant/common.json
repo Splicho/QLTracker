@@ -229,7 +229,14 @@
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "還沒有清單。建立您的第一個清單以開始使用。",
-    "noServers": "此清單中尚未儲存伺服器 ."
+    "noServers": "此清單中尚未儲存伺服器 .",
+    "deleteList": "刪除清單",
+    "deleteDialogTitle": "刪除最愛清單",
+    "deleteDialogDescription": "刪除「{{list}}」？只儲存在此清單中的伺服器也會從最愛中移除。",
+    "deleteDialogCancel": "取消",
+    "toasts": {
+      "listDeleted": "已刪除「{{list}}」。"
+    }
   },
   "watchlist": {
     "title": "玩家關注清單",
@@ -247,7 +254,11 @@
     "statusUnavailable": "無法使用",
     "toasts": {
       "tracked": "{{player}} 已加入關注清單。",
-      "untracked": "{{player}} 已從關注清單移除。"
+      "untracked": "{{player}} 已從關注清單移除。",
+      "noteSaved": "已儲存 {{player}} 的備註。",
+      "noteCleared": "已移除 {{player}} 的備註。",
+      "steamIdCopied": "SteamID 已複製。",
+      "steamIdCopyError": "無法複製 SteamID。"
     },
     "columns": {
       "player": "玩家",
@@ -256,6 +267,20 @@
       "map": "地圖",
       "mode": "模式",
       "actions": "動作"
+    },
+    "noteDialog": {
+      "clear": "清除備註",
+      "description": "為 {{player}} 新增本機備註。",
+      "hint": "備註只會儲存在這台裝置上。",
+      "label": "備註",
+      "placeholder": "為這位玩家新增備註...",
+      "save": "儲存備註",
+      "title": "玩家備註"
+    },
+    "actions": {
+      "copySteamId": "複製 SteamID",
+      "editNote": "編輯備註",
+      "viewServer": "檢視伺服器"
     }
   },
   "filters": {

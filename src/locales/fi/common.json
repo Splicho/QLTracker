@@ -229,7 +229,14 @@
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Ei vielä listoja. Luo ensimmäinen lista aloittaaksesi.",
-    "noServers": "Tässä listassa ei ole vielä tallennettuja palvelimia."
+    "noServers": "Tässä listassa ei ole vielä tallennettuja palvelimia.",
+    "deleteList": "Poista lista",
+    "deleteDialogTitle": "Poista suosikkilista",
+    "deleteDialogDescription": "Poistetaanko \"{{list}}\"? Vain tähän listaan tallennetut palvelimet poistetaan Suosikeista.",
+    "deleteDialogCancel": "Peruuta",
+    "toasts": {
+      "listDeleted": "\"{{list}}\" poistettiin."
+    }
   },
   "watchlist": {
     "title": "Pelaajien seurantalista",
@@ -247,7 +254,11 @@
     "statusUnavailable": "Ei saatavilla",
     "toasts": {
       "tracked": "{{player}} lisättiin seurantalistalle.",
-      "untracked": "{{player}} poistettiin seurantalistalta."
+      "untracked": "{{player}} poistettiin seurantalistalta.",
+      "noteSaved": "Muistiinpano pelaajalle {{player}} tallennettiin.",
+      "noteCleared": "Muistiinpano pelaajalle {{player}} poistettiin.",
+      "steamIdCopied": "SteamID kopioitu.",
+      "steamIdCopyError": "SteamID:n kopiointi epäonnistui."
     },
     "columns": {
       "player": "Pelaaja",
@@ -256,6 +267,20 @@
       "map": "Kartta",
       "mode": "Tila",
       "actions": "Toimet"
+    },
+    "noteDialog": {
+      "clear": "Poista muistiinpano",
+      "description": "Lisää paikallinen muistiinpano pelaajalle {{player}}.",
+      "hint": "Muistiinpanot tallennetaan vain tähän laitteeseen.",
+      "label": "Muistiinpano",
+      "placeholder": "Lisää muistiinpano tästä pelaajasta...",
+      "save": "Tallenna muistiinpano",
+      "title": "Pelaajamuistiinpano"
+    },
+    "actions": {
+      "copySteamId": "Kopioi SteamID",
+      "editNote": "Muokkaa muistiinpanoa",
+      "viewServer": "Näytä palvelin"
     }
   },
   "filters": {

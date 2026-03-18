@@ -229,7 +229,14 @@
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Dar nėra sąrašų. Sukurti savo pirmąjį sąrašą pradėti.",
-    "noServers": "Nr serveriai įrašyti šiame sąraše dar."
+    "noServers": "Nr serveriai įrašyti šiame sąraše dar.",
+    "deleteList": "Ištrinti sąrašą",
+    "deleteDialogTitle": "Ištrinti mėgstamų sąrašą",
+    "deleteDialogDescription": "Ištrinti \"{{list}}\"? Serveriai, išsaugoti tik šiame sąraše, bus pašalinti iš mėgstamų.",
+    "deleteDialogCancel": "Atšaukti",
+    "toasts": {
+      "listDeleted": "\"{{list}}\" ištrintas."
+    }
   },
   "watchlist": {
     "title": "Žaidėjų stebėjimo sąrašas",
@@ -247,7 +254,11 @@
     "statusUnavailable": "Nepasiekiama",
     "toasts": {
       "tracked": "{{player}} pridėtas į stebėjimo sąrašą.",
-      "untracked": "{{player}} pašalintas iš stebėjimo sąrašo."
+      "untracked": "{{player}} pašalintas iš stebėjimo sąrašo.",
+      "noteSaved": "Pastaba žaidėjui {{player}} išsaugota.",
+      "noteCleared": "Pastaba žaidėjui {{player}} pašalinta.",
+      "steamIdCopied": "SteamID nukopijuotas.",
+      "steamIdCopyError": "Nepavyko nukopijuoti SteamID."
     },
     "columns": {
       "player": "Žaidėjas",
@@ -256,6 +267,20 @@
       "map": "Žemėlapis",
       "mode": "Ręžimas",
       "actions": "Veiksmai"
+    },
+    "noteDialog": {
+      "clear": "Išvalyti pastabą",
+      "description": "Pridėkite vietinę pastabą žaidėjui {{player}}.",
+      "hint": "Pastabos saugomos tik šiame įrenginyje.",
+      "label": "Pastaba",
+      "placeholder": "Pridėkite pastabą apie šį žaidėją...",
+      "save": "Išsaugoti pastabą",
+      "title": "Žaidėjo pastaba"
+    },
+    "actions": {
+      "copySteamId": "Kopijuoti SteamID",
+      "editNote": "Redaguoti pastabą",
+      "viewServer": "Peržiūrėti serverį"
     }
   },
   "filters": {

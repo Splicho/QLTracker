@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import {
   createDefaultServerFilters,
   type ServerFiltersValue,
@@ -8,6 +10,17 @@ import { useFavorites } from "@/hooks/use-favorites";
 import { ServerList } from "@/components/server/server-list";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Dialog,
   DialogContent,
@@ -47,10 +60,11 @@ export function FavoritesPage({
   onJoinServer: (context: ServerInteractionContext) => void;
 }) {
   const { t } = useTranslation();
-  const { state, createList } = useFavorites();
+  const { state, createList, deleteList } = useFavorites();
   const [selectedListId, setSelectedListId] = useState<string | null>(null);
   const [listName, setListName] = useState("");
   const [createListOpen, setCreateListOpen] = useState(false);
+  const [deleteListOpen, setDeleteListOpen] = useState(false);
 
   const selectedList =
     state.lists.find((list) => list.id === selectedListId) ??
@@ -72,6 +86,12 @@ export function FavoritesPage({
       setSelectedListId(state.lists[0].id);
     }
   }, [selectedListId, state.lists]);
+
+  useEffect(() => {
+    if (!selectedList) {
+      setDeleteListOpen(false);
+    }
+  }, [selectedList]);
 
   const favoriteAddresses = useMemo(
     () =>
@@ -202,6 +222,64 @@ export function FavoritesPage({
                   : t("favorites.noLists")}
               </p>
             </div>
+            {selectedList ? (
+              <AlertDialog open={deleteListOpen} onOpenChange={setDeleteListOpen}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="outline"
+                      onClick={() => {
+                        setDeleteListOpen(true);
+                      }}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="z-[200]">
+                    {t("favorites.deleteList")}
+                  </TooltipContent>
+                </Tooltip>
+                <AlertDialogContent size="sm">
+                  <AlertDialogHeader>
+                    <AlertDialogMedia className="bg-destructive/10 text-destructive">
+                      <Trash2 className="size-8" />
+                    </AlertDialogMedia>
+                    <AlertDialogTitle>
+                      {t("favorites.deleteDialogTitle")}
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t("favorites.deleteDialogDescription", {
+                        list: selectedList.name,
+                      })}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>
+                      {t("favorites.deleteDialogCancel")}
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      variant="destructive"
+                      onClick={() => {
+                        if (
+                          selectedList &&
+                          deleteList(selectedList.id)
+                        ) {
+                          toast.success(
+                            t("favorites.toasts.listDeleted", {
+                              list: selectedList.name,
+                            })
+                          );
+                        }
+                      }}
+                    >
+                      {t("favorites.deleteList")}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            ) : null}
           </div>
 
           <div className="min-h-[18rem] flex-1">

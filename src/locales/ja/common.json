@@ -229,7 +229,14 @@
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "リストはまだありません。 最初のリストを作成して開始します.",
-    "noServers": "このリストに保存されていないサーバーはまだ保存されていません."
+    "noServers": "このリストに保存されていないサーバーはまだ保存されていません.",
+    "deleteList": "リストを削除",
+    "deleteDialogTitle": "お気に入りリストを削除",
+    "deleteDialogDescription": "「{{list}}」を削除しますか？ このリストにしか保存されていないサーバーはお気に入りから削除されます。",
+    "deleteDialogCancel": "キャンセル",
+    "toasts": {
+      "listDeleted": "「{{list}}」を削除しました。"
+    }
   },
   "watchlist": {
     "title": "プレイヤーウォッチリスト",
@@ -247,7 +254,11 @@
     "statusUnavailable": "利用不可",
     "toasts": {
       "tracked": "{{player}} をウォッチリストに追加しました。",
-      "untracked": "{{player}} をウォッチリストから削除しました。"
+      "untracked": "{{player}} をウォッチリストから削除しました。",
+      "noteSaved": "{{player}} のメモを保存しました。",
+      "noteCleared": "{{player}} のメモを削除しました。",
+      "steamIdCopied": "SteamIDをコピーしました。",
+      "steamIdCopyError": "SteamIDをコピーできませんでした。"
     },
     "columns": {
       "player": "プレイヤー",
@@ -256,6 +267,20 @@
       "map": "マップ",
       "mode": "モード",
       "actions": "アクション"
+    },
+    "noteDialog": {
+      "clear": "メモを削除",
+      "description": "{{player}} にローカルメモを追加します。",
+      "hint": "メモはこのデバイスにのみ保存されます。",
+      "label": "メモ",
+      "placeholder": "このプレイヤーについてメモを追加...",
+      "save": "メモを保存",
+      "title": "プレイヤーノート"
+    },
+    "actions": {
+      "copySteamId": "SteamIDをコピー",
+      "editNote": "メモを編集",
+      "viewServer": "サーバーを表示"
     }
   },
   "filters": {

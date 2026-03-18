@@ -229,7 +229,14 @@
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Ingen lister endnu. Opret din første liste for at komme i gang.",
-    "noServers": "Ingen servere gemt i denne liste endnu."
+    "noServers": "Ingen servere gemt i denne liste endnu.",
+    "deleteList": "Slet liste",
+    "deleteDialogTitle": "Slet favoritliste",
+    "deleteDialogDescription": "Slet \"{{list}}\"? Servere, der kun er gemt i denne liste, fjernes fra Favoritter.",
+    "deleteDialogCancel": "Annuller",
+    "toasts": {
+      "listDeleted": "\"{{list}}\" blev slettet."
+    }
   },
   "watchlist": {
     "title": "Spillerovervågning",
@@ -247,7 +254,11 @@
     "statusUnavailable": "Utilgængelig",
     "toasts": {
       "tracked": "{{player}} blev tilføjet til overvågningen.",
-      "untracked": "{{player}} blev fjernet fra overvågningen."
+      "untracked": "{{player}} blev fjernet fra overvågningen.",
+      "noteSaved": "Noten for {{player}} blev gemt.",
+      "noteCleared": "Noten for {{player}} blev fjernet.",
+      "steamIdCopied": "SteamID kopieret.",
+      "steamIdCopyError": "SteamID kunne ikke kopieres."
     },
     "columns": {
       "player": "Spiller",
@@ -256,6 +267,20 @@
       "map": "Kort",
       "mode": "Tilstand",
       "actions": "Handlinger"
+    },
+    "noteDialog": {
+      "clear": "Ryd note",
+      "description": "Tilføj en lokal note for {{player}}.",
+      "hint": "Noter gemmes kun på denne enhed.",
+      "label": "Note",
+      "placeholder": "Tilføj en note om denne spiller...",
+      "save": "Gem note",
+      "title": "Spillernote"
+    },
+    "actions": {
+      "copySteamId": "Kopiér SteamID",
+      "editNote": "Rediger note",
+      "viewServer": "Vis server"
     }
   },
   "filters": {

@@ -229,7 +229,14 @@
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "还没有名单 创建您的第一个启动列表 .",
-    "noServers": "尚未在此列表中保存服务器 ."
+    "noServers": "尚未在此列表中保存服务器 .",
+    "deleteList": "删除列表",
+    "deleteDialogTitle": "删除收藏列表",
+    "deleteDialogDescription": "删除“{{list}}”？仅保存在该列表中的服务器也会从收藏中移除。",
+    "deleteDialogCancel": "取消",
+    "toasts": {
+      "listDeleted": "已删除“{{list}}”。"
+    }
   },
   "watchlist": {
     "title": "玩家关注列表",
@@ -247,7 +254,11 @@
     "statusUnavailable": "不可用",
     "toasts": {
       "tracked": "{{player}} 已加入关注列表。",
-      "untracked": "{{player}} 已从关注列表移除。"
+      "untracked": "{{player}} 已从关注列表移除。",
+      "noteSaved": "已保存 {{player}} 的备注。",
+      "noteCleared": "已删除 {{player}} 的备注。",
+      "steamIdCopied": "SteamID 已复制。",
+      "steamIdCopyError": "无法复制 SteamID。"
     },
     "columns": {
       "player": "玩家",
@@ -256,6 +267,20 @@
       "map": "地图",
       "mode": "模式",
       "actions": "行动"
+    },
+    "noteDialog": {
+      "clear": "清除备注",
+      "description": "为 {{player}} 添加本地备注。",
+      "hint": "备注只会保存在此设备上。",
+      "label": "备注",
+      "placeholder": "为这位玩家添加备注...",
+      "save": "保存备注",
+      "title": "玩家备注"
+    },
+    "actions": {
+      "copySteamId": "复制 SteamID",
+      "editNote": "编辑备注",
+      "viewServer": "查看服务器"
     }
   },
   "filters": {

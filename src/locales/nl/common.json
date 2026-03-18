@@ -229,7 +229,14 @@
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Nog geen lijsten. Maak je eerste lijst om aan de slag te gaan.",
-    "noServers": "Nog geen servers opgeslagen in deze lijst."
+    "noServers": "Nog geen servers opgeslagen in deze lijst.",
+    "deleteList": "Lijst verwijderen",
+    "deleteDialogTitle": "Favorietenlijst verwijderen",
+    "deleteDialogDescription": "\"{{list}}\" verwijderen? Servers die alleen in deze lijst zijn opgeslagen, worden uit Favorieten verwijderd.",
+    "deleteDialogCancel": "Annuleren",
+    "toasts": {
+      "listDeleted": "\"{{list}}\" is verwijderd."
+    }
   },
   "watchlist": {
     "title": "Spelersvolglijst",
@@ -247,7 +254,11 @@
     "statusUnavailable": "Niet beschikbaar",
     "toasts": {
       "tracked": "{{player}} is aan de volglijst toegevoegd.",
-      "untracked": "{{player}} is van de volglijst verwijderd."
+      "untracked": "{{player}} is van de volglijst verwijderd.",
+      "noteSaved": "Notitie voor {{player}} opgeslagen.",
+      "noteCleared": "Notitie voor {{player}} verwijderd.",
+      "steamIdCopied": "SteamID gekopieerd.",
+      "steamIdCopyError": "SteamID kon niet worden gekopieerd."
     },
     "columns": {
       "player": "Speler",
@@ -256,6 +267,20 @@
       "map": "Map",
       "mode": "Modus",
       "actions": "Acties"
+    },
+    "noteDialog": {
+      "clear": "Notitie wissen",
+      "description": "Voeg een lokale notitie toe voor {{player}}.",
+      "hint": "Notities worden alleen op dit apparaat opgeslagen.",
+      "label": "Notitie",
+      "placeholder": "Voeg een notitie toe over deze speler...",
+      "save": "Notitie opslaan",
+      "title": "Spelersnotitie"
+    },
+    "actions": {
+      "copySteamId": "SteamID kopiëren",
+      "editNote": "Notitie bewerken",
+      "viewServer": "Server bekijken"
     }
   },
   "filters": {

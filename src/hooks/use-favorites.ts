@@ -151,9 +151,28 @@ export function useFavorites() {
     });
   }
 
+  function deleteList(listId: string) {
+    if (!state.lists.some((list) => list.id === listId)) {
+      return false;
+    }
+
+    setState({
+      lists: state.lists.filter((list) => list.id !== listId),
+      servers: state.servers
+        .map((entry) => ({
+          ...entry,
+          listIds: entry.listIds.filter((entryListId) => entryListId !== listId),
+        }))
+        .filter((entry) => entry.listIds.length > 0),
+    });
+
+    return true;
+  }
+
   return {
     state,
     createList,
+    deleteList,
     addServerToList,
     moveServerToList,
     removeServer,

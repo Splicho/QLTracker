@@ -229,7 +229,14 @@
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "No lists yet. Create your first list to get started.",
-    "noServers": "No servers saved in this list yet."
+    "noServers": "No servers saved in this list yet.",
+    "deleteList": "Delete List",
+    "deleteDialogTitle": "Delete Favorite List",
+    "deleteDialogDescription": "Delete \"{{list}}\"? Servers saved only in this list will be removed from Favorites.",
+    "deleteDialogCancel": "Cancel",
+    "toasts": {
+      "listDeleted": "\"{{list}}\" deleted."
+    }
   },
   "watchlist": {
     "title": "Player Watchlist",
@@ -247,7 +254,11 @@
     "statusUnavailable": "Unavailable",
     "toasts": {
       "tracked": "{{player}} added to watchlist.",
-      "untracked": "{{player}} removed from watchlist."
+      "untracked": "{{player}} removed from watchlist.",
+      "noteSaved": "Note saved for {{player}}.",
+      "noteCleared": "Note removed for {{player}}.",
+      "steamIdCopied": "SteamID copied.",
+      "steamIdCopyError": "Could not copy SteamID."
     },
     "columns": {
       "player": "Player",
@@ -256,6 +267,20 @@
       "map": "Map",
       "mode": "Mode",
       "actions": "Actions"
+    },
+    "noteDialog": {
+      "clear": "Clear note",
+      "description": "Add a local note for {{player}}.",
+      "hint": "Notes are stored only on this device.",
+      "label": "Note",
+      "placeholder": "Add a note about this player...",
+      "save": "Save note",
+      "title": "Player note"
+    },
+    "actions": {
+      "copySteamId": "Copy SteamID",
+      "editNote": "Edit note",
+      "viewServer": "View server"
     }
   },
   "filters": {

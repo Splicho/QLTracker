@@ -57,8 +57,38 @@ export function useTrackedPlayers() {
         steamId: normalizedSteamId,
         playerName: normalizedPlayerName,
         addedAt: new Date().toISOString(),
+        note: "",
       },
     ]);
+    return true;
+  }
+
+  function setPlayerNote(steamId: string, note: string) {
+    const normalizedSteamId = steamId.trim();
+    const normalizedNote = note.trim().slice(0, 500);
+    let hasChanged = false;
+
+    const nextPlayers = players.map((player) => {
+      if (player.steamId !== normalizedSteamId) {
+        return player;
+      }
+
+      if (player.note === normalizedNote) {
+        return player;
+      }
+
+      hasChanged = true;
+      return {
+        ...player,
+        note: normalizedNote,
+      };
+    });
+
+    if (!hasChanged) {
+      return false;
+    }
+
+    setPlayers(nextPlayers);
     return true;
   }
 
@@ -79,6 +109,7 @@ export function useTrackedPlayers() {
     players,
     isTracked,
     trackPlayer,
+    setPlayerNote,
     untrackPlayer,
   };
 }

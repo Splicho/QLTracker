@@ -229,7 +229,14 @@
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Немає списку. Створіть перший список, щоб розпочати роботу.",
-    "noServers": "Немає серверів, що зберігаються в цьому списку."
+    "noServers": "Немає серверів, що зберігаються в цьому списку.",
+    "deleteList": "Видалити список",
+    "deleteDialogTitle": "Видалити список обраного",
+    "deleteDialogDescription": "Видалити \"{{list}}\"? Сервери, збережені лише в цьому списку, буде видалено з обраного.",
+    "deleteDialogCancel": "Скасувати",
+    "toasts": {
+      "listDeleted": "«{{list}}» видалено."
+    }
   },
   "watchlist": {
     "title": "Список відстеження гравців",
@@ -247,7 +254,11 @@
     "statusUnavailable": "Недоступно",
     "toasts": {
       "tracked": "{{player}} додано до списку відстеження.",
-      "untracked": "{{player}} видалено зі списку відстеження."
+      "untracked": "{{player}} видалено зі списку відстеження.",
+      "noteSaved": "Нотатку для {{player}} збережено.",
+      "noteCleared": "Нотатку для {{player}} видалено.",
+      "steamIdCopied": "SteamID скопійовано.",
+      "steamIdCopyError": "Не вдалося скопіювати SteamID."
     },
     "columns": {
       "player": "Гравці",
@@ -256,6 +267,20 @@
       "map": "Карта",
       "mode": "Режими",
       "actions": "Акції"
+    },
+    "noteDialog": {
+      "clear": "Очистити нотатку",
+      "description": "Додайте локальну нотатку для {{player}}.",
+      "hint": "Нотатки зберігаються лише на цьому пристрої.",
+      "label": "Нотатка",
+      "placeholder": "Додайте нотатку про цього гравця...",
+      "save": "Зберегти нотатку",
+      "title": "Нотатка про гравця"
+    },
+    "actions": {
+      "copySteamId": "Скопіювати SteamID",
+      "editNote": "Редагувати нотатку",
+      "viewServer": "Відкрити сервер"
     }
   },
   "filters": {

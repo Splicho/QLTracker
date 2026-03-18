@@ -229,7 +229,14 @@
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Nici o listă încă. Creați prima listă pentru a începe.",
-    "noServers": "Nici un server salvat în această listă încă."
+    "noServers": "Nici un server salvat în această listă încă.",
+    "deleteList": "Șterge lista",
+    "deleteDialogTitle": "Șterge lista de favorite",
+    "deleteDialogDescription": "Ștergi \"{{list}}\"? Serverele salvate doar în această listă vor fi eliminate din Favorite.",
+    "deleteDialogCancel": "Anulează",
+    "toasts": {
+      "listDeleted": "\"{{list}}\" a fost ștearsă."
+    }
   },
   "watchlist": {
     "title": "Lista de urmărire a jucătorilor",
@@ -247,7 +254,11 @@
     "statusUnavailable": "Indisponibil",
     "toasts": {
       "tracked": "{{player}} a fost adăugat în lista de urmărire.",
-      "untracked": "{{player}} a fost eliminat din lista de urmărire."
+      "untracked": "{{player}} a fost eliminat din lista de urmărire.",
+      "noteSaved": "Notița pentru {{player}} a fost salvată.",
+      "noteCleared": "Notița pentru {{player}} a fost eliminată.",
+      "steamIdCopied": "SteamID copiat.",
+      "steamIdCopyError": "SteamID nu a putut fi copiat."
     },
     "columns": {
       "player": "Jucător",
@@ -256,6 +267,20 @@
       "map": "Hartă",
       "mode": "Mod",
       "actions": "Acțiuni"
+    },
+    "noteDialog": {
+      "clear": "Șterge notița",
+      "description": "Adaugă o notiță locală pentru {{player}}.",
+      "hint": "Notițele sunt stocate doar pe acest dispozitiv.",
+      "label": "Notiță",
+      "placeholder": "Adaugă o notiță despre acest jucător...",
+      "save": "Salvează notița",
+      "title": "Notiță pentru jucător"
+    },
+    "actions": {
+      "copySteamId": "Copiază SteamID",
+      "editNote": "Editează notița",
+      "viewServer": "Vezi serverul"
     }
   },
   "filters": {

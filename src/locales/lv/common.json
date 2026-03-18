@@ -229,7 +229,14 @@
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Vēl nav sarakstu. Izveidot savu pirmo sarakstu, lai sāktu.",
-    "noServers": "Šajā sarakstā vēl nav saglabāts neviens serveris."
+    "noServers": "Šajā sarakstā vēl nav saglabāts neviens serveris.",
+    "deleteList": "Dzēst sarakstu",
+    "deleteDialogTitle": "Dzēst izlases sarakstu",
+    "deleteDialogDescription": "Dzēst \"{{list}}\"? Serveri, kas saglabāti tikai šajā sarakstā, tiks noņemti no izlases.",
+    "deleteDialogCancel": "Atcelt",
+    "toasts": {
+      "listDeleted": "\"{{list}}\" tika dzēsts."
+    }
   },
   "watchlist": {
     "title": "Spēlētāju novērošanas saraksts",
@@ -247,7 +254,11 @@
     "statusUnavailable": "Nav pieejams",
     "toasts": {
       "tracked": "{{player}} pievienots novērošanas sarakstam.",
-      "untracked": "{{player}} noņemts no novērošanas saraksta."
+      "untracked": "{{player}} noņemts no novērošanas saraksta.",
+      "noteSaved": "Piezīme spēlētājam {{player}} ir saglabāta.",
+      "noteCleared": "Piezīme spēlētājam {{player}} ir noņemta.",
+      "steamIdCopied": "SteamID nokopēts.",
+      "steamIdCopyError": "SteamID nevarēja nokopēt."
     },
     "columns": {
       "player": "Spēlētājs",
@@ -256,6 +267,20 @@
       "map": "Karte",
       "mode": "Režīms",
       "actions": "Darbības"
+    },
+    "noteDialog": {
+      "clear": "Notīrīt piezīmi",
+      "description": "Pievienojiet lokālu piezīmi spēlētājam {{player}}.",
+      "hint": "Piezīmes tiek glabātas tikai šajā ierīcē.",
+      "label": "Piezīme",
+      "placeholder": "Pievienojiet piezīmi par šo spēlētāju...",
+      "save": "Saglabāt piezīmi",
+      "title": "Spēlētāja piezīme"
+    },
+    "actions": {
+      "copySteamId": "Kopēt SteamID",
+      "editNote": "Rediģēt piezīmi",
+      "viewServer": "Skatīt serveri"
     }
   },
   "filters": {

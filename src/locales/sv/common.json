@@ -229,7 +229,14 @@
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Inga listor ännu. Skapa din första lista för att komma igång.",
-    "noServers": "Inga servrar sparade i denna lista ännu."
+    "noServers": "Inga servrar sparade i denna lista ännu.",
+    "deleteList": "Ta bort lista",
+    "deleteDialogTitle": "Ta bort favoritlista",
+    "deleteDialogDescription": "Ta bort \"{{list}}\"? Servrar som bara är sparade i den här listan tas bort från Favoriter.",
+    "deleteDialogCancel": "Avbryt",
+    "toasts": {
+      "listDeleted": "\"{{list}}\" togs bort."
+    }
   },
   "watchlist": {
     "title": "Spelarbevakning",
@@ -247,7 +254,11 @@
     "statusUnavailable": "Otillgänglig",
     "toasts": {
       "tracked": "{{player}} lades till i bevakningen.",
-      "untracked": "{{player}} togs bort från bevakningen."
+      "untracked": "{{player}} togs bort från bevakningen.",
+      "noteSaved": "Anteckning sparad för {{player}}.",
+      "noteCleared": "Anteckning borttagen för {{player}}.",
+      "steamIdCopied": "SteamID kopierat.",
+      "steamIdCopyError": "Kunde inte kopiera SteamID."
     },
     "columns": {
       "player": "Spelare",
@@ -256,6 +267,20 @@
       "map": "Karta",
       "mode": "Mode",
       "actions": "Aktiviteter"
+    },
+    "noteDialog": {
+      "clear": "Rensa anteckning",
+      "description": "Lägg till en lokal anteckning för {{player}}.",
+      "hint": "Anteckningar sparas bara på den här enheten.",
+      "label": "Anteckning",
+      "placeholder": "Lägg till en anteckning om den här spelaren...",
+      "save": "Spara anteckning",
+      "title": "Spelaranteckning"
+    },
+    "actions": {
+      "copySteamId": "Kopiera SteamID",
+      "editNote": "Redigera anteckning",
+      "viewServer": "Visa server"
     }
   },
   "filters": {

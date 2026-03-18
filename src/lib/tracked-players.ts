@@ -4,6 +4,7 @@ export type TrackedPlayer = {
   steamId: string;
   playerName: string;
   addedAt: string;
+  note: string;
 };
 
 function isTrackedPlayer(value: unknown): value is TrackedPlayer {
@@ -15,8 +16,13 @@ function isTrackedPlayer(value: unknown): value is TrackedPlayer {
   return (
     typeof candidate.steamId === "string" &&
     typeof candidate.playerName === "string" &&
-    typeof candidate.addedAt === "string"
+    typeof candidate.addedAt === "string" &&
+    (candidate.note == null || typeof candidate.note === "string")
   );
+}
+
+function normalizePlayerNote(note: string | null | undefined) {
+  return (note ?? "").trim().slice(0, 500);
 }
 
 export function parseTrackedPlayers(rawValue: string) {
@@ -43,6 +49,7 @@ export function parseTrackedPlayers(rawValue: string) {
         steamId,
         playerName,
         addedAt: entry.addedAt,
+        note: normalizePlayerNote(entry.note),
       });
     }
 

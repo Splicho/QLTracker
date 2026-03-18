@@ -229,7 +229,14 @@
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Пока нет списков. Создайте свой первый список, чтобы начать.",
-    "noServers": "Серверов в этом списке пока нет."
+    "noServers": "Серверов в этом списке пока нет.",
+    "deleteList": "Удалить список",
+    "deleteDialogTitle": "Удалить список избранного",
+    "deleteDialogDescription": "Удалить \"{{list}}\"? Серверы, сохранённые только в этом списке, будут удалены из избранного.",
+    "deleteDialogCancel": "Отмена",
+    "toasts": {
+      "listDeleted": "«{{list}}» удалён."
+    }
   },
   "watchlist": {
     "title": "Список отслеживания игроков",
@@ -247,7 +254,11 @@
     "statusUnavailable": "Недоступно",
     "toasts": {
       "tracked": "{{player}} добавлен в список отслеживания.",
-      "untracked": "{{player}} удалён из списка отслеживания."
+      "untracked": "{{player}} удалён из списка отслеживания.",
+      "noteSaved": "Заметка для {{player}} сохранена.",
+      "noteCleared": "Заметка для {{player}} удалена.",
+      "steamIdCopied": "SteamID скопирован.",
+      "steamIdCopyError": "Не удалось скопировать SteamID."
     },
     "columns": {
       "player": "Игрок",
@@ -256,6 +267,20 @@
       "map": "Карта",
       "mode": "Режим",
       "actions": "Меры"
+    },
+    "noteDialog": {
+      "clear": "Очистить заметку",
+      "description": "Добавьте локальную заметку для {{player}}.",
+      "hint": "Заметки хранятся только на этом устройстве.",
+      "label": "Заметка",
+      "placeholder": "Добавьте заметку об этом игроке...",
+      "save": "Сохранить заметку",
+      "title": "Заметка об игроке"
+    },
+    "actions": {
+      "copySteamId": "Скопировать SteamID",
+      "editNote": "Изменить заметку",
+      "viewServer": "Открыть сервер"
     }
   },
   "filters": {

@@ -229,7 +229,14 @@
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "სიები ჯერ არ არის. დასაწყებად შექმენით თქვენი პირველი სია.",
-    "noServers": "ამ სიაში ჯერ არცერთი სერვერი არ არის შენახული."
+    "noServers": "ამ სიაში ჯერ არცერთი სერვერი არ არის შენახული.",
+    "deleteList": "სიის წაშლა",
+    "deleteDialogTitle": "ფავორიტების სიის წაშლა",
+    "deleteDialogDescription": "წავშალოთ \"{{list}}\"? სერვერები, რომლებიც მხოლოდ ამ სიაშია შენახული, ფავორიტებიდან მოიხსნება.",
+    "deleteDialogCancel": "გაუქმება",
+    "toasts": {
+      "listDeleted": "\"{{list}}\" წაიშალა."
+    }
   },
   "watchlist": {
     "title": "მოთამაშეთა დაკვირვების სია",
@@ -247,7 +254,11 @@
     "statusUnavailable": "მიუწვდომელია",
     "toasts": {
       "tracked": "{{player}} დაემატა დაკვირვების სიას.",
-      "untracked": "{{player}} წაიშალა დაკვირვების სიიდან."
+      "untracked": "{{player}} წაიშალა დაკვირვების სიიდან.",
+      "noteSaved": "{{player}}-ისთვის შენიშვნა შენახულია.",
+      "noteCleared": "{{player}}-ისთვის შენიშვნა წაიშალა.",
+      "steamIdCopied": "SteamID დაკოპირდა.",
+      "steamIdCopyError": "SteamID-ის კოპირება ვერ მოხერხდა."
     },
     "columns": {
       "player": "მოთამაშე",
@@ -256,6 +267,20 @@
       "map": "რუკა",
       "mode": "რეჟიმი",
       "actions": "მოქმედებები"
+    },
+    "noteDialog": {
+      "clear": "შენიშვნის წაშლა",
+      "description": "დაამატეთ ლოკალური შენიშვნა მოთამაშისთვის {{player}}.",
+      "hint": "შენიშვნები ინახება მხოლოდ ამ მოწყობილობაზე.",
+      "label": "შენიშვნა",
+      "placeholder": "დაამატეთ შენიშვნა ამ მოთამაშეზე...",
+      "save": "შენიშვნის შენახვა",
+      "title": "მოთამაშის შენიშვნა"
+    },
+    "actions": {
+      "copySteamId": "SteamID-ის კოპირება",
+      "editNote": "შენიშვნის ჩასწორება",
+      "viewServer": "სერვერის ნახვა"
     }
   },
   "filters": {

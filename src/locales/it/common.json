@@ -229,7 +229,14 @@
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Ancora nessuna lista. Crea la tua prima lista per iniziare.",
-    "noServers": "Nessun server salvato in questa lista."
+    "noServers": "Nessun server salvato in questa lista.",
+    "deleteList": "Elimina lista",
+    "deleteDialogTitle": "Elimina lista preferiti",
+    "deleteDialogDescription": "Eliminare \"{{list}}\"? I server salvati solo in questa lista verranno rimossi dai Preferiti.",
+    "deleteDialogCancel": "Annulla",
+    "toasts": {
+      "listDeleted": "\"{{list}}\" è stata eliminata."
+    }
   },
   "watchlist": {
     "title": "Lista di monitoraggio giocatori",
@@ -247,7 +254,11 @@
     "statusUnavailable": "Non disponibile",
     "toasts": {
       "tracked": "{{player}} è stato aggiunto alla watchlist.",
-      "untracked": "{{player}} è stato rimosso dalla watchlist."
+      "untracked": "{{player}} è stato rimosso dalla watchlist.",
+      "noteSaved": "Nota salvata per {{player}}.",
+      "noteCleared": "Nota rimossa per {{player}}.",
+      "steamIdCopied": "SteamID copiato.",
+      "steamIdCopyError": "Impossibile copiare lo SteamID."
     },
     "columns": {
       "player": "Giocatore",
@@ -256,6 +267,20 @@
       "map": "Mappa",
       "mode": "Modalità",
       "actions": "Azioni"
+    },
+    "noteDialog": {
+      "clear": "Cancella nota",
+      "description": "Aggiungi una nota locale per {{player}}.",
+      "hint": "Le note vengono salvate solo su questo dispositivo.",
+      "label": "Nota",
+      "placeholder": "Aggiungi una nota su questo giocatore...",
+      "save": "Salva nota",
+      "title": "Nota giocatore"
+    },
+    "actions": {
+      "copySteamId": "Copia SteamID",
+      "editNote": "Modifica nota",
+      "viewServer": "Visualizza server"
     }
   },
   "filters": {

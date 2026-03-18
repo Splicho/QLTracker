@@ -230,7 +230,14 @@
     "noServers": "Na ovom popisu još nema spremljenih poslužitelja.",
     "savedServers_one": "{{count}} saved server",
     "savedServers_few": "{{count}} spremljeni poslužitelji",
-    "savedServers_other": "{{count}} saved servers"
+    "savedServers_other": "{{count}} saved servers",
+    "deleteList": "Izbriši listu",
+    "deleteDialogTitle": "Izbriši listu favorita",
+    "deleteDialogDescription": "Izbrisati \"{{list}}\"? Serveri spremljeni samo u ovoj listi bit će uklonjeni iz favorita.",
+    "deleteDialogCancel": "Odustani",
+    "toasts": {
+      "listDeleted": "\"{{list}}\" je izbrisana."
+    }
   },
   "watchlist": {
     "title": "Popis praćenih igrača",
@@ -248,7 +255,11 @@
     "statusUnavailable": "Nedostupno",
     "toasts": {
       "tracked": "{{player}} je dodan na popis praćenja.",
-      "untracked": "{{player}} je uklonjen s popisa praćenja."
+      "untracked": "{{player}} je uklonjen s popisa praćenja.",
+      "noteSaved": "Bilješka za {{player}} je spremljena.",
+      "noteCleared": "Bilješka za {{player}} je uklonjena.",
+      "steamIdCopied": "SteamID je kopiran.",
+      "steamIdCopyError": "SteamID nije moguće kopirati."
     },
     "columns": {
       "player": "Igrač",
@@ -257,6 +268,20 @@
       "map": "Mapa",
       "mode": "Način rada",
       "actions": "Radnje"
+    },
+    "noteDialog": {
+      "clear": "Obriši bilješku",
+      "description": "Dodajte lokalnu bilješku za {{player}}.",
+      "hint": "Bilješke se pohranjuju samo na ovom uređaju.",
+      "label": "Bilješka",
+      "placeholder": "Dodajte bilješku o ovom igraču...",
+      "save": "Spremi bilješku",
+      "title": "Bilješka o igraču"
+    },
+    "actions": {
+      "copySteamId": "Kopiraj SteamID",
+      "editNote": "Uredi bilješku",
+      "viewServer": "Prikaži server"
     }
   },
   "filters": {

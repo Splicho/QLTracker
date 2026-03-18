@@ -229,7 +229,14 @@
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Nimekirja veel pole. Looge oma esimene nimekiri, et alustada.",
-    "noServers": "Siia nimekirja pole veel salvestatud ühtegi serverit."
+    "noServers": "Siia nimekirja pole veel salvestatud ühtegi serverit.",
+    "deleteList": "Kustuta nimekiri",
+    "deleteDialogTitle": "Kustuta lemmikute nimekiri",
+    "deleteDialogDescription": "Kas kustutada \"{{list}}\"? Serverid, mis on salvestatud ainult sellesse nimekirja, eemaldatakse lemmikutest.",
+    "deleteDialogCancel": "Loobu",
+    "toasts": {
+      "listDeleted": "\"{{list}}\" kustutati."
+    }
   },
   "watchlist": {
     "title": "Mängijate jälgimisloend",
@@ -247,7 +254,11 @@
     "statusUnavailable": "Pole saadaval",
     "toasts": {
       "tracked": "{{player}} lisati jälgimisloendisse.",
-      "untracked": "{{player}} eemaldati jälgimisloendist."
+      "untracked": "{{player}} eemaldati jälgimisloendist.",
+      "noteSaved": "{{player}} märkus on salvestatud.",
+      "noteCleared": "{{player}} märkus on eemaldatud.",
+      "steamIdCopied": "SteamID kopeeriti.",
+      "steamIdCopyError": "SteamID kopeerimine ebaõnnestus."
     },
     "columns": {
       "player": "Mängija",
@@ -256,6 +267,20 @@
       "map": "Kaart",
       "mode": "Mode",
       "actions": "Tegevused"
+    },
+    "noteDialog": {
+      "clear": "Eemalda märkus",
+      "description": "Lisa kohalik märkus mängijale {{player}}.",
+      "hint": "Märkused salvestatakse ainult sellesse seadmesse.",
+      "label": "Märkus",
+      "placeholder": "Lisa selle mängija kohta märkus...",
+      "save": "Salvesta märkus",
+      "title": "Mängija märkus"
+    },
+    "actions": {
+      "copySteamId": "Kopeeri SteamID",
+      "editNote": "Muuda märkust",
+      "viewServer": "Vaata serverit"
     }
   },
   "filters": {

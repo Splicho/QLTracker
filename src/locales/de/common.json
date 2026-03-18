@@ -229,7 +229,14 @@
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Noch keine Listen. Erstelle deine erste Liste, um loszulegen.",
-    "noServers": "In dieser Liste sind noch keine Server gespeichert."
+    "noServers": "In dieser Liste sind noch keine Server gespeichert.",
+    "deleteList": "Liste löschen",
+    "deleteDialogTitle": "Favoritenliste löschen",
+    "deleteDialogDescription": "„{{list}}“ löschen? Server, die nur in dieser Liste gespeichert sind, werden aus den Favoriten entfernt.",
+    "deleteDialogCancel": "Abbrechen",
+    "toasts": {
+      "listDeleted": "„{{list}}“ gelöscht."
+    }
   },
   "watchlist": {
     "title": "Spieler Watchlist",
@@ -247,7 +254,11 @@
     "statusUnavailable": "Nicht verfügbar",
     "toasts": {
       "tracked": "{{player}} zur Watchlist hinzugefügt.",
-      "untracked": "{{player}} von der Watchlist entfernt."
+      "untracked": "{{player}} von der Watchlist entfernt.",
+      "noteSaved": "Notiz für {{player}} gespeichert.",
+      "noteCleared": "Notiz für {{player}} entfernt.",
+      "steamIdCopied": "SteamID kopiert.",
+      "steamIdCopyError": "SteamID konnte nicht kopiert werden."
     },
     "columns": {
       "player": "Spieler",
@@ -256,6 +267,20 @@
       "map": "Karte",
       "mode": "Modus",
       "actions": "Aktionen"
+    },
+    "noteDialog": {
+      "clear": "Notiz löschen",
+      "description": "Füge eine lokale Notiz für {{player}} hinzu.",
+      "hint": "Notizen werden nur auf diesem Gerät gespeichert.",
+      "label": "Notiz",
+      "placeholder": "Notiz zu diesem Spieler hinzufügen...",
+      "save": "Notiz speichern",
+      "title": "Spielernotiz"
+    },
+    "actions": {
+      "copySteamId": "SteamID kopieren",
+      "editNote": "Notiz bearbeiten",
+      "viewServer": "Server anzeigen"
     }
   },
   "filters": {

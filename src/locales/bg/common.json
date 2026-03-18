@@ -229,7 +229,14 @@
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Все още няма списъци. Създаване на първия си списък, за да започнете.",
-    "noServers": "Все още няма записани сървъри в този списък."
+    "noServers": "Все още няма записани сървъри в този списък.",
+    "deleteList": "Изтрий списъка",
+    "deleteDialogTitle": "Изтрий списъка с любими",
+    "deleteDialogDescription": "Да се изтрие ли \"{{list}}\"? Сървърите, запазени само в този списък, ще бъдат премахнати от Любими.",
+    "deleteDialogCancel": "Отказ",
+    "toasts": {
+      "listDeleted": "\"{{list}}\" е изтрит."
+    }
   },
   "watchlist": {
     "title": "Списък за следене на играчи",
@@ -247,7 +254,11 @@
     "statusUnavailable": "Недостъпно",
     "toasts": {
       "tracked": "{{player}} е добавен в списъка за следене.",
-      "untracked": "{{player}} е премахнат от списъка за следене."
+      "untracked": "{{player}} е премахнат от списъка за следене.",
+      "noteSaved": "Бележката за {{player}} е запазена.",
+      "noteCleared": "Бележката за {{player}} е премахната.",
+      "steamIdCopied": "SteamID е копиран.",
+      "steamIdCopyError": "SteamID не можа да бъде копиран."
     },
     "columns": {
       "player": "Играч",
@@ -256,6 +267,20 @@
       "map": "Карта",
       "mode": "Режим",
       "actions": "Действия"
+    },
+    "noteDialog": {
+      "clear": "Изчисти бележката",
+      "description": "Добавете локална бележка за {{player}}.",
+      "hint": "Бележките се съхраняват само на това устройство.",
+      "label": "Бележка",
+      "placeholder": "Добавете бележка за този играч...",
+      "save": "Запази бележката",
+      "title": "Бележка за играч"
+    },
+    "actions": {
+      "copySteamId": "Копирай SteamID",
+      "editNote": "Редактирай бележката",
+      "viewServer": "Покажи сървъра"
     }
   },
   "filters": {

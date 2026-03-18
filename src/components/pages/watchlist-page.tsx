@@ -1,6 +1,6 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Copy, Eye, Play, Trash2, Users } from "lucide-react";
+import { Copy, Eye, Pencil, Play, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useTrackedPlayers } from "@/hooks/use-tracked-players";
 import type { ServerInteractionContext } from "@/hooks/use-server-interactions";
 import {
@@ -34,6 +39,7 @@ import {
   getGameModeLabel,
 } from "@/lib/server-utils";
 import { type ServerPing, fetchSteamServerPings, type SteamServer } from "@/lib/steam";
+import { TrackedPlayerNoteDialog } from "@/components/pages/tracked-player-note-dialog";
 
 export function WatchlistPage({
   servers,
@@ -45,11 +51,19 @@ export function WatchlistPage({
   onJoinServer: (context: ServerInteractionContext) => void;
 }) {
   const { t } = useTranslation();
-  const { players, untrackPlayer } = useTrackedPlayers();
+  const { players, setPlayerNote, untrackPlayer } = useTrackedPlayers();
   const realtimeAvailable = isRealtimeEnabled();
+  const [editingSteamId, setEditingSteamId] = useState<string | null>(null);
   const trackedSteamIds = useMemo(
     () => players.map((player) => player.steamId),
     [players]
+  );
+  const editingPlayer = useMemo(
+    () =>
+      editingSteamId
+        ? players.find((player) => player.steamId === editingSteamId) ?? null
+        : null,
+    [editingSteamId, players]
   );
   const presenceQuery = useQuery({
     queryKey: ["realtime", "presence-lookup", trackedSteamIds],
@@ -125,12 +139,12 @@ export function WatchlistPage({
   const onlineCount = rows.filter((row) => row.presence != null).length;
   const serviceUnavailable = !realtimeAvailable || presenceQuery.isError;
 
-  const copyAddress = async (addr: string) => {
+  const copySteamId = async (steamId: string) => {
     try {
-      await navigator.clipboard.writeText(addr);
-      toast.success(t("serverList.toasts.serverAddressCopied"));
+      await navigator.clipboard.writeText(steamId);
+      toast.success(t("watchlist.toasts.steamIdCopied"));
     } catch {
-      toast.error(t("serverList.toasts.serverAddressCopyError"));
+      toast.error(t("watchlist.toasts.steamIdCopyError"));
     }
   };
 
@@ -233,32 +247,45 @@ export function WatchlistPage({
                       </TableCell>
                       <TableCell>
                         <div className="flex justify-end gap-2">
-                          <Button
-                            type="button"
-                            size="icon"
-                            variant="outline"
-                            disabled={!row.interactionContext}
-                            onClick={() => {
-                              if (row.interactionContext) {
-                                onOpenServer(row.interactionContext);
-                              }
-                            }}
-                          >
-                            <Eye className="size-4" />
-                          </Button>
-                          <Button
-                            type="button"
-                            size="icon"
-                            variant="outline"
-                            disabled={!row.presence}
-                            onClick={() => {
-                              if (row.presence) {
-                                void copyAddress(row.presence.addr);
-                              }
-                            }}
-                          >
-                            <Copy className="size-4" />
-                          </Button>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span>
+                                <Button
+                                  type="button"
+                                  size="icon"
+                                  variant="outline"
+                                  disabled={!row.interactionContext}
+                                  onClick={() => {
+                                    if (row.interactionContext) {
+                                      onOpenServer(row.interactionContext);
+                                    }
+                                  }}
+                                >
+                                  <Eye className="size-4" />
+                                </Button>
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent side="top">
+                              {t("watchlist.actions.viewServer")}
+                            </TooltipContent>
+                          </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                type="button"
+                                size="icon"
+                                variant="outline"
+                                onClick={() => {
+                                  void copySteamId(row.trackedPlayer.steamId);
+                                }}
+                              >
+                                <Copy className="size-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top">
+                              {t("watchlist.actions.copySteamId")}
+                            </TooltipContent>
+                          </Tooltip>
                           <Button
                             type="button"
                             size="icon"
@@ -272,6 +299,23 @@ export function WatchlistPage({
                           >
                             <Play className="size-4" />
                           </Button>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                type="button"
+                                size="icon"
+                                variant="outline"
+                                onClick={() => {
+                                  setEditingSteamId(row.trackedPlayer.steamId);
+                                }}
+                              >
+                                <Pencil className="size-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top">
+                              {t("watchlist.actions.editNote")}
+                            </TooltipContent>
+                          </Tooltip>
                           <Button
                             type="button"
                             size="icon"
@@ -298,6 +342,16 @@ export function WatchlistPage({
           </div>
         )}
       </div>
+      <TrackedPlayerNoteDialog
+        open={editingPlayer != null}
+        trackedPlayer={editingPlayer}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditingSteamId(null);
+          }
+        }}
+        onSaveNote={setPlayerNote}
+      />
     </section>
   );
 }

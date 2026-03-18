@@ -229,7 +229,14 @@
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "아직 목록이 없습니다. 첫 번째 목록 만들기 시작.",
-    "noServers": "아직이 목록에 저장되지 않았습니다."
+    "noServers": "아직이 목록에 저장되지 않았습니다.",
+    "deleteList": "목록 삭제",
+    "deleteDialogTitle": "즐겨찾기 목록 삭제",
+    "deleteDialogDescription": "\"{{list}}\"을(를) 삭제할까요? 이 목록에만 저장된 서버는 즐겨찾기에서 제거됩니다.",
+    "deleteDialogCancel": "취소",
+    "toasts": {
+      "listDeleted": "\"{{list}}\"이(가) 삭제되었습니다."
+    }
   },
   "watchlist": {
     "title": "플레이어 워치리스트",
@@ -247,7 +254,11 @@
     "statusUnavailable": "사용할 수 없음",
     "toasts": {
       "tracked": "{{player}} 님을 워치리스트에 추가했습니다.",
-      "untracked": "{{player}} 님을 워치리스트에서 제거했습니다."
+      "untracked": "{{player}} 님을 워치리스트에서 제거했습니다.",
+      "noteSaved": "{{player}} 메모를 저장했습니다.",
+      "noteCleared": "{{player}} 메모를 삭제했습니다.",
+      "steamIdCopied": "SteamID를 복사했습니다.",
+      "steamIdCopyError": "SteamID를 복사할 수 없습니다."
     },
     "columns": {
       "player": "지원하다",
@@ -256,6 +267,20 @@
       "map": "맵",
       "mode": "주요 특징",
       "actions": "팟캐스트"
+    },
+    "noteDialog": {
+      "clear": "메모 지우기",
+      "description": "{{player}}에 대한 로컬 메모를 추가합니다.",
+      "hint": "메모는 이 기기에만 저장됩니다.",
+      "label": "메모",
+      "placeholder": "이 플레이어에 대한 메모를 추가하세요...",
+      "save": "메모 저장",
+      "title": "플레이어 메모"
+    },
+    "actions": {
+      "copySteamId": "SteamID 복사",
+      "editNote": "메모 편집",
+      "viewServer": "서버 보기"
     }
   },
   "filters": {

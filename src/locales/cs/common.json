@@ -229,7 +229,14 @@
     "savedServers_one": "{{count}} saved server",
     "savedServers_other": "{{count}} saved servers",
     "noLists": "Zatím žádné seznamy. Vytvořte si svůj první seznam začít.",
-    "noServers": "V tomto seznamu ještě nejsou uloženy žádné servery."
+    "noServers": "V tomto seznamu ještě nejsou uloženy žádné servery.",
+    "deleteList": "Smazat seznam",
+    "deleteDialogTitle": "Smazat seznam oblíbených",
+    "deleteDialogDescription": "Smazat \"{{list}}\"? Servery uložené pouze v tomto seznamu budou odstraněny z oblíbených.",
+    "deleteDialogCancel": "Zrušit",
+    "toasts": {
+      "listDeleted": "Seznam \"{{list}}\" byl smazán."
+    }
   },
   "watchlist": {
     "title": "Sledování hráčů",
@@ -247,7 +254,11 @@
     "statusUnavailable": "Nedostupné",
     "toasts": {
       "tracked": "{{player}} byl přidán do sledování.",
-      "untracked": "{{player}} byl odebrán ze sledování."
+      "untracked": "{{player}} byl odebrán ze sledování.",
+      "noteSaved": "Poznámka pro {{player}} byla uložena.",
+      "noteCleared": "Poznámka pro {{player}} byla odstraněna.",
+      "steamIdCopied": "SteamID bylo zkopírováno.",
+      "steamIdCopyError": "SteamID se nepodařilo zkopírovat."
     },
     "columns": {
       "player": "Hráč",
@@ -256,6 +267,20 @@
       "map": "Mapa",
       "mode": "Režim",
       "actions": "Akce"
+    },
+    "noteDialog": {
+      "clear": "Smazat poznámku",
+      "description": "Přidejte místní poznámku pro {{player}}.",
+      "hint": "Poznámky jsou uloženy pouze na tomto zařízení.",
+      "label": "Poznámka",
+      "placeholder": "Přidejte poznámku o tomto hráči...",
+      "save": "Uložit poznámku",
+      "title": "Poznámka k hráči"
+    },
+    "actions": {
+      "copySteamId": "Kopírovat SteamID",
+      "editNote": "Upravit poznámku",
+      "viewServer": "Zobrazit server"
     }
   },
   "filters": {
