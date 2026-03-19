@@ -190,7 +190,7 @@ async function runPollCycle() {
   }
 
   const snapshots = await fetchSteamSnapshots();
-  const enrichedSnapshots = await enrichSnapshots(snapshots);
+  const enrichedSnapshots = await enrichSnapshots(snapshots, snapshotsByAddr);
   replaceSnapshotsIndex(enrichedSnapshots);
   await upsertPlayerNameHistory(enrichedSnapshots);
 
