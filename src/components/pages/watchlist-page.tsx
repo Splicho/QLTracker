@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Copy, Eye, Pencil, Play, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { Change } from "@/components/icon";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -28,17 +29,25 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useTrackedPlayers } from "@/hooks/use-tracked-players";
+import { QuakeText, stripQuakeColors } from "@/lib/quake";
 import type { ServerInteractionContext } from "@/hooks/use-server-interactions";
 import {
+  fetchRealtimePlayerNameHistoryLookup,
   fetchRealtimePlayerPresenceLookup,
   isRealtimeEnabled,
+  type PlayerNameHistoryEntry,
   type RealtimePlayerPresence,
 } from "@/lib/realtime";
 import {
   createFallbackServerFromPresence,
   getGameModeLabel,
 } from "@/lib/server-utils";
-import { type ServerPing, fetchSteamServerPings, type SteamServer } from "@/lib/steam";
+import {
+  type ServerPing,
+  fetchSteamServerPings,
+  type SteamServer,
+} from "@/lib/steam";
+import { TrackedPlayerAliasesDialog } from "@/components/pages/tracked-player-aliases-dialog";
 import { TrackedPlayerNoteDialog } from "@/components/pages/tracked-player-note-dialog";
 
 export function WatchlistPage({
@@ -53,6 +62,9 @@ export function WatchlistPage({
   const { t } = useTranslation();
   const { players, setPlayerNote, untrackPlayer } = useTrackedPlayers();
   const realtimeAvailable = isRealtimeEnabled();
+  const [aliasHistorySteamId, setAliasHistorySteamId] = useState<string | null>(
+    null
+  );
   const [editingSteamId, setEditingSteamId] = useState<string | null>(null);
   const trackedSteamIds = useMemo(
     () => players.map((player) => player.steamId),
@@ -64,6 +76,14 @@ export function WatchlistPage({
         ? players.find((player) => player.steamId === editingSteamId) ?? null
         : null,
     [editingSteamId, players]
+  );
+  const aliasHistoryPlayer = useMemo(
+    () =>
+      aliasHistorySteamId
+        ? players.find((player) => player.steamId === aliasHistorySteamId) ??
+          null
+        : null,
+    [aliasHistorySteamId, players]
   );
   const presenceQuery = useQuery({
     queryKey: ["realtime", "presence-lookup", trackedSteamIds],
@@ -99,6 +119,14 @@ export function WatchlistPage({
     refetchInterval: 15_000,
     placeholderData: (previousData) => previousData,
   });
+  const aliasHistoryQuery = useQuery({
+    queryKey: ["realtime", "player-name-history", trackedSteamIds],
+    queryFn: () => fetchRealtimePlayerNameHistoryLookup(trackedSteamIds),
+    enabled: realtimeAvailable && trackedSteamIds.length > 0,
+    staleTime: 30_000,
+    refetchInterval: 30_000,
+    placeholderData: (previousData) => previousData,
+  });
   const requiresPasswordByAddr = useMemo<Record<string, boolean | null>>(
     () =>
       Object.fromEntries(
@@ -115,6 +143,8 @@ export function WatchlistPage({
       players.map((trackedPlayer) => {
         const presence = presenceQuery.data?.[trackedPlayer.steamId] ?? null;
         const liveServer = presence ? liveServersByAddr[presence.addr] ?? null : null;
+        const remoteNameHistory =
+          aliasHistoryQuery.data?.[trackedPlayer.steamId] ?? [];
         const modeLabel = getGameModeLabel(presence?.gameMode, t);
         const interactionContext = presence
           ? {
@@ -129,12 +159,24 @@ export function WatchlistPage({
           : null;
 
         return {
+          aliases: mergeTrackedPlayerAliases(
+            trackedPlayer.playerName,
+            trackedPlayer.aliases,
+            remoteNameHistory
+          ),
           trackedPlayer,
           presence,
           interactionContext,
         };
       }),
-    [liveServersByAddr, players, presenceQuery.data, requiresPasswordByAddr, t]
+    [
+      aliasHistoryQuery.data,
+      liveServersByAddr,
+      players,
+      presenceQuery.data,
+      requiresPasswordByAddr,
+      t,
+    ]
   );
   const onlineCount = rows.filter((row) => row.presence != null).length;
   const serviceUnavailable = !realtimeAvailable || presenceQuery.isError;
@@ -216,7 +258,36 @@ export function WatchlistPage({
                   {rows.map((row) => (
                     <TableRow key={row.trackedPlayer.steamId}>
                       <TableCell className="font-medium text-foreground">
-                        {row.trackedPlayer.playerName}
+                        <div className="flex min-w-0 items-center gap-2">
+                          <div className="min-w-0 truncate">
+                            <QuakeText
+                              text={row.trackedPlayer.playerName}
+                              fallbackClassName="truncate"
+                            />
+                          </div>
+                          {row.aliases.length > 0 ? (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  type="button"
+                                  size="icon"
+                                  variant="ghost"
+                                  className="size-7 shrink-0 rounded-md text-muted-foreground hover:text-foreground"
+                                  onClick={() => {
+                                    setAliasHistorySteamId(
+                                      row.trackedPlayer.steamId
+                                    );
+                                  }}
+                                >
+                                  <Change className="size-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent side="top">
+                                {t("watchlist.aliasHistoryTooltip")}
+                              </TooltipContent>
+                            </Tooltip>
+                          ) : null}
+                        </div>
                       </TableCell>
                       <TableCell>
                         {serviceUnavailable ? (
@@ -324,7 +395,9 @@ export function WatchlistPage({
                               if (untrackPlayer(row.trackedPlayer.steamId)) {
                                 toast.success(
                                   t("watchlist.toasts.untracked", {
-                                    player: row.trackedPlayer.playerName,
+                                    player: stripQuakeColors(
+                                      row.trackedPlayer.playerName
+                                    ),
                                   })
                                 );
                               }
@@ -352,6 +425,43 @@ export function WatchlistPage({
         }}
         onSaveNote={setPlayerNote}
       />
+      <TrackedPlayerAliasesDialog
+        open={aliasHistoryPlayer != null}
+        trackedPlayer={aliasHistoryPlayer}
+        aliases={
+          rows.find((row) => row.trackedPlayer.steamId === aliasHistorySteamId)
+            ?.aliases ?? []
+        }
+        onOpenChange={(open) => {
+          if (!open) {
+            setAliasHistorySteamId(null);
+          }
+        }}
+      />
     </section>
   );
+}
+
+function mergeTrackedPlayerAliases(
+  currentPlayerName: string,
+  localAliases: string[],
+  remoteNameHistory: PlayerNameHistoryEntry[]
+) {
+  const aliases: string[] = [];
+  const seenAliases = new Set<string>([currentPlayerName]);
+
+  for (const alias of [
+    ...remoteNameHistory.map((entry) => entry.playerName),
+    ...localAliases,
+  ]) {
+    const normalizedAlias = alias.trim();
+    if (!normalizedAlias || seenAliases.has(normalizedAlias)) {
+      continue;
+    }
+
+    seenAliases.add(normalizedAlias);
+    aliases.push(normalizedAlias);
+  }
+
+  return aliases;
 }

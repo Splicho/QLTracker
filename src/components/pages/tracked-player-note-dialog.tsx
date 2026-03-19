@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { stripQuakeColors } from "@/lib/quake";
 import type { TrackedPlayer } from "@/lib/tracked-players";
 
 type TrackedPlayerNoteDialogProps = {
@@ -28,6 +29,9 @@ export function TrackedPlayerNoteDialog({
 }: TrackedPlayerNoteDialogProps) {
   const { t } = useTranslation();
   const [draftNote, setDraftNote] = useState("");
+  const playerLabel = trackedPlayer
+    ? stripQuakeColors(trackedPlayer.playerName)
+    : "";
 
   useEffect(() => {
     if (!open) {
@@ -48,7 +52,7 @@ export function TrackedPlayerNoteDialog({
     if (didChange) {
       toast.success(
         t("watchlist.toasts.noteCleared", {
-          player: trackedPlayer.playerName,
+          player: playerLabel,
         })
       );
     }
@@ -64,7 +68,7 @@ export function TrackedPlayerNoteDialog({
     if (didChange) {
       toast.success(
         t("watchlist.toasts.noteSaved", {
-          player: trackedPlayer.playerName,
+          player: playerLabel,
         })
       );
     }
@@ -82,7 +86,7 @@ export function TrackedPlayerNoteDialog({
           <DialogTitle>{t("watchlist.noteDialog.title")}</DialogTitle>
           <DialogDescription>
             {t("watchlist.noteDialog.description", {
-              player: trackedPlayer?.playerName ?? "",
+              player: playerLabel,
             })}
           </DialogDescription>
         </DialogHeader>

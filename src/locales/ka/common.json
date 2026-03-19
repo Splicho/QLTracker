@@ -185,7 +185,42 @@
     "discordPresenceServerDescription": "როცა QLTracker სერვერს გაუშვებს, Discord აქტივობაში ჩასვი სერვერის სახელი, რუკა, რეჟიმი და მოთამაშეები.",
     "discordPresenceSteamIdTitle": "SteamID64 მიმდინარე სერვერის თვალყურისთვის",
     "discordPresenceSteamIdDescription": "არასავალდებულოა. დაამატე შენი SteamID64, რომ Discord-მა აჩვენოს რომელ სერვერზე ხარ ახლა, მაშინაც კი თუ Quake Live-ში სერვერს ცვლი.",
-    "discordPresenceSteamIdPlaceholder": "7656119..."
+    "discordPresenceSteamIdPlaceholder": "7656119...",
+    "sections": {
+      "general": "გენერალი",
+      "generalDescription": "ენისა და აპის ძირითადი პარამეტრები.",
+      "startupTray": "გაშვება და უჯრა",
+      "startupTrayDescription": "გაშვების ქცევა, უჯრის რეჟიმი და ფანჯრის დამუშავება.",
+      "desktopAlerts": "დესკტოპის გაფრთხილებები",
+      "desktopAlertsDescription": "მშობლიური შეტყობინებები თვალყურის დევნილი მოთამაშეებისთვის და საყვარელი სერვერებისთვის.",
+      "notifications": "შეტყობინებები და უთანხმოება",
+      "notificationsDescription": "ანგარიშის მიბმისა და შეტყობინებების წესზე წვდომის დარღვევა.",
+      "discordPresence": "უთანხმოების არსებობა",
+      "discordPresenceDescription": "უთანხმოება მდიდარი ყოფნა სანამ QLTracker ღიაა."
+    },
+    "backToApp": "აპში დაბრუნება",
+    "trayModeTitle": "უჯრის რეჟიმი",
+    "trayModeDescription": "გააგრძელეთ QLTracker გაშვება ფონზე უჯრის ხატულებით და სწრაფი მოქმედებებით.",
+    "closeToTrayTitle": "დახურეთ ფანჯარა უჯრაზე",
+    "closeToTrayDescription": "მთავარი ფანჯრის დახურვისას დახურვის ნაცვლად, დამალეთ QLTracker.",
+    "startMinimizedTitle": "დაწყება მინიმუმამდე უჯრაზე",
+    "startMinimizedDescription": "გაუშვით QLTracker ფონზე, სანამ არ აღადგენთ მას უჯრის ხატიდან.",
+    "desktopAlertsTitle": "დესკტოპის გაფრთხილებები",
+    "desktopAlertsDescription": "გაგზავნეთ მშობლიური დესკტოპის შეტყობინებები თვალყურის დევნილი მოთამაშეებისთვის და საყვარელი სერვერებისთვის.",
+    "desktopAlertsPausedTitle": "დესკტოპის გაფრთხილებების პაუზა",
+    "desktopAlertsPausedDescription": "დროებით გააჩუმეთ ყველა დესკტოპის გაფრთხილება თქვენი გაფრთხილების წესების შეცვლის გარეშე.",
+    "trackedPlayerAlertsTitle": "მოთამაშის გაფრთხილებების თვალყურის დევნება",
+    "trackedPlayerAlertsDescription": "შეატყობინეთ, როდესაც უყურებს მოთამაშე გამოჩნდება ან გადადის სხვა სერვერზე. საჭიროებს რეალურ დროში backend-ს.",
+    "favoriteServerAlertsTitle": "საყვარელი სერვერის გაფრთხილებები",
+    "favoriteServerAlertsDescription": "შეატყობინეთ, როდესაც საყვარელი სერვერი მიაღწევს თქვენი მოთამაშის ზღვარს.",
+    "favoriteServerThresholdTitle": "საყვარელი სერვერის მოთამაშის ბარიერი",
+    "favoriteServerThresholdDescription": "გაგზავნეთ გაფრთხილება, როდესაც საყვარელი სერვერი გადაკვეთს ამ მოთამაშეთა რაოდენობას.",
+    "favoriteServerThresholdPlaceholder": "მოთამაშეები",
+    "discordLinkTitle": "Discord ანგარიშის ბმული",
+    "discordLinkDescription": "დააკავშირეთ Discord DM შეტყობინების მიწოდებისა და ანგარიშის სტატუსის სამართავად.",
+    "notificationsManageRulesTitle": "შეტყობინების წესები",
+    "notificationsManageRulesDescription": "სერვერის სპეციფიკური Discord DM წესები იმართება სერვერების სიიდან.",
+    "notificationsManageRulesHint": "გახსენით სერვერი და გამოიყენეთ Discord შეტყობინების ქმედება, რომ შექმნათ ან შეცვალოთ წესი."
   },
   "language": {
     "en": "English",
@@ -338,5 +373,10 @@
       "none": "არცერთი თეგი არჩეული არ არის.",
       "inputPlaceholder": "შეიყვანეთ თეგი და დააჭირეთ Enter-ს"
     }
+  },
+  "releaseNotes": {
+    "title": "რა არის ახალი {{ვერსია}}-ში",
+    "publishedOn": "გამოქვეყნებულია {{თარიღი}}",
+    "close": "დახურვა"
   }
 }

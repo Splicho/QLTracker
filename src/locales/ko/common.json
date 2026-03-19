@@ -185,7 +185,42 @@
     "discordPresenceServerDescription": "QLTracker가 서버를 실행하면 서버 이름, 맵, 모드, 플레이어 정보를 Discord 활동에 포함합니다.",
     "discordPresenceSteamIdTitle": "실시간 서버 추적용 SteamID64",
     "discordPresenceSteamIdDescription": "선택 사항입니다. SteamID64를 추가하면 Quake Live 안에서 서버를 바꿔도 Discord에 현재 들어가 있는 서버를 올바르게 표시할 수 있습니다.",
-    "discordPresenceSteamIdPlaceholder": "7656119..."
+    "discordPresenceSteamIdPlaceholder": "7656119...",
+    "sections": {
+      "general": "일반",
+      "generalDescription": "언어 및 핵심 앱 기본 설정.",
+      "startupTray": "시작 및 트레이",
+      "startupTrayDescription": "시작 동작, 트레이 모드 및 창 처리.",
+      "desktopAlerts": "데스크톱 알림",
+      "desktopAlertsDescription": "추적된 플레이어 및 즐겨찾는 서버에 대한 기본 알림.",
+      "notifications": "알림 및 불일치",
+      "notificationsDescription": "Discord 계정 연결 및 알림 규칙 액세스.",
+      "discordPresence": "불화의 존재",
+      "discordPresenceDescription": "QLTracker가 열려 있는 동안 Discord의 풍부한 존재감을 느껴보세요."
+    },
+    "backToApp": "앱으로 돌아가기",
+    "trayModeTitle": "트레이 모드",
+    "trayModeDescription": "트레이 아이콘과 빠른 작업을 통해 QLTracker를 백그라운드에서 계속 실행하세요.",
+    "closeToTrayTitle": "트레이 창 닫기",
+    "closeToTrayDescription": "메인 창을 닫을 때 종료하는 대신 QLTracker를 숨기십시오.",
+    "startMinimizedTitle": "트레이로 최소화된 상태로 시작",
+    "startMinimizedDescription": "트레이 아이콘에서 복원할 때까지 백그라운드에서 QLTracker를 실행하십시오.",
+    "desktopAlertsTitle": "데스크톱 알림",
+    "desktopAlertsDescription": "추적된 플레이어와 즐겨찾는 서버에 대한 기본 데스크톱 알림을 보냅니다.",
+    "desktopAlertsPausedTitle": "데스크톱 알림 일시중지",
+    "desktopAlertsPausedDescription": "경고 규칙을 변경하지 않고 모든 데스크톱 경고를 일시적으로 무음으로 설정합니다.",
+    "trackedPlayerAlertsTitle": "추적된 플레이어 알림",
+    "trackedPlayerAlertsDescription": "감시 중인 플레이어가 나타나거나 다른 서버로 이동하면 알림을 보냅니다. 실시간 백엔드가 필요합니다.",
+    "favoriteServerAlertsTitle": "즐겨찾는 서버 알림",
+    "favoriteServerAlertsDescription": "즐겨찾는 서버가 플레이어 임계값에 도달하면 알림을 보냅니다.",
+    "favoriteServerThresholdTitle": "선호하는 서버 플레이어 임계값",
+    "favoriteServerThresholdDescription": "즐겨찾는 서버가 이 플레이어 수를 초과하면 경고를 보냅니다.",
+    "favoriteServerThresholdPlaceholder": "플레이어",
+    "discordLinkTitle": "디스코드 계정 링크",
+    "discordLinkDescription": "Discord를 연결하여 DM 알림 전달 및 계정 상태를 관리하세요.",
+    "notificationsManageRulesTitle": "알림 규칙",
+    "notificationsManageRulesDescription": "서버별 Discord DM 규칙은 서버 목록에서 관리됩니다.",
+    "notificationsManageRulesHint": "서버를 열고 Discord 알림 작업을 사용하여 규칙을 생성하거나 편집하세요."
   },
   "language": {
     "en": "English",
@@ -338,5 +373,10 @@
       "none": "태그 선택 없음.",
       "inputPlaceholder": "유형 태그 및 프레스 Enter"
     }
+  },
+  "releaseNotes": {
+    "title": "{{버전}}의 새로운 기능",
+    "publishedOn": "게시됨 {{date}}",
+    "close": "닫기"
   }
 }

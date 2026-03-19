@@ -185,7 +185,42 @@
     "discordPresenceServerDescription": "Quando QLTracker avvia un server, includi il nome del server, la mappa, la modalità e i giocatori nella tua attività Discord.",
     "discordPresenceSteamIdTitle": "SteamID64 per il rilevamento del server attuale",
     "discordPresenceSteamIdDescription": "Facoltativo. Aggiungi il tuo SteamID64 così Discord può mostrare il server in cui ti trovi davvero, anche se cambi server direttamente da Quake Live.",
-    "discordPresenceSteamIdPlaceholder": "7656119..."
+    "discordPresenceSteamIdPlaceholder": "7656119...",
+    "sections": {
+      "general": "Generale",
+      "generalDescription": "Preferenze relative alla lingua e alle app principali.",
+      "startupTray": "Avvio e vassoio",
+      "startupTrayDescription": "Comportamento di avvio, modalità vassoio e gestione delle finestre.",
+      "desktopAlerts": "Avvisi sul desktop",
+      "desktopAlertsDescription": "Notifiche native per giocatori monitorati e server preferiti.",
+      "notifications": "Notifiche e discordia",
+      "notificationsDescription": "Collegamento dell'account Discord e accesso alle regole di notifica.",
+      "discordPresence": "Presenza Discordia",
+      "discordPresenceDescription": "Presenza ricca di Discord mentre QLTracker è aperto."
+    },
+    "backToApp": "Torna all'app",
+    "trayModeTitle": "Modalità vassoio",
+    "trayModeDescription": "Mantieni QLTracker in esecuzione in background con un'icona nella barra delle applicazioni e azioni rapide.",
+    "closeToTrayTitle": "Chiudi la finestra sul vassoio",
+    "closeToTrayDescription": "Nascondi QLTracker invece di uscire quando chiudi la finestra principale.",
+    "startMinimizedTitle": "Inizia ridotto a icona nel vassoio",
+    "startMinimizedDescription": "Avvia QLTracker in background finché non lo ripristini dall'icona nella barra delle applicazioni.",
+    "desktopAlertsTitle": "Avvisi sul desktop",
+    "desktopAlertsDescription": "Invia notifiche desktop native per i giocatori monitorati e i server preferiti.",
+    "desktopAlertsPausedTitle": "Metti in pausa gli avvisi sul desktop",
+    "desktopAlertsPausedDescription": "Silenzia temporaneamente tutti gli avvisi sul desktop senza modificare le regole degli avvisi.",
+    "trackedPlayerAlertsTitle": "Avvisi dei giocatori monitorati",
+    "trackedPlayerAlertsDescription": "Avvisa quando un giocatore osservato appare o si sposta su un altro server. Richiede il backend in tempo reale.",
+    "favoriteServerAlertsTitle": "Avvisi del server preferito",
+    "favoriteServerAlertsDescription": "Avvisa quando un server preferito raggiunge la soglia dei tuoi giocatori.",
+    "favoriteServerThresholdTitle": "Soglia del giocatore del server preferito",
+    "favoriteServerThresholdDescription": "Invia un avviso quando un server preferito supera questo conteggio di giocatori.",
+    "favoriteServerThresholdPlaceholder": "Giocatori",
+    "discordLinkTitle": "Collegamento all'account Discord",
+    "discordLinkDescription": "Connetti Discord per gestire la consegna delle notifiche DM e lo stato dell'account.",
+    "notificationsManageRulesTitle": "Regole di notifica",
+    "notificationsManageRulesDescription": "Le regole Discord DM specifiche del server sono gestite dall'elenco dei server.",
+    "notificationsManageRulesHint": "Apri un server e utilizza l'azione di notifica Discord per creare o modificare una regola."
   },
   "language": {
     "en": "English",
@@ -338,5 +373,10 @@
       "none": "Nessun tag selezionato.",
       "inputPlaceholder": "Digitare il tag e premere Invio"
     }
+  },
+  "releaseNotes": {
+    "title": "Novità in {{version}}",
+    "publishedOn": "Pubblicato il {{data}}",
+    "close": "Chiudi"
   }
 }

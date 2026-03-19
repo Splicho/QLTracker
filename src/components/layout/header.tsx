@@ -18,13 +18,11 @@ export function Header({ page }: { page: PageId }) {
   const { setTheme, theme } = useTheme();
   const { t } = useTranslation();
   const currentPage =
-    (page === "notifications"
-      ? t("navigation.notifications")
-      : page === "settings"
-        ? t("navigation.settings")
-        : navigationItems.find((item) => item.id === page)
-          ? t(navigationItems.find((item) => item.id === page)!.titleKey)
-          : null) ?? t("header.unknown");
+    (page === "settings"
+      ? t("navigation.settings")
+      : navigationItems.find((item) => item.id === page)
+        ? t(navigationItems.find((item) => item.id === page)!.titleKey)
+        : null) ?? t("header.unknown");
 
   const handleThemeChange = (
     nextTheme: "light" | "dark" | "system",

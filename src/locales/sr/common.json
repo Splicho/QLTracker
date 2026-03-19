@@ -185,7 +185,42 @@
     "discordPresenceServerDescription": "Када QLTracker покрене сервер, укључи име сервера, мапу, режим и играче у твоју Discord активност.",
     "discordPresenceSteamIdTitle": "SteamID64 за праћење тренутног сервера",
     "discordPresenceSteamIdDescription": "Опционо. Додај свој SteamID64 да би Discord могао да приказује сервер на ком стварно јеси, чак и ако мењаш сервере у самом Quake Live-у.",
-    "discordPresenceSteamIdPlaceholder": "7656119..."
+    "discordPresenceSteamIdPlaceholder": "7656119...",
+    "sections": {
+      "general": "генерал",
+      "generalDescription": "Језик и основна подешавања апликације.",
+      "startupTray": "Стартуп & Траи",
+      "startupTrayDescription": "Понашање при покретању, режим лежишта и руковање прозорима.",
+      "desktopAlerts": "Десктоп Алертс",
+      "desktopAlertsDescription": "Изворна обавештења за праћене играче и омиљене сервере.",
+      "notifications": "Обавештења и несклад",
+      "notificationsDescription": "Повезивање Дисцорд налога и приступ правилу обавештења.",
+      "discordPresence": "Дисцорд Пресенце",
+      "discordPresenceDescription": "Дисцорд богато присуство док је КЛТрацкер отворен."
+    },
+    "backToApp": "Назад на апликацију",
+    "trayModeTitle": "Траи Моде",
+    "trayModeDescription": "Нека КЛТрацкер ради у позадини помоћу иконе на траци и брзих радњи.",
+    "closeToTrayTitle": "Затворите прозор за лежиште",
+    "closeToTrayDescription": "Сакријте КЛТрацкер уместо да напустите када затворите главни прозор.",
+    "startMinimizedTitle": "Почните минимизирати у послужавник",
+    "startMinimizedDescription": "Покрените КЛТрацкер у позадини док га не вратите са иконе на траци.",
+    "desktopAlertsTitle": "Десктоп Алертс",
+    "desktopAlertsDescription": "Шаљите изворна обавештења на радној површини за праћене играче и омиљене сервере.",
+    "desktopAlertsPausedTitle": "Паузирајте упозорења на радној површини",
+    "desktopAlertsPausedDescription": "Привремено утишајте сва упозорења на радној површини без промене правила упозорења.",
+    "trackedPlayerAlertsTitle": "Праћена упозорења играча",
+    "trackedPlayerAlertsDescription": "Обавести када се посматрани играч појави или пређе на други сервер. Захтева позадину у реалном времену.",
+    "favoriteServerAlertsTitle": "Упозорења о омиљеним серверима",
+    "favoriteServerAlertsDescription": "Обавестите када омиљени сервер достигне праг вашег играча.",
+    "favoriteServerThresholdTitle": "Праг омиљеног играча сервера",
+    "favoriteServerThresholdDescription": "Пошаљите упозорење када омиљени сервер пређе овај број играча.",
+    "favoriteServerThresholdPlaceholder": "Играчи",
+    "discordLinkTitle": "Веза са Дисцорд налогом",
+    "discordLinkDescription": "Повежите Дисцорд да бисте управљали испоруком ДМ обавештења и статусом налога.",
+    "notificationsManageRulesTitle": "Правила обавештења",
+    "notificationsManageRulesDescription": "Дисцорд ДМ правилима специфичним за сервер се управља са листе сервера.",
+    "notificationsManageRulesHint": "Отворите сервер и користите радњу Дисцорд обавештења да бисте креирали или изменили правило."
   },
   "language": {
     "en": "English",
@@ -339,5 +374,10 @@
       "none": "Није изабрана ниједна ознака.",
       "inputPlaceholder": "Откуцајте ознаку и притисните Ентер"
     }
+  },
+  "releaseNotes": {
+    "title": "Шта је ново у {{верзији}}",
+    "publishedOn": "Објављено {{дате}}",
+    "close": "Затвори"
   }
 }

@@ -185,7 +185,42 @@
     "discordPresenceServerDescription": "Amikor a QLTracker elindít egy szervert, jelenjen meg a szerver neve, a pálya, a mód és a játékosok a Discord-tevékenységedben.",
     "discordPresenceSteamIdTitle": "SteamID64 az aktuális szerver követéséhez",
     "discordPresenceSteamIdDescription": "Nem kötelező. Add meg a SteamID64 azonosítódat, hogy a Discord azt a szervert tudja mutatni, amelyiken tényleg vagy, akkor is, ha Quake Live közben szervert váltasz.",
-    "discordPresenceSteamIdPlaceholder": "7656119..."
+    "discordPresenceSteamIdPlaceholder": "7656119...",
+    "sections": {
+      "general": "tábornok",
+      "generalDescription": "Nyelvi és alapvető alkalmazásbeállítások.",
+      "startupTray": "Indítás és tálca",
+      "startupTrayDescription": "Indítási viselkedés, tálcamód és ablakkezelés.",
+      "desktopAlerts": "Asztali figyelmeztetések",
+      "desktopAlertsDescription": "Natív értesítések nyomon követett játékosok és kedvenc szerverek számára.",
+      "notifications": "Értesítések és viszály",
+      "notificationsDescription": "Discord fiók összekapcsolása és értesítési szabály elérése.",
+      "discordPresence": "Discord jelenlét",
+      "discordPresenceDescription": "Discord gazdag jelenlét, miközben a QLTracker nyitva van."
+    },
+    "backToApp": "Vissza az alkalmazáshoz",
+    "trayModeTitle": "Tálca mód",
+    "trayModeDescription": "Tartsa a QLTracker futását a háttérben egy tálcaikon és gyors műveletek segítségével.",
+    "closeToTrayTitle": "Zárja be az ablakot a tálcához",
+    "closeToTrayDescription": "A QLTracker elrejtése a kilépés helyett a főablak bezárásakor.",
+    "startMinimizedTitle": "Kezdje kicsinyítve a tálcára",
+    "startMinimizedDescription": "Indítsa el a QLTracker programot a háttérben, amíg vissza nem állítja a tálcaikonról.",
+    "desktopAlertsTitle": "Asztali figyelmeztetések",
+    "desktopAlertsDescription": "Natív asztali értesítések küldése a követett játékosoknak és kedvenc szervereknek.",
+    "desktopAlertsPausedTitle": "Az asztali riasztások szüneteltetése",
+    "desktopAlertsPausedDescription": "Ideiglenesen elnémíthatja az összes asztali riasztást a riasztási szabályok módosítása nélkül.",
+    "trackedPlayerAlertsTitle": "Nyomon követett játékos figyelmeztetések",
+    "trackedPlayerAlertsDescription": "Értesítés, ha egy figyelt játékos megjelenik vagy másik szerverre költözik. Valós idejű háttérprogramot igényel.",
+    "favoriteServerAlertsTitle": "Kedvenc szerver riasztások",
+    "favoriteServerAlertsDescription": "Értesítést küld, ha egy kedvenc szerver eléri a játékosok küszöbét.",
+    "favoriteServerThresholdTitle": "Kedvenc szerver játékos küszöbértéke",
+    "favoriteServerThresholdDescription": "Figyelmeztetés küldése, ha egy kedvenc szerver átlépi ezt a játékosszámot.",
+    "favoriteServerThresholdPlaceholder": "Játékosok",
+    "discordLinkTitle": "Discord fiók linkje",
+    "discordLinkDescription": "Csatlakoztassa a Discord-ot a DM-értesítések kézbesítéséhez és a fiók állapotának kezeléséhez.",
+    "notificationsManageRulesTitle": "Értesítési szabályok",
+    "notificationsManageRulesDescription": "A kiszolgálóspecifikus Discord DM-szabályok kezelése a kiszolgálólistából történik.",
+    "notificationsManageRulesHint": "Nyisson meg egy kiszolgálót, és használja a Discord értesítési műveletet szabály létrehozásához vagy szerkesztéséhez."
   },
   "language": {
     "en": "English",
@@ -338,5 +373,10 @@
       "none": "Nincs kijelölve címke.",
       "inputPlaceholder": "Típus címke és nyomja meg a Enter"
     }
+  },
+  "releaseNotes": {
+    "title": "A(z) {{version}} újdonságai",
+    "publishedOn": "Közzétéve: {{dátum}}",
+    "close": "Bezárás"
   }
 }

@@ -6,7 +6,4 @@ export const navigationItems = [
   { id: "watchlist", titleKey: "navigation.watchlist", icon: Eye },
 ] as const;
 
-export type PageId =
-  | (typeof navigationItems)[number]["id"]
-  | "notifications"
-  | "settings";
+export type PageId = (typeof navigationItems)[number]["id"] | "settings";

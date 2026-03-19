@@ -36,9 +36,31 @@ export type AppSettingsValue = {
   discordPresenceEnabled: boolean;
   discordPresenceShowServerDetails: boolean;
   discordPresenceSteamId: string;
+  trayEnabled: boolean;
+  closeToTray: boolean;
+  startMinimizedToTray: boolean;
+  desktopAlertsEnabled: boolean;
+  desktopAlertsPaused: boolean;
+  desktopAlertsTrackedPlayers: boolean;
+  desktopAlertsFavoriteServers: boolean;
+  favoriteServerAlertMinPlayers: number;
 };
 
 export const APP_SETTINGS_STORAGE_KEY = "qltracker-app-settings";
+
+export const MIN_FAVORITE_SERVER_ALERT_PLAYERS = 1;
+export const MAX_FAVORITE_SERVER_ALERT_PLAYERS = 63;
+
+function normalizeFavoriteServerAlertMinPlayers(value: unknown) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return 2;
+  }
+
+  return Math.min(
+    MAX_FAVORITE_SERVER_ALERT_PLAYERS,
+    Math.max(MIN_FAVORITE_SERVER_ALERT_PLAYERS, Math.round(value))
+  );
+}
 
 export function createDefaultAppSettings(): AppSettingsValue {
   return {
@@ -46,6 +68,14 @@ export function createDefaultAppSettings(): AppSettingsValue {
     discordPresenceEnabled: false,
     discordPresenceShowServerDetails: false,
     discordPresenceSteamId: "",
+    trayEnabled: false,
+    closeToTray: true,
+    startMinimizedToTray: false,
+    desktopAlertsEnabled: false,
+    desktopAlertsPaused: false,
+    desktopAlertsTrackedPlayers: true,
+    desktopAlertsFavoriteServers: true,
+    favoriteServerAlertMinPlayers: 2,
   };
 }
 
@@ -76,6 +106,37 @@ export function parseStoredAppSettings(rawValue: string): AppSettingsValue {
         typeof parsed.discordPresenceSteamId === "string"
           ? parsed.discordPresenceSteamId
           : defaults.discordPresenceSteamId,
+      trayEnabled:
+        typeof parsed.trayEnabled === "boolean"
+          ? parsed.trayEnabled
+          : defaults.trayEnabled,
+      closeToTray:
+        typeof parsed.closeToTray === "boolean"
+          ? parsed.closeToTray
+          : defaults.closeToTray,
+      startMinimizedToTray:
+        typeof parsed.startMinimizedToTray === "boolean"
+          ? parsed.startMinimizedToTray
+          : defaults.startMinimizedToTray,
+      desktopAlertsEnabled:
+        typeof parsed.desktopAlertsEnabled === "boolean"
+          ? parsed.desktopAlertsEnabled
+          : defaults.desktopAlertsEnabled,
+      desktopAlertsPaused:
+        typeof parsed.desktopAlertsPaused === "boolean"
+          ? parsed.desktopAlertsPaused
+          : defaults.desktopAlertsPaused,
+      desktopAlertsTrackedPlayers:
+        typeof parsed.desktopAlertsTrackedPlayers === "boolean"
+          ? parsed.desktopAlertsTrackedPlayers
+          : defaults.desktopAlertsTrackedPlayers,
+      desktopAlertsFavoriteServers:
+        typeof parsed.desktopAlertsFavoriteServers === "boolean"
+          ? parsed.desktopAlertsFavoriteServers
+          : defaults.desktopAlertsFavoriteServers,
+      favoriteServerAlertMinPlayers: normalizeFavoriteServerAlertMinPlayers(
+        parsed.favoriteServerAlertMinPlayers
+      ),
     };
   } catch {
     return defaults;

@@ -21,10 +21,10 @@ function getPagePresenceState(page: PageId) {
   switch (page) {
     case "favorites":
       return "Favorites";
-    case "notifications":
-      return "Notifications";
     case "settings":
       return "Settings";
+    case "watchlist":
+      return "Watchlist";
     case "server-list":
     default:
       return "Server List";

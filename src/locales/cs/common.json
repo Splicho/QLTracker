@@ -185,7 +185,42 @@
     "discordPresenceServerDescription": "Když QLTracker spustí server, zahrňte do aktivity na Discordu název serveru, mapu, režim a hráče.",
     "discordPresenceSteamIdTitle": "SteamID64 pro sledování aktuálního serveru",
     "discordPresenceSteamIdDescription": "Volitelné. Přidej svůj SteamID64, aby Discord mohl zobrazit server, na kterém právě jsi, i když v Quake Live přepínáš mezi servery.",
-    "discordPresenceSteamIdPlaceholder": "7656119..."
+    "discordPresenceSteamIdPlaceholder": "7656119...",
+    "sections": {
+      "general": "Generál",
+      "generalDescription": "Předvolby jazyka a základní aplikace.",
+      "startupTray": "Spuštění a zásobník",
+      "startupTrayDescription": "Chování při spouštění, režim zásobníku a manipulace s oknem.",
+      "desktopAlerts": "Upozornění na ploše",
+      "desktopAlertsDescription": "Nativní upozornění pro sledované hráče a oblíbené servery.",
+      "notifications": "Oznámení a neshody",
+      "notificationsDescription": "Zrušte propojení účtů a přístup k pravidlům oznámení.",
+      "discordPresence": "Přítomnost nesouladu",
+      "discordPresenceDescription": "Když je otevřený QLTracker, rušte bohatou přítomnost."
+    },
+    "backToApp": "Zpět do aplikace",
+    "trayModeTitle": "Režim zásobníku",
+    "trayModeDescription": "Udržujte QLTracker spuštěný na pozadí pomocí ikony na hlavním panelu a rychlých akcí.",
+    "closeToTrayTitle": "Zavřete okno do zásobníku",
+    "closeToTrayDescription": "Skryjte QLTracker místo ukončení, když zavřete hlavní okno.",
+    "startMinimizedTitle": "Začněte minimalizováno do zásobníku",
+    "startMinimizedDescription": "Spusťte QLTracker na pozadí, dokud jej neobnovíte z ikony na hlavním panelu.",
+    "desktopAlertsTitle": "Upozornění na ploše",
+    "desktopAlertsDescription": "Odesílejte nativní upozornění na plochu pro sledované hráče a oblíbené servery.",
+    "desktopAlertsPausedTitle": "Pozastavit upozornění na ploše",
+    "desktopAlertsPausedDescription": "Dočasně ztište všechna upozornění na ploše, aniž byste změnili pravidla upozornění.",
+    "trackedPlayerAlertsTitle": "Upozornění na sledované hráče",
+    "trackedPlayerAlertsDescription": "Upozornit, když se sledovaný hráč objeví nebo se přesune na jiný server. Vyžaduje backend v reálném čase.",
+    "favoriteServerAlertsTitle": "Upozornění na oblíbené servery",
+    "favoriteServerAlertsDescription": "Upozornit, když oblíbený server dosáhne hranice vašeho hráče.",
+    "favoriteServerThresholdTitle": "Hranice oblíbeného hráče na serveru",
+    "favoriteServerThresholdDescription": "Poslat upozornění, když oblíbený server překročí tento počet hráčů.",
+    "favoriteServerThresholdPlaceholder": "Hráči",
+    "discordLinkTitle": "Odkaz na účet Discord",
+    "discordLinkDescription": "Připojte Discord a spravujte doručování oznámení DM a stav účtu.",
+    "notificationsManageRulesTitle": "Pravidla oznamování",
+    "notificationsManageRulesDescription": "Pravidla Discord DM specifická pro server jsou spravována ze seznamu serverů.",
+    "notificationsManageRulesHint": "Otevřete server a pomocí akce oznámení o neshodě vytvořte nebo upravte pravidlo."
   },
   "language": {
     "en": "English",
@@ -338,5 +373,10 @@
       "none": "Žádné značky.",
       "inputPlaceholder": "Zadejte značku a stiskněte Enter"
     }
+  },
+  "releaseNotes": {
+    "title": "Co je nového ve {{version}}",
+    "publishedOn": "Publikováno {{date}}",
+    "close": "Zavřít"
   }
 }

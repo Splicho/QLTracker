@@ -185,7 +185,42 @@
     "discordPresenceServerDescription": "Wanneer QLTracker een server start, voeg je de servernaam, map, modus en spelers toe aan je Discord-activiteit.",
     "discordPresenceSteamIdTitle": "SteamID64 voor live servertracking",
     "discordPresenceSteamIdDescription": "Optioneel. Voeg je SteamID64 toe zodat Discord de server kan tonen waar je echt op zit, zelfs als je binnen Quake Live van server wisselt.",
-    "discordPresenceSteamIdPlaceholder": "7656119..."
+    "discordPresenceSteamIdPlaceholder": "7656119...",
+    "sections": {
+      "general": "Algemeen",
+      "generalDescription": "Taal- en kernapp-voorkeuren.",
+      "startupTray": "Opstarten en lade",
+      "startupTrayDescription": "Opstartgedrag, lademodus en vensterbehandeling.",
+      "desktopAlerts": "Bureaubladwaarschuwingen",
+      "desktopAlertsDescription": "Native meldingen voor gevolgde spelers en favoriete servers.",
+      "notifications": "Meldingen en onenigheid",
+      "notificationsDescription": "Discord-accountkoppeling en toegang tot meldingsregels.",
+      "discordPresence": "Onenigheid aanwezigheid",
+      "discordPresenceDescription": "Discord rijke aanwezigheid terwijl QLTracker open is."
+    },
+    "backToApp": "Terug naar app",
+    "trayModeTitle": "Lademodus",
+    "trayModeDescription": "Houd QLTracker actief op de achtergrond met een systeemvakpictogram en snelle acties.",
+    "closeToTrayTitle": "Sluit het venster naar de lade",
+    "closeToTrayDescription": "Verberg QLTracker in plaats van te stoppen wanneer u het hoofdvenster sluit.",
+    "startMinimizedTitle": "Begin geminimaliseerd naar lade",
+    "startMinimizedDescription": "Start QLTracker op de achtergrond totdat u het herstelt via het systeemvakpictogram.",
+    "desktopAlertsTitle": "Bureaubladwaarschuwingen",
+    "desktopAlertsDescription": "Stuur native desktopmeldingen voor gevolgde spelers en favoriete servers.",
+    "desktopAlertsPausedTitle": "Onderbreek bureaubladwaarschuwingen",
+    "desktopAlertsPausedDescription": "Schakel tijdelijk alle bureaubladwaarschuwingen uit zonder uw waarschuwingsregels te wijzigen.",
+    "trackedPlayerAlertsTitle": "Bijgehouden spelerwaarschuwingen",
+    "trackedPlayerAlertsDescription": "Geef een melding wanneer een bekeken speler verschijnt of naar een andere server verhuist. Vereist de realtime backend.",
+    "favoriteServerAlertsTitle": "Favoriete serverwaarschuwingen",
+    "favoriteServerAlertsDescription": "Geef een melding wanneer een favoriete server uw spelersdrempel bereikt.",
+    "favoriteServerThresholdTitle": "Drempel voor favoriete serverspeler",
+    "favoriteServerThresholdDescription": "Stuur een waarschuwing wanneer een favoriete server dit spelersaantal overschrijdt.",
+    "favoriteServerThresholdPlaceholder": "Spelers",
+    "discordLinkTitle": "Discord-accountkoppeling",
+    "discordLinkDescription": "Verbind Discord om de bezorging van DM-meldingen en de accountstatus te beheren.",
+    "notificationsManageRulesTitle": "Meldingsregels",
+    "notificationsManageRulesDescription": "Serverspecifieke Discord DM-regels worden beheerd vanuit de serverlijst.",
+    "notificationsManageRulesHint": "Open een server en gebruik de Discord-meldingsactie om een regel te maken of te bewerken."
   },
   "language": {
     "en": "English",
@@ -338,5 +373,10 @@
       "none": "Geen tags geselecteerd.",
       "inputPlaceholder": "Typ tag en druk op Enter"
     }
+  },
+  "releaseNotes": {
+    "title": "Wat is er nieuw in {{version}}",
+    "publishedOn": "Gepubliceerd op {{date}}",
+    "close": "Sluiten"
   }
 }

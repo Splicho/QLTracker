@@ -185,7 +185,42 @@
     "discordPresenceServerDescription": "當 QLTracker 啟動伺服器時，在你的 Discord 活動中包含伺服器名稱、地圖、模式和玩家資訊。",
     "discordPresenceSteamIdTitle": "用於即時伺服器追蹤的 SteamID64",
     "discordPresenceSteamIdDescription": "可選。加入你的 SteamID64，這樣 Discord 就能顯示你目前實際所在的伺服器，即使你在 Quake Live 裡切換伺服器也一樣。",
-    "discordPresenceSteamIdPlaceholder": "7656119..."
+    "discordPresenceSteamIdPlaceholder": "7656119...",
+    "sections": {
+      "general": "一般",
+      "generalDescription": "語言和核心應用程式首選項。",
+      "startupTray": "啟動和托盤",
+      "startupTrayDescription": "啟動行為、托盤模式和視窗處理。",
+      "desktopAlerts": "桌面警報",
+      "desktopAlertsDescription": "用於追蹤的玩家和喜愛的伺服器的本機通知。",
+      "notifications": "通知和不和諧",
+      "notificationsDescription": "Discord 帳戶連結和通知規則存取。",
+      "discordPresence": "不和諧存在",
+      "discordPresenceDescription": "QLTracker 打開時，Discord 豐富的存在。"
+    },
+    "backToApp": "返回應用程式",
+    "trayModeTitle": "托盤模式",
+    "trayModeDescription": "透過托盤圖示和快速操作讓 QLTracker 在背景運行。",
+    "closeToTrayTitle": "關閉托盤視窗",
+    "closeToTrayDescription": "當您關閉主視窗時，隱藏 QLTracker 而不是退出。",
+    "startMinimizedTitle": "開始最小化到托盤",
+    "startMinimizedDescription": "在背景啟動 QLTracker，直到您從托盤圖示恢復它。",
+    "desktopAlertsTitle": "桌面警報",
+    "desktopAlertsDescription": "為追蹤的玩家和喜愛的伺服器發送本機桌面通知。",
+    "desktopAlertsPausedTitle": "暫停桌面警報",
+    "desktopAlertsPausedDescription": "暫時使所有桌面警報靜音，而不更改警報規則。",
+    "trackedPlayerAlertsTitle": "追蹤玩家警報",
+    "trackedPlayerAlertsDescription": "當觀看的玩家出現或移動到另一個伺服器時發出通知。需要實時後端。",
+    "favoriteServerAlertsTitle": "最喜歡的伺服器警報",
+    "favoriteServerAlertsDescription": "當最喜歡的伺服器達到您的玩家閾值時發出通知。",
+    "favoriteServerThresholdTitle": "最喜歡的伺服器玩家閾值",
+    "favoriteServerThresholdDescription": "當喜愛的伺服器超過此玩家數量時發送警報。",
+    "favoriteServerThresholdPlaceholder": "玩家",
+    "discordLinkTitle": "不和諧帳戶鏈接",
+    "discordLinkDescription": "連結 Discord 來管理 DM 通知傳遞和帳戶狀態。",
+    "notificationsManageRulesTitle": "通知規則",
+    "notificationsManageRulesDescription": "伺服器特定的 Discord DM 規則透過伺服器清單進行管理。",
+    "notificationsManageRulesHint": "開啟伺服器並使用 Discord 通知操作來建立或編輯規則。"
   },
   "language": {
     "en": "English",
@@ -338,5 +373,10 @@
       "none": "沒有選擇標籤 .",
       "inputPlaceholder": "輸入"
     }
+  },
+  "releaseNotes": {
+    "title": "{{version}} 中的新功能",
+    "publishedOn": "发布日期：{{date}}",
+    "close": "關閉"
   }
 }

@@ -8,19 +8,29 @@ import {
 } from "@/components/server/server-filters";
 import { ServerList } from "@/components/server/server-list";
 import { FavoritesPage } from "@/components/pages/favorites-page";
-import { NotificationsPage } from "@/components/pages/notifications-page";
+import { ReleaseNotesDialog } from "@/components/release-notes-dialog";
 import { SettingsPage } from "@/components/pages/settings-page";
 import { WatchlistPage } from "@/components/pages/watchlist-page";
 import { useAppSettings } from "@/hooks/use-app-settings";
+import { useAppTray } from "@/hooks/use-app-tray";
+import { useDesktopAlerts } from "@/hooks/use-desktop-alerts";
 import { useDiscordPresence } from "@/hooks/use-discord-presence";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useRealtimePlayerPresence } from "@/hooks/use-realtime-player-presence";
 import { useRealtimeSnapshots } from "@/hooks/use-realtime-snapshots";
 import { useServerInteractions } from "@/hooks/use-server-interactions";
+import { useTrackedPlayerIdentitySync } from "@/hooks/use-tracked-player-identity-sync";
 import type { DiscordPresenceServerContext } from "@/lib/discord-presence";
 import { registerGlobalErrorLogging } from "@/lib/error-log";
 import type { PageId } from "@/lib/navigation";
 import { isRealtimeEnabled } from "@/lib/realtime";
+import {
+  LAST_SEEN_RELEASE_NOTES_VERSION_STORAGE_KEY,
+  parsePendingReleaseNotes,
+  parseReleaseNotesVersion,
+  PENDING_RELEASE_NOTES_STORAGE_KEY,
+  shouldShowPendingReleaseNotes,
+} from "@/lib/release-notes";
 import {
   parseStoredServerFilters,
   serializeServerFilters,
@@ -36,6 +46,10 @@ import {
   createFallbackServerFromPresence,
   getGameModeLabel,
 } from "@/lib/server-utils";
+import {
+  parseSettingsSection,
+  SETTINGS_SECTION_STORAGE_KEY,
+} from "@/lib/settings-navigation";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useTranslation } from "react-i18next";
 
@@ -60,7 +74,10 @@ function getQueryErrorMessage(error: unknown) {
 
 export function App() {
   const { t } = useTranslation();
+  const appVersion = import.meta.env.PACKAGE_VERSION ?? "0.1.0";
   const [page, setPage] = useState<PageId>("server-list");
+  const [lastNonSettingsPage, setLastNonSettingsPage] =
+    useState<Exclude<PageId, "settings">>("server-list");
   const [activePresenceSession, setActivePresenceSession] = useState<{
     addr: string;
     modeLabel: string | null;
@@ -69,7 +86,7 @@ export function App() {
   const [isTrackedQuakeLiveRunning, setIsTrackedQuakeLiveRunning] = useState<
     boolean | null
   >(null);
-  const { settings } = useAppSettings();
+  const { settings, updateSettings } = useAppSettings();
   const trackedPresenceSteamId = settings.discordPresenceSteamId.trim();
   const trackLiveServerPresence =
     settings.discordPresenceEnabled &&
@@ -81,10 +98,46 @@ export function App() {
     SERVER_FILTERS_STORAGE_KEY,
     serializeServerFilters(createDefaultServerFilters())
   );
+  const [rawSettingsSection, setRawSettingsSection] = useLocalStorage(
+    SETTINGS_SECTION_STORAGE_KEY,
+    "general"
+  );
+  const [pendingReleaseNotes, setPendingReleaseNotes] = useState(() =>
+    parsePendingReleaseNotes(
+      localStorage.getItem(PENDING_RELEASE_NOTES_STORAGE_KEY) ?? ""
+    )
+  );
+  const [releaseNotesOpen, setReleaseNotesOpen] = useState(false);
+  const settingsSection = parseSettingsSection(rawSettingsSection);
   const [filters, setFilters] = useState(() =>
     parseStoredServerFilters(rawFilters)
   );
   useEffect(() => registerGlobalErrorLogging(), []);
+  useTrackedPlayerIdentitySync();
+  useEffect(() => {
+    const pending = parsePendingReleaseNotes(
+      localStorage.getItem(PENDING_RELEASE_NOTES_STORAGE_KEY) ?? ""
+    );
+    if (pending && pending.version !== appVersion) {
+      localStorage.removeItem(PENDING_RELEASE_NOTES_STORAGE_KEY);
+      setPendingReleaseNotes(null);
+      return;
+    }
+
+    setPendingReleaseNotes(pending);
+
+    if (
+      shouldShowPendingReleaseNotes(
+        pending,
+        appVersion,
+        parseReleaseNotesVersion(
+          localStorage.getItem(LAST_SEEN_RELEASE_NOTES_VERSION_STORAGE_KEY)
+        )
+      )
+    ) {
+      setReleaseNotesOpen(true);
+    }
+  }, [appVersion]);
   useEffect(() => {
     setRawFilters(serializeServerFilters(filters));
   }, [filters, setRawFilters]);
@@ -111,6 +164,17 @@ export function App() {
       }),
     [serversQuery.data, snapshotsByAddr]
   );
+  useAppTray({
+    settings,
+    onRefresh: () => {
+      void serversQuery.refetch();
+    },
+    updateSettings,
+  });
+  useDesktopAlerts({
+    servers: mergedServers,
+    settings,
+  });
   const serversErrorMessage = getQueryErrorMessage(serversQuery.error);
   const handleServerLaunched = (context: DiscordPresenceServerContext) => {
     setActivePresenceSession({
@@ -276,8 +340,26 @@ export function App() {
   }, [activePresenceSession]);
 
   const handleNavigate = (nextPage: PageId) => {
+    if (nextPage !== "settings") {
+      setLastNonSettingsPage(nextPage);
+    }
+
     setPage(nextPage);
     setActivePresenceSession(null);
+  };
+
+  const handleReleaseNotesOpenChange = (open: boolean) => {
+    setReleaseNotesOpen(open);
+    if (open || !pendingReleaseNotes || pendingReleaseNotes.version !== appVersion) {
+      return;
+    }
+
+    localStorage.setItem(
+      LAST_SEEN_RELEASE_NOTES_VERSION_STORAGE_KEY,
+      appVersion
+    );
+    localStorage.removeItem(PENDING_RELEASE_NOTES_STORAGE_KEY);
+    setPendingReleaseNotes(null);
   };
 
   return (
@@ -294,6 +376,9 @@ export function App() {
         <AppSidebar
           page={page}
           onNavigate={handleNavigate}
+          onExitSettings={() => handleNavigate(lastNonSettingsPage)}
+          onSettingsSectionChange={setRawSettingsSection}
+          settingsSection={settingsSection}
           servers={mergedServers}
         />
       </div>
@@ -354,13 +439,16 @@ export function App() {
             onOpenServer={serverInteractions.openServerDetails}
             onJoinServer={serverInteractions.requestJoin}
           />
-        ) : page === "notifications" ? (
-          <NotificationsPage />
         ) : (
-          <SettingsPage />
+          <SettingsPage section={settingsSection} />
         )}
       </SidebarInset>
       {serverInteractions.overlays}
+      <ReleaseNotesDialog
+        open={releaseNotesOpen}
+        releaseNotes={pendingReleaseNotes}
+        onOpenChange={handleReleaseNotesOpenChange}
+      />
     </SidebarProvider>
   );
 }

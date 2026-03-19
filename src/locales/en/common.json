@@ -77,6 +77,22 @@
       "createRule": "Create Rule"
     }
   },
+  "tray": {
+    "tooltip": "QLTracker",
+    "open": "Open QLTracker",
+    "refresh": "Refresh Servers",
+    "enableAlerts": "Enable Desktop Alerts",
+    "pauseAlerts": "Pause Desktop Alerts",
+    "resumeAlerts": "Resume Desktop Alerts",
+    "quit": "Quit"
+  },
+  "desktopAlerts": {
+    "trackedPlayerTitle": "{{player}} is playing",
+    "trackedPlayerBody": "{{server}} • {{map}} • {{mode}}",
+    "favoriteServerTitle": "{{server}} is active",
+    "favoriteServerBody_one": "{{count}} player on {{map}}",
+    "favoriteServerBody_other": "{{count}} players on {{map}}"
+  },
   "serverList": {
     "refresh": "Refresh",
     "noServersMatch": "No servers match the current filters.",
@@ -98,7 +114,7 @@
     "actions": {
       "copyAddress": "Copy IP:Port",
       "notificationsPublicOnly": "Notifications are available only for public servers.",
-      "connectDiscordFavorites": "Connect Discord on the Notifications page to enable notifications.",
+      "connectDiscordFavorites": "Connect Discord in Settings to enable notifications.",
       "editNotification": "Edit Discord notification",
       "notifyDiscord": "Notify on Discord",
       "editFavorite": "Edit favorite",
@@ -172,13 +188,48 @@
   },
   "settings": {
     "title": "Settings",
+    "backToApp": "Back to app",
+    "sections": {
+      "general": "General",
+      "generalDescription": "Language and core app preferences.",
+      "startupTray": "Startup & Tray",
+      "startupTrayDescription": "Startup behavior, tray mode, and window handling.",
+      "desktopAlerts": "Desktop Alerts",
+      "desktopAlertsDescription": "Native notifications for tracked players and favorite servers.",
+      "notifications": "Notifications & Discord",
+      "notificationsDescription": "Discord account linking and notification rule access.",
+      "discordPresence": "Discord Presence",
+      "discordPresenceDescription": "Discord rich presence while QLTracker is open."
+    },
     "startupTitle": "Startup on Windows",
     "startupDescription": "Automatically launch QLTracker when you sign in to Windows.",
     "startupSaving": "Saving startup preference...",
     "unavailable": "Setting is unavailable in this build.",
+    "trayModeTitle": "Tray Mode",
+    "trayModeDescription": "Keep QLTracker running in the background with a tray icon and quick actions.",
+    "closeToTrayTitle": "Close window to tray",
+    "closeToTrayDescription": "Hide QLTracker instead of quitting when you close the main window.",
+    "startMinimizedTitle": "Start minimized to tray",
+    "startMinimizedDescription": "Launch QLTracker in the background until you restore it from the tray icon.",
+    "desktopAlertsTitle": "Desktop Alerts",
+    "desktopAlertsDescription": "Send native desktop notifications for tracked players and favorite servers.",
+    "desktopAlertsPausedTitle": "Pause desktop alerts",
+    "desktopAlertsPausedDescription": "Temporarily silence all desktop alerts without changing your alert rules.",
+    "trackedPlayerAlertsTitle": "Tracked player alerts",
+    "trackedPlayerAlertsDescription": "Notify when a watched player appears or moves to another server. Requires the realtime backend.",
+    "favoriteServerAlertsTitle": "Favorite server alerts",
+    "favoriteServerAlertsDescription": "Notify when a favorite server reaches your player threshold.",
+    "favoriteServerThresholdTitle": "Favorite server player threshold",
+    "favoriteServerThresholdDescription": "Send an alert when a favorite server crosses this player count.",
+    "favoriteServerThresholdPlaceholder": "Players",
     "languageTitle": "Language",
     "languageDescription": "Choose the language used throughout QLTracker.",
     "languagePlaceholder": "Select language",
+    "discordLinkTitle": "Discord Account Link",
+    "discordLinkDescription": "Connect Discord to manage DM notification delivery and account status.",
+    "notificationsManageRulesTitle": "Notification Rules",
+    "notificationsManageRulesDescription": "Server-specific Discord DM rules are managed from the server list.",
+    "notificationsManageRulesHint": "Open a server and use the Discord notification action to create or edit a rule.",
     "discordPresenceTitle": "Discord Presence",
     "discordPresenceDescription": "Show QLTracker as your Discord activity while you browse the app.",
     "discordPresenceServerTitle": "Show current server details",
@@ -243,6 +294,12 @@
     "summary_one": "{{online}} online out of {{count}} tracked player",
     "summary_other": "{{online}} online out of {{count}} tracked players",
     "onlineCount": "{{count}} online",
+    "aliasHistoryTooltip": "Nickname history",
+    "aliasHistoryDialogTitle": "Nickname history",
+    "aliasHistoryDialogDescription": "Known nicknames for {{player}}.",
+    "aliasHistoryEmpty": "No previous nicknames recorded yet.",
+    "currentNickname": "Current nickname",
+    "previousNicknames": "Previous nicknames",
     "serviceUnavailableBadge": "Live status unavailable",
     "emptyTitle": "No tracked players yet",
     "emptyDescription": "Track players from a server drawer to keep an eye on where they are playing.",
@@ -282,6 +339,11 @@
       "editNote": "Edit note",
       "viewServer": "View server"
     }
+  },
+  "releaseNotes": {
+    "title": "What's new in {{version}}",
+    "publishedOn": "Published {{date}}",
+    "close": "Close"
   },
   "filters": {
     "title": "Filters",

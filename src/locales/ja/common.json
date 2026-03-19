@@ -185,7 +185,42 @@
     "discordPresenceServerDescription": "QLTracker がサーバーを起動したときに、サーバー名、マップ、モード、プレイヤー情報を Discord のアクティビティに含めます。",
     "discordPresenceSteamIdTitle": "現在のサーバー追跡用 SteamID64",
     "discordPresenceSteamIdDescription": "任意です。SteamID64 を追加すると、Quake Live 内でサーバーを切り替えても、Discord に今いるサーバーを正しく表示できます。",
-    "discordPresenceSteamIdPlaceholder": "7656119..."
+    "discordPresenceSteamIdPlaceholder": "7656119...",
+    "sections": {
+      "general": "一般",
+      "generalDescription": "言語とコアアプリの設定。",
+      "startupTray": "スタートアップとトレイ",
+      "startupTrayDescription": "起動時の動作、トレイ モード、ウィンドウの処理。",
+      "desktopAlerts": "デスクトップアラート",
+      "desktopAlertsDescription": "追跡されたプレーヤーとお気に入りのサーバーのネイティブ通知。",
+      "notifications": "通知とDiscord",
+      "notificationsDescription": "Discord アカウントのリンクと通知ルールへのアクセス。",
+      "discordPresence": "不和の存在",
+      "discordPresenceDescription": "QLTracker が開いている間、Discord のリッチなプレゼンスが得られます。"
+    },
+    "backToApp": "アプリに戻る",
+    "trayModeTitle": "トレイモード",
+    "trayModeDescription": "トレイ アイコンとクイック アクションを使用して、QLTracker をバックグラウンドで実行し続けます。",
+    "closeToTrayTitle": "ウィンドウをトレイまで閉じます",
+    "closeToTrayDescription": "メイン ウィンドウを閉じるときに終了するのではなく、QLTracker を非表示にします。",
+    "startMinimizedTitle": "トレイに最小化して開始",
+    "startMinimizedDescription": "トレイ アイコンから復元するまで、QLTracker をバックグラウンドで起動します。",
+    "desktopAlertsTitle": "デスクトップアラート",
+    "desktopAlertsDescription": "追跡されたプレーヤーとお気に入りのサーバーに対してネイティブ デスクトップ通知を送信します。",
+    "desktopAlertsPausedTitle": "デスクトップアラートを一時停止する",
+    "desktopAlertsPausedDescription": "アラート ルールを変更せずに、すべてのデスクトップ アラートを一時的に停止します。",
+    "trackedPlayerAlertsTitle": "追跡されたプレーヤーのアラート",
+    "trackedPlayerAlertsDescription": "監視しているプレイヤーが出現したり、別のサーバーに移動したりしたときに通知します。リアルタイム バックエンドが必要です。",
+    "favoriteServerAlertsTitle": "お気に入りのサーバーアラート",
+    "favoriteServerAlertsDescription": "お気に入りのサーバーがプレイヤーのしきい値に達したときに通知します。",
+    "favoriteServerThresholdTitle": "お気に入りのサーバー プレーヤーのしきい値",
+    "favoriteServerThresholdDescription": "お気に入りのサーバーがこのプレイヤー数を超えたときにアラートを送信します。",
+    "favoriteServerThresholdPlaceholder": "選手",
+    "discordLinkTitle": "Discordアカウントリンク",
+    "discordLinkDescription": "Discord に接続して DM 通知の配信とアカウントのステータスを管理します。",
+    "notificationsManageRulesTitle": "通知ルール",
+    "notificationsManageRulesDescription": "サーバー固有の Discord DM ルールはサーバー リストから管理されます。",
+    "notificationsManageRulesHint": "サーバーを開き、Discord 通知アクションを使用してルールを作成または編集します。"
   },
   "language": {
     "en": "English",
@@ -338,5 +373,10 @@
       "none": "選択したタグはありません.",
       "inputPlaceholder": "型タグとプレス Enter"
     }
+  },
+  "releaseNotes": {
+    "title": "{{バージョン}}の新機能",
+    "publishedOn": "公開日 {{日付}}",
+    "close": "閉じる"
   }
 }

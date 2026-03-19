@@ -21,6 +21,15 @@ export type RealtimePlayerPresence = {
   updatedAt: string;
 };
 
+export type PlayerNameHistoryEntry = {
+  playerName: string;
+  firstSeenAt: string;
+  lastSeenAt: string;
+  lastSeenAddr: string | null;
+  lastSeenServerName: string | null;
+  seenCount: number;
+};
+
 export type ServerHistoryPoint = {
   timestamp: string;
   players: number;
@@ -43,6 +52,11 @@ type RealtimePresenceResponse = {
 type RealtimePresenceLookupResponse = {
   ok: boolean;
   presences: Record<string, RealtimePlayerPresence | null>;
+};
+
+type RealtimePlayerNameHistoryLookupResponse = {
+  ok: boolean;
+  histories: Record<string, PlayerNameHistoryEntry[]>;
 };
 
 type RealtimeServerHistoryResponse = {
@@ -126,6 +140,29 @@ export async function fetchRealtimePlayerPresenceLookup(steamIds: string[]) {
       realtimeUrl,
       error:
         error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
+}
+
+export async function fetchRealtimePlayerNameHistoryLookup(steamIds: string[]) {
+  if (!isRealtimeEnabled() || steamIds.length === 0) {
+    return {};
+  }
+
+  try {
+    const payload = await realtimePost<RealtimePlayerNameHistoryLookupResponse>(
+      `${realtimeUrl}/api/players/name-history/lookup`,
+      {
+        steamIds,
+      }
+    );
+    return payload.histories ?? {};
+  } catch (error) {
+    await appendErrorLog("realtime.playerNameHistoryLookup", {
+      steamIds,
+      realtimeUrl,
+      error: error instanceof Error ? error.message : String(error),
     });
     throw error;
   }

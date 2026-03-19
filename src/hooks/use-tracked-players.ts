@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import {
+  mergeTrackedPlayerIdentity,
   parseTrackedPlayers,
   serializeTrackedPlayers,
   TRACKED_PLAYERS_STORAGE_KEY,
@@ -34,17 +35,18 @@ export function useTrackedPlayers() {
       (player) => player.steamId === normalizedSteamId
     );
     if (existingPlayer) {
-      if (existingPlayer.playerName === normalizedPlayerName) {
+      const nextPlayer = mergeTrackedPlayerIdentity(
+        existingPlayer,
+        normalizedPlayerName
+      );
+      if (nextPlayer === existingPlayer) {
         return false;
       }
 
       setPlayers(
         players.map((player) =>
           player.steamId === normalizedSteamId
-            ? {
-                ...player,
-                playerName: normalizedPlayerName,
-              }
+            ? nextPlayer
             : player
         )
       );
@@ -56,10 +58,36 @@ export function useTrackedPlayers() {
       {
         steamId: normalizedSteamId,
         playerName: normalizedPlayerName,
+        aliases: [],
         addedAt: new Date().toISOString(),
         note: "",
       },
     ]);
+    return true;
+  }
+
+  function syncPlayerNames(nextPlayerNames: Record<string, string>) {
+    let hasChanged = false;
+
+    const nextPlayers = players.map((player) => {
+      const nextPlayerName = nextPlayerNames[player.steamId];
+      if (!nextPlayerName) {
+        return player;
+      }
+
+      const nextPlayer = mergeTrackedPlayerIdentity(player, nextPlayerName);
+      if (nextPlayer !== player) {
+        hasChanged = true;
+      }
+
+      return nextPlayer;
+    });
+
+    if (!hasChanged) {
+      return false;
+    }
+
+    setPlayers(nextPlayers);
     return true;
   }
 
@@ -109,6 +137,7 @@ export function useTrackedPlayers() {
     players,
     isTracked,
     trackPlayer,
+    syncPlayerNames,
     setPlayerNote,
     untrackPlayer,
   };

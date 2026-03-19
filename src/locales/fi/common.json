@@ -185,7 +185,42 @@
     "discordPresenceServerDescription": "Kun QLTracker käynnistää palvelimen, sisällytä palvelimen nimi, kartta, pelitila ja pelaajat Discord-aktiviteettiisi.",
     "discordPresenceSteamIdTitle": "SteamID64 palvelimen live-seurantaan",
     "discordPresenceSteamIdDescription": "Valinnainen. Lisää SteamID64-tunnuksesi, jotta Discord voi näyttää palvelimen, jolla oikeasti olet, vaikka vaihtaisit palvelinta Quake Liven sisällä.",
-    "discordPresenceSteamIdPlaceholder": "7656119..."
+    "discordPresenceSteamIdPlaceholder": "7656119...",
+    "sections": {
+      "general": "Kenraali",
+      "generalDescription": "Kieli- ja ydinsovellusasetukset.",
+      "startupTray": "Käynnistys ja alusta",
+      "startupTrayDescription": "Käynnistyskäyttäytyminen, lokerotila ja ikkunoiden käsittely.",
+      "desktopAlerts": "Työpöytähälytykset",
+      "desktopAlertsDescription": "Alkuperäiset ilmoitukset seuratuille pelaajille ja suosikkipalvelimille.",
+      "notifications": "Ilmoitukset ja ristiriita",
+      "notificationsDescription": "Discord-tilin linkitys ja ilmoitussäännön käyttöoikeus.",
+      "discordPresence": "Erimielisyys läsnäolo",
+      "discordPresenceDescription": "Discord rikas läsnäolo QLTrackerin ollessa auki."
+    },
+    "backToApp": "Takaisin sovellukseen",
+    "trayModeTitle": "Lokerotila",
+    "trayModeDescription": "Pidä QLTracker käynnissä taustalla tarjotinkuvakkeen ja nopeiden toimien avulla.",
+    "closeToTrayTitle": "Sulje ikkuna lokeroon",
+    "closeToTrayDescription": "Piilota QLTracker sen sijaan, että suljet pääikkunan.",
+    "startMinimizedTitle": "Aloita minimoitu lokeroon",
+    "startMinimizedDescription": "Käynnistä QLTracker taustalla, kunnes palautat sen tarjotinkuvakkeesta.",
+    "desktopAlertsTitle": "Työpöytähälytykset",
+    "desktopAlertsDescription": "Lähetä alkuperäisiä työpöytäilmoituksia seuratuille pelaajille ja suosikkipalvelimille.",
+    "desktopAlertsPausedTitle": "Keskeytä työpöydän hälytykset",
+    "desktopAlertsPausedDescription": "Hiljennä väliaikaisesti kaikki työpöydän hälytykset muuttamatta hälytyssääntöjä.",
+    "trackedPlayerAlertsTitle": "Seuratut pelaajahälytykset",
+    "trackedPlayerAlertsDescription": "Ilmoita, kun katsottu pelaaja ilmestyy tai siirtyy toiselle palvelimelle. Vaatii reaaliaikaisen taustajärjestelmän.",
+    "favoriteServerAlertsTitle": "Suosikkipalvelimen hälytykset",
+    "favoriteServerAlertsDescription": "Ilmoita, kun suosikkipalvelin saavuttaa pelaajakynnyksesi.",
+    "favoriteServerThresholdTitle": "Suosikkipalvelinpelaajan kynnys",
+    "favoriteServerThresholdDescription": "Lähetä hälytys, kun suosikkipalvelin ylittää tämän pelaajamäärän.",
+    "favoriteServerThresholdPlaceholder": "Pelaajat",
+    "discordLinkTitle": "Discord-tilin linkki",
+    "discordLinkDescription": "Yhdistä Discord hallitaksesi DM-ilmoitusten toimitusta ja tilin tilaa.",
+    "notificationsManageRulesTitle": "Ilmoitussäännöt",
+    "notificationsManageRulesDescription": "Palvelinkohtaisia Discord DM -sääntöjä hallitaan palvelinluettelosta.",
+    "notificationsManageRulesHint": "Avaa palvelin ja käytä Discord-ilmoitustoimintoa säännön luomiseen tai muokkaamiseen."
   },
   "language": {
     "en": "English",
@@ -338,5 +373,10 @@
       "none": "Tunnisteita ei ole valittu.",
       "inputPlaceholder": "Kirjoita ja paina Enter"
     }
+  },
+  "releaseNotes": {
+    "title": "Mitä uutta versiossa {{version}}",
+    "publishedOn": "Julkaistu {{päivämäärä}}",
+    "close": "Sulje"
   }
 }

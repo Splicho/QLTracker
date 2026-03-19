@@ -185,7 +185,42 @@
     "discordPresenceServerDescription": "Kada QLTracker pokrene server, uključi naziv servera, mapu, način rada i igrače u svoju Discord aktivnost.",
     "discordPresenceSteamIdTitle": "SteamID64 za praćenje trenutnog servera",
     "discordPresenceSteamIdDescription": "Neobavezno. Dodaj svoj SteamID64 kako bi Discord mogao prikazati server na kojem stvarno jesi, čak i ako mijenjaš servere unutar Quake Livea.",
-    "discordPresenceSteamIdPlaceholder": "7656119..."
+    "discordPresenceSteamIdPlaceholder": "7656119...",
+    "sections": {
+      "general": "generalno",
+      "generalDescription": "Jezik i osnovne postavke aplikacije.",
+      "startupTray": "Pokretanje i ladica",
+      "startupTrayDescription": "Ponašanje pri pokretanju, način ladice i rukovanje prozorom.",
+      "desktopAlerts": "Upozorenja na radnoj površini",
+      "desktopAlertsDescription": "Izvorne obavijesti za praćene igrače i omiljene poslužitelje.",
+      "notifications": "Obavijesti i Discord",
+      "notificationsDescription": "Povezivanje Discord računa i pristup pravilu obavijesti.",
+      "discordPresence": "Prisutnost nesklada",
+      "discordPresenceDescription": "Discord bogata prisutnost dok je QLTracker otvoren."
+    },
+    "backToApp": "Natrag na aplikaciju",
+    "trayModeTitle": "Način ladice",
+    "trayModeDescription": "Neka QLTracker radi u pozadini pomoću ikone na traci i brzih radnji.",
+    "closeToTrayTitle": "Zatvorite prozor na traci",
+    "closeToTrayDescription": "Sakrijte QLTracker umjesto da ga zatvorite kada zatvorite glavni prozor.",
+    "startMinimizedTitle": "Početak minimiziran na ladicu",
+    "startMinimizedDescription": "Pokrenite QLTracker u pozadini dok ga ne vratite iz ikone na traci.",
+    "desktopAlertsTitle": "Upozorenja na radnoj površini",
+    "desktopAlertsDescription": "Šalji izvorne obavijesti radne površine za praćene igrače i omiljene poslužitelje.",
+    "desktopAlertsPausedTitle": "Pauziraj upozorenja na radnoj površini",
+    "desktopAlertsPausedDescription": "Privremeno utišajte sva upozorenja na radnoj površini bez promjene pravila upozorenja.",
+    "trackedPlayerAlertsTitle": "Upozorenja praćenih igrača",
+    "trackedPlayerAlertsDescription": "Obavijesti kada se gledani igrač pojavi ili premjesti na drugi poslužitelj. Zahtijeva backend u stvarnom vremenu.",
+    "favoriteServerAlertsTitle": "Omiljena upozorenja poslužitelja",
+    "favoriteServerAlertsDescription": "Obavijestite kada omiljeni poslužitelj dosegne vaš prag igrača.",
+    "favoriteServerThresholdTitle": "Prag omiljenog poslužiteljskog igrača",
+    "favoriteServerThresholdDescription": "Pošaljite upozorenje kada omiljeni poslužitelj prijeđe ovaj broj igrača.",
+    "favoriteServerThresholdPlaceholder": "Igrači",
+    "discordLinkTitle": "Link Discord računa",
+    "discordLinkDescription": "Povežite Discord za upravljanje isporukom DM obavijesti i statusom računa.",
+    "notificationsManageRulesTitle": "Pravila obavješćivanja",
+    "notificationsManageRulesDescription": "Discord DM pravilima specifičnim za poslužitelj upravlja se s popisa poslužitelja.",
+    "notificationsManageRulesHint": "Otvorite poslužitelj i upotrijebite radnju obavijesti Discord za stvaranje ili uređivanje pravila."
   },
   "language": {
     "en": "English",
@@ -339,5 +374,10 @@
       "none": "Nema odabranih oznaka.",
       "inputPlaceholder": "Upišite tag i pritisnite Enter"
     }
+  },
+  "releaseNotes": {
+    "title": "Što je novo u {{version}}",
+    "publishedOn": "Objavljeno {{date}}",
+    "close": "Zatvori"
   }
 }

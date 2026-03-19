@@ -185,7 +185,42 @@
     "discordPresenceServerDescription": "Kui QLTracker käivitab serveri, lisa serveri nimi, kaart, režiim ja mängijad sinu Discordi tegevusse.",
     "discordPresenceSteamIdTitle": "SteamID64 aktiivse serveri jälgimiseks",
     "discordPresenceSteamIdDescription": "Valikuline. Lisa oma SteamID64, et Discord saaks näidata serverit, kus sa päriselt oled, isegi kui vahetad Quake Live'is serverit.",
-    "discordPresenceSteamIdPlaceholder": "7656119..."
+    "discordPresenceSteamIdPlaceholder": "7656119...",
+    "sections": {
+      "general": "Kindral",
+      "generalDescription": "Keele ja põhirakenduste eelistused.",
+      "startupTray": "Käivitamine ja salv",
+      "startupTrayDescription": "Käivituskäitumine, salverežiim ja akende käsitsemine.",
+      "desktopAlerts": "Töölaua märguanded",
+      "desktopAlertsDescription": "Algsed märguanded jälgitavate mängijate ja lemmikserverite jaoks.",
+      "notifications": "Märguanded ja ebakõlad",
+      "notificationsDescription": "Discordi konto linkimine ja juurdepääs teavitusreeglitele.",
+      "discordPresence": "Ebakõla olemasolu",
+      "discordPresenceDescription": "Discord rikkalik kohalolek, kui QLTracker on avatud."
+    },
+    "backToApp": "Tagasi rakenduse juurde",
+    "trayModeTitle": "Salve režiim",
+    "trayModeDescription": "Hoidke QLTracker taustal töötamas salveikooni ja kiirete toimingute abil.",
+    "closeToTrayTitle": "Sulgege salve aken",
+    "closeToTrayDescription": "Peaakna sulgemisel peitke QLTracker selle asemel, et sulgeda.",
+    "startMinimizedTitle": "Alusta minimeeritud alusele",
+    "startMinimizedDescription": "Käivitage taustal QLTracker, kuni taastate selle salveikoonilt.",
+    "desktopAlertsTitle": "Töölaua märguanded",
+    "desktopAlertsDescription": "Saatke jälgitavate mängijate ja lemmikserverite jaoks oma töölauateatisi.",
+    "desktopAlertsPausedTitle": "Peatage töölaua märguanded",
+    "desktopAlertsPausedDescription": "Vaigistage ajutiselt kõik töölauateated ilma hoiatusreegleid muutmata.",
+    "trackedPlayerAlertsTitle": "Jälitatud mängija hoiatused",
+    "trackedPlayerAlertsDescription": "Teavita, kui jälgitav mängija ilmub või liigub teise serverisse. Nõuab reaalajas taustaprogrammi.",
+    "favoriteServerAlertsTitle": "Lemmikserveri hoiatused",
+    "favoriteServerAlertsDescription": "Teavitage, kui lemmikserver jõuab teie mängija läveni.",
+    "favoriteServerThresholdTitle": "Lemmikserveri mängija lävi",
+    "favoriteServerThresholdDescription": "Saatke hoiatus, kui lemmikserver ületab selle mängijate arvu.",
+    "favoriteServerThresholdPlaceholder": "Mängijad",
+    "discordLinkTitle": "Discordi konto link",
+    "discordLinkDescription": "Ühendage Discord, et hallata DM-teatiste edastamist ja konto olekut.",
+    "notificationsManageRulesTitle": "Teavitamise reeglid",
+    "notificationsManageRulesDescription": "Serveripõhiseid Discord DM-i reegleid hallatakse serverite loendist.",
+    "notificationsManageRulesHint": "Avage server ja kasutage reegli loomiseks või muutmiseks teavitustoimingut Discord."
   },
   "language": {
     "en": "English",
@@ -338,5 +373,10 @@
       "none": "Silte pole valitud.",
       "inputPlaceholder": "Kirjuta silt ja vajuta Enter"
     }
+  },
+  "releaseNotes": {
+    "title": "Mis on uut versioonis {{version}}",
+    "publishedOn": "Avaldatud {{kuupäev}}",
+    "close": "Sule"
   }
 }

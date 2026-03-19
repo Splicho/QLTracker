@@ -1560,9 +1560,11 @@ fn launcher_restart_app(app: tauri::AppHandle) {
 }
 
 #[tauri::command]
-fn launcher_finish_bootstrap(app: tauri::AppHandle) -> Result<(), String> {
+fn launcher_finish_bootstrap(app: tauri::AppHandle, show_window: bool) -> Result<(), String> {
     let main_window = ensure_main_window(&app)?;
-    focus_window(&main_window);
+    if show_window {
+        focus_window(&main_window);
+    }
     Ok(())
 }
 
@@ -1779,6 +1781,7 @@ pub fn run() {
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
             None,
         ))
+        .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {

@@ -185,7 +185,42 @@
     "discordPresenceServerDescription": "Когато QLTracker стартира сървър, включвай името на сървъра, картата, режима и играчите в твоята Discord активност.",
     "discordPresenceSteamIdTitle": "SteamID64 за проследяване на текущия сървър",
     "discordPresenceSteamIdDescription": "По желание. Добави своя SteamID64, за да може Discord да показва в кой сървър си в момента, дори ако сменяш сървърите в Quake Live.",
-    "discordPresenceSteamIdPlaceholder": "7656119..."
+    "discordPresenceSteamIdPlaceholder": "7656119...",
+    "sections": {
+      "general": "генерал",
+      "generalDescription": "Предпочитания за език и основни приложения.",
+      "startupTray": "Стартиране и тава",
+      "startupTrayDescription": "Поведение при стартиране, режим на област и работа с прозорец.",
+      "desktopAlerts": "Сигнали на работния плот",
+      "desktopAlertsDescription": "Родни известия за проследени играчи и любими сървъри.",
+      "notifications": "Известия и Discord",
+      "notificationsDescription": "Свързване на Discord акаунт и достъп до правило за известяване.",
+      "discordPresence": "Присъствие на Discord",
+      "discordPresenceDescription": "Богато присъствие на Discord, докато QLTracker е отворен."
+    },
+    "backToApp": "Назад към приложението",
+    "trayModeTitle": "Режим тава",
+    "trayModeDescription": "Поддържайте QLTracker да работи във фонов режим с икона в панела и бързи действия.",
+    "closeToTrayTitle": "Затворете прозореца в трея",
+    "closeToTrayDescription": "Скрийте QLTracker вместо да излезете, когато затворите главния прозорец.",
+    "startMinimizedTitle": "Старт минимизиран в трея",
+    "startMinimizedDescription": "Стартирайте QLTracker във фонов режим, докато не го възстановите от иконата в трея.",
+    "desktopAlertsTitle": "Сигнали на работния плот",
+    "desktopAlertsDescription": "Изпращайте собствени известия на работния плот за проследени играчи и любими сървъри.",
+    "desktopAlertsPausedTitle": "Поставете на пауза предупрежденията на работния плот",
+    "desktopAlertsPausedDescription": "Временно заглушете всички предупреждения на работния плот, без да променяте правилата си за предупреждения.",
+    "trackedPlayerAlertsTitle": "Сигнали за проследени играчи",
+    "trackedPlayerAlertsDescription": "Уведомявайте, когато наблюдаван играч се появи или се премести на друг сървър. Изисква бекенда в реално време.",
+    "favoriteServerAlertsTitle": "Сигнали за любим сървър",
+    "favoriteServerAlertsDescription": "Уведомете, когато любим сървър достигне вашия праг на играч.",
+    "favoriteServerThresholdTitle": "Праг на любим сървърен играч",
+    "favoriteServerThresholdDescription": "Изпратете предупреждение, когато любим сървър надхвърли този брой играчи.",
+    "favoriteServerThresholdPlaceholder": "Играчи",
+    "discordLinkTitle": "Връзка към Discord акаунт",
+    "discordLinkDescription": "Свържете Discord, за да управлявате доставката на DM известия и състоянието на акаунта.",
+    "notificationsManageRulesTitle": "Правила за уведомяване",
+    "notificationsManageRulesDescription": "Специфичните за сървъра правила на Discord DM се управляват от списъка със сървъри.",
+    "notificationsManageRulesHint": "Отворете сървър и използвайте действието за известяване на Discord, за да създадете или редактирате правило."
   },
   "language": {
     "en": "English",
@@ -338,5 +373,10 @@
       "none": "Няма избрани етикети.",
       "inputPlaceholder": "Въведете таг и натиснете Enter"
     }
+  },
+  "releaseNotes": {
+    "title": "Какво е новото във {{version}}",
+    "publishedOn": "Публикувано {{date}}",
+    "close": "затвори"
   }
 }

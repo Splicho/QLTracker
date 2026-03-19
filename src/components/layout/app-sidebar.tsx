@@ -2,8 +2,8 @@ import appIcon from "@/assets/images/appicon.png";
 import logo from "@/assets/images/logo.png";
 import logoDark from "@/assets/images/logo_dark.png";
 import { useQuery } from "@tanstack/react-query";
+import { ArrowLeft } from "lucide-react";
 import {
-  Bell,
   Cog,
   Discord,
   GameController,
@@ -18,6 +18,10 @@ import { useFavorites } from "@/hooks/use-favorites";
 import { useTrackedPlayers } from "@/hooks/use-tracked-players";
 import packageJson from "../../../package.json";
 import { navigationItems, type PageId } from "@/lib/navigation";
+import {
+  settingsNavigationItems,
+  type SettingsSectionId,
+} from "@/lib/settings-navigation";
 import {
   fetchRealtimePlayerPresenceLookup,
   isRealtimeEnabled,
@@ -67,10 +71,16 @@ const socialIcons: Record<
 export function AppSidebar({
   page,
   onNavigate,
+  onExitSettings,
+  onSettingsSectionChange,
+  settingsSection,
   servers,
 }: {
   page: PageId;
   onNavigate: (page: PageId) => void;
+  onExitSettings: () => void;
+  onSettingsSectionChange: (section: SettingsSectionId) => void;
+  settingsSection: SettingsSectionId;
   servers: SteamServer[];
 }) {
   const { t } = useTranslation();
@@ -114,6 +124,7 @@ export function AppSidebar({
     trackedPlayers.length > 0 &&
     realtimeAvailable &&
     !trackedPresenceQuery.isError;
+  const isSettingsPage = page === "settings";
 
   return (
     <Sidebar
@@ -145,96 +156,122 @@ export function AppSidebar({
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className="uppercase tracking-[0.18em]">
-            {t("sidebar.groupLabel")}
+            {isSettingsPage ? t("settings.title") : t("sidebar.groupLabel")}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigationItems.map((item) => (
-                <SidebarMenuItem
-                  key={item.id}
-                  className="relative group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center"
-                >
-                  <SidebarMenuButton
-                    asChild
-                    tooltip={t(item.titleKey)}
-                    isActive={page === item.id}
-                    size="lg"
-                    className="cursor-pointer group-data-[collapsible=icon]:!size-10 group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!p-0 [&_svg]:size-5!"
-                  >
-                    <button type="button" onClick={() => onNavigate(item.id)}>
-                      <item.icon />
-                      <span className="group-data-[collapsible=icon]:hidden">
-                        {t(item.titleKey)}
-                      </span>
-                    </button>
-                  </SidebarMenuButton>
-                  {item.id === "favorites" && shouldShowFavoritesBadge ? (
-                    <Tooltip>
+              {isSettingsPage
+                ? settingsNavigationItems.map((item) => (
+                    <SidebarMenuItem
+                      key={item.id}
+                      className="relative group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center"
+                    >
+                      <SidebarMenuButton
+                        asChild
+                        tooltip={t(item.titleKey)}
+                        isActive={settingsSection === item.id}
+                        size="lg"
+                        className="cursor-pointer group-data-[collapsible=icon]:!size-10 group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!p-0 [&_svg]:size-5!"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => onSettingsSectionChange(item.id)}
+                        >
+                          <item.icon />
+                          <span className="group-data-[collapsible=icon]:hidden">
+                            {t(item.titleKey)}
+                          </span>
+                        </button>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))
+                : navigationItems.map((item) => (
+                    <SidebarMenuItem
+                      key={item.id}
+                      className="relative group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center"
+                    >
+                      <SidebarMenuButton
+                        asChild
+                        tooltip={t(item.titleKey)}
+                        isActive={page === item.id}
+                        size="lg"
+                        className="cursor-pointer group-data-[collapsible=icon]:!size-10 group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!p-0 [&_svg]:size-5!"
+                      >
+                        <button type="button" onClick={() => onNavigate(item.id)}>
+                          <item.icon />
+                          <span className="group-data-[collapsible=icon]:hidden">
+                            {t(item.titleKey)}
+                          </span>
+                        </button>
+                      </SidebarMenuButton>
+                      {item.id === "favorites" && shouldShowFavoritesBadge ? (
+                        <Tooltip>
                         <TooltipTrigger asChild>
                           <SidebarMenuBadge className="pointer-events-auto z-[150] right-2 top-1/2 h-6 min-w-6 -translate-y-1/2 gap-1.5 rounded-md border border-sidebar-border/70 bg-muted px-2 text-xs leading-none peer-data-[size=sm]/menu-button:top-1/2 peer-data-[size=default]/menu-button:top-1/2 peer-data-[size=lg]/menu-button:top-1/2">
-                          <GameController className="size-3" />
-                          <span>{favoritePlayerCount}</span>
-                        </SidebarMenuBadge>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="z-[200]">
-                        {t("favorites.playersTooltip")}
-                      </TooltipContent>
-                    </Tooltip>
-                  ) : item.id === "watchlist" && shouldShowWatchlistBadge ? (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <SidebarMenuBadge className="pointer-events-auto z-[150] right-2 top-1/2 h-6 min-w-6 -translate-y-1/2 gap-1.5 rounded-md border border-sidebar-border/70 bg-muted px-2 text-xs leading-none peer-data-[size=sm]/menu-button:top-1/2 peer-data-[size=default]/menu-button:top-1/2 peer-data-[size=lg]/menu-button:top-1/2">
-                          <GameController className="size-3" />
-                          <span>{onlineTrackedPlayerCount}</span>
-                        </SidebarMenuBadge>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="z-[200] capitalize">
-                        {t("watchlist.onlineCount", {
-                          count: onlineTrackedPlayerCount,
-                        })}
-                      </TooltipContent>
-                    </Tooltip>
-                  ) : null}
-                </SidebarMenuItem>
-              ))}
+                            <GameController className="size-3" />
+                            <span>{favoritePlayerCount}</span>
+                          </SidebarMenuBadge>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="z-[200]">
+                          {t("favorites.playersTooltip")}
+                        </TooltipContent>
+                      </Tooltip>
+                    ) : item.id === "watchlist" && shouldShowWatchlistBadge ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <SidebarMenuBadge className="pointer-events-auto z-[150] right-2 top-1/2 h-6 min-w-6 -translate-y-1/2 gap-1.5 rounded-md border border-sidebar-border/70 bg-muted px-2 text-xs leading-none peer-data-[size=sm]/menu-button:top-1/2 peer-data-[size=default]/menu-button:top-1/2 peer-data-[size=lg]/menu-button:top-1/2">
+                              <GameController className="size-3" />
+                              <span>{onlineTrackedPlayerCount}</span>
+                            </SidebarMenuBadge>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="z-[200] capitalize">
+                            {t("watchlist.onlineCount", {
+                              count: onlineTrackedPlayerCount,
+                            })}
+                          </TooltipContent>
+                        </Tooltip>
+                      ) : null}
+                    </SidebarMenuItem>
+                  ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="px-2 py-2 group-data-[collapsible=icon]:px-0">
         <SidebarMenu>
-          <SidebarMenuItem className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
-            <SidebarMenuButton
-              asChild
-              tooltip={t("navigation.notifications")}
-              isActive={page === "notifications"}
-              size="lg"
-              className="cursor-pointer group-data-[collapsible=icon]:!size-10 group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!p-0 [&_svg]:size-5!"
-            >
-              <button type="button" onClick={() => onNavigate("notifications")}>
-                <Bell />
-                <span className="group-data-[collapsible=icon]:hidden">
-                  {t("navigation.notifications")}
-                </span>
-              </button>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
-            <SidebarMenuButton
-              asChild
-              tooltip={t("navigation.settings")}
-              isActive={page === "settings"}
-              size="lg"
-              className="cursor-pointer group-data-[collapsible=icon]:!size-10 group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!p-0 [&_svg]:size-5!"
-            >
-              <button type="button" onClick={() => onNavigate("settings")}>
-                <Cog />
-                <span className="group-data-[collapsible=icon]:hidden">
-                  {t("navigation.settings")}
-                </span>
-              </button>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          {isSettingsPage ? (
+            <SidebarMenuItem className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
+              <SidebarMenuButton
+                asChild
+                tooltip={t("settings.backToApp")}
+                size="lg"
+                className="cursor-pointer group-data-[collapsible=icon]:!size-10 group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!p-0 [&_svg]:size-5!"
+              >
+                <button type="button" onClick={onExitSettings}>
+                  <ArrowLeft className="size-5" />
+                  <span className="group-data-[collapsible=icon]:hidden">
+                    {t("settings.backToApp")}
+                  </span>
+                </button>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ) : (
+            <SidebarMenuItem className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
+              <SidebarMenuButton
+                asChild
+                tooltip={t("navigation.settings")}
+                size="lg"
+                className="cursor-pointer group-data-[collapsible=icon]:!size-10 group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!p-0 [&_svg]:size-5!"
+              >
+                <button type="button" onClick={() => onNavigate("settings")}>
+                  <Cog />
+                  <span className="group-data-[collapsible=icon]:hidden">
+                    {t("navigation.settings")}
+                  </span>
+                </button>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
         </SidebarMenu>
         <div className="border-t border-sidebar-border" />
         <Dialog>

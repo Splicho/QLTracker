@@ -5,6 +5,15 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { type DownloadEvent, check } from "@tauri-apps/plugin-updater";
 import splashIcon from "@/assets/images/splash-logo.png";
 import { Progress } from "@/components/ui/progress";
+import {
+  createPendingReleaseNotes,
+  PENDING_RELEASE_NOTES_STORAGE_KEY,
+  serializePendingReleaseNotes,
+} from "@/lib/release-notes";
+import {
+  APP_SETTINGS_STORAGE_KEY,
+  parseStoredAppSettings,
+} from "@/lib/settings";
 
 type BootstrapPhase =
   | "checking"
@@ -74,6 +83,12 @@ export function BootstrapPage() {
   );
 
   const openLauncher = useCallback(async () => {
+    const storedSettings = parseStoredAppSettings(
+      localStorage.getItem(APP_SETTINGS_STORAGE_KEY) ?? ""
+    );
+    const showWindow =
+      !storedSettings.trayEnabled || !storedSettings.startMinimizedToTray;
+
     updateState({
       phase: "opening",
       status: "Opening QLTracker",
@@ -83,7 +98,9 @@ export function BootstrapPage() {
 
     try {
       await Promise.race([
-        invoke("launcher_finish_bootstrap"),
+        invoke("launcher_finish_bootstrap", {
+          showWindow,
+        }),
         new Promise((_, reject) => {
           window.setTimeout(() => {
             reject(new Error("Main window handoff timed out."));
@@ -222,6 +239,18 @@ export function BootstrapPage() {
         error: null,
         progress: 100,
       });
+
+      const pendingReleaseNotes = createPendingReleaseNotes({
+        version: update.version,
+        body: update.body,
+        date: update.date,
+      });
+      if (pendingReleaseNotes) {
+        localStorage.setItem(
+          PENDING_RELEASE_NOTES_STORAGE_KEY,
+          serializePendingReleaseNotes(pendingReleaseNotes)
+        );
+      }
 
       await invoke("launcher_restart_app");
     } catch (error) {

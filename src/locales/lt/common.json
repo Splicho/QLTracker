@@ -185,7 +185,42 @@
     "discordPresenceServerDescription": "Kai QLTracker paleidžia serverį, įtraukite serverio pavadinimą, žemėlapį, režimą ir žaidėjus į savo Discord veiklą.",
     "discordPresenceSteamIdTitle": "SteamID64 dabartinio serverio sekimui",
     "discordPresenceSteamIdDescription": "Neprivaloma. Pridėk savo SteamID64, kad Discord galėtų rodyti serverį, kuriame iš tikrųjų esi, net jei Quake Live viduje perjungi serverius.",
-    "discordPresenceSteamIdPlaceholder": "7656119..."
+    "discordPresenceSteamIdPlaceholder": "7656119...",
+    "sections": {
+      "general": "Generolas",
+      "generalDescription": "Kalbos ir pagrindinės programos nuostatos.",
+      "startupTray": "Paleidimas ir dėklas",
+      "startupTrayDescription": "Paleidimo elgsena, dėklo režimas ir langų tvarkymas.",
+      "desktopAlerts": "Darbalaukio įspėjimai",
+      "desktopAlertsDescription": "Vietiniai pranešimai stebimiems žaidėjams ir mėgstamiems serveriams.",
+      "notifications": "Pranešimai ir nesutarimai",
+      "notificationsDescription": "Nesuderinamas paskyros susiejimas ir prieiga prie pranešimų taisyklės.",
+      "discordPresence": "Nesantaika buvimas",
+      "discordPresenceDescription": "Discord turtingas buvimas, kai QLTracker veikia."
+    },
+    "backToApp": "Grįžti į programą",
+    "trayModeTitle": "Dėklo režimas",
+    "trayModeDescription": "Palaikykite QLTracker veikimą fone naudodami dėklo piktogramą ir greitus veiksmus.",
+    "closeToTrayTitle": "Uždarykite langą prie dėklo",
+    "closeToTrayDescription": "Paslėpkite QLTracker, o ne išeikite, kai uždarote pagrindinį langą.",
+    "startMinimizedTitle": "Pradėti sumažinta iki dėklo",
+    "startMinimizedDescription": "Paleiskite QLTracker fone, kol atkursite jį naudodami dėklo piktogramą.",
+    "desktopAlertsTitle": "Darbalaukio įspėjimai",
+    "desktopAlertsDescription": "Siųskite vietinius darbalaukio pranešimus apie sekamus žaidėjus ir mėgstamus serverius.",
+    "desktopAlertsPausedTitle": "Pristabdyti darbalaukio įspėjimus",
+    "desktopAlertsPausedDescription": "Laikinai nutildykite visus darbalaukio įspėjimus nekeisdami įspėjimų taisyklių.",
+    "trackedPlayerAlertsTitle": "Stebimi žaidėjo įspėjimai",
+    "trackedPlayerAlertsDescription": "Pranešti, kai stebimas žaidėjas pasirodo arba persikelia į kitą serverį. Reikia realaus laiko backend.",
+    "favoriteServerAlertsTitle": "Mėgstamiausi serverio įspėjimai",
+    "favoriteServerAlertsDescription": "Praneškite, kai mėgstamiausias serveris pasiekia jūsų žaidėjo slenkstį.",
+    "favoriteServerThresholdTitle": "Mėgstamiausio serverio žaidėjo slenkstis",
+    "favoriteServerThresholdDescription": "Siųsti įspėjimą, kai mėgstamas serveris peržengia šį žaidėjų skaičių.",
+    "favoriteServerThresholdPlaceholder": "Žaidėjai",
+    "discordLinkTitle": "„Discord“ paskyros nuoroda",
+    "discordLinkDescription": "Prijunkite Discord, kad galėtumėte valdyti DM pranešimų pristatymą ir paskyros būseną.",
+    "notificationsManageRulesTitle": "Pranešimų taisyklės",
+    "notificationsManageRulesDescription": "Konkrečiam serveriui skirtos „Discord DM“ taisyklės valdomos iš serverių sąrašo.",
+    "notificationsManageRulesHint": "Atidarykite serverį ir naudokite „Discord“ pranešimo veiksmą, kad sukurtumėte arba redaguotumėte taisyklę."
   },
   "language": {
     "en": "English",
@@ -338,5 +373,10 @@
       "none": "@ info: whatsthis.",
       "inputPlaceholder": "Įveskite žymę ir paspauskite Enter"
     }
+  },
+  "releaseNotes": {
+    "title": "Kas naujo {{version}}",
+    "publishedOn": "Paskelbta {{data}}",
+    "close": "Uždaryti"
   }
 }
