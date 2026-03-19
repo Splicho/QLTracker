@@ -2,7 +2,7 @@
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "QLTracker",
   "mainBinaryName": "QLTracker",
-  "version": "0.0.1-beta.17",
+  "version": "0.0.1-beta.18",
   "identifier": "com.isevendeuce.qltracker",
   "build": {
     "frontendDist": "../dist",
@@ -34,14 +34,13 @@
         "height": 430,
         "resizable": false,
         "maximizable": false,
-        "minimizable": false,
+        "minimizable": true,
         "closable": false,
         "fullscreen": false,
         "decorations": false,
         "shadow": false,
         "transparent": true,
-        "center": true,
-        "alwaysOnTop": true
+        "center": true
       }
     ],
     "security": {

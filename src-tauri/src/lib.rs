@@ -133,6 +133,9 @@ enum DiscordPresenceCommand {
     Clear {
         application_id: String,
     },
+    Shutdown {
+        completion: mpsc::Sender<()>,
+    },
 }
 
 #[derive(Debug, Serialize, Clone)]
@@ -219,6 +222,19 @@ fn discord_presence_sender() -> &'static mpsc::Sender<DiscordPresenceCommand> {
             let mut current_application_id: Option<String> = None;
             let mut current_client: Option<DiscordIpcClient> = None;
 
+            fn clear_current_presence(
+                current_application_id: &mut Option<String>,
+                current_client: &mut Option<DiscordIpcClient>,
+            ) {
+                if let Some(client) = current_client.as_mut() {
+                    let _ = client.clear_activity();
+                    let _ = client.close();
+                }
+
+                *current_application_id = None;
+                *current_client = None;
+            }
+
             fn ensure_client(
                 current_application_id: &mut Option<String>,
                 current_client: &mut Option<DiscordIpcClient>,
@@ -304,14 +320,15 @@ fn discord_presence_sender() -> &'static mpsc::Sender<DiscordPresenceCommand> {
                     }
                     DiscordPresenceCommand::Clear { application_id } => {
                         if current_application_id.as_deref() == Some(application_id.as_str()) {
-                            if let Some(client) = current_client.as_mut() {
-                                let _ = client.clear_activity();
-                                let _ = client.close();
-                            }
-
-                            current_application_id = None;
-                            current_client = None;
+                            clear_current_presence(
+                                &mut current_application_id,
+                                &mut current_client,
+                            );
                         }
+                    }
+                    DiscordPresenceCommand::Shutdown { completion } => {
+                        clear_current_presence(&mut current_application_id, &mut current_client);
+                        let _ = completion.send(());
                     }
                 }
             }
@@ -319,6 +336,22 @@ fn discord_presence_sender() -> &'static mpsc::Sender<DiscordPresenceCommand> {
 
         sender
     })
+}
+
+fn shutdown_discord_presence() {
+    let Some(sender) = DISCORD_PRESENCE_SENDER.get() else {
+        return;
+    };
+
+    let (completion_sender, completion_receiver) = mpsc::channel();
+    if sender
+        .send(DiscordPresenceCommand::Shutdown {
+            completion: completion_sender,
+        })
+        .is_ok()
+    {
+        let _ = completion_receiver.recv_timeout(Duration::from_millis(750));
+    }
 }
 
 fn extract_between<'a>(haystack: &'a str, start: &str, end: &str) -> Option<&'a str> {
@@ -1551,11 +1584,13 @@ fn is_quake_live_running() -> bool {
 
 #[tauri::command]
 fn launcher_exit_app(app: tauri::AppHandle) {
+    shutdown_discord_presence();
     app.exit(0);
 }
 
 #[tauri::command]
 fn launcher_restart_app(app: tauri::AppHandle) {
+    shutdown_discord_presence();
     app.request_restart();
 }
 
