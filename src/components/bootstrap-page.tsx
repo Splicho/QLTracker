@@ -6,8 +6,9 @@ import { type DownloadEvent, check } from "@tauri-apps/plugin-updater";
 import splashIcon from "@/assets/images/splash-logo.png";
 import { Progress } from "@/components/ui/progress";
 import {
-  createPendingReleaseNotes,
   PENDING_RELEASE_NOTES_STORAGE_KEY,
+  RELEASE_NOTES_RECOVERY_VERSION_STORAGE_KEY,
+  resolvePendingReleaseNotes,
   serializePendingReleaseNotes,
 } from "@/lib/release-notes";
 import {
@@ -240,10 +241,16 @@ export function BootstrapPage() {
         progress: 100,
       });
 
-      const pendingReleaseNotes = createPendingReleaseNotes({
+      localStorage.setItem(
+        RELEASE_NOTES_RECOVERY_VERSION_STORAGE_KEY,
+        update.version
+      );
+
+      const pendingReleaseNotes = await resolvePendingReleaseNotes({
         version: update.version,
         body: update.body,
         date: update.date,
+        rawJson: update.rawJson,
       });
       if (pendingReleaseNotes) {
         localStorage.setItem(

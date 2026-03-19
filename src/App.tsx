@@ -25,10 +25,13 @@ import { registerGlobalErrorLogging } from "@/lib/error-log";
 import type { PageId } from "@/lib/navigation";
 import { isRealtimeEnabled } from "@/lib/realtime";
 import {
+  fetchGitHubReleaseNotes,
   LAST_SEEN_RELEASE_NOTES_VERSION_STORAGE_KEY,
   parsePendingReleaseNotes,
   parseReleaseNotesVersion,
   PENDING_RELEASE_NOTES_STORAGE_KEY,
+  RELEASE_NOTES_RECOVERY_VERSION_STORAGE_KEY,
+  serializePendingReleaseNotes,
   shouldShowPendingReleaseNotes,
 } from "@/lib/release-notes";
 import {
@@ -115,28 +118,59 @@ export function App() {
   useEffect(() => registerGlobalErrorLogging(), []);
   useTrackedPlayerIdentitySync();
   useEffect(() => {
+    let cancelled = false;
+
+    const lastSeenVersion = parseReleaseNotesVersion(
+      localStorage.getItem(LAST_SEEN_RELEASE_NOTES_VERSION_STORAGE_KEY)
+    );
+    const recoveryVersion = parseReleaseNotesVersion(
+      localStorage.getItem(RELEASE_NOTES_RECOVERY_VERSION_STORAGE_KEY)
+    );
     const pending = parsePendingReleaseNotes(
       localStorage.getItem(PENDING_RELEASE_NOTES_STORAGE_KEY) ?? ""
     );
+
     if (pending && pending.version !== appVersion) {
       localStorage.removeItem(PENDING_RELEASE_NOTES_STORAGE_KEY);
       setPendingReleaseNotes(null);
-      return;
+    } else {
+      setPendingReleaseNotes(pending);
+
+      if (shouldShowPendingReleaseNotes(pending, appVersion, lastSeenVersion)) {
+        setReleaseNotesOpen(true);
+        return () => {
+          cancelled = true;
+        };
+      }
     }
 
-    setPendingReleaseNotes(pending);
+    if (recoveryVersion && recoveryVersion !== appVersion) {
+      localStorage.removeItem(RELEASE_NOTES_RECOVERY_VERSION_STORAGE_KEY);
+    }
 
-    if (
-      shouldShowPendingReleaseNotes(
-        pending,
-        appVersion,
-        parseReleaseNotesVersion(
-          localStorage.getItem(LAST_SEEN_RELEASE_NOTES_VERSION_STORAGE_KEY)
-        )
-      )
-    ) {
+    if (lastSeenVersion === appVersion) {
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    void (async () => {
+      const recoveredReleaseNotes = await fetchGitHubReleaseNotes(appVersion);
+      if (!recoveredReleaseNotes || cancelled) {
+        return;
+      }
+
+      localStorage.setItem(
+        PENDING_RELEASE_NOTES_STORAGE_KEY,
+        serializePendingReleaseNotes(recoveredReleaseNotes)
+      );
+      setPendingReleaseNotes(recoveredReleaseNotes);
       setReleaseNotesOpen(true);
-    }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [appVersion]);
   useEffect(() => {
     setRawFilters(serializeServerFilters(filters));
@@ -359,6 +393,7 @@ export function App() {
       appVersion
     );
     localStorage.removeItem(PENDING_RELEASE_NOTES_STORAGE_KEY);
+    localStorage.removeItem(RELEASE_NOTES_RECOVERY_VERSION_STORAGE_KEY);
     setPendingReleaseNotes(null);
   };
 

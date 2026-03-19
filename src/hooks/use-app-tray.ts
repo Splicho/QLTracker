@@ -56,12 +56,20 @@ export function useAppTray({
 
     void getCurrentWindow()
       .onCloseRequested(async (event) => {
-        if (!closeToTrayEnabledRef.current || quitRequestedRef.current) {
+        if (quitRequestedRef.current) {
           return;
         }
 
         event.preventDefault();
-        await getCurrentWindow().hide().catch(() => undefined);
+        if (closeToTrayEnabledRef.current) {
+          await getCurrentWindow().hide().catch(() => undefined);
+          return;
+        }
+
+        quitRequestedRef.current = true;
+        await invoke("launcher_exit_app").catch(() => {
+          quitRequestedRef.current = false;
+        });
       })
       .then((nextUnlisten) => {
         unlisten = nextUnlisten;
