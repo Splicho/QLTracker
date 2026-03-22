@@ -130,6 +130,10 @@ function isRealtimeEnabled() {
   return realtimeUrl.length > 0;
 }
 
+function hasRealtimeTrueskillRatings(snapshot: RealtimeServerSnapshot) {
+  return snapshot.playersInfo.some((player) => player.trueskill != null);
+}
+
 async function fetchRealtimeLookup(addrs: string[]) {
   const payload = await invoke<string>("realtime_http_post", {
     url: `${realtimeUrl}/api/servers/lookup`,
@@ -208,7 +212,7 @@ export async function fetchSteamServerPlayerRatings(addr: string) {
   if (isRealtimeEnabled()) {
     try {
       const snapshot = await fetchRealtimeSnapshot(addr);
-      if (snapshot) {
+      if (snapshot && (snapshot.players <= 0 || hasRealtimeTrueskillRatings(snapshot))) {
         return snapshot.playersInfo.map((player) => ({
           name: player.name,
           qelo: player.qelo ?? null,
@@ -233,7 +237,7 @@ export async function fetchSteamServerRatingSummaries(
   addrs: string[],
   ratingKind: "qelo" | "trueskill"
 ) {
-  if (isRealtimeEnabled()) {
+  if (isRealtimeEnabled() && ratingKind !== "trueskill") {
     try {
       const snapshots = await fetchRealtimeLookup(addrs);
       return snapshots.map((snapshot) => ({

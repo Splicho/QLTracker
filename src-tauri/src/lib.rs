@@ -1079,6 +1079,10 @@ fn extract_rating_number(input: &str) -> Option<f64> {
     None
 }
 
+fn is_useful_rating_value(value: f64) -> bool {
+    value.is_finite() && value > 0.0 && value < 10_000.0 && value != 1500.0
+}
+
 fn extract_first_plausible_number(input: &str) -> Option<f64> {
     let mut buffer = String::new();
     let mut seen_dot = false;
@@ -1119,6 +1123,90 @@ fn extract_first_plausible_number(input: &str) -> Option<f64> {
     None
 }
 
+fn json_value_as_f64(value: &serde_json::Value, key: &str) -> Option<f64> {
+    value
+        .get(key)
+        .and_then(|field| field.as_f64())
+        .or_else(|| {
+            value
+                .get(key)
+                .and_then(|field| field.as_str())
+                .and_then(|field| field.trim().parse::<f64>().ok())
+        })
+}
+
+fn json_value_as_i64(value: &serde_json::Value, key: &str) -> Option<i64> {
+    value
+        .get(key)
+        .and_then(|field| field.as_i64())
+        .or_else(|| {
+            value
+                .get(key)
+                .and_then(|field| field.as_str())
+                .and_then(|field| field.trim().parse::<i64>().ok())
+        })
+}
+
+fn collect_nested_rating_candidates(
+    value: &serde_json::Value,
+    candidates: &mut Vec<(f64, i64)>,
+) {
+    let Some(ratings) = value.get("ratings").and_then(|ratings| ratings.as_object()) else {
+        return;
+    };
+
+    for entry in ratings.values() {
+        let Some(rating_value) = json_value_as_f64(entry, "elo")
+            .or_else(|| json_value_as_f64(entry, "trueskill"))
+            .or_else(|| json_value_as_f64(entry, "rating"))
+            .or_else(|| json_value_as_f64(entry, "mu"))
+        else {
+            continue;
+        };
+
+        candidates.push((rating_value, json_value_as_i64(entry, "games").unwrap_or(0)));
+    }
+}
+
+fn extract_trueskill_from_json(value: &serde_json::Value) -> Option<f64> {
+    if let Some(number) = value.as_f64() {
+        return is_useful_rating_value(number).then_some(number);
+    }
+
+    for key in ["elo", "trueskill", "rating", "mu"] {
+        if let Some(number) = json_value_as_f64(value, key) {
+            return is_useful_rating_value(number).then_some(number);
+        }
+    }
+
+    let mut candidates = Vec::new();
+    collect_nested_rating_candidates(value, &mut candidates);
+
+    if let Some(playerinfo) = value.get("playerinfo").and_then(|playerinfo| playerinfo.as_object()) {
+        for player in playerinfo.values() {
+            collect_nested_rating_candidates(player, &mut candidates);
+        }
+    }
+
+    if let Some(players) = value.get("players").and_then(|players| players.as_array()) {
+        for player in players {
+            collect_nested_rating_candidates(player, &mut candidates);
+        }
+    }
+
+    if let Some((rating, _)) = candidates
+        .iter()
+        .filter(|(rating, games)| *games > 0 && is_useful_rating_value(*rating))
+        .max_by_key(|(_, games)| *games)
+    {
+        return Some(*rating);
+    }
+
+    candidates
+        .iter()
+        .find_map(|(rating, _)| is_useful_rating_value(*rating).then_some(*rating))
+}
+
 async fn fetch_trueskill(
     client: &reqwest::Client,
     url_template: &str,
@@ -1143,21 +1231,8 @@ async fn fetch_trueskill(
     let body = response.text().await.ok()?;
 
     if let Ok(json) = serde_json::from_str::<serde_json::Value>(&body) {
-        if let Some(number) = json.as_f64() {
+        if let Some(number) = extract_trueskill_from_json(&json) {
             return Some(number);
-        }
-
-        for key in ["elo", "trueskill", "rating", "mu"] {
-            if let Some(number) = json.get(key).and_then(|value| value.as_f64()) {
-                return Some(number);
-            }
-            if let Some(number) = json
-                .get(key)
-                .and_then(|value| value.as_str())
-                .and_then(|value| value.trim().parse::<f64>().ok())
-            {
-                return Some(number);
-            }
         }
     }
 
