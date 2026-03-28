@@ -3,6 +3,8 @@ import dgram from "node:dgram";
 const A2S_PLAYER_HEADER = Buffer.from([
   0xff, 0xff, 0xff, 0xff, 0x55, 0xff, 0xff, 0xff, 0xff,
 ]);
+const SIMPLE_PACKET_HEADER = -1;
+const SPLIT_PACKET_HEADER = -2;
 const A2S_CHALLENGE_HEADER = 0x41;
 const A2S_PLAYER_RESPONSE_HEADER = 0x44;
 const SOCKET_TIMEOUT_MS = 4000;
@@ -90,6 +92,37 @@ function parsePlayerResponse(buffer: Buffer) {
   return players;
 }
 
+type SplitPacketFragment = {
+  id: number;
+  number: number;
+  payload: Buffer;
+  total: number;
+};
+
+function parseSplitPacketFragment(buffer: Buffer): SplitPacketFragment | null {
+  if (buffer.length < 12 || buffer.readInt32LE(0) !== SPLIT_PACKET_HEADER) {
+    return null;
+  }
+
+  const id = buffer.readInt32LE(4);
+  const total = buffer[8] ?? 0;
+  const number = buffer[9] ?? 0;
+  if (total <= 0 || number >= total) {
+    return null;
+  }
+
+  return {
+    id,
+    number,
+    payload: buffer.subarray(12),
+    total,
+  };
+}
+
+function isSimplePacket(buffer: Buffer) {
+  return buffer.length >= 5 && buffer.readInt32LE(0) === SIMPLE_PACKET_HEADER;
+}
+
 async function sendAndReceive(
   socket: dgram.Socket,
   host: string,
@@ -97,6 +130,8 @@ async function sendAndReceive(
   payload: Buffer
 ) {
   return new Promise<Buffer>((resolve, reject) => {
+    const splitPackets = new Map<number, Array<Buffer | undefined>>();
+
     const timeoutId = setTimeout(() => {
       cleanup();
       reject(new Error("A2S query timed out."));
@@ -114,12 +149,38 @@ async function sendAndReceive(
     };
 
     const handleMessage = (message: Buffer) => {
+      if (isSimplePacket(message)) {
+        cleanup();
+        resolve(message);
+        return;
+      }
+
+      const fragment = parseSplitPacketFragment(message);
+      if (!fragment) {
+        cleanup();
+        reject(new Error("Unexpected A2S packet format."));
+        return;
+      }
+
+      const parts = splitPackets.get(fragment.id) ?? Array<Buffer | undefined>(fragment.total);
+      parts[fragment.number] = fragment.payload;
+      splitPackets.set(fragment.id, parts);
+
+      if (parts.filter((part): part is Buffer => part != null).length !== fragment.total) {
+        return;
+      }
+
       cleanup();
-      resolve(message);
+      const payload = Buffer.concat(parts as Buffer[]);
+      resolve(
+        isSimplePacket(payload)
+          ? payload
+          : Buffer.concat([Buffer.from([0xff, 0xff, 0xff, 0xff]), payload])
+      );
     };
 
     socket.once("error", handleError);
-    socket.once("message", handleMessage);
+    socket.on("message", handleMessage);
     socket.send(payload, port, host, (error) => {
       if (!error) {
         return;
@@ -143,12 +204,13 @@ export async function queryServerPlayers(addr: string) {
       A2S_PLAYER_HEADER
     );
 
+    if (challengeResponse[4] === A2S_PLAYER_RESPONSE_HEADER) {
+      return parsePlayerResponse(challengeResponse);
+    }
+
     if (
       challengeResponse.length < 9 ||
-      challengeResponse[0] !== 0xff ||
-      challengeResponse[1] !== 0xff ||
-      challengeResponse[2] !== 0xff ||
-      challengeResponse[3] !== 0xff ||
+      !isSimplePacket(challengeResponse) ||
       challengeResponse[4] !== A2S_CHALLENGE_HEADER
     ) {
       throw new Error("Unexpected A2S challenge response.");

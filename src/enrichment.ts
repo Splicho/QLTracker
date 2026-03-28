@@ -103,6 +103,96 @@ function extractRatingNumber(input: string) {
   return extractFirstPlausibleNumber(lowered);
 }
 
+function isUsefulRatingValue(value: number) {
+  return Number.isFinite(value) && value > 0 && value < 10000 && value !== 1500;
+}
+
+function asRecord(value: unknown) {
+  return value && typeof value === "object" ? (value as Record<string, unknown>) : null;
+}
+
+function collectNestedRatingCandidates(
+  value: unknown,
+  candidates: Array<{ games: number; value: number }>
+) {
+  const record = asRecord(value);
+  const ratings = asRecord(record?.ratings);
+  if (!ratings) {
+    return;
+  }
+
+  for (const modeRatings of Object.values(ratings)) {
+    const entry = asRecord(modeRatings);
+    if (!entry) {
+      continue;
+    }
+
+    const value =
+      qlstatsValueAsNumber(entry, "elo") ??
+      qlstatsValueAsNumber(entry, "trueskill") ??
+      qlstatsValueAsNumber(entry, "rating") ??
+      qlstatsValueAsNumber(entry, "mu");
+    if (value == null) {
+      continue;
+    }
+
+    candidates.push({
+      games: qlstatsValueAsNumber(entry, "games") ?? 0,
+      value,
+    });
+  }
+}
+
+function extractTrueskillFromJson(value: unknown) {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return isUsefulRatingValue(value) ? value : null;
+  }
+
+  const record = asRecord(value);
+  if (!record) {
+    return null;
+  }
+
+  for (const key of ["elo", "trueskill", "rating", "mu"]) {
+    const field = record[key];
+    if (typeof field === "number" && Number.isFinite(field)) {
+      return isUsefulRatingValue(field) ? field : null;
+    }
+    if (typeof field === "string") {
+      const parsed = Number(field.trim());
+      if (Number.isFinite(parsed)) {
+        return isUsefulRatingValue(parsed) ? parsed : null;
+      }
+    }
+  }
+
+  const candidates: Array<{ games: number; value: number }> = [];
+  collectNestedRatingCandidates(record, candidates);
+
+  const playerInfo = asRecord(record.playerinfo);
+  if (playerInfo) {
+    for (const playerEntry of Object.values(playerInfo)) {
+      collectNestedRatingCandidates(playerEntry, candidates);
+    }
+  }
+
+  const players = Array.isArray(record.players) ? record.players : null;
+  if (players) {
+    for (const playerEntry of players) {
+      collectNestedRatingCandidates(playerEntry, candidates);
+    }
+  }
+
+  const playedRating = candidates
+    .filter((candidate) => candidate.games > 0 && isUsefulRatingValue(candidate.value))
+    .sort((left, right) => right.games - left.games)[0];
+  if (playedRating) {
+    return playedRating.value;
+  }
+
+  return candidates.find((candidate) => isUsefulRatingValue(candidate.value))?.value ?? null;
+}
+
 async function fetchTrueskill(steamId: string) {
   const cached = trueskillCache.get(steamId);
   if (cached && Date.now() - cached.cachedAt <= trueskillTtlMs) {
@@ -130,25 +220,12 @@ async function fetchTrueskill(steamId: string) {
 
     try {
       const json = JSON.parse(body) as unknown;
-      if (typeof json === "number" && Number.isFinite(json)) {
-        value = json;
-      } else if (json && typeof json === "object") {
-        for (const key of ["elo", "trueskill", "rating", "mu"]) {
-          const field = (json as Record<string, unknown>)[key];
-          if (typeof field === "number" && Number.isFinite(field)) {
-            value = field;
-            break;
-          }
-          if (typeof field === "string") {
-            const parsed = Number(field.trim());
-            if (Number.isFinite(parsed)) {
-              value = parsed;
-              break;
-            }
-          }
-        }
-      }
+      value = extractTrueskillFromJson(json);
     } catch {
+      value = extractRatingNumber(body);
+    }
+
+    if (value == null) {
       value = extractRatingNumber(body);
     }
 
@@ -168,6 +245,16 @@ function calculateAverage(values: Array<number | null | undefined>) {
   return Math.round(
     numbers.reduce((total, value) => total + value, 0) / numbers.length
   );
+}
+
+function formatErrorMessage(reason: unknown) {
+  if (reason instanceof Error && reason.message.trim().length > 0) {
+    return reason.message;
+  }
+
+  return typeof reason === "string" && reason.trim().length > 0
+    ? reason
+    : String(reason);
 }
 
 function stripQuakeColors(value: string) {
@@ -443,8 +530,9 @@ async function enrichSnapshot(
     livePlayersResult.status === "fulfilled" ? livePlayersResult.value : [];
   if (livePlayersResult.status === "rejected") {
     console.warn(
-      `A2S player query failed for ${snapshot.addr}:`,
-      livePlayersResult.reason
+      `A2S player query failed for ${snapshot.addr}: ${formatErrorMessage(
+        livePlayersResult.reason
+      )}`
     );
   }
 
@@ -456,8 +544,9 @@ async function enrichSnapshot(
     }
   } else {
     console.warn(
-      `QLStats player request failed for ${snapshot.addr}:`,
-      qlstatsPayloadResult.reason
+      `QLStats player request failed for ${snapshot.addr}: ${formatErrorMessage(
+        qlstatsPayloadResult.reason
+      )}`
     );
   }
 
