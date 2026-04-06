@@ -10,9 +10,16 @@ const DEFAULT_QUEUE = {
   description: "Seasonal 4v4 Clan Arena pickup queue.",
   name: "4v4 CA",
   playerCount: 8,
-  readyCheckDurationSeconds: 30,
   slug: "4v4-ca",
   teamSize: 4,
+};
+
+const DEFAULT_SETTINGS = {
+  callbackSecret: null,
+  id: "default",
+  provisionApiUrl: null,
+  provisionAuthToken: null,
+  readyCheckDurationSeconds: 30,
   vetoTurnDurationSeconds: 20,
 };
 
@@ -35,12 +42,16 @@ type PickupQueueRow = {
   description: string | null;
   teamSize: number;
   playerCount: number;
-  readyCheckDurationSeconds: number;
-  vetoTurnDurationSeconds: number;
   enabled: boolean;
+};
+
+type PickupSettingsRow = {
+  callbackSecret: string | null;
+  id: string;
   provisionApiUrl: string | null;
   provisionAuthToken: string | null;
-  callbackSecret: string | null;
+  readyCheckDurationSeconds: number;
+  vetoTurnDurationSeconds: number;
 };
 
 type PickupSeasonRow = {
@@ -474,6 +485,40 @@ export function createPickupService(io: Server) {
   const vetoTimers = new Map<string, NodeJS.Timeout>();
 
   async function ensureBootstrapData() {
+    await pool.query(
+      `
+        insert into "PickupSettings" (
+          "id",
+          "readyCheckDurationSeconds",
+          "vetoTurnDurationSeconds",
+          "provisionApiUrl",
+          "provisionAuthToken",
+          "callbackSecret",
+          "createdAt",
+          "updatedAt"
+        )
+        values (
+          $1,
+          $2,
+          $3,
+          $4,
+          $5,
+          $6,
+          now(),
+          now()
+        )
+        on conflict ("id") do nothing
+      `,
+      [
+        DEFAULT_SETTINGS.id,
+        DEFAULT_SETTINGS.readyCheckDurationSeconds,
+        DEFAULT_SETTINGS.vetoTurnDurationSeconds,
+        DEFAULT_SETTINGS.provisionApiUrl,
+        DEFAULT_SETTINGS.provisionAuthToken,
+        DEFAULT_SETTINGS.callbackSecret,
+      ],
+    );
+
     const queueResult = await pool.query<PickupQueueRow>(
       `
         insert into "PickupQueue" (
@@ -483,8 +528,6 @@ export function createPickupService(io: Server) {
           "description",
           "teamSize",
           "playerCount",
-          "readyCheckDurationSeconds",
-          "vetoTurnDurationSeconds",
           "enabled",
           "createdAt",
           "updatedAt"
@@ -496,8 +539,6 @@ export function createPickupService(io: Server) {
           $3,
           $4,
           $5,
-          $6,
-          $7,
           true,
           now(),
           now()
@@ -508,8 +549,6 @@ export function createPickupService(io: Server) {
           "description" = excluded."description",
           "teamSize" = excluded."teamSize",
           "playerCount" = excluded."playerCount",
-          "readyCheckDurationSeconds" = excluded."readyCheckDurationSeconds",
-          "vetoTurnDurationSeconds" = excluded."vetoTurnDurationSeconds",
           "updatedAt" = now()
         returning
           "id",
@@ -518,12 +557,7 @@ export function createPickupService(io: Server) {
           "description",
           "teamSize",
           "playerCount",
-          "readyCheckDurationSeconds",
-          "vetoTurnDurationSeconds",
-          "enabled",
-          "provisionApiUrl",
-          "provisionAuthToken",
-          "callbackSecret"
+          "enabled"
       `,
       [
         DEFAULT_QUEUE.slug,
@@ -531,8 +565,6 @@ export function createPickupService(io: Server) {
         DEFAULT_QUEUE.description,
         DEFAULT_QUEUE.teamSize,
         DEFAULT_QUEUE.playerCount,
-        DEFAULT_QUEUE.readyCheckDurationSeconds,
-        DEFAULT_QUEUE.vetoTurnDurationSeconds,
       ],
     );
 
@@ -605,6 +637,32 @@ export function createPickupService(io: Server) {
     return queue;
   }
 
+  async function getPickupSettings() {
+    await ensureBootstrapData();
+    const result = await pool.query<PickupSettingsRow>(
+      `
+        select
+          "id",
+          "readyCheckDurationSeconds",
+          "vetoTurnDurationSeconds",
+          "provisionApiUrl",
+          "provisionAuthToken",
+          "callbackSecret"
+        from "PickupSettings"
+        where "id" = $1
+        limit 1
+      `,
+      [DEFAULT_SETTINGS.id],
+    );
+
+    const settings = result.rows[0];
+    if (!settings) {
+      throw new Error("Pickup settings are unavailable.");
+    }
+
+    return settings;
+  }
+
   async function getAllQueues() {
     await ensureBootstrapData();
     const result = await pool.query<PickupQueueRow>(
@@ -616,12 +674,7 @@ export function createPickupService(io: Server) {
           "description",
           "teamSize",
           "playerCount",
-          "readyCheckDurationSeconds",
-          "vetoTurnDurationSeconds",
-          "enabled",
-          "provisionApiUrl",
-          "provisionAuthToken",
-          "callbackSecret"
+          "enabled"
         from "PickupQueue"
       `,
     );
@@ -654,12 +707,7 @@ export function createPickupService(io: Server) {
           "description",
           "teamSize",
           "playerCount",
-          "readyCheckDurationSeconds",
-          "vetoTurnDurationSeconds",
-          "enabled",
-          "provisionApiUrl",
-          "provisionAuthToken",
-          "callbackSecret"
+          "enabled"
         from "PickupQueue"
         where "id" = $1
         limit 1
@@ -681,12 +729,7 @@ export function createPickupService(io: Server) {
           "description",
           "teamSize",
           "playerCount",
-          "readyCheckDurationSeconds",
-          "vetoTurnDurationSeconds",
-          "enabled",
-          "provisionApiUrl",
-          "provisionAuthToken",
-          "callbackSecret"
+          "enabled"
         from "PickupQueue"
         where "slug" = $1
         limit 1
@@ -955,12 +998,7 @@ export function createPickupService(io: Server) {
           q."description",
           q."teamSize",
           q."playerCount",
-          q."readyCheckDurationSeconds",
-          q."vetoTurnDurationSeconds",
-          q."enabled",
-          q."provisionApiUrl",
-          q."provisionAuthToken",
-          q."callbackSecret"
+          q."enabled"
         from "PickupQueueMember" qm
         inner join "PickupQueue" q on q."id" = qm."queueId"
         where qm."playerId" = $1
@@ -986,6 +1024,7 @@ export function createPickupService(io: Server) {
 
   function queueToPublicState(
     queue: PickupQueueRow,
+    settings: PickupSettingsRow,
     currentPlayers: number,
     season: PickupSeasonRow | null,
   ): PickupQueuePublicState {
@@ -996,11 +1035,11 @@ export function createPickupService(io: Server) {
       id: queue.id,
       name: queue.name,
       playerCount: queue.playerCount,
-      readyCheckDurationSeconds: queue.readyCheckDurationSeconds,
+      readyCheckDurationSeconds: settings.readyCheckDurationSeconds,
       season: seasonToState(season),
       slug: queue.slug,
       teamSize: queue.teamSize,
-      vetoTurnDurationSeconds: queue.vetoTurnDurationSeconds,
+      vetoTurnDurationSeconds: settings.vetoTurnDurationSeconds,
     };
   }
 
@@ -1010,7 +1049,8 @@ export function createPickupService(io: Server) {
       throw new Error("Pickup queue is unavailable.");
     }
 
-    const [queueCounts, seasons] = await Promise.all([
+    const [settings, queueCounts, seasons] = await Promise.all([
+      getPickupSettings(),
       pool.query<{ count: string; queueId: string }>(
         `
           select "queueId", count(*)::text as count
@@ -1024,7 +1064,12 @@ export function createPickupService(io: Server) {
       queueCounts.rows.map((row) => [row.queueId, Number(row.count ?? "0")]),
     );
     const queuesState = queues.map((queue, index) =>
-      queueToPublicState(queue, countByQueueId.get(queue.id) ?? 0, seasons[index] ?? null),
+      queueToPublicState(
+        queue,
+        settings,
+        countByQueueId.get(queue.id) ?? 0,
+        seasons[index] ?? null,
+      ),
     );
     const primaryQueue = queuesState[0] ?? null;
 
@@ -1356,6 +1401,7 @@ export function createPickupService(io: Server) {
   }
 
   async function createMatchFromQueue(queue: PickupQueueRow, season: PickupSeasonRow) {
+    const settings = await getPickupSettings();
     const members = await getQueueMembers(queue.id, queue.playerCount);
     if (members.length < queue.playerCount) {
       return null;
@@ -1378,7 +1424,7 @@ export function createPickupService(io: Server) {
     );
     const teams = chooseBalancedTeams(queue.teamSize, ratedMembers);
     const readyDeadlineAt = new Date(
-      Date.now() + queue.readyCheckDurationSeconds * 1000,
+      Date.now() + settings.readyCheckDurationSeconds * 1000,
     );
 
     const client = await pool.connect();
@@ -1635,7 +1681,10 @@ export function createPickupService(io: Server) {
       return;
     }
 
-    const queue = await getQueueById(match.queueId);
+    const [queue, settings] = await Promise.all([
+      getQueueById(match.queueId),
+      getPickupSettings(),
+    ]);
     if (!queue) {
       return;
     }
@@ -1653,7 +1702,7 @@ export function createPickupService(io: Server) {
     const turnCaptainPlayerId =
       captainIds[Math.floor(Math.random() * captainIds.length)] ?? captainIds[0]!;
     const vetoDeadlineAt = new Date(
-      Date.now() + queue.vetoTurnDurationSeconds * 1000,
+      Date.now() + settings.vetoTurnDurationSeconds * 1000,
     );
     const vetoState: PickupVetoState = {
       availableMaps: maps,
@@ -1777,8 +1826,8 @@ export function createPickupService(io: Server) {
       return;
     }
 
-    const queue = await getQueueById(match.queueId);
-    if (!queue?.provisionApiUrl) {
+    const settings = await getPickupSettings();
+    if (!settings.provisionApiUrl) {
       await recordProvisionEvent(matchId, "provision-error", {
         error: "Provision API URL is not configured.",
       });
@@ -1813,13 +1862,13 @@ export function createPickupService(io: Server) {
     await recordProvisionEvent(matchId, "request", payload);
 
     try {
-      const response = await fetch(queue.provisionApiUrl, {
+      const response = await fetch(settings.provisionApiUrl, {
         body: JSON.stringify(payload),
         headers: {
           "Content-Type": "application/json",
-          ...(queue.provisionAuthToken
+          ...(settings.provisionAuthToken
             ? {
-                Authorization: `Bearer ${queue.provisionAuthToken}`,
+                Authorization: `Bearer ${settings.provisionAuthToken}`,
               }
             : {}),
         },
@@ -1941,13 +1990,9 @@ export function createPickupService(io: Server) {
       currentCaptainPlayerId === balanceSummary.captainPlayerIds.left
         ? balanceSummary.captainPlayerIds.right
         : balanceSummary.captainPlayerIds.left;
-    const queue = await getQueueById(match.queueId);
-    if (!queue) {
-      return;
-    }
-
+    const settings = await getPickupSettings();
     const vetoDeadlineAt = new Date(
-      Date.now() + queue.vetoTurnDurationSeconds * 1000,
+      Date.now() + settings.vetoTurnDurationSeconds * 1000,
     );
     await pool.query(
       `
@@ -2314,8 +2359,8 @@ export function createPickupService(io: Server) {
       throw new Error("Pickup match was not found.");
     }
 
-    const queue = await getQueueById(match.queueId);
-    if (!queue?.callbackSecret) {
+    const settings = await getPickupSettings();
+    if (!settings.callbackSecret) {
       throw new Error("Pickup callback secret is not configured.");
     }
 
@@ -2325,7 +2370,7 @@ export function createPickupService(io: Server) {
       throw new Error("Missing pickup callback signature.");
     }
 
-    const expected = createSignature(queue.callbackSecret, rawBody);
+    const expected = createSignature(settings.callbackSecret, rawBody);
     if (signature !== expected) {
       throw new Error("Invalid pickup callback signature.");
     }

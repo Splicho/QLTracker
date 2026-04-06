@@ -128,9 +128,15 @@ create table if not exists "PickupQueue" (
   "description" text,
   "teamSize" integer not null default 4,
   "playerCount" integer not null default 8,
+  "enabled" boolean not null default true,
+  "createdAt" timestamptz not null default now(),
+  "updatedAt" timestamptz not null default now()
+);
+
+create table if not exists "PickupSettings" (
+  "id" text primary key default 'default',
   "readyCheckDurationSeconds" integer not null default 30,
   "vetoTurnDurationSeconds" integer not null default 20,
-  "enabled" boolean not null default true,
   "provisionApiUrl" text,
   "provisionAuthToken" text,
   "callbackSecret" text,
