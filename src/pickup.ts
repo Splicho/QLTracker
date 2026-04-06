@@ -1826,11 +1826,38 @@ export function createPickupService(io: Server) {
       return;
     }
 
+    const failProvision = async (reason: string, payload?: Record<string, unknown>) => {
+      const players = await getMatchPlayers(matchId);
+      await pool.query(
+        `
+          update "PickupMatch"
+          set
+            "status" = 'cancelled',
+            "resultPayload" = $2::jsonb,
+            "updatedAt" = now()
+          where "id" = $1
+        `,
+        [
+          matchId,
+          JSON.stringify({
+            ...(payload ?? {}),
+            reason,
+          }),
+        ],
+      );
+
+      await broadcastPublicState();
+      for (const player of players) {
+        await emitPlayerState(player.playerId);
+      }
+    };
+
     const settings = await getPickupSettings();
     if (!settings.provisionApiUrl) {
       await recordProvisionEvent(matchId, "provision-error", {
         error: "Provision API URL is not configured.",
       });
+      await failProvision("provision-not-configured");
       return;
     }
 
@@ -1895,9 +1922,17 @@ export function createPickupService(io: Server) {
         (typeof parsed.ip === "string" || typeof parsed.port === "number")
       ) {
         await applyProvisionResult(matchId, parsed);
+        return;
       }
+
+      await failProvision("provision-request-failed", {
+        status: response.status,
+      });
     } catch (error) {
       await recordProvisionEvent(matchId, "response-error", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      await failProvision("provision-request-error", {
         error: error instanceof Error ? error.message : String(error),
       });
     }
