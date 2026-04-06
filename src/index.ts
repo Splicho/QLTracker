@@ -16,6 +16,7 @@ import {
   fetchPlayerNameHistoryLookup,
   upsertPlayerNameHistory,
 } from "./player-name-history.js";
+import { createPickupService } from "./pickup.js";
 import { fetchSteamSnapshots } from "./steam.js";
 import {
   serverSnapshotSchema,
@@ -30,6 +31,7 @@ const io = new Server(server, {
     origin: config.corsOrigins,
   },
 });
+const pickupService = createPickupService(io);
 
 app.use(
   cors({
@@ -37,7 +39,16 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json({ limit: "1mb" }));
+app.use(
+  express.json({
+    limit: "1mb",
+    verify: (request, _response, buffer) => {
+      (request as express.Request & { rawBody?: string }).rawBody = buffer.toString(
+        "utf8"
+      );
+    },
+  })
+);
 
 let playerPresenceBySteamId = new Map<string, PlayerPresence>();
 let snapshotsByAddr = new Map<string, ServerSnapshot>();
@@ -222,6 +233,61 @@ app.get("/health", async (_request, response) => {
   });
 });
 
+app.get("/api/pickup/public-state", async (_request, response) => {
+  try {
+    response.json({
+      ok: true,
+      state: await pickupService.getPublicState(),
+    });
+  } catch (error) {
+    response.status(500).json({
+      ok: false,
+      error: error instanceof Error ? error.message : "Pickup state unavailable.",
+    });
+  }
+});
+
+app.get("/api/pickup/me/state", async (request, response) => {
+  const authorization = request.header("authorization");
+  const token = authorization?.replace(/^Bearer\s+/i, "").trim() ?? "";
+  if (!token) {
+    response.status(401).json({ ok: false, error: "Missing pickup session token." });
+    return;
+  }
+
+  try {
+    const state = await pickupService.getPlayerStateByToken(token);
+    if (!state) {
+      response.status(401).json({ ok: false, error: "Pickup session is invalid." });
+      return;
+    }
+
+    response.json({
+      ok: true,
+      state,
+    });
+  } catch (error) {
+    response.status(500).json({
+      ok: false,
+      error: error instanceof Error ? error.message : "Pickup state unavailable.",
+    });
+  }
+});
+
+app.post("/api/pickup/callbacks/provisioned", async (request, response) => {
+  await pickupService.handleProvisionCallback(
+    request as express.Request & { rawBody?: string },
+    response
+  );
+});
+
+app.post("/api/pickup/callbacks/result", async (request, response) => {
+  await pickupService.handleResultCallback(
+    request as express.Request & { rawBody?: string },
+    response
+  );
+});
+
 app.get("/api/servers/:addr", async (request, response) => {
   const addr = decodeURIComponent(request.params.addr);
   const result = await pool.query(
@@ -365,7 +431,8 @@ app.post("/api/ingest/server-snapshot", async (request, response) => {
   });
 });
 
-io.on("connection", (socket) => {
+io.on("connection", async (socket) => {
+  const pickupSession = await pickupService.authenticateSocket(socket);
   socket.emit("realtime:ready", {
     connectedAt: new Date().toISOString(),
   });
@@ -420,6 +487,8 @@ io.on("connection", (socket) => {
 
     void socket.leave(getPresenceRoomName(steamId));
   });
+
+  await pickupService.handleSocketConnection(socket, pickupSession);
 });
 
 server.listen(config.port, () => {
@@ -434,6 +503,10 @@ server.listen(config.port, () => {
     .catch((error: unknown) => {
       console.error("State hydration failed:", error);
     });
+
+  void pickupService.hydrate().catch((error: unknown) => {
+    console.error("Pickup hydration failed:", error);
+  });
 
   if (!config.steamApiKey) {
     console.warn(
