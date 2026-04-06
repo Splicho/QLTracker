@@ -161,26 +161,32 @@ type PickupMatchPlayerRow = PickupPlayerIdentity & {
   won: boolean | null;
 };
 
+type PickupQueueSeasonState = {
+  endsAt: string;
+  id: string;
+  name: string;
+  startsAt: string;
+  status: string;
+} | null;
+
+type PickupQueuePublicState = {
+  currentPlayers: number;
+  description: string | null;
+  enabled: boolean;
+  id: string;
+  name: string;
+  playerCount: number;
+  readyCheckDurationSeconds: number;
+  season: PickupQueueSeasonState;
+  slug: string;
+  teamSize: number;
+  vetoTurnDurationSeconds: number;
+};
+
 type PickupPublicState = {
-  queue: {
-    currentPlayers: number;
-    description: string | null;
-    enabled: boolean;
-    id: string;
-    name: string;
-    playerCount: number;
-    readyCheckDurationSeconds: number;
-    slug: string;
-    teamSize: number;
-    vetoTurnDurationSeconds: number;
-  };
-  season: {
-    endsAt: string;
-    id: string;
-    name: string;
-    startsAt: string;
-    status: string;
-  } | null;
+  queue: PickupQueuePublicState | null;
+  queues: PickupQueuePublicState[];
+  season: PickupQueueSeasonState;
 };
 
 type PickupPlayerRatingState = {
@@ -384,13 +390,14 @@ function compareByRating(
 }
 
 function chooseBalancedTeams(
+  teamSize: number,
   members: Array<PickupQueueMemberRow & { rating: PickupRatingRow }>,
 ) {
   const seeded = [...members].sort(compareByRating);
   const leftSeed = seeded[0]!;
   const rightSeed = seeded[1]!;
   const remaining = seeded.slice(2);
-  const leftSlots = DEFAULT_QUEUE.teamSize - 1;
+  const leftSlots = teamSize - 1;
   const splits = combinations(remaining, leftSlots);
   let best: {
     delta: number;
@@ -598,7 +605,72 @@ export function createPickupService(io: Server) {
     return queue;
   }
 
-  async function getDefaultQueue() {
+  async function getAllQueues() {
+    await ensureBootstrapData();
+    const result = await pool.query<PickupQueueRow>(
+      `
+        select
+          "id",
+          "slug",
+          "name",
+          "description",
+          "teamSize",
+          "playerCount",
+          "readyCheckDurationSeconds",
+          "vetoTurnDurationSeconds",
+          "enabled",
+          "provisionApiUrl",
+          "provisionAuthToken",
+          "callbackSecret"
+        from "PickupQueue"
+      `,
+    );
+
+    return result.rows.sort((left, right) => {
+      if (left.slug === DEFAULT_QUEUE.slug && right.slug !== DEFAULT_QUEUE.slug) {
+        return -1;
+      }
+
+      if (right.slug === DEFAULT_QUEUE.slug && left.slug !== DEFAULT_QUEUE.slug) {
+        return 1;
+      }
+
+      if (left.enabled !== right.enabled) {
+        return left.enabled ? -1 : 1;
+      }
+
+      return left.name.localeCompare(right.name);
+    });
+  }
+
+  async function getQueueById(queueId: string) {
+    await ensureBootstrapData();
+    const result = await pool.query<PickupQueueRow>(
+      `
+        select
+          "id",
+          "slug",
+          "name",
+          "description",
+          "teamSize",
+          "playerCount",
+          "readyCheckDurationSeconds",
+          "vetoTurnDurationSeconds",
+          "enabled",
+          "provisionApiUrl",
+          "provisionAuthToken",
+          "callbackSecret"
+        from "PickupQueue"
+        where "id" = $1
+        limit 1
+      `,
+      [queueId],
+    );
+
+    return result.rows[0] ?? null;
+  }
+
+  async function getQueueBySlug(queueSlug: string) {
     await ensureBootstrapData();
     const result = await pool.query<PickupQueueRow>(
       `
@@ -619,10 +691,20 @@ export function createPickupService(io: Server) {
         where "slug" = $1
         limit 1
       `,
-      [DEFAULT_QUEUE.slug],
+      [queueSlug],
     );
 
     return result.rows[0] ?? null;
+  }
+
+  async function getPrimaryQueue() {
+    const queues = await getAllQueues();
+    return (
+      queues.find((queue) => queue.slug === DEFAULT_QUEUE.slug) ??
+      queues.find((queue) => queue.enabled) ??
+      queues[0] ??
+      null
+    );
   }
 
   async function getActiveSeason(queueId: string) {
@@ -837,42 +919,119 @@ export function createPickupService(io: Server) {
     return insert.rows[0]!;
   }
 
+  async function getPlayerSeasonRating(playerId: string, seasonId: string) {
+    const result = await pool.query<PickupRatingRow>(
+      `
+        select
+          "playerId",
+          "mu",
+          "sigma",
+          "displayRating",
+          "gamesPlayed",
+          "wins",
+          "losses"
+        from "PickupPlayerSeasonRating"
+        where "seasonId" = $1 and "playerId" = $2
+        limit 1
+      `,
+      [seasonId, playerId],
+    );
+
+    return result.rows[0] ?? null;
+  }
+
+  async function getQueueMembership(playerId: string) {
+    const result = await pool.query<
+      PickupQueueRow & {
+        joinedAt: Date;
+      }
+    >(
+      `
+        select
+          qm."joinedAt",
+          q."id",
+          q."slug",
+          q."name",
+          q."description",
+          q."teamSize",
+          q."playerCount",
+          q."readyCheckDurationSeconds",
+          q."vetoTurnDurationSeconds",
+          q."enabled",
+          q."provisionApiUrl",
+          q."provisionAuthToken",
+          q."callbackSecret"
+        from "PickupQueueMember" qm
+        inner join "PickupQueue" q on q."id" = qm."queueId"
+        where qm."playerId" = $1
+        limit 1
+      `,
+      [playerId],
+    );
+
+    return result.rows[0] ?? null;
+  }
+
+  function seasonToState(season: PickupSeasonRow | null): PickupQueueSeasonState {
+    return season
+      ? {
+          endsAt: season.endsAt.toISOString(),
+          id: season.id,
+          name: season.name,
+          startsAt: season.startsAt.toISOString(),
+          status: season.status,
+        }
+      : null;
+  }
+
+  function queueToPublicState(
+    queue: PickupQueueRow,
+    currentPlayers: number,
+    season: PickupSeasonRow | null,
+  ): PickupQueuePublicState {
+    return {
+      currentPlayers,
+      description: queue.description,
+      enabled: queue.enabled,
+      id: queue.id,
+      name: queue.name,
+      playerCount: queue.playerCount,
+      readyCheckDurationSeconds: queue.readyCheckDurationSeconds,
+      season: seasonToState(season),
+      slug: queue.slug,
+      teamSize: queue.teamSize,
+      vetoTurnDurationSeconds: queue.vetoTurnDurationSeconds,
+    };
+  }
+
   async function getPublicState(): Promise<PickupPublicState> {
-    const queue = await getDefaultQueue();
-    if (!queue) {
+    const queues = await getAllQueues();
+    if (!queues.length) {
       throw new Error("Pickup queue is unavailable.");
     }
 
-    const [season, queueCount] = await Promise.all([
-      getActiveSeason(queue.id),
-      pool.query<{ count: string }>(
-        `select count(*)::text as count from "PickupQueueMember" where "queueId" = $1`,
-        [queue.id],
+    const [queueCounts, seasons] = await Promise.all([
+      pool.query<{ count: string; queueId: string }>(
+        `
+          select "queueId", count(*)::text as count
+          from "PickupQueueMember"
+          group by "queueId"
+        `,
       ),
+      Promise.all(queues.map((queue) => getActiveSeason(queue.id))),
     ]);
+    const countByQueueId = new Map(
+      queueCounts.rows.map((row) => [row.queueId, Number(row.count ?? "0")]),
+    );
+    const queuesState = queues.map((queue, index) =>
+      queueToPublicState(queue, countByQueueId.get(queue.id) ?? 0, seasons[index] ?? null),
+    );
+    const primaryQueue = queuesState[0] ?? null;
 
     return {
-      queue: {
-        currentPlayers: Number(queueCount.rows[0]?.count ?? "0"),
-        description: queue.description,
-        enabled: queue.enabled,
-        id: queue.id,
-        name: queue.name,
-        playerCount: queue.playerCount,
-        readyCheckDurationSeconds: queue.readyCheckDurationSeconds,
-        slug: queue.slug,
-        teamSize: queue.teamSize,
-        vetoTurnDurationSeconds: queue.vetoTurnDurationSeconds,
-      },
-      season: season
-        ? {
-            endsAt: season.endsAt.toISOString(),
-            id: season.id,
-            name: season.name,
-            startsAt: season.startsAt.toISOString(),
-            status: season.status,
-          }
-        : null,
+      queue: primaryQueue,
+      queues: queuesState,
+      season: primaryQueue?.season ?? null,
     };
   }
 
@@ -1016,21 +1175,13 @@ export function createPickupService(io: Server) {
   async function getPlayerState(
     player: PickupPlayerIdentity,
   ): Promise<PickupPlayerState> {
-    const [publicState, queue] = await Promise.all([
-      getPublicState(),
-      getDefaultQueue(),
-    ]);
-
-    if (!queue) {
-      throw new Error("Pickup queue is unavailable.");
-    }
-
-    const season = await getActiveSeason(queue.id);
-    const rating =
-      season != null ? await getOrCreatePlayerSeasonRating(player, season) : null;
     const match = await getLatestPlayerMatch(player.id);
 
     if (match) {
+      const [publicState, rating] = await Promise.all([
+        getPublicState(),
+        getPlayerSeasonRating(player.id, match.seasonId),
+      ]);
       const matchPlayers = await getMatchPlayers(match.id);
       const left = matchPlayers.filter((member) => member.team === "left");
       const right = matchPlayers.filter((member) => member.team === "right");
@@ -1076,31 +1227,38 @@ export function createPickupService(io: Server) {
       };
     }
 
-    const membership = await pool.query<{ joinedAt: Date }>(
-      `
-        select "joinedAt"
-        from "PickupQueueMember"
-        where "playerId" = $1
-        limit 1
-      `,
-      [player.id],
-    );
+    const [publicState, membership, primaryQueue] = await Promise.all([
+      getPublicState(),
+      getQueueMembership(player.id),
+      getPrimaryQueue(),
+    ]);
 
-    const joinedAt = membership.rows[0]?.joinedAt;
-    if (joinedAt) {
+    if (membership) {
+      const season = await getActiveSeason(membership.id);
+      const rating =
+        season != null ? await getOrCreatePlayerSeasonRating(player, season) : null;
+
       return {
         publicState,
         queue: {
-          joinedAt: joinedAt.toISOString(),
-          playerCount: queue.playerCount,
-          queueId: queue.id,
-          queueSlug: queue.slug,
+          joinedAt: membership.joinedAt.toISOString(),
+          playerCount: membership.playerCount,
+          queueId: membership.id,
+          queueSlug: membership.slug,
         },
         rating: ratingToState(rating),
         stage: "queue",
         viewer: player,
       };
     }
+
+    if (!primaryQueue) {
+      throw new Error("Pickup queue is unavailable.");
+    }
+
+    const season = await getActiveSeason(primaryQueue.id);
+    const rating =
+      season != null ? await getOrCreatePlayerSeasonRating(player, season) : null;
 
     return {
       publicState,
@@ -1145,6 +1303,7 @@ export function createPickupService(io: Server) {
   async function broadcastPublicState() {
     const publicState = await getPublicState();
     io.emit("pickup:public-state", publicState);
+    io.emit("pickup:queues:update", publicState.queues);
     io.emit("pickup:queue:update", publicState.queue);
   }
 
@@ -1217,7 +1376,7 @@ export function createPickupService(io: Server) {
         ),
       })),
     );
-    const teams = chooseBalancedTeams(ratedMembers);
+    const teams = chooseBalancedTeams(queue.teamSize, ratedMembers);
     const readyDeadlineAt = new Date(
       Date.now() + queue.readyCheckDurationSeconds * 1000,
     );
@@ -1353,8 +1512,8 @@ export function createPickupService(io: Server) {
   }
 
   async function tryStartMatchmaking(queueId: string) {
-    const queue = await getDefaultQueue();
-    if (!queue || queue.id !== queueId || !queue.enabled) {
+    const queue = await getQueueById(queueId);
+    if (!queue || !queue.enabled) {
       return;
     }
 
@@ -1476,7 +1635,7 @@ export function createPickupService(io: Server) {
       return;
     }
 
-    const queue = await getDefaultQueue();
+    const queue = await getQueueById(match.queueId);
     if (!queue) {
       return;
     }
@@ -1618,7 +1777,7 @@ export function createPickupService(io: Server) {
       return;
     }
 
-    const queue = await getDefaultQueue();
+    const queue = await getQueueById(match.queueId);
     if (!queue?.provisionApiUrl) {
       await recordProvisionEvent(matchId, "provision-error", {
         error: "Provision API URL is not configured.",
@@ -1782,7 +1941,7 @@ export function createPickupService(io: Server) {
       currentCaptainPlayerId === balanceSummary.captainPlayerIds.left
         ? balanceSummary.captainPlayerIds.right
         : balanceSummary.captainPlayerIds.left;
-    const queue = await getDefaultQueue();
+    const queue = await getQueueById(match.queueId);
     if (!queue) {
       return;
     }
@@ -1826,8 +1985,16 @@ export function createPickupService(io: Server) {
     await applyBan(matchId, null, undefined, "timeout");
   }
 
-  async function joinQueue(session: PickupSessionIdentity) {
-    const queue = await getDefaultQueue();
+  async function joinQueue(
+    session: PickupSessionIdentity,
+    queueRef?: { queueId?: string; queueSlug?: string },
+  ) {
+    const queue =
+      (queueRef?.queueId
+        ? await getQueueById(queueRef.queueId)
+        : queueRef?.queueSlug
+          ? await getQueueBySlug(queueRef.queueSlug)
+          : await getPrimaryQueue()) ?? null;
     if (!queue || !queue.enabled) {
       throw new Error("The pickup queue is currently unavailable.");
     }
@@ -2147,7 +2314,7 @@ export function createPickupService(io: Server) {
       throw new Error("Pickup match was not found.");
     }
 
-    const queue = await getDefaultQueue();
+    const queue = await getQueueById(match.queueId);
     if (!queue?.callbackSecret) {
       throw new Error("Pickup callback secret is not configured.");
     }
@@ -2197,14 +2364,29 @@ export function createPickupService(io: Server) {
 
       await emitSocketState(socket, session);
 
-      socket.on("pickup:queue:join", async () => {
+      socket.on("pickup:queue:join", async (payload: unknown) => {
         if (!session) {
           socket.emit("pickup:error", { message: "Pickup login is required." });
           return;
         }
 
+        const queueId =
+          typeof (payload as { queueId?: unknown })?.queueId === "string"
+            ? (payload as { queueId: string }).queueId.trim()
+            : "";
+        const queueSlug =
+          typeof (payload as { queueSlug?: unknown })?.queueSlug === "string"
+            ? (payload as { queueSlug: string }).queueSlug.trim()
+            : "";
+
         try {
-          socket.emit("pickup:state", await joinQueue(session));
+          socket.emit(
+            "pickup:state",
+            await joinQueue(session, {
+              queueId: queueId || undefined,
+              queueSlug: queueSlug || undefined,
+            }),
+          );
         } catch (error) {
           socket.emit("pickup:error", {
             message: error instanceof Error ? error.message : String(error),
