@@ -342,107 +342,11 @@ function createSignature(secret: string, body: string) {
   return crypto.createHmac("sha256", secret).update(body).digest("hex");
 }
 
-function extractFirstPlausibleNumber(input: string) {
-  const matches = input.match(/-?\d+(?:\.\d+)?/g) ?? [];
-
-  for (const match of matches) {
-    const value = Number(match);
-    if (
-      Number.isFinite(value) &&
-      value > 0 &&
-      value < 10000 &&
-      value !== 1500
-    ) {
-      return value;
-    }
-  }
-
-  return null;
-}
-
-function extractRatingNumber(input: string) {
-  const lowered = input.toLowerCase();
-  const keywords = ["trueskill", "rating", "elo", "mu"];
-
-  for (const keyword of keywords) {
-    const index = lowered.indexOf(keyword);
-    if (index !== -1) {
-      const value = extractFirstPlausibleNumber(
-        lowered.slice(index + keyword.length),
-      );
-      if (value != null) {
-        return value;
-      }
-    }
-  }
-
-  return extractFirstPlausibleNumber(lowered);
-}
-
-function asRecord(value: unknown) {
-  return value && typeof value === "object"
-    ? (value as Record<string, unknown>)
-    : null;
-}
-
-function extractTrueskillFromJson(value: unknown): number | null {
-  if (typeof value === "number" && Number.isFinite(value)) {
-    return value;
-  }
-
-  const record = asRecord(value);
-  if (!record) {
-    return null;
-  }
-
-  for (const key of ["elo", "trueskill", "rating", "mu"]) {
-    const field = record[key];
-    if (typeof field === "number" && Number.isFinite(field)) {
-      return field;
-    }
-
-    if (typeof field === "string") {
-      const parsed = Number(field.trim());
-      if (Number.isFinite(parsed)) {
-        return parsed;
-      }
-    }
-  }
-
-  return null;
-}
-
-async function fetchExternalSeedRating(steamId: string) {
-  const template = config.trueskillUrlTemplate.trim();
-  if (!template) {
-    return null;
-  }
-
-  const url = template.includes("%s")
-    ? template.replace("%s", steamId)
-    : `${template.replace(/\/+$/, "")}/${steamId}`;
-
-  try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      return null;
-    }
-
-    const body = await response.text();
-    try {
-      const parsed = JSON.parse(body) as unknown;
-      return extractTrueskillFromJson(parsed) ?? extractRatingNumber(body);
-    } catch {
-      return extractRatingNumber(body);
-    }
-  } catch {
-    return null;
-  }
-}
-
 function createRating(mu: number, sigma: number) {
   return ratingEnv.createRating(mu, sigma);
 }
+
+const DEFAULT_PICKUP_DISPLAY_RATING = 1000;
 
 function combinations<T>(values: T[], size: number): T[][] {
   if (size === 0) {
@@ -841,14 +745,45 @@ export function createPickupService(io: Server) {
       [season.id, player.id],
     );
 
-    if (existing.rows[0]) {
-      return existing.rows[0];
+  if (existing.rows[0]) {
+    const rating = existing.rows[0];
+    if (
+      rating.gamesPlayed === 0 &&
+      (rating.displayRating !== DEFAULT_PICKUP_DISPLAY_RATING ||
+        rating.mu !== ratingEnv.mu ||
+        rating.sigma !== ratingEnv.sigma)
+    ) {
+      const normalized = await pool.query<PickupRatingRow>(
+        `
+          update "PickupPlayerSeasonRating"
+          set
+            "mu" = $3,
+            "sigma" = $4,
+            "displayRating" = $5,
+            "seededFrom" = 'default-baseline',
+            "updatedAt" = now()
+          where "seasonId" = $1 and "playerId" = $2
+          returning
+            "playerId",
+            "mu",
+            "sigma",
+            "displayRating",
+            "gamesPlayed",
+            "wins",
+            "losses"
+        `,
+        [season.id, player.id, ratingEnv.mu, ratingEnv.sigma, DEFAULT_PICKUP_DISPLAY_RATING],
+      );
+
+      return normalized.rows[0] ?? rating;
     }
 
-    const seed = await fetchExternalSeedRating(player.steamId);
-    const mu = seed ?? ratingEnv.mu;
-    const sigma = ratingEnv.sigma;
-    const insert = await pool.query<PickupRatingRow>(
+    return rating;
+  }
+
+  const mu = ratingEnv.mu;
+  const sigma = ratingEnv.sigma;
+  const insert = await pool.query<PickupRatingRow>(
       `
         insert into "PickupPlayerSeasonRating" (
           "id",
@@ -894,8 +829,8 @@ export function createPickupService(io: Server) {
         player.id,
         mu,
         sigma,
-        defaultDisplayRating(mu),
-        seed != null ? "qlstats-trueskill" : "default-baseline",
+        DEFAULT_PICKUP_DISPLAY_RATING,
+        "default-baseline",
       ],
     );
 
