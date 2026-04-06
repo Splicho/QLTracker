@@ -59,7 +59,7 @@ export function buildServerCfg(
     `set sv_maxclients "${maxClients}"`,
     `set sv_mapPoolFile "mappool_capickup.txt"`,
     `set qlx_owner "${config.qlxOwnerSteamId}"`,
-    `set qlx_plugins "plugin_manager,essentials,workshop,pickup_bridge,qltracker_sort"`,
+    `set qlx_plugins "plugin_manager,essentials,workshop,pickup_bridge,qltracker_sort,qltracker_admins"`,
     `set qlx_database "Redis"`,
     `set qlx_redisAddress "127.0.0.1"`,
     `set qlx_redisDatabase "${slot.redisDb}"`,
