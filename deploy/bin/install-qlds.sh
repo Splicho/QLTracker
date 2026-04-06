@@ -42,4 +42,9 @@ else
   python3 -m pip install -r "$QLDS_DIR/minqlx-plugins/requirements.txt"
 fi
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CUSTOM_PLUGIN_DIR="$(cd "$SCRIPT_DIR/../plugins" && pwd)"
+mkdir -p "$QLDS_DIR/minqlx-plugins"
+cp "$CUSTOM_PLUGIN_DIR"/*.py "$QLDS_DIR/minqlx-plugins/"
+
 chown -R qltracker:qltracker "$QLDS_DIR"
