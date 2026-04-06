@@ -1,0 +1,20 @@
+# QLTracker pickup CA map pool
+# format: mapname|factoryid
+campgrounds|hoq_ca
+bloodrun|hoq_ca
+furiousheights|hoq_ca
+hektik|hoq_ca
+grimdungeons|hoq_ca
+verticalvengeance|hoq_ca
+thunderstruck|hoq_ca
+toxicity|hoq_ca
+serpentslair|hoq_ca
+suddendeath|hoq_ca
+ra3map7|hoq_ca
+ra3map7a|hoq_ca
+ra3map7b|hoq_ca
+ra3map7c|hoq_ca
+ra3map9|hoq_ca
+ra3map9a|hoq_ca
+ra3map9b|hoq_ca
+ra3map9c|hoq_ca

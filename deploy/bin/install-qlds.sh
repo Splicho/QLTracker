@@ -33,6 +33,7 @@ cp -R "$TMP_DIR/minqlx/bin/." "$QLDS_DIR/"
 if [[ ! -d "$QLDS_DIR/minqlx-plugins" ]]; then
   git clone https://github.com/MinoMino/minqlx-plugins.git "$QLDS_DIR/minqlx-plugins"
 else
+  git config --global --add safe.directory "$QLDS_DIR/minqlx-plugins"
   git -C "$QLDS_DIR/minqlx-plugins" pull --ff-only
 fi
 
@@ -45,9 +46,11 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CUSTOM_PLUGIN_DIR="$(cd "$SCRIPT_DIR/../plugins" && pwd)"
 CUSTOM_FACTORY_DIR="$(cd "$SCRIPT_DIR/../factories" && pwd)"
+CUSTOM_BASEQ3_DIR="$(cd "$SCRIPT_DIR/../baseq3" && pwd)"
 mkdir -p "$QLDS_DIR/minqlx-plugins"
 mkdir -p "$QLDS_DIR/baseq3/scripts"
 cp "$CUSTOM_PLUGIN_DIR"/*.py "$QLDS_DIR/minqlx-plugins/"
 cp "$CUSTOM_FACTORY_DIR"/*.factories "$QLDS_DIR/baseq3/scripts/"
+cp "$CUSTOM_BASEQ3_DIR"/*.txt "$QLDS_DIR/baseq3/"
 
 chown -R qltracker:qltracker "$QLDS_DIR"

@@ -2,6 +2,13 @@ import path from "node:path";
 import { config, type SlotDefinition } from "./config.js";
 import type { ProvisionPayload, SlotMetadata } from "./types.js";
 
+const PICKUP_WORKSHOP_IDS = [
+  "1804795751",
+  "1804815655",
+  "3463480024",
+  "2806460799",
+] as const;
+
 export function buildSlotMetadata(
   payload: ProvisionPayload,
   slot: SlotDefinition,
@@ -50,12 +57,14 @@ export function buildServerCfg(
     `set g_factory "hoq_ca"`,
     `set teamsize "${teamSize}"`,
     `set sv_maxclients "${maxClients}"`,
+    `set sv_mapPoolFile "mappool_capickup.txt"`,
     `set qlx_owner "${config.qlxOwnerSteamId}"`,
-    `set qlx_plugins "plugin_manager,essentials,pickup_bridge,qltracker_sort"`,
+    `set qlx_plugins "plugin_manager,essentials,workshop,pickup_bridge,qltracker_sort"`,
     `set qlx_database "Redis"`,
     `set qlx_redisAddress "127.0.0.1"`,
     `set qlx_redisDatabase "${slot.redisDb}"`,
     `set qlx_logs "5"`,
+    `set qlx_workshopReferences "${PICKUP_WORKSHOP_IDS.join(",")}"`,
     `set zmq_stats_enable "1"`,
     `set zmq_stats_ip "127.0.0.1"`,
     `set zmq_stats_port "${slot.zmqPort}"`,
