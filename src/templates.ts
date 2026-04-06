@@ -47,7 +47,7 @@ export function buildServerCfg(
 
   return [
     `set sv_hostname "^1QLTracker^7 Pickup ${metadata.matchId.slice(0, 8)}"`,
-    `set g_factory "ca"`,
+    `set g_factory "hoq_ca"`,
     `set teamsize "${teamSize}"`,
     `set sv_maxclients "${maxClients}"`,
     `set qlx_owner "${config.qlxOwnerSteamId}"`,

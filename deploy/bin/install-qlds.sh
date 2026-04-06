@@ -44,7 +44,10 @@ fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CUSTOM_PLUGIN_DIR="$(cd "$SCRIPT_DIR/../plugins" && pwd)"
+CUSTOM_FACTORY_DIR="$(cd "$SCRIPT_DIR/../factories" && pwd)"
 mkdir -p "$QLDS_DIR/minqlx-plugins"
+mkdir -p "$QLDS_DIR/baseq3/scripts"
 cp "$CUSTOM_PLUGIN_DIR"/*.py "$QLDS_DIR/minqlx-plugins/"
+cp "$CUSTOM_FACTORY_DIR"/*.factories "$QLDS_DIR/baseq3/scripts/"
 
 chown -R qltracker:qltracker "$QLDS_DIR"
