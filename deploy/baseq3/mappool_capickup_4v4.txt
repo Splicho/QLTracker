@@ -1,4 +1,4 @@
-# QLTracker pickup CA map pool fallback
+# QLTracker 4v4 CA pickup map pool
 # format: mapname|factoryid
 asylum|hoq_ca
 serpentslair|hoq_ca

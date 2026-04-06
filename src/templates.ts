@@ -9,6 +9,14 @@ const PICKUP_WORKSHOP_IDS = [
   "2806460799",
 ] as const;
 
+function getMapPoolFile(teamSize: number) {
+  if (teamSize <= 2) {
+    return "mappool_capickup_2v2.txt";
+  }
+
+  return "mappool_capickup_4v4.txt";
+}
+
 export function buildSlotMetadata(
   payload: ProvisionPayload,
   slot: SlotDefinition,
@@ -57,7 +65,7 @@ export function buildServerCfg(
     `set g_factory "hoq_ca"`,
     `set teamsize "${teamSize}"`,
     `set sv_maxclients "${maxClients}"`,
-    `set sv_mapPoolFile "mappool_capickup.txt"`,
+    `set sv_mapPoolFile "${getMapPoolFile(teamSize)}"`,
     `set qlx_owner "${config.qlxOwnerSteamId}"`,
     `set qlx_plugins "plugin_manager,essentials,workshop,pickup_bridge,qltracker_sort,qltracker_admins"`,
     `set qlx_database "Redis"`,
