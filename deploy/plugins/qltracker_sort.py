@@ -10,6 +10,16 @@ class qltracker_sort(minqlx.Plugin):
         self.add_command("sort", self.cmd_sort, 5)
         self.load_roster()
 
+    @staticmethod
+    def parse_steam_id(player):
+        try:
+            steam_id = getattr(player, "steam_id", None)
+            if steam_id is None:
+                return None
+            return int(steam_id)
+        except (TypeError, ValueError):
+            return None
+
     def load_metadata(self):
         metadata_file = self.get_cvar("qlx_pickupMetadataFile")
         if not metadata_file:
@@ -32,7 +42,11 @@ class qltracker_sort(minqlx.Plugin):
 
     def sort_connected_players(self):
         for player in self.players():
-            target_team = self.allowed_players.get(int(player.steam_id))
+            steam_id = self.parse_steam_id(player)
+            if steam_id is None:
+                continue
+
+            target_team = self.allowed_players.get(steam_id)
             if not target_team:
                 continue
 

@@ -9,6 +9,25 @@ const PICKUP_WORKSHOP_IDS = [
   "2806460799",
 ] as const;
 
+function formatQueueLabel(queueId: string, teamSize: number) {
+  const normalized = queueId.trim().toLowerCase();
+
+  if (normalized.includes("2v2") && normalized.includes("ca")) {
+    return "2v2 CA";
+  }
+
+  if (normalized.includes("4v4") && normalized.includes("ca")) {
+    return "4v4 CA";
+  }
+
+  const rawLabel = normalized.replace(/[-_]+/g, " ").trim();
+  if (rawLabel.length === 0) {
+    return `${teamSize}v${teamSize} CA`;
+  }
+
+  return rawLabel.replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
 function getMapPoolFile(teamSize: number) {
   if (teamSize <= 2) {
     return "mappool_capickup_2v2.txt";
@@ -60,9 +79,10 @@ export function buildServerCfg(
   const teamSize = metadata.teams.red.length;
   const maxClients = teamSize * 2 + 2;
   const metadataFile = path.join(slotDir, "match.json");
+  const queueLabel = formatQueueLabel(metadata.queueId, teamSize);
 
   return [
-    `set sv_hostname "^1QLTracker^7 Pickup ${metadata.matchId.slice(0, 8)}"`,
+    `set sv_hostname "^1QLTracker^7 Pickup | ${queueLabel}"`,
     `set teamsize "${teamSize}"`,
     `set sv_maxclients "${maxClients}"`,
     `set sv_mapPoolFile "${getMapPoolFile(teamSize)}"`,

@@ -22,6 +22,16 @@ class pickup_bridge(minqlx.Plugin):
         self.callback_token = None
         self.populate_roster()
 
+    @staticmethod
+    def parse_steam_id(player):
+        try:
+            steam_id = getattr(player, "steam_id", None)
+            if steam_id is None:
+                return None
+            return int(steam_id)
+        except (TypeError, ValueError):
+            return None
+
     def load_metadata(self):
         metadata_file = self.get_cvar("qlx_pickupMetadataFile")
         if not metadata_file:
@@ -75,22 +85,45 @@ class pickup_bridge(minqlx.Plugin):
             self.logger.error("failed to report ready state: %s", error)
 
     def handle_player_connect(self, player):
-        if int(player.steam_id) not in self.allowed_players:
-            return "This pickup server is reserved for the active pickup roster."
+        steam_id = self.parse_steam_id(player)
+        if steam_id is None:
+            self.logger.info("player connected without resolved steam_id yet: %s", player.clean_name)
+            return
+
+        if steam_id not in self.allowed_players:
+            self.logger.info("allowing spectator connection for non-roster player %s (%s)", player.clean_name, steam_id)
 
     @minqlx.delay(1)
     def handle_player_loaded(self, player):
-        team = self.allowed_players.get(int(player.steam_id))
+        steam_id = self.parse_steam_id(player)
+        if steam_id is None:
+            return
+
+        team = self.allowed_players.get(steam_id)
         if team:
             try:
                 player.put(team)
             except Exception as error:
                 self.logger.warning("failed to place player %s onto %s: %s", player.clean_name, team, error)
+            return
+
+        try:
+            if player.team != "spectator":
+                player.put("spectator")
+        except Exception as error:
+            self.logger.warning("failed to move non-roster player %s to spectator: %s", player.clean_name, error)
 
     def handle_team_switch_attempt(self, player, _old_team, new_team):
-        target_team = self.allowed_players.get(int(player.steam_id))
+        steam_id = self.parse_steam_id(player)
+        if steam_id is None:
+            return
+
+        target_team = self.allowed_players.get(steam_id)
         if not target_team:
-            return False
+            if new_team in {"red", "blue", "free", "any"}:
+                player.tell("^1[QLTRACKER] ^7This server is locked to the active pickup roster. Spectators are welcome.")
+                return False
+            return
 
         if new_team == target_team:
             return
