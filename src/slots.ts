@@ -21,11 +21,15 @@ function metadataFile(slotId: number) {
   return path.join(slotDir(slotId), "match.json");
 }
 
+export const RCON_BASE_PORT = 19000;
+
 function defaultSlotState(slot: SlotDefinition): SlotState {
   return {
     gamePort: slot.gamePort,
     matchId: null,
     queueId: null,
+    rconPort: null,
+    rconToken: null,
     redisDb: slot.redisDb,
     resultPostedAt: null,
     slotId: slot.id,
@@ -148,17 +152,21 @@ export async function allocateSlot(payload: ProvisionPayload) {
     );
     fs.writeFileSync(path.join(currentDir, "slot.env"), `${buildSlotEnv(currentDir, slot)}\n`, "utf8");
 
+    const rconToken = randomToken();
+    const rconPort = RCON_BASE_PORT + slot.id;
     const nextState: SlotState = {
       ...state,
       matchId: payload.matchId,
       queueId: payload.queueId,
+      rconPort,
+      rconToken,
       resultPostedAt: null,
       state: "provisioning",
       token,
       updatedAt: new Date().toISOString(),
     };
     writeSlotState(slot.id, nextState);
-    return { metadata, slot, state: nextState };
+    return { metadata, rconPort, rconToken, slot, state: nextState };
   }
 
   return null;
@@ -187,6 +195,23 @@ export function markSlotReady(slotId: number) {
     ...state,
     state: "busy",
     updatedAt: new Date().toISOString(),
+  };
+  writeSlotState(slotId, nextState);
+  return nextState;
+}
+
+export function markSlotResultPosted(slotId: number) {
+  const slot = SLOT_DEFINITIONS.find((value) => value.id === slotId);
+  if (!slot) {
+    return null;
+  }
+
+  const state = readSlotState(slot);
+  const now = new Date().toISOString();
+  const nextState: SlotState = {
+    ...state,
+    resultPostedAt: now,
+    updatedAt: now,
   };
   writeSlotState(slotId, nextState);
   return nextState;

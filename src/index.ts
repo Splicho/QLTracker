@@ -5,6 +5,7 @@ import { config, ensureAppDirectories, SLOT_DEFINITIONS } from "./config.js";
 import { createSignature } from "./signing.js";
 import {
   allocateSlot,
+  markSlotResultPosted,
   markSlotReady,
   prepareManualSlot,
   readSlotMetadata,
@@ -188,10 +189,12 @@ app.post("/internal/slots/:slotId/ready", async (request, response) => {
       return;
     }
 
+    console.info(`[pickup] slot ${slotId} ready for match ${payload.matchId}`);
     markSlotReady(slotId);
     resolveReady(slotId);
     response.json({ ok: true });
   } catch (error) {
+    console.error(`[pickup] ready callback failed for slot ${request.params.slotId}:`, error);
     response.status(400).json({
       ok: false,
       error: error instanceof Error ? error.message : String(error),
@@ -221,8 +224,10 @@ app.post("/internal/slots/:slotId/live", async (request, response) => {
     }
 
     await postMatchLive(payload.matchId);
+    console.info(`[pickup] slot ${slotId} live for match ${payload.matchId}`);
     response.json({ ok: true });
   } catch (error) {
+    console.error(`[pickup] live callback failed for slot ${request.params.slotId}:`, error);
     response.status(400).json({
       ok: false,
       error: error instanceof Error ? error.message : String(error),
@@ -254,6 +259,10 @@ app.post("/internal/slots/:slotId/completed", async (request, response) => {
     }
 
     await postMatchResult(payload.matchId, payload.winnerTeam, payload.finalScore);
+    markSlotResultPosted(slotId);
+    console.info(
+      `[pickup] slot ${slotId} completed match ${payload.matchId} winner=${payload.winnerTeam} finalScore=${payload.finalScore}`,
+    );
     response.json({ ok: true });
 
     setTimeout(async () => {
@@ -261,6 +270,7 @@ app.post("/internal/slots/:slotId/completed", async (request, response) => {
       releaseSlot(slotId);
     }, config.postMatchGraceSeconds * 1000);
   } catch (error) {
+    console.error(`[pickup] completed callback failed for slot ${request.params.slotId}:`, error);
     response.status(400).json({
       ok: false,
       error: error instanceof Error ? error.message : String(error),

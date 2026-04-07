@@ -31,6 +31,8 @@ export type SlotState = {
   gamePort: number;
   matchId: string | null;
   queueId: string | null;
+  rconPort: number | null;
+  rconToken: string | null;
   redisDb: number;
   resultPostedAt: string | null;
   slotId: number;

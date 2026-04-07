@@ -14,9 +14,14 @@ class pickup_bridge(minqlx.Plugin):
         self.add_hook("team_switch_attempt", self.handle_team_switch_attempt, priority=minqlx.PRI_HIGH)
         self.add_hook("game_start", self.handle_game_start)
         self.add_hook("game_end", self.handle_game_end)
+        self.add_hook("round_start", self.handle_round_start)
+        self.add_hook("console_print", self.handle_console_print)
 
         self.ready_reported = False
         self.live_reported = False
+        self.live_reporting = False
+        self.completed_reported = False
+        self.completed_reporting = False
         self.metadata = self.load_metadata()
         self.allowed_players = {}
         self.match_id = None
@@ -83,19 +88,34 @@ class pickup_bridge(minqlx.Plugin):
         try:
             self.post_json("ready", {})
             self.ready_reported = True
+            self.logger.info("reported ready state")
         except urllib.error.URLError as error:
             self.logger.error("failed to report ready state: %s", error)
 
     @minqlx.thread
-    def handle_game_start(self, *_args):
-        if self.live_reported:
+    def report_live(self, trigger):
+        if self.live_reported or self.live_reporting:
             return
 
+        self.live_reporting = True
         try:
             self.post_json("live", {})
             self.live_reported = True
+            self.logger.info("reported live state via %s", trigger)
         except urllib.error.URLError as error:
-            self.logger.error("failed to report live state: %s", error)
+            self.live_reported = False
+            self.logger.error("failed to report live state via %s: %s", trigger, error)
+        except Exception as error:
+            self.live_reported = False
+            self.logger.error("failed to report live state via %s: %s", trigger, error)
+        finally:
+            self.live_reporting = False
+
+    def handle_game_start(self, *_args):
+        self.report_live("game_start")
+
+    def handle_round_start(self, _round_number):
+        self.report_live("round_start")
 
     def handle_player_connect(self, player):
         steam_id = self.parse_steam_id(player)
@@ -151,11 +171,7 @@ class pickup_bridge(minqlx.Plugin):
         force_team()
         return False
 
-    @minqlx.thread
-    def handle_game_end(self, data):
-        if data.get("ABORTED"):
-            return
-
+    def resolve_scores(self, data=None):
         red_score = None
         blue_score = None
         try:
@@ -166,14 +182,43 @@ class pickup_bridge(minqlx.Plugin):
             red_score = None
             blue_score = None
 
-        if red_score is None or blue_score is None:
+        if (red_score is None or blue_score is None) and data is not None:
             red_score = int(data.get("TSCORE0", 0))
             blue_score = int(data.get("TSCORE1", 0))
 
-        winner_team = "left" if red_score >= blue_score else "right"
-        final_score = f"{red_score}-{blue_score}"
+        return red_score, blue_score
 
+    def infer_winner_from_text(self, text):
+        normalized = text.lower()
+        if "hit the roundlimit" not in normalized and "hit the fraglimit" not in normalized:
+            return None
+
+        if "blue" in normalized:
+            return "right"
+
+        if "red" in normalized:
+            return "left"
+
+        return None
+
+    @minqlx.thread
+    def report_completed(self, trigger, winner_team=None, final_score=None):
+        if self.completed_reported or self.completed_reporting:
+            return
+
+        self.completed_reporting = True
         try:
+            red_score, blue_score = self.resolve_scores()
+            if final_score is None and red_score is not None and blue_score is not None:
+                final_score = f"{red_score}-{blue_score}"
+
+            if winner_team is None and red_score is not None and blue_score is not None:
+                winner_team = "left" if red_score >= blue_score else "right"
+
+            if winner_team is None:
+                self.logger.error("failed to report match result via %s: winner could not be resolved", trigger)
+                return
+
             self.post_json(
                 "completed",
                 {
@@ -181,5 +226,38 @@ class pickup_bridge(minqlx.Plugin):
                     "finalScore": final_score,
                 },
             )
+            self.completed_reported = True
+            self.logger.info(
+                "reported match result via %s: winner=%s final_score=%s",
+                trigger,
+                winner_team,
+                final_score,
+            )
         except urllib.error.URLError as error:
-            self.logger.error("failed to post match result: %s", error)
+            self.completed_reported = False
+            self.logger.error("failed to post match result via %s: %s", trigger, error)
+        except Exception as error:
+            self.completed_reported = False
+            self.logger.error("failed to post match result via %s: %s", trigger, error)
+        finally:
+            self.completed_reporting = False
+
+    def handle_game_end(self, data):
+        if data.get("ABORTED"):
+            return
+
+        red_score, blue_score = self.resolve_scores(data)
+        winner_team = None
+        final_score = None
+        if red_score is not None and blue_score is not None:
+            winner_team = "left" if red_score >= blue_score else "right"
+            final_score = f"{red_score}-{blue_score}"
+
+        self.report_completed("game_end", winner_team, final_score)
+
+    def handle_console_print(self, text):
+        winner_team = self.infer_winner_from_text(text)
+        if winner_team is None:
+            return
+
+        self.report_completed("console_print", winner_team)
