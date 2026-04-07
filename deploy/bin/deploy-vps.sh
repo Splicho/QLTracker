@@ -107,19 +107,20 @@ verify_health() {
   local port
   local attempt
 
-  port="$(awk -F= '$1=="PORT"{print $2}' "$APP_DIR/.env" | tail -n 1)"
+  port="$(awk -F= '$1=="PORT"{print $2}' "$APP_DIR/.env" | tr -d '\r' | tail -n 1)"
   if [[ -z "$port" ]]; then
     port="7070"
   fi
 
   for ((attempt = 1; attempt <= HEALTH_RETRIES; attempt += 1)); do
-    if curl --fail --silent --show-error "http://127.0.0.1:${port}/healthz" >/dev/null; then
+    if curl --fail --silent "http://127.0.0.1:${port}/healthz" >/dev/null 2>/dev/null; then
       return
     fi
 
     sleep "$HEALTH_RETRY_DELAY_SECONDS"
   done
 
+  curl --fail --silent --show-error "http://127.0.0.1:${port}/healthz" >/dev/null || true
   die "health check failed after ${HEALTH_RETRIES} attempts"
 }
 
