@@ -66,17 +66,16 @@ function rejectReady(slotId: number, error: Error) {
   pending.reject(error);
 }
 
-async function postMatchResult(matchId: string, winnerTeam: "left" | "right", finalScore: string | null) {
+async function postRealtimeCallback(
+  url: string,
+  callbackName: string,
+  payload: Record<string, unknown>,
+) {
   let lastError: Error | null = null;
   for (let attempt = 1; attempt <= 5; attempt += 1) {
     try {
-      const payload = {
-        finalScore,
-        matchId,
-        winnerTeam,
-      };
       const rawBody = JSON.stringify(payload);
-      const response = await fetch(config.realtimeResultCallbackUrl, {
+      const response = await fetch(url, {
         body: rawBody,
         headers: {
           "Content-Type": "application/json",
@@ -87,7 +86,7 @@ async function postMatchResult(matchId: string, winnerTeam: "left" | "right", fi
 
       if (!response.ok) {
         const text = await response.text();
-        throw new Error(`Realtime result callback failed (${response.status}): ${text}`);
+        throw new Error(`Realtime ${callbackName} callback failed (${response.status}): ${text}`);
       }
 
       return;
@@ -99,7 +98,21 @@ async function postMatchResult(matchId: string, winnerTeam: "left" | "right", fi
     }
   }
 
-  throw lastError ?? new Error("Realtime result callback failed.");
+  throw lastError ?? new Error(`Realtime ${callbackName} callback failed.`);
+}
+
+async function postMatchLive(matchId: string) {
+  await postRealtimeCallback(config.realtimeLiveCallbackUrl, "live", {
+    matchId,
+  });
+}
+
+async function postMatchResult(matchId: string, winnerTeam: "left" | "right", finalScore: string | null) {
+  await postRealtimeCallback(config.realtimeResultCallbackUrl, "result", {
+    finalScore,
+    matchId,
+    winnerTeam,
+  });
 }
 
 function getSlotById(slotId: number) {
@@ -176,6 +189,37 @@ app.post("/internal/slots/:slotId/ready", async (request, response) => {
 
     markSlotReady(slotId);
     resolveReady(slotId);
+    response.json({ ok: true });
+  } catch (error) {
+    response.status(400).json({
+      ok: false,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+});
+
+app.post("/internal/slots/:slotId/live", async (request, response) => {
+  const schema = z.object({
+    matchId: z.string().min(1),
+    token: z.string().min(1),
+  });
+
+  try {
+    const slotId = Number(request.params.slotId);
+    const payload = schema.parse(request.body);
+    const slot = getSlotById(slotId);
+    if (!slot) {
+      response.status(404).json({ ok: false, error: "Unknown slot." });
+      return;
+    }
+
+    const state = readSlotState(slot);
+    if (state.token !== payload.token || state.matchId !== payload.matchId) {
+      response.status(403).json({ ok: false, error: "Invalid slot token." });
+      return;
+    }
+
+    await postMatchLive(payload.matchId);
     response.json({ ok: true });
   } catch (error) {
     response.status(400).json({

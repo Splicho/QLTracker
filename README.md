@@ -9,6 +9,7 @@ Standalone VPS-side provisioner for Quake Live pickup servers with minqlx.
 - Generates slot-specific Quake Live/minqlx config
 - Starts the slot through systemd
 - Waits for a local ready callback from the custom minqlx plugin
+- Posts a signed live callback when the match starts
 - Posts signed match results back to `qltracker-realtime`
 
 ## Runtime layout

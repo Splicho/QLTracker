@@ -12,9 +12,11 @@ class pickup_bridge(minqlx.Plugin):
         self.add_hook("player_connect", self.handle_player_connect, priority=minqlx.PRI_HIGH)
         self.add_hook("player_loaded", self.handle_player_loaded)
         self.add_hook("team_switch_attempt", self.handle_team_switch_attempt, priority=minqlx.PRI_HIGH)
+        self.add_hook("game_start", self.handle_game_start)
         self.add_hook("game_end", self.handle_game_end)
 
         self.ready_reported = False
+        self.live_reported = False
         self.metadata = self.load_metadata()
         self.allowed_players = {}
         self.match_id = None
@@ -83,6 +85,17 @@ class pickup_bridge(minqlx.Plugin):
             self.ready_reported = True
         except urllib.error.URLError as error:
             self.logger.error("failed to report ready state: %s", error)
+
+    @minqlx.thread
+    def handle_game_start(self, *_args):
+        if self.live_reported:
+            return
+
+        try:
+            self.post_json("live", {})
+            self.live_reported = True
+        except urllib.error.URLError as error:
+            self.logger.error("failed to report live state: %s", error)
 
     def handle_player_connect(self, player):
         steam_id = self.parse_steam_id(player)

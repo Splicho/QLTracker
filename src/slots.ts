@@ -40,12 +40,17 @@ export async function systemctl(args: string[]) {
   return execFileAsync("sudo", ["systemctl", ...args]);
 }
 
-export async function getServiceActive(slotId: number) {
+export async function getServiceState(slotId: number) {
   try {
-    const { stdout } = await systemctl(["is-active", `qltracker-ql@${slotId}.service`]);
-    return stdout.trim() === "active";
+    const { stdout } = await systemctl([
+      "show",
+      `qltracker-ql@${slotId}.service`,
+      "--property=ActiveState",
+      "--value",
+    ]);
+    return stdout.trim();
   } catch {
-    return false;
+    return "inactive";
   }
 }
 
@@ -88,12 +93,17 @@ export function readSlotMetadata(slotId: number) {
 export async function reconcileSlots() {
   for (const slot of SLOT_DEFINITIONS) {
     const state = readSlotState(slot);
-    const active = await getServiceActive(slot.id);
-    if (state.state === "idle" && !active) {
+    const serviceState = await getServiceState(slot.id);
+    const serviceRunning =
+      serviceState === "active" ||
+      serviceState === "activating" ||
+      serviceState === "deactivating";
+
+    if (state.state === "idle" && !serviceRunning) {
       continue;
     }
 
-    if (state.state === "idle" && active) {
+    if (state.state === "idle" && serviceRunning) {
       writeSlotState(slot.id, {
         ...state,
         matchId: null,
@@ -105,7 +115,7 @@ export async function reconcileSlots() {
       continue;
     }
 
-    if (state.state !== "idle" && !active) {
+    if (state.state !== "idle" && !serviceRunning) {
       writeSlotState(slot.id, {
         ...state,
         matchId: null,
