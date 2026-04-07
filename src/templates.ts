@@ -102,3 +102,27 @@ export function buildServerCfg(
     `set serverstartup "map ${metadata.finalMapKey} hoq_ca"`,
   ].join("\n");
 }
+
+export function buildManualServerCfg(
+  slotDir: string,
+  slot: SlotDefinition,
+  map: string,
+) {
+  return [
+    `set sv_hostname "^1QLTracker^7 Manual Server"`,
+    `set teamsize "4"`,
+    `set sv_maxclients "10"`,
+    `set sv_mapPoolFile "mappool_capickup_4v4.txt"`,
+    `set qlx_owner "${config.qlxOwnerSteamId}"`,
+    `set qlx_plugins "plugin_manager,essentials,workshop,qltracker_admins"`,
+    `set qlx_database "Redis"`,
+    `set qlx_redisAddress "127.0.0.1"`,
+    `set qlx_redisDatabase "${slot.redisDb}"`,
+    `set qlx_logs "5"`,
+    `set qlx_workshopReferences "${PICKUP_WORKSHOP_IDS.join(",")}"`,
+    `set zmq_stats_enable "1"`,
+    `set zmq_stats_ip "127.0.0.1"`,
+    `set zmq_stats_port "${slot.zmqPort}"`,
+    `set serverstartup "map ${map} hoq_ca"`,
+  ].join("\n");
+}

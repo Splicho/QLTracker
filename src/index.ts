@@ -6,6 +6,7 @@ import { createSignature } from "./signing.js";
 import {
   allocateSlot,
   markSlotReady,
+  prepareManualSlot,
   readSlotMetadata,
   readSlotState,
   reconcileSlots,
@@ -316,6 +317,70 @@ app.get("/internal/slots/:slotId/metadata", (request, response) => {
   }
 
   response.json(metadata);
+});
+
+app.post("/api/admin/slots/:slotId/stop", async (request, response) => {
+  try {
+    requireProvisionAuth(request);
+    const slotId = Number(request.params.slotId);
+    const slot = getSlotById(slotId);
+    if (!slot) {
+      response.status(404).json({ ok: false, error: "Unknown slot." });
+      return;
+    }
+
+    const state = readSlotState(slot);
+    if (state.state === "idle") {
+      response.status(409).json({ ok: false, error: "Slot is already idle." });
+      return;
+    }
+
+    await stopSlot(slotId);
+    releaseSlot(slotId);
+    response.json({ ok: true });
+  } catch (error) {
+    const status = error instanceof Error && error.message === "Unauthorized." ? 401 : 500;
+    response.status(status).json({
+      ok: false,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+});
+
+app.post("/api/admin/slots/:slotId/start-manual", async (request, response) => {
+  const bodySchema = z.object({
+    map: z.string().trim().min(1),
+  });
+
+  try {
+    requireProvisionAuth(request);
+    const slotId = Number(request.params.slotId);
+    const slot = getSlotById(slotId);
+    if (!slot) {
+      response.status(404).json({ ok: false, error: "Unknown slot." });
+      return;
+    }
+
+    const body = bodySchema.parse(request.body);
+    const result = prepareManualSlot(slotId, body.map);
+    if (!result) {
+      response.status(409).json({ ok: false, error: "Slot is not idle." });
+      return;
+    }
+
+    await startSlot(slotId);
+    response.json({
+      ok: true,
+      joinAddress: `${config.publicIp}:${result.slot.gamePort}`,
+      port: result.slot.gamePort,
+    });
+  } catch (error) {
+    const status = error instanceof z.ZodError ? 400 : error instanceof Error && error.message === "Unauthorized." ? 401 : 500;
+    response.status(status).json({
+      ok: false,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
 });
 
 ensureAppDirectories();

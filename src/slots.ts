@@ -4,7 +4,7 @@ import { promisify } from "node:util";
 import { execFile } from "node:child_process";
 import { config, SLOT_DEFINITIONS, type SlotDefinition } from "./config.js";
 import { randomToken } from "./signing.js";
-import { buildServerCfg, buildSlotEnv, buildSlotMetadata } from "./templates.js";
+import { buildManualServerCfg, buildServerCfg, buildSlotEnv, buildSlotMetadata } from "./templates.js";
 import type { ProvisionPayload, SlotMetadata, SlotState } from "./types.js";
 
 const execFileAsync = promisify(execFile);
@@ -199,4 +199,36 @@ export function releaseSlot(slotId: number) {
   }
 
   writeSlotState(slotId, defaultSlotState(slot));
+}
+
+export function prepareManualSlot(slotId: number, map: string) {
+  const slot = SLOT_DEFINITIONS.find((value) => value.id === slotId);
+  if (!slot) {
+    return null;
+  }
+
+  const state = readSlotState(slot);
+  if (state.state !== "idle") {
+    return null;
+  }
+
+  const currentDir = slotDir(slot.id);
+  fs.writeFileSync(
+    path.join(currentDir, "home", "baseq3", "pickup-server.cfg"),
+    `${buildManualServerCfg(currentDir, slot, map)}\n`,
+    "utf8",
+  );
+  fs.writeFileSync(path.join(currentDir, "slot.env"), `${buildSlotEnv(currentDir, slot)}\n`, "utf8");
+
+  const nextState: SlotState = {
+    ...state,
+    matchId: `manual-${Date.now()}`,
+    queueId: null,
+    resultPostedAt: null,
+    state: "busy",
+    token: null,
+    updatedAt: new Date().toISOString(),
+  };
+  writeSlotState(slotId, nextState);
+  return { slot, state: nextState };
 }
