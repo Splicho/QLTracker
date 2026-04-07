@@ -41,6 +41,7 @@ export function buildSlotMetadata(
 export function buildSlotEnv(slotDir: string, slot: SlotDefinition) {
   return [
     `QLDS_BASE_DIR=${config.qldsBaseDir}`,
+    `PUBLIC_IP=${config.publicIp}`,
     `SLOT_ID=${slot.id}`,
     `GAME_PORT=${slot.gamePort}`,
     `ZMQ_PORT=${slot.zmqPort}`,

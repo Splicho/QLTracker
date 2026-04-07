@@ -43,10 +43,10 @@ export type SlotDefinition = {
 };
 
 export const SLOT_DEFINITIONS: SlotDefinition[] = [
-  { id: 1, gamePort: 27960, redisDb: 1, zmqPort: 64550 },
-  { id: 2, gamePort: 27961, redisDb: 2, zmqPort: 64551 },
-  { id: 3, gamePort: 27962, redisDb: 3, zmqPort: 64552 },
-  { id: 4, gamePort: 27963, redisDb: 4, zmqPort: 64553 },
+  { id: 1, gamePort: 27961, redisDb: 1, zmqPort: 64550 },
+  { id: 2, gamePort: 27962, redisDb: 2, zmqPort: 64551 },
+  { id: 3, gamePort: 27963, redisDb: 3, zmqPort: 64552 },
+  { id: 4, gamePort: 27964, redisDb: 4, zmqPort: 64553 },
 ];
 
 export function ensureAppDirectories() {

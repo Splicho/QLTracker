@@ -22,5 +22,6 @@ mkdir -p "$FS_HOMEPATH" "$LOG_DIR"
 
 exec "${QLDS_BASE_DIR}/run_server_x64_minqlx.sh" \
   +set fs_homepath "$FS_HOMEPATH" \
+  +set net_ip "$PUBLIC_IP" \
   +set net_port "$GAME_PORT" \
   +exec "$SERVER_CFG"

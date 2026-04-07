@@ -58,9 +58,17 @@ export function readSlotState(slot: SlotDefinition): SlotState {
   }
 
   const parsed = JSON.parse(fs.readFileSync(file, "utf8")) as SlotState;
+  const {
+    gamePort: _gamePort,
+    redisDb: _redisDb,
+    slotId: _slotId,
+    zmqPort: _zmqPort,
+    ...rest
+  } = parsed;
+
   return {
     ...defaultSlotState(slot),
-    ...parsed,
+    ...rest,
   };
 }
 
