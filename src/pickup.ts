@@ -91,9 +91,9 @@ type PickupRatingRow = {
 };
 
 type PickupQueueMemberRow = PickupPlayerIdentity & {
-  id: string;
   joinedAt: Date;
   playerId: string;
+  queueMemberId: string;
 };
 
 type PickupVetoTurn = {
@@ -157,8 +157,8 @@ type PickupMatchRow = {
 };
 
 type PickupMatchPlayerRow = PickupPlayerIdentity & {
-  id: string;
   matchId: string;
+  matchPlayerId: string;
   playerId: string;
   joinedAt: Date;
   readyState: "pending" | "ready" | "dropped";
@@ -847,10 +847,10 @@ export function createPickupService(io: Server) {
     const result = await pool.query<PickupQueueMemberRow>(
       `
         select
-          qm."id",
+          qm."id" as "queueMemberId",
           qm."playerId",
           qm."joinedAt",
-          p."id",
+          p."id" as "id",
           p."personaName",
           p."avatarUrl",
           p."profileUrl",
@@ -1183,7 +1183,11 @@ export function createPickupService(io: Server) {
         inner join "PickupMatchPlayer" mp on mp."matchId" = m."id"
         where
           mp."playerId" = $1
-          and m."status" in ('ready_check', 'veto', 'provisioning', 'server_ready', 'live')
+          and (
+            m."status" in ('provisioning', 'server_ready', 'live')
+            or (m."status" = 'ready_check' and m."readyDeadlineAt" > now())
+            or (m."status" = 'veto' and m."vetoDeadlineAt" > now())
+          )
         order by m."createdAt" desc
         limit 1
       `,
@@ -1262,7 +1266,7 @@ export function createPickupService(io: Server) {
     const result = await pool.query<PickupMatchPlayerRow>(
       `
         select
-          mp."id",
+          mp."id" as "matchPlayerId",
           mp."matchId",
           mp."playerId",
           mp."joinedAt",
@@ -1277,7 +1281,7 @@ export function createPickupService(io: Server) {
           mp."sigmaAfter",
           mp."displayAfter",
           mp."won",
-          p."id",
+          p."id" as "id",
           p."personaName",
           p."avatarUrl",
           p."profileUrl",
@@ -1562,10 +1566,10 @@ export function createPickupService(io: Server) {
       const lockedMembers = await client.query<PickupQueueMemberRow>(
         `
           select
-            qm."id",
+            qm."id" as "queueMemberId",
             qm."playerId",
             qm."joinedAt",
-            p."id",
+            p."id" as "id",
             p."personaName",
             p."avatarUrl",
             p."profileUrl",
@@ -1585,11 +1589,18 @@ export function createPickupService(io: Server) {
         return null;
       }
 
-      const lockedIds = lockedMembers.rows.map((member) => member.id);
-      await client.query(
-        `delete from "PickupQueueMember" where "id" = any($1::text[])`,
+      const lockedIds = lockedMembers.rows.map((member) => member.queueMemberId);
+      const deletedMembers = await client.query<{ queueMemberId: string }>(
+        `
+          delete from "PickupQueueMember"
+          where "id" = any($1::text[])
+          returning "id" as "queueMemberId"
+        `,
         [lockedIds],
       );
+      if (deletedMembers.rows.length !== lockedIds.length) {
+        throw new Error("Pickup queue members could not be claimed atomically.");
+      }
 
       const matchResult = await client.query<{ id: string }>(
         `
@@ -2466,7 +2477,7 @@ export function createPickupService(io: Server) {
             where "id" = $1 and "matchId" = $2
           `,
           [
-            player.id,
+            player.matchPlayerId,
             matchId,
             rating.mu,
             rating.sigma,
@@ -2514,7 +2525,7 @@ export function createPickupService(io: Server) {
             where "id" = $1 and "matchId" = $2
           `,
           [
-            player.id,
+            player.matchPlayerId,
             matchId,
             rating.mu,
             rating.sigma,
