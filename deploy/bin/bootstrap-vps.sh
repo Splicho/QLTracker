@@ -51,5 +51,9 @@ if [[ -d "$APP_DIR/deploy/bin" ]]; then
   chmod 755 "$APP_DIR"/deploy/bin/*.sh
 fi
 
+if [[ -f "$APP_DIR/deploy/sudoers/qltracker-provisioner" ]]; then
+  install -m 0440 "$APP_DIR/deploy/sudoers/qltracker-provisioner" /etc/sudoers.d/qltracker-provisioner
+fi
+
 systemctl enable nginx redis-server
 systemctl start nginx redis-server

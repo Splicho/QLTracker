@@ -15,6 +15,8 @@ SYSTEMD_DIR="${SYSTEMD_DIR:-/etc/systemd/system}"
 SYNC_NGINX="${SYNC_NGINX:-0}"
 NGINX_SITE_TARGET="${NGINX_SITE_TARGET:-/etc/nginx/sites-available/qltracker-provisioner}"
 FORCE_ACTIVE_SLOT_DEPLOY="${FORCE_ACTIVE_SLOT_DEPLOY:-0}"
+HEALTH_RETRIES="${HEALTH_RETRIES:-15}"
+HEALTH_RETRY_DELAY_SECONDS="${HEALTH_RETRY_DELAY_SECONDS:-2}"
 
 log() {
   printf '[deploy] %s\n' "$*"
@@ -86,6 +88,9 @@ sync_runtime_assets() {
   install -o "$APP_USER" -g "$APP_GROUP" -m 0644 "$APP_DIR"/deploy/factories/*.factories "$BASEQ3_DIR/scripts"/
   install -o "$APP_USER" -g "$APP_GROUP" -m 0644 "$APP_DIR"/deploy/baseq3/*.txt "$BASEQ3_DIR"/
 
+  install -m 0440 "$APP_DIR/deploy/sudoers/qltracker-provisioner" /etc/sudoers.d/qltracker-provisioner
+  visudo -cf /etc/sudoers.d/qltracker-provisioner >/dev/null
+
   install -m 0644 "$APP_DIR/deploy/systemd/qltracker-provisioner.service" "$SYSTEMD_DIR/qltracker-provisioner.service"
   install -m 0644 "$APP_DIR/deploy/systemd/qltracker-ql@.service" "$SYSTEMD_DIR/qltracker-ql@.service"
 
@@ -100,13 +105,22 @@ sync_runtime_assets() {
 
 verify_health() {
   local port
+  local attempt
 
   port="$(awk -F= '$1=="PORT"{print $2}' "$APP_DIR/.env" | tail -n 1)"
   if [[ -z "$port" ]]; then
     port="7070"
   fi
 
-  curl --fail --silent --show-error "http://127.0.0.1:${port}/healthz" >/dev/null
+  for ((attempt = 1; attempt <= HEALTH_RETRIES; attempt += 1)); do
+    if curl --fail --silent --show-error "http://127.0.0.1:${port}/healthz" >/dev/null; then
+      return
+    fi
+
+    sleep "$HEALTH_RETRY_DELAY_SECONDS"
+  done
+
+  die "health check failed after ${HEALTH_RETRIES} attempts"
 }
 
 restart_services() {

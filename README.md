@@ -40,6 +40,7 @@ What it does:
 - resets `/opt/qltracker-provisioner/app` to `origin/master`
 - runs `npm ci` and `npm run build`
 - syncs tracked minqlx plugins, factories, and baseq3 files from the repo
+- syncs the tracked sudoers rule for slot `systemctl` access
 - syncs the tracked systemd units and reloads systemd
 - restarts `qltracker-provisioner` and verifies `http://127.0.0.1:7070/healthz`
 
