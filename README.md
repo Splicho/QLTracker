@@ -25,6 +25,25 @@ Standalone VPS-side provisioner for Quake Live pickup servers with minqlx.
 
 - `deploy/bin/bootstrap-vps.sh`
 - `deploy/bin/install-qlds.sh`
+- `deploy/bin/deploy-vps.sh`
+
+## VPS update flow
+
+Use the repo checkout on the server as the only code source:
+
+```bash
+sudo /opt/qltracker-provisioner/app/deploy/bin/deploy-vps.sh
+```
+
+What it does:
+
+- resets `/opt/qltracker-provisioner/app` to `origin/master`
+- runs `npm ci` and `npm run build`
+- syncs tracked minqlx plugins, factories, and baseq3 files from the repo
+- syncs the tracked systemd units and reloads systemd
+- restarts `qltracker-provisioner` and verifies `http://127.0.0.1:7070/healthz`
+
+The script refuses to deploy while any `qltracker-ql@*.service` slot is active unless `FORCE_ACTIVE_SLOT_DEPLOY=1` is set.
 
 ## Local commands
 

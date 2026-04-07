@@ -2,6 +2,9 @@
 set -euo pipefail
 
 export DEBIAN_FRONTEND=noninteractive
+APP_DIR="${APP_DIR:-/opt/qltracker-provisioner/app}"
+REPO_URL="${REPO_URL:-https://github.com/Splicho/qltracker-provisioner.git}"
+BRANCH="${BRANCH:-master}"
 
 apt-get update
 apt-get -y --fix-broken install
@@ -37,6 +40,16 @@ fi
 
 mkdir -p /opt/qltracker-provisioner /opt/qltracker-qlds /var/lib/qltracker-provisioner/slots
 chown -R qltracker:qltracker /opt/qltracker-provisioner /opt/qltracker-qlds /var/lib/qltracker-provisioner
+
+if [[ ! -d "$APP_DIR/.git" ]]; then
+  mkdir -p "$(dirname "$APP_DIR")"
+  chown -R qltracker:qltracker "$(dirname "$APP_DIR")"
+  runuser -u qltracker -- git clone --branch "$BRANCH" "$REPO_URL" "$APP_DIR"
+fi
+
+if [[ -d "$APP_DIR/deploy/bin" ]]; then
+  chmod 755 "$APP_DIR"/deploy/bin/*.sh
+fi
 
 systemctl enable nginx redis-server
 systemctl start nginx redis-server
