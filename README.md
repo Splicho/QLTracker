@@ -35,6 +35,7 @@ Small self-hosted Socket.IO + Postgres backend for QLTracker.
 - `GET /api/pickup/public-state`
 - `GET /api/pickup/me/state`
 - `POST /api/pickup/callbacks/provisioned`
+- `POST /api/pickup/callbacks/live`
 - `POST /api/pickup/callbacks/result`
 
 ## Socket events
@@ -56,4 +57,4 @@ Small self-hosted Socket.IO + Postgres backend for QLTracker.
 - `SESSION_SECRET` must match the `SESSION_SECRET` used by `qltracker-web`, because pickup app-session tokens are hashed and validated in both services.
 - Pickup routes expect the shared pickup tables from `sql/schema.sql`.
 - Provisioning configuration is stored on the pickup queue row in Postgres: `provisionApiUrl`, `provisionAuthToken`, and `callbackSecret`.
-- Provision and result callbacks must include the `x-pickup-signature` header, signed as `HMAC-SHA256(callbackSecret, rawBody)`.
+- Provision, live, and result callbacks must include the `x-pickup-signature` header, signed as `HMAC-SHA256(callbackSecret, rawBody)`.

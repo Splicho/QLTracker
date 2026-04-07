@@ -281,6 +281,13 @@ app.post("/api/pickup/callbacks/provisioned", async (request, response) => {
   );
 });
 
+app.post("/api/pickup/callbacks/live", async (request, response) => {
+  await pickupService.handleLiveCallback(
+    request as express.Request & { rawBody?: string },
+    response
+  );
+});
+
 app.post("/api/pickup/callbacks/result", async (request, response) => {
   await pickupService.handleResultCallback(
     request as express.Request & { rawBody?: string },

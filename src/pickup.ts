@@ -34,6 +34,8 @@ const DEFAULT_MAP_POOL = [
 ] as const;
 
 const ratingEnv = new TrueSkill(1000, 150, 75, 5, 0);
+const COMPLETED_MATCH_VISIBLE_MS = 30_000;
+const PROVISION_RETRY_DELAYS_MS = [0, 5_000, 10_000, 20_000, 30_000] as const;
 
 type PickupQueueRow = {
   id: string;
@@ -187,6 +189,7 @@ type PickupQueuePublicState = {
   id: string;
   name: string;
   playerCount: number;
+  players: Array<PickupPlayerIdentity & { joinedAt: string }>;
   readyCheckDurationSeconds: number;
   season: PickupQueueSeasonState;
   slug: string;
@@ -336,6 +339,19 @@ function toPlayerCard(player: PickupMatchPlayerRow): PickupPlayerCard {
     steamId: player.steamId,
     team: player.team,
     won: player.won,
+  };
+}
+
+function toQueuedPlayerState(
+  player: PickupQueueMemberRow,
+): PickupPlayerIdentity & { joinedAt: string } {
+  return {
+    avatarUrl: player.avatarUrl,
+    id: player.playerId,
+    joinedAt: player.joinedAt.toISOString(),
+    personaName: player.personaName,
+    profileUrl: player.profileUrl,
+    steamId: player.steamId,
   };
 }
 
@@ -1027,6 +1043,7 @@ export function createPickupService(io: Server) {
     settings: PickupSettingsRow,
     currentPlayers: number,
     season: PickupSeasonRow | null,
+    members: PickupQueueMemberRow[],
   ): PickupQueuePublicState {
     return {
       currentPlayers,
@@ -1035,6 +1052,7 @@ export function createPickupService(io: Server) {
       id: queue.id,
       name: queue.name,
       playerCount: queue.playerCount,
+      players: members.map(toQueuedPlayerState),
       readyCheckDurationSeconds: settings.readyCheckDurationSeconds,
       season: seasonToState(season),
       slug: queue.slug,
@@ -1049,7 +1067,7 @@ export function createPickupService(io: Server) {
       throw new Error("Pickup queue is unavailable.");
     }
 
-    const [settings, queueCounts, seasons] = await Promise.all([
+    const [settings, queueCounts, seasons, queueMembers] = await Promise.all([
       getPickupSettings(),
       pool.query<{ count: string; queueId: string }>(
         `
@@ -1059,6 +1077,7 @@ export function createPickupService(io: Server) {
         `,
       ),
       Promise.all(queues.map((queue) => getActiveSeason(queue.id))),
+      Promise.all(queues.map((queue) => getQueueMembers(queue.id, queue.playerCount))),
     ]);
     const countByQueueId = new Map(
       queueCounts.rows.map((row) => [row.queueId, Number(row.count ?? "0")]),
@@ -1069,6 +1088,7 @@ export function createPickupService(io: Server) {
         settings,
         countByQueueId.get(queue.id) ?? 0,
         seasons[index] ?? null,
+        queueMembers[index] ?? [],
       ),
     );
     const primaryQueue = queuesState[0] ?? null;
@@ -1129,7 +1149,7 @@ export function createPickupService(io: Server) {
     };
   }
 
-  async function getLatestPlayerMatch(playerId: string) {
+  async function getLatestPlayerActiveMatch(playerId: string) {
     const result = await pool.query<PickupMatchRow>(
       `
         select
@@ -1161,11 +1181,65 @@ export function createPickupService(io: Server) {
         inner join "PickupMatchPlayer" mp on mp."matchId" = m."id"
         where
           mp."playerId" = $1
-          and m."status" <> 'cancelled'
+          and m."status" in ('ready_check', 'veto', 'provisioning', 'server_ready', 'live')
         order by m."createdAt" desc
         limit 1
       `,
       [playerId],
+    );
+
+    const row = result.rows[0];
+    if (!row) {
+      return null;
+    }
+
+    return {
+      ...row,
+      balanceSummary: parseJson<PickupBalanceSummary>(row.balanceSummary),
+      provisionPayload: parseJson<Record<string, unknown>>(row.provisionPayload),
+      resultPayload: parseJson<Record<string, unknown>>(row.resultPayload),
+      vetoState: parseJson<PickupVetoState>(row.vetoState),
+    };
+  }
+
+  async function getLatestPlayerRecentCompletedMatch(playerId: string) {
+    const result = await pool.query<PickupMatchRow>(
+      `
+        select
+          m."id",
+          m."queueId",
+          m."seasonId",
+          m."status",
+          m."readyDeadlineAt",
+          m."vetoDeadlineAt",
+          m."currentCaptainPlayerId",
+          m."finalMapKey",
+          m."bannedMapKeys",
+          m."vetoState",
+          m."balanceSummary",
+          m."provisionPayload",
+          m."resultPayload",
+          m."serverIp",
+          m."serverPort",
+          m."serverJoinAddress",
+          m."serverLocationCountryCode",
+          m."serverLocationCountryName",
+          m."serverProvisionedAt",
+          m."liveStartedAt",
+          m."completedAt",
+          m."winnerTeam",
+          m."finalScore",
+          m."createdAt"
+        from "PickupMatch" m
+        inner join "PickupMatchPlayer" mp on mp."matchId" = m."id"
+        where
+          mp."playerId" = $1
+          and m."status" = 'completed'
+          and m."completedAt" >= $2
+        order by m."createdAt" desc
+        limit 1
+      `,
+      [playerId, new Date(Date.now() - COMPLETED_MATCH_VISIBLE_MS)],
     );
 
     const row = result.rows[0];
@@ -1217,65 +1291,71 @@ export function createPickupService(io: Server) {
     return result.rows;
   }
 
+  async function buildMatchState(match: PickupMatchRow): Promise<PickupMatchState> {
+    const matchPlayers = await getMatchPlayers(match.id);
+    const left = matchPlayers.filter((member) => member.team === "left");
+    const right = matchPlayers.filter((member) => member.team === "right");
+
+    return {
+      balanceSummary: match.balanceSummary,
+      completedAt: match.completedAt?.toISOString() ?? null,
+      finalMapKey: match.finalMapKey,
+      finalScore: match.finalScore,
+      id: match.id,
+      liveStartedAt: match.liveStartedAt?.toISOString() ?? null,
+      queueId: match.queueId,
+      readyDeadlineAt: match.readyDeadlineAt?.toISOString() ?? null,
+      seasonId: match.seasonId,
+      server: {
+        countryCode: match.serverLocationCountryCode,
+        countryName: match.serverLocationCountryName,
+        ip: match.serverIp,
+        joinAddress: match.serverJoinAddress,
+        port: match.serverPort,
+        provisionedAt: match.serverProvisionedAt?.toISOString() ?? null,
+      },
+      status: match.status,
+      teams: {
+        left: left.map(toPlayerCard),
+        right: right.map(toPlayerCard),
+      },
+      veto: {
+        availableMaps: match.vetoState?.availableMaps ?? [],
+        bannedMaps: match.vetoState?.bannedMaps ?? [],
+        currentCaptainPlayerId: match.vetoState?.turnCaptainPlayerId ?? null,
+        deadlineAt: match.vetoDeadlineAt?.toISOString() ?? null,
+        turns: match.vetoState?.turns ?? [],
+      },
+      winnerTeam: match.winnerTeam,
+    };
+  }
+
   async function getPlayerState(
     player: PickupPlayerIdentity,
   ): Promise<PickupPlayerState> {
-    const match = await getLatestPlayerMatch(player.id);
+    const match = await getLatestPlayerActiveMatch(player.id);
 
     if (match) {
       const [publicState, rating] = await Promise.all([
         getPublicState(),
         getPlayerSeasonRating(player.id, match.seasonId),
       ]);
-      const matchPlayers = await getMatchPlayers(match.id);
-      const left = matchPlayers.filter((member) => member.team === "left");
-      const right = matchPlayers.filter((member) => member.team === "right");
-      const matchState: PickupMatchState = {
-        balanceSummary: match.balanceSummary,
-        completedAt: match.completedAt?.toISOString() ?? null,
-        finalMapKey: match.finalMapKey,
-        finalScore: match.finalScore,
-        id: match.id,
-        liveStartedAt: match.liveStartedAt?.toISOString() ?? null,
-        queueId: match.queueId,
-        readyDeadlineAt: match.readyDeadlineAt?.toISOString() ?? null,
-        seasonId: match.seasonId,
-        server: {
-          countryCode: match.serverLocationCountryCode,
-          countryName: match.serverLocationCountryName,
-          ip: match.serverIp,
-          joinAddress: match.serverJoinAddress,
-          port: match.serverPort,
-          provisionedAt: match.serverProvisionedAt?.toISOString() ?? null,
-        },
-        status: match.status,
-        teams: {
-          left: left.map(toPlayerCard),
-          right: right.map(toPlayerCard),
-        },
-        veto: {
-          availableMaps: match.vetoState?.availableMaps ?? [],
-          bannedMaps: match.vetoState?.bannedMaps ?? [],
-          currentCaptainPlayerId: match.vetoState?.turnCaptainPlayerId ?? null,
-          deadlineAt: match.vetoDeadlineAt?.toISOString() ?? null,
-          turns: match.vetoState?.turns ?? [],
-        },
-        winnerTeam: match.winnerTeam,
-      };
+      const matchState = await buildMatchState(match);
 
       return {
         match: matchState,
         publicState,
         rating: ratingToState(rating),
-        stage: match.status === "cancelled" ? "idle" : match.status,
+        stage: match.status as Exclude<PickupMatchRow["status"], "cancelled">,
         viewer: player,
       };
     }
 
-    const [publicState, membership, primaryQueue] = await Promise.all([
+    const [publicState, membership, primaryQueue, recentCompletedMatch] = await Promise.all([
       getPublicState(),
       getQueueMembership(player.id),
       getPrimaryQueue(),
+      getLatestPlayerRecentCompletedMatch(player.id),
     ]);
 
     if (membership) {
@@ -1293,6 +1373,21 @@ export function createPickupService(io: Server) {
         },
         rating: ratingToState(rating),
         stage: "queue",
+        viewer: player,
+      };
+    }
+
+    if (recentCompletedMatch) {
+      const [matchState, rating] = await Promise.all([
+        buildMatchState(recentCompletedMatch),
+        getPlayerSeasonRating(player.id, recentCompletedMatch.seasonId),
+      ]);
+
+      return {
+        match: matchState,
+        publicState,
+        rating: ratingToState(rating),
+        stage: "completed",
         viewer: player,
       };
     }
@@ -1762,6 +1857,19 @@ export function createPickupService(io: Server) {
     matchId: string,
     payload: Record<string, unknown>,
   ) {
+    const match = await getLatestMatchById(matchId);
+    if (!match) {
+      throw new Error("Pickup match was not found.");
+    }
+
+    if (match.status === "completed" || match.status === "cancelled") {
+      return;
+    }
+
+    if (!["provisioning", "server_ready", "live"].includes(match.status)) {
+      throw new Error("Pickup match is not awaiting provisioning.");
+    }
+
     const ip =
       typeof payload.ip === "string" && payload.ip.trim().length > 0
         ? payload.ip.trim()
@@ -1787,19 +1895,20 @@ export function createPickupService(io: Server) {
       `
         update "PickupMatch"
         set
-          "status" = 'server_ready',
-          "serverIp" = $2,
-          "serverPort" = $3,
-          "serverJoinAddress" = $4,
-          "serverLocationCountryCode" = $5,
-          "serverLocationCountryName" = $6,
+          "status" = $2::"PickupMatchStatus",
+          "serverIp" = $3,
+          "serverPort" = $4,
+          "serverJoinAddress" = $5,
+          "serverLocationCountryCode" = $6,
+          "serverLocationCountryName" = $7,
           "serverProvisionedAt" = now(),
-          "provisionPayload" = coalesce("provisionPayload", '{}'::jsonb) || $7::jsonb,
+          "provisionPayload" = coalesce("provisionPayload", '{}'::jsonb) || $8::jsonb,
           "updatedAt" = now()
         where "id" = $1
       `,
       [
         matchId,
+        match.status === "live" ? "live" : "server_ready",
         ip,
         port,
         joinAddress,
@@ -1828,6 +1937,8 @@ export function createPickupService(io: Server) {
 
     const failProvision = async (reason: string, payload?: Record<string, unknown>) => {
       const players = await getMatchPlayers(matchId);
+      const requeuedPlayerIds = players.map((player) => player.playerId);
+      await requeueReadyPlayers(match.queueId, players);
       await pool.query(
         `
           update "PickupMatch"
@@ -1842,10 +1953,16 @@ export function createPickupService(io: Server) {
           JSON.stringify({
             ...(payload ?? {}),
             reason,
+            requeuedPlayerIds,
           }),
         ],
       );
 
+      await recordProvisionEvent(matchId, "provision-failed", {
+        ...(payload ?? {}),
+        reason,
+        requeuedPlayerIds,
+      });
       await broadcastPublicState();
       for (const player of players) {
         await emitPlayerState(player.playerId);
@@ -1887,54 +2004,90 @@ export function createPickupService(io: Server) {
     };
 
     await recordProvisionEvent(matchId, "request", payload);
+    const requestBody = JSON.stringify(payload);
 
-    try {
-      const response = await fetch(settings.provisionApiUrl, {
-        body: JSON.stringify(payload),
-        headers: {
-          "Content-Type": "application/json",
-          ...(settings.provisionAuthToken
-            ? {
-                Authorization: `Bearer ${settings.provisionAuthToken}`,
-              }
-            : {}),
-        },
-        method: "POST",
-      });
+    for (const [attemptIndex, delayMs] of PROVISION_RETRY_DELAYS_MS.entries()) {
+      const attempt = attemptIndex + 1;
 
-      const text = await response.text();
-      let parsed: Record<string, unknown> | null = null;
-      try {
-        parsed = text.length > 0 ? (JSON.parse(text) as Record<string, unknown>) : null;
-      } catch {
-        parsed = { raw: text };
+      if (delayMs > 0) {
+        await recordProvisionEvent(matchId, "retry-wait", {
+          attempt,
+          delayMs,
+        });
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
       }
 
-      await recordProvisionEvent(matchId, "response", {
-        ok: response.ok,
-        payload: parsed,
-        status: response.status,
-      });
-
-      if (
-        response.ok &&
-        parsed &&
-        (typeof parsed.ip === "string" || typeof parsed.port === "number")
-      ) {
-        await applyProvisionResult(matchId, parsed);
+      const latestMatch = await getLatestMatchById(matchId);
+      if (!latestMatch || latestMatch.status !== "provisioning") {
         return;
       }
 
-      await failProvision("provision-request-failed", {
-        status: response.status,
-      });
-    } catch (error) {
-      await recordProvisionEvent(matchId, "response-error", {
-        error: error instanceof Error ? error.message : String(error),
-      });
-      await failProvision("provision-request-error", {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      try {
+        const response = await fetch(settings.provisionApiUrl, {
+          body: requestBody,
+          headers: {
+            "Content-Type": "application/json",
+            ...(settings.provisionAuthToken
+              ? {
+                  Authorization: `Bearer ${settings.provisionAuthToken}`,
+                }
+              : {}),
+          },
+          method: "POST",
+        });
+
+        const text = await response.text();
+        let parsed: Record<string, unknown> | null = null;
+        try {
+          parsed = text.length > 0 ? (JSON.parse(text) as Record<string, unknown>) : null;
+        } catch {
+          parsed = { raw: text };
+        }
+
+        await recordProvisionEvent(matchId, "response", {
+          attempt,
+          ok: response.ok,
+          payload: parsed,
+          status: response.status,
+        });
+
+        if (
+          response.ok &&
+          parsed &&
+          (typeof parsed.ip === "string" || typeof parsed.port === "number")
+        ) {
+          await applyProvisionResult(matchId, parsed);
+          return;
+        }
+
+        const retryable = response.status === 409 || response.status >= 500;
+        if (retryable && attempt < PROVISION_RETRY_DELAYS_MS.length) {
+          continue;
+        }
+
+        await failProvision("provision-request-failed", {
+          attempt,
+          payload: parsed ?? undefined,
+          status: response.status,
+        });
+        return;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        await recordProvisionEvent(matchId, "response-error", {
+          attempt,
+          error: message,
+        });
+
+        if (attempt < PROVISION_RETRY_DELAYS_MS.length) {
+          continue;
+        }
+
+        await failProvision("provision-request-error", {
+          attempt,
+          error: message,
+        });
+        return;
+      }
     }
   }
 
@@ -2084,9 +2237,12 @@ export function createPickupService(io: Server) {
       throw new Error("No active pickup season is configured.");
     }
 
-    const currentState = await getPlayerState(session.player);
-    if (currentState.stage !== "idle") {
-      return currentState;
+    const [activeMatch, membership] = await Promise.all([
+      getLatestPlayerActiveMatch(session.player.id),
+      getQueueMembership(session.player.id),
+    ]);
+    if (activeMatch || membership) {
+      return getPlayerState(session.player);
     }
 
     await getOrCreatePlayerSeasonRating(session.player, activeSeason);
@@ -2126,7 +2282,7 @@ export function createPickupService(io: Server) {
   }
 
   async function markReady(session: PickupSessionIdentity) {
-    const match = await getLatestPlayerMatch(session.player.id);
+    const match = await getLatestPlayerActiveMatch(session.player.id);
     if (!match || match.status !== "ready_check") {
       throw new Error("You are not in an active ready check.");
     }
@@ -2155,13 +2311,45 @@ export function createPickupService(io: Server) {
   }
 
   async function banMap(session: PickupSessionIdentity, mapKey: string) {
-    const match = await getLatestPlayerMatch(session.player.id);
+    const match = await getLatestPlayerActiveMatch(session.player.id);
     if (!match || match.status !== "veto") {
       throw new Error("You are not in an active veto.");
     }
 
     await applyBan(match.id, session.player.id, mapKey, "captain");
     return getPlayerState(session.player);
+  }
+
+  async function applyMatchLive(
+    matchId: string,
+    payload: Record<string, unknown>,
+  ) {
+    const match = await getLatestMatchById(matchId);
+    if (!match || match.status === "completed" || match.status === "cancelled") {
+      return;
+    }
+
+    if (!["server_ready", "live"].includes(match.status)) {
+      throw new Error("Pickup match server is not ready yet.");
+    }
+
+    await pool.query(
+      `
+        update "PickupMatch"
+        set
+          "status" = 'live',
+          "liveStartedAt" = coalesce("liveStartedAt", now()),
+          "updatedAt" = now()
+        where "id" = $1
+      `,
+      [matchId],
+    );
+
+    await recordProvisionEvent(matchId, "live", payload);
+    const players = await getMatchPlayers(matchId);
+    for (const player of players) {
+      await emitPlayerState(player.playerId);
+    }
   }
 
   async function applyMatchResult(
@@ -2539,6 +2727,25 @@ export function createPickupService(io: Server) {
 
         await verifyCallbackSignature(matchId, request);
         await applyProvisionResult(matchId, request.body as Record<string, unknown>);
+        response.json({ ok: true });
+      } catch (error) {
+        response.status(400).json({
+          ok: false,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    },
+    async handleLiveCallback(request: RawBodyRequest, response: express.Response) {
+      try {
+        const matchId =
+          typeof request.body?.matchId === "string" ? request.body.matchId.trim() : "";
+        if (!matchId) {
+          response.status(400).json({ ok: false, error: "matchId is required." });
+          return;
+        }
+
+        await verifyCallbackSignature(matchId, request);
+        await applyMatchLive(matchId, request.body as Record<string, unknown>);
         response.json({ ok: true });
       } catch (error) {
         response.status(400).json({
