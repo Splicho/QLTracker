@@ -499,6 +499,8 @@ function chooseBalancedTeams(
 export function createPickupService(io: Server) {
   const readyTimers = new Map<string, NodeJS.Timeout>();
   const vetoTimers = new Map<string, NodeJS.Timeout>();
+  const queueDisconnectTimers = new Map<string, NodeJS.Timeout>();
+  const connectedPickupSocketsByPlayerId = new Map<string, Set<string>>();
 
   async function ensureBootstrapData() {
     await pool.query(
@@ -1447,6 +1449,38 @@ export function createPickupService(io: Server) {
     io.emit("pickup:queue:update", publicState.queue);
   }
 
+  function clearQueueDisconnectTimer(playerId: string) {
+    const timer = queueDisconnectTimers.get(playerId);
+    if (!timer) {
+      return;
+    }
+
+    clearTimeout(timer);
+    queueDisconnectTimers.delete(playerId);
+  }
+
+  function trackConnectedPickupSocket(playerId: string, socketId: string) {
+    clearQueueDisconnectTimer(playerId);
+    const sockets = connectedPickupSocketsByPlayerId.get(playerId) ?? new Set<string>();
+    sockets.add(socketId);
+    connectedPickupSocketsByPlayerId.set(playerId, sockets);
+  }
+
+  function untrackConnectedPickupSocket(playerId: string, socketId: string) {
+    const sockets = connectedPickupSocketsByPlayerId.get(playerId);
+    if (!sockets) {
+      return 0;
+    }
+
+    sockets.delete(socketId);
+    if (sockets.size > 0) {
+      return sockets.size;
+    }
+
+    connectedPickupSocketsByPlayerId.delete(playerId);
+    return 0;
+  }
+
   function clearReadyTimer(matchId: string) {
     const timer = readyTimers.get(matchId);
     if (timer) {
@@ -2271,14 +2305,47 @@ export function createPickupService(io: Server) {
     return getPlayerState(session.player);
   }
 
-  async function leaveQueue(session: PickupSessionIdentity) {
+  async function leaveQueueByPlayerId(playerId: string) {
     await pool.query(`delete from "PickupQueueMember" where "playerId" = $1`, [
-      session.player.id,
+      playerId,
     ]);
 
     await broadcastPublicState();
-    await emitPlayerState(session.player.id);
+    await emitPlayerState(playerId);
+  }
+
+  async function leaveQueue(session: PickupSessionIdentity) {
+    await leaveQueueByPlayerId(session.player.id);
     return getPlayerState(session.player);
+  }
+
+  async function autoLeaveDisconnectedPlayerQueue(playerId: string) {
+    if ((connectedPickupSocketsByPlayerId.get(playerId)?.size ?? 0) > 0) {
+      return;
+    }
+
+    const [activeMatch, membership] = await Promise.all([
+      getLatestPlayerActiveMatch(playerId),
+      getQueueMembership(playerId),
+    ]);
+    if (activeMatch || !membership) {
+      return;
+    }
+
+    await leaveQueueByPlayerId(playerId);
+    console.log(`pickup auto-left disconnected player ${playerId}`);
+  }
+
+  function scheduleQueueDisconnectLeave(playerId: string) {
+    clearQueueDisconnectTimer(playerId);
+    const timeout = setTimeout(() => {
+      queueDisconnectTimers.delete(playerId);
+      void autoLeaveDisconnectedPlayerQueue(playerId).catch((error) => {
+        console.error("Failed to auto-leave disconnected pickup player:", error);
+      });
+    }, config.pickupQueueDisconnectGraceMs);
+
+    queueDisconnectTimers.set(playerId, timeout);
   }
 
   async function markReady(session: PickupSessionIdentity) {
@@ -2627,7 +2694,20 @@ export function createPickupService(io: Server) {
     async handleSocketConnection(socket: Socket, session: PickupSessionIdentity | null) {
       socket.join("pickup:public");
       if (session) {
+        trackConnectedPickupSocket(session.player.id, socket.id);
         socket.join(`pickup:player:${session.player.id}`);
+
+        socket.on("disconnect", () => {
+          const remainingSockets = untrackConnectedPickupSocket(
+            session.player.id,
+            socket.id,
+          );
+          if (remainingSockets > 0) {
+            return;
+          }
+
+          scheduleQueueDisconnectLeave(session.player.id);
+        });
       }
 
       await emitSocketState(socket, session);
