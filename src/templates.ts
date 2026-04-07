@@ -62,7 +62,6 @@ export function buildServerCfg(
 
   return [
     `set sv_hostname "^1QLTracker^7 Pickup ${metadata.matchId.slice(0, 8)}"`,
-    `set g_factory "hoq_ca"`,
     `set teamsize "${teamSize}"`,
     `set sv_maxclients "${maxClients}"`,
     `set sv_mapPoolFile "${getMapPoolFile(teamSize)}"`,
@@ -79,6 +78,6 @@ export function buildServerCfg(
     `set qlx_pickupMetadataFile "${metadataFile}"`,
     `set qlx_pickupBridgeUrl "${metadata.callbackBaseUrl}"`,
     `set qlx_pickupBridgeToken "${metadata.callbackToken}"`,
-    `map "${metadata.finalMapKey}"`,
+    `set serverstartup "map ${metadata.finalMapKey} hoq_ca"`,
   ].join("\n");
 }
