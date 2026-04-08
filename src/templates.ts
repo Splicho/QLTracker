@@ -127,9 +127,10 @@ export function buildManualServerCfg(
 ) {
   const maxClients = teamSize * 2 + 2;
   const manualLabel = `${teamSize}v${teamSize} CA`;
+  const manualBrandName = "^1QLTracker^7 | Clan Arena";
 
   return [
-    `set sv_hostname "QLTracker Manual Server"`,
+    `set sv_hostname "QLTracker | Clan Arena"`,
     `set teamsize "${teamSize}"`,
     `set sv_maxclients "${maxClients}"`,
     `set sv_mapPoolFile "${getMapPoolFile(teamSize)}"`,
@@ -140,7 +141,7 @@ export function buildManualServerCfg(
     `set qlx_redisDatabase "${slot.redisDb}"`,
     `set qlx_logs "5"`,
     `set qlx_workshopReferences "${PICKUP_WORKSHOP_IDS.join(",")}"`,
-    `set qlx_serverBrandName "^1QLTracker^7 Manual Server"`,
+    `set qlx_serverBrandName "${manualBrandName}"`,
     `set qlx_serverBrandTopField "${manualLabel}"`,
     `set qlx_serverBrandBottomField "^7Hosted by ^1QLTracker"`,
     `set zmq_stats_enable "1"`,
