@@ -11,6 +11,8 @@ const envSchema = z.object({
   POST_MATCH_GRACE_SECONDS: z.coerce.number().int().positive().default(45),
   PROVISION_AUTH_TOKEN: z.string().min(1),
   PROVISION_READY_TIMEOUT_MS: z.coerce.number().int().positive().default(90_000),
+  PUBLIC_COUNTRY_CODE: z.string().trim().max(2).default(""),
+  PUBLIC_COUNTRY_NAME: z.string().trim().default(""),
   PUBLIC_HOST: z.string().min(1).default("provision.qltracker.com"),
   PUBLIC_IP: z.string().min(1),
   QLDS_BASE_DIR: z.string().min(1).default("/opt/qltracker-qlds"),
@@ -21,6 +23,8 @@ const envSchema = z.object({
 });
 
 const parsed = envSchema.parse(process.env);
+const normalizedPublicCountryCode = parsed.PUBLIC_COUNTRY_CODE.trim().toLowerCase();
+const normalizedPublicCountryName = parsed.PUBLIC_COUNTRY_NAME.trim();
 
 export const config = {
   callbackSecret: parsed.CALLBACK_SECRET,
@@ -28,6 +32,10 @@ export const config = {
   postMatchGraceSeconds: parsed.POST_MATCH_GRACE_SECONDS,
   provisionAuthToken: parsed.PROVISION_AUTH_TOKEN,
   provisionReadyTimeoutMs: parsed.PROVISION_READY_TIMEOUT_MS,
+  publicCountryCode:
+    normalizedPublicCountryCode.length === 2 ? normalizedPublicCountryCode : null,
+  publicCountryName:
+    normalizedPublicCountryName.length > 0 ? normalizedPublicCountryName : null,
   publicHost: parsed.PUBLIC_HOST,
   publicIp: parsed.PUBLIC_IP,
   qldsBaseDir: parsed.QLDS_BASE_DIR,

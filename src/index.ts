@@ -148,6 +148,8 @@ app.post("/api/pickups/provision", async (request, response) => {
       connectSlot(allocation.slot.id, allocation.slot.zmqPort);
       await waitForReady(allocation.slot.id);
       response.json({
+        countryCode: config.publicCountryCode,
+        countryName: config.publicCountryName,
         ip: config.publicIp,
         joinAddress: `${config.publicIp}:${allocation.slot.gamePort}`,
         port: allocation.slot.gamePort,
@@ -389,6 +391,8 @@ app.post("/api/admin/slots/:slotId/start-manual", async (request, response) => {
     connectSlot(slotId, slot.zmqPort);
     response.json({
       ok: true,
+      countryCode: config.publicCountryCode,
+      countryName: config.publicCountryName,
       joinAddress: `${config.publicIp}:${result.slot.gamePort}`,
       port: result.slot.gamePort,
     });
