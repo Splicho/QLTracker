@@ -5,6 +5,27 @@ import { Rating, TrueSkill } from "ts-trueskill";
 import { config } from "./config.js";
 import { pool } from "./db.js";
 import { lookupCountry } from "./geolite.js";
+import { createPickupCallbackApi } from "./pickup/callbacks.js";
+import { defaultDisplayRating } from "./pickup/ratings.js";
+import { chooseBalancedTeams } from "./pickup/matchmaking.js";
+import { createPlayerStateApi } from "./pickup/player-state.js";
+import { parseJson, queueToPublicState } from "./pickup/state.js";
+import type {
+  PickupActiveRatingRow,
+  PickupBalanceSummary,
+  PickupMatchPlayerRow,
+  PickupMatchRow,
+  PickupPlayerIdentity,
+  PickupQueueMemberRow,
+  PickupQueueRow,
+  PickupPublicState,
+  PickupRatingRow,
+  PickupSeasonRow,
+  PickupSessionIdentity,
+  PickupSettingsRow,
+  PickupVetoState,
+  RawBodyRequest,
+} from "./pickup/types.js";
 
 const DEFAULT_QUEUE = {
   description: "Seasonal 4v4 Clan Arena pickup queue.",
@@ -37,338 +58,11 @@ const ratingEnv = new TrueSkill(1000, 150, 75, 5, 0);
 const COMPLETED_MATCH_VISIBLE_MS = 30_000;
 const PROVISION_RETRY_DELAYS_MS = [0, 5_000, 10_000, 20_000, 30_000] as const;
 
-type PickupQueueRow = {
-  id: string;
-  slug: string;
-  name: string;
-  description: string | null;
-  teamSize: number;
-  playerCount: number;
-  enabled: boolean;
-};
-
-type PickupSettingsRow = {
-  callbackSecret: string | null;
-  id: string;
-  provisionApiUrl: string | null;
-  provisionAuthToken: string | null;
-  readyCheckDurationSeconds: number;
-  vetoTurnDurationSeconds: number;
-};
-
-type PickupSeasonRow = {
-  id: string;
-  queueId: string;
-  name: string;
-  status: "draft" | "active" | "completed";
-  durationPreset: "one_month" | "three_month" | "custom";
-  startsAt: Date;
-  endsAt: Date;
-};
-
-type PickupPlayerIdentity = {
-  avatarUrl: string | null;
-  id: string;
-  personaName: string;
-  profileUrl: string | null;
-  steamId: string;
-};
-
-type PickupSessionIdentity = {
-  player: PickupPlayerIdentity;
-  sessionId: string;
-  token: string;
-};
-
-type PickupRatingRow = {
-  displayRating: number;
-  gamesPlayed: number;
-  losses: number;
-  mu: number;
-  playerId: string;
-  sigma: number;
-  wins: number;
-};
-
-type PickupQueueMemberRow = PickupPlayerIdentity & {
-  joinedAt: Date;
-  playerId: string;
-  queueMemberId: string;
-};
-
-type PickupVetoTurn = {
-  captainPlayerId: string;
-  mapKey: string;
-  order: number;
-  reason: "captain" | "timeout";
-};
-
-type PickupVetoState = {
-  availableMaps: string[];
-  bannedMaps: string[];
-  turns: PickupVetoTurn[];
-  turnCaptainPlayerId: string | null;
-};
-
-type PickupBalanceSummary = {
-  captainPlayerIds: {
-    left: string;
-    right: string;
-  };
-  ratingDelta: number;
-  teamRatings: {
-    left: number;
-    right: number;
-  };
-};
-
-type PickupMatchRow = {
-  id: string;
-  queueId: string;
-  seasonId: string;
-  status:
-    | "ready_check"
-    | "veto"
-    | "provisioning"
-    | "server_ready"
-    | "live"
-    | "completed"
-    | "cancelled";
-  readyDeadlineAt: Date | null;
-  vetoDeadlineAt: Date | null;
-  currentCaptainPlayerId: string | null;
-  finalMapKey: string | null;
-  bannedMapKeys: string[] | null;
-  vetoState: PickupVetoState | null;
-  balanceSummary: PickupBalanceSummary | null;
-  provisionPayload: Record<string, unknown> | null;
-  resultPayload: Record<string, unknown> | null;
-  serverIp: string | null;
-  serverPort: number | null;
-  serverJoinAddress: string | null;
-  serverLocationCountryCode: string | null;
-  serverLocationCountryName: string | null;
-  serverProvisionedAt: Date | null;
-  liveStartedAt: Date | null;
-  completedAt: Date | null;
-  winnerTeam: "left" | "right" | null;
-  finalScore: string | null;
-  createdAt: Date;
-};
-
-type PickupMatchPlayerRow = PickupPlayerIdentity & {
-  matchId: string;
-  matchPlayerId: string;
-  playerId: string;
-  joinedAt: Date;
-  readyState: "pending" | "ready" | "dropped";
-  readyConfirmedAt: Date | null;
-  team: "left" | "right" | null;
-  isCaptain: boolean;
-  muBefore: number;
-  sigmaBefore: number;
-  displayBefore: number;
-  muAfter: number | null;
-  sigmaAfter: number | null;
-  displayAfter: number | null;
-  won: boolean | null;
-};
-
-type PickupQueueSeasonState = {
-  endsAt: string;
-  id: string;
-  name: string;
-  startsAt: string;
-  status: string;
-} | null;
-
-type PickupQueuePublicState = {
-  currentPlayers: number;
-  description: string | null;
-  enabled: boolean;
-  id: string;
-  name: string;
-  playerCount: number;
-  players: Array<PickupPlayerIdentity & { joinedAt: string }>;
-  readyCheckDurationSeconds: number;
-  season: PickupQueueSeasonState;
-  slug: string;
-  teamSize: number;
-  vetoTurnDurationSeconds: number;
-};
-
-type PickupPublicState = {
-  queue: PickupQueuePublicState | null;
-  queues: PickupQueuePublicState[];
-  season: PickupQueueSeasonState;
-};
-
-type PickupPlayerRatingState = {
-  displayRating: number;
-  gamesPlayed: number;
-  losses: number;
-  mu: number;
-  sigma: number;
-  wins: number;
-} | null;
-
-type PickupPlayerCard = {
-  avatarUrl: string | null;
-  displayAfter: number | null;
-  displayBefore: number;
-  id: string;
-  isCaptain: boolean;
-  joinedAt: string;
-  personaName: string;
-  profileUrl: string | null;
-  readyConfirmedAt: string | null;
-  readyState: "pending" | "ready" | "dropped";
-  steamId: string;
-  team: "left" | "right" | null;
-  won: boolean | null;
-};
-
-type PickupMatchState = {
-  balanceSummary: PickupBalanceSummary | null;
-  completedAt: string | null;
-  finalMapKey: string | null;
-  finalScore: string | null;
-  id: string;
-  liveStartedAt: string | null;
-  queueId: string;
-  readyDeadlineAt: string | null;
-  seasonId: string;
-  server: {
-    countryCode: string | null;
-    countryName: string | null;
-    ip: string | null;
-    joinAddress: string | null;
-    port: number | null;
-    provisionedAt: string | null;
-  };
-  status: PickupMatchRow["status"];
-  teams: {
-    left: PickupPlayerCard[];
-    right: PickupPlayerCard[];
-  };
-  veto: {
-    availableMaps: string[];
-    bannedMaps: string[];
-    currentCaptainPlayerId: string | null;
-    deadlineAt: string | null;
-    turns: PickupVetoTurn[];
-  };
-  winnerTeam: "left" | "right" | null;
-};
-
-type PickupPlayerState =
-  | {
-      publicState: PickupPublicState;
-      rating: PickupPlayerRatingState;
-      stage: "idle";
-      viewer: PickupPlayerIdentity;
-    }
-  | {
-      publicState: PickupPublicState;
-      queue: {
-        joinedAt: string;
-        playerCount: number;
-        queueId: string;
-        queueSlug: string;
-      };
-      rating: PickupPlayerRatingState;
-      stage: "queue";
-      viewer: PickupPlayerIdentity;
-    }
-  | {
-      match: PickupMatchState;
-      publicState: PickupPublicState;
-      rating: PickupPlayerRatingState;
-      stage:
-        | "ready_check"
-        | "veto"
-        | "provisioning"
-        | "server_ready"
-        | "live"
-        | "completed";
-      viewer: PickupPlayerIdentity;
-    };
-
-type RawBodyRequest = express.Request & {
-  rawBody?: string;
-};
-
 function hashPickupToken(token: string) {
   return crypto
     .createHmac("sha256", config.sessionSecret)
     .update(`pickup:${token}`)
     .digest("hex");
-}
-
-function defaultDisplayRating(mu: number) {
-  return Math.max(0, Math.round(mu));
-}
-
-function ratingToState(rating: PickupRatingRow | null): PickupPlayerRatingState {
-  if (!rating) {
-    return null;
-  }
-
-  return {
-    displayRating: rating.displayRating,
-    gamesPlayed: rating.gamesPlayed,
-    losses: rating.losses,
-    mu: rating.mu,
-    sigma: rating.sigma,
-    wins: rating.wins,
-  };
-}
-
-function toPlayerCard(player: PickupMatchPlayerRow): PickupPlayerCard {
-  return {
-    avatarUrl: player.avatarUrl,
-    displayAfter: player.displayAfter,
-    displayBefore: player.displayBefore,
-    id: player.playerId,
-    isCaptain: player.isCaptain,
-    joinedAt: player.joinedAt.toISOString(),
-    personaName: player.personaName,
-    profileUrl: player.profileUrl,
-    readyConfirmedAt: player.readyConfirmedAt?.toISOString() ?? null,
-    readyState: player.readyState,
-    steamId: player.steamId,
-    team: player.team,
-    won: player.won,
-  };
-}
-
-function toQueuedPlayerState(
-  player: PickupQueueMemberRow,
-): PickupPlayerIdentity & { joinedAt: string } {
-  return {
-    avatarUrl: player.avatarUrl,
-    id: player.playerId,
-    joinedAt: player.joinedAt.toISOString(),
-    personaName: player.personaName,
-    profileUrl: player.profileUrl,
-    steamId: player.steamId,
-  };
-}
-
-function parseJson<T>(value: unknown): T | null {
-  if (!value) {
-    return null;
-  }
-
-  if (typeof value === "string") {
-    try {
-      return JSON.parse(value) as T;
-    } catch {
-      return null;
-    }
-  }
-
-  return value as T;
 }
 
 function createSignature(secret: string, body: string) {
@@ -380,121 +74,6 @@ function createRating(mu: number, sigma: number) {
 }
 
 const DEFAULT_PICKUP_DISPLAY_RATING = 1000;
-
-function combinations<T>(values: T[], size: number): T[][] {
-  if (size === 0) {
-    return [[]];
-  }
-
-  if (values.length < size) {
-    return [];
-  }
-
-  if (values.length === size) {
-    return [values];
-  }
-
-  const [head, ...tail] = values;
-  return [
-    ...combinations(tail, size - 1).map((combo) => [head, ...combo]),
-    ...combinations(tail, size),
-  ];
-}
-
-function compareByRating(
-  left: PickupQueueMemberRow & { rating: PickupRatingRow },
-  right: PickupQueueMemberRow & { rating: PickupRatingRow },
-) {
-  if (right.rating.displayRating !== left.rating.displayRating) {
-    return right.rating.displayRating - left.rating.displayRating;
-  }
-
-  if (left.joinedAt.getTime() !== right.joinedAt.getTime()) {
-    return left.joinedAt.getTime() - right.joinedAt.getTime();
-  }
-
-  return left.playerId.localeCompare(right.playerId);
-}
-
-function chooseBalancedTeams(
-  teamSize: number,
-  members: Array<PickupQueueMemberRow & { rating: PickupRatingRow }>,
-) {
-  const seeded = [...members].sort(compareByRating);
-  const leftSeed = seeded[0]!;
-  const rightSeed = seeded[1]!;
-  const remaining = seeded.slice(2);
-  const leftSlots = teamSize - 1;
-  const splits = combinations(remaining, leftSlots);
-  let best: {
-    delta: number;
-    left: Array<PickupQueueMemberRow & { rating: PickupRatingRow }>;
-    right: Array<PickupQueueMemberRow & { rating: PickupRatingRow }>;
-  } | null = null;
-
-  for (const leftCombo of splits) {
-    const leftIds = new Set(leftCombo.map((member) => member.playerId));
-    const left = [leftSeed, ...leftCombo];
-    const right = [
-      rightSeed,
-      ...remaining.filter((member) => !leftIds.has(member.playerId)),
-    ];
-    const leftRating = left.reduce(
-      (total, member) => total + member.rating.displayRating,
-      0,
-    );
-    const rightRating = right.reduce(
-      (total, member) => total + member.rating.displayRating,
-      0,
-    );
-    const delta = Math.abs(leftRating - rightRating);
-
-    if (
-      !best ||
-      delta < best.delta ||
-      (delta === best.delta &&
-        left.map((member) => member.playerId).join("|") <
-          best.left.map((member) => member.playerId).join("|"))
-    ) {
-      best = { delta, left, right };
-    }
-  }
-
-  if (!best) {
-    throw new Error("Could not balance pickup teams.");
-  }
-
-  const leftCaptain =
-    best.left[Math.floor(Math.random() * best.left.length)] ?? best.left[0]!;
-  const rightCaptain =
-    best.right[Math.floor(Math.random() * best.right.length)] ?? best.right[0]!;
-
-  return {
-    balanceSummary: {
-      captainPlayerIds: {
-        left: leftCaptain.playerId,
-        right: rightCaptain.playerId,
-      },
-      ratingDelta: best.delta,
-      teamRatings: {
-        left: Math.round(
-          best.left.reduce(
-            (total, member) => total + member.rating.displayRating,
-            0,
-          ) / best.left.length,
-        ),
-        right: Math.round(
-          best.right.reduce(
-            (total, member) => total + member.rating.displayRating,
-            0,
-          ) / best.right.length,
-        ),
-      },
-    } satisfies PickupBalanceSummary,
-    left: best.left,
-    right: best.right,
-  };
-}
 
 export function createPickupService(io: Server) {
   const readyTimers = new Map<string, NodeJS.Timeout>();
@@ -1001,6 +580,62 @@ export function createPickupService(io: Server) {
     return result.rows[0] ?? null;
   }
 
+  async function getPreferredPlayerRating(playerId: string) {
+    const result = await pool.query<PickupRatingRow>(
+      `
+        select
+          r."playerId",
+          r."mu",
+          r."sigma",
+          r."displayRating",
+          r."gamesPlayed",
+          r."wins",
+          r."losses"
+        from "PickupPlayerSeasonRating" r
+        inner join "PickupSeason" s
+          on s."id" = r."seasonId"
+        where r."playerId" = $1
+          and s."status" = 'active'
+        order by r."updatedAt" desc, s."startsAt" desc
+        limit 1
+      `,
+      [playerId],
+    );
+
+    return result.rows[0] ?? null;
+  }
+
+  async function getPlayerActiveRatings(playerId: string) {
+    const result = await pool.query<PickupActiveRatingRow>(
+      `
+        select
+          r."playerId",
+          r."mu",
+          r."sigma",
+          r."displayRating",
+          r."gamesPlayed",
+          r."wins",
+          r."losses",
+          s."id" as "seasonId",
+          s."name" as "seasonName",
+          q."id" as "queueId",
+          q."slug" as "queueSlug",
+          q."name" as "queueName"
+        from "PickupPlayerSeasonRating" r
+        inner join "PickupSeason" s
+          on s."id" = r."seasonId"
+        inner join "PickupQueue" q
+          on q."id" = s."queueId"
+        where r."playerId" = $1
+          and s."status" = 'active'
+        order by r."displayRating" desc, r."updatedAt" desc, s."startsAt" desc
+      `,
+      [playerId],
+    );
+
+    return result.rows;
+  }
+
   async function getQueueMembership(playerId: string) {
     const result = await pool.query<
       PickupQueueRow & {
@@ -1026,41 +661,6 @@ export function createPickupService(io: Server) {
     );
 
     return result.rows[0] ?? null;
-  }
-
-  function seasonToState(season: PickupSeasonRow | null): PickupQueueSeasonState {
-    return season
-      ? {
-          endsAt: season.endsAt.toISOString(),
-          id: season.id,
-          name: season.name,
-          startsAt: season.startsAt.toISOString(),
-          status: season.status,
-        }
-      : null;
-  }
-
-  function queueToPublicState(
-    queue: PickupQueueRow,
-    settings: PickupSettingsRow,
-    currentPlayers: number,
-    season: PickupSeasonRow | null,
-    members: PickupQueueMemberRow[],
-  ): PickupQueuePublicState {
-    return {
-      currentPlayers,
-      description: queue.description,
-      enabled: queue.enabled,
-      id: queue.id,
-      name: queue.name,
-      playerCount: queue.playerCount,
-      players: members.map(toQueuedPlayerState),
-      readyCheckDurationSeconds: settings.readyCheckDurationSeconds,
-      season: seasonToState(season),
-      slug: queue.slug,
-      teamSize: queue.teamSize,
-      vetoTurnDurationSeconds: settings.vetoTurnDurationSeconds,
-    };
   }
 
   async function getPublicState(): Promise<PickupPublicState> {
@@ -1297,122 +897,20 @@ export function createPickupService(io: Server) {
     return result.rows;
   }
 
-  async function buildMatchState(match: PickupMatchRow): Promise<PickupMatchState> {
-    const matchPlayers = await getMatchPlayers(match.id);
-    const left = matchPlayers.filter((member) => member.team === "left");
-    const right = matchPlayers.filter((member) => member.team === "right");
-
-    return {
-      balanceSummary: match.balanceSummary,
-      completedAt: match.completedAt?.toISOString() ?? null,
-      finalMapKey: match.finalMapKey,
-      finalScore: match.finalScore,
-      id: match.id,
-      liveStartedAt: match.liveStartedAt?.toISOString() ?? null,
-      queueId: match.queueId,
-      readyDeadlineAt: match.readyDeadlineAt?.toISOString() ?? null,
-      seasonId: match.seasonId,
-      server: {
-        countryCode: match.serverLocationCountryCode,
-        countryName: match.serverLocationCountryName,
-        ip: match.serverIp,
-        joinAddress: match.serverJoinAddress,
-        port: match.serverPort,
-        provisionedAt: match.serverProvisionedAt?.toISOString() ?? null,
-      },
-      status: match.status,
-      teams: {
-        left: left.map(toPlayerCard),
-        right: right.map(toPlayerCard),
-      },
-      veto: {
-        availableMaps: match.vetoState?.availableMaps ?? [],
-        bannedMaps: match.vetoState?.bannedMaps ?? [],
-        currentCaptainPlayerId: match.vetoState?.turnCaptainPlayerId ?? null,
-        deadlineAt: match.vetoDeadlineAt?.toISOString() ?? null,
-        turns: match.vetoState?.turns ?? [],
-      },
-      winnerTeam: match.winnerTeam,
-    };
-  }
-
-  async function getPlayerState(
-    player: PickupPlayerIdentity,
-  ): Promise<PickupPlayerState> {
-    const match = await getLatestPlayerActiveMatch(player.id);
-
-    if (match) {
-      const [publicState, rating] = await Promise.all([
-        getPublicState(),
-        getPlayerSeasonRating(player.id, match.seasonId),
-      ]);
-      const matchState = await buildMatchState(match);
-
-      return {
-        match: matchState,
-        publicState,
-        rating: ratingToState(rating),
-        stage: match.status as Exclude<PickupMatchRow["status"], "cancelled">,
-        viewer: player,
-      };
-    }
-
-    const [publicState, membership, primaryQueue, recentCompletedMatch] = await Promise.all([
-      getPublicState(),
-      getQueueMembership(player.id),
-      getPrimaryQueue(),
-      getLatestPlayerRecentCompletedMatch(player.id),
-    ]);
-
-    if (membership) {
-      const season = await getActiveSeason(membership.id);
-      const rating =
-        season != null ? await getOrCreatePlayerSeasonRating(player, season) : null;
-
-      return {
-        publicState,
-        queue: {
-          joinedAt: membership.joinedAt.toISOString(),
-          playerCount: membership.playerCount,
-          queueId: membership.id,
-          queueSlug: membership.slug,
-        },
-        rating: ratingToState(rating),
-        stage: "queue",
-        viewer: player,
-      };
-    }
-
-    if (recentCompletedMatch) {
-      const [matchState, rating] = await Promise.all([
-        buildMatchState(recentCompletedMatch),
-        getPlayerSeasonRating(player.id, recentCompletedMatch.seasonId),
-      ]);
-
-      return {
-        match: matchState,
-        publicState,
-        rating: ratingToState(rating),
-        stage: "completed",
-        viewer: player,
-      };
-    }
-
-    if (!primaryQueue) {
-      throw new Error("Pickup queue is unavailable.");
-    }
-
-    const season = await getActiveSeason(primaryQueue.id);
-    const rating =
-      season != null ? await getOrCreatePlayerSeasonRating(player, season) : null;
-
-    return {
-      publicState,
-      rating: ratingToState(rating),
-      stage: "idle",
-      viewer: player,
-    };
-  }
+  const playerStateApi = createPlayerStateApi({
+    getActiveSeason,
+    getLatestPlayerActiveMatch,
+    getLatestPlayerRecentCompletedMatch,
+    getMatchPlayers,
+    getOrCreatePlayerSeasonRating,
+    getPlayerActiveRatings,
+    getPlayerSeasonRating,
+    getPreferredPlayerRating,
+    getPrimaryQueue,
+    getPublicState,
+    getQueueMembership,
+  });
+  const { getPlayerState } = playerStateApi;
 
   async function emitPlayerState(playerId: string) {
     const identityResult = await pool.query<PickupPlayerIdentity>(
@@ -2641,43 +2139,22 @@ export function createPickupService(io: Server) {
       }
     }
   }
-
-  async function getPlayerStateByToken(token: string) {
-    const session = await authenticatePickupSession(token);
-    if (!session) {
-      return null;
-    }
-
-    return getPlayerState(session.player);
-  }
-
-  async function verifyCallbackSignature(
-    matchId: string,
-    request: RawBodyRequest,
-  ) {
-    const match = await getLatestMatchById(matchId);
-    if (!match) {
-      throw new Error("Pickup match was not found.");
-    }
-
-    const settings = await getPickupSettings();
-    if (!settings.callbackSecret) {
-      throw new Error("Pickup callback secret is not configured.");
-    }
-
-    const signature = request.header("x-pickup-signature")?.trim();
-    const rawBody = request.rawBody ?? JSON.stringify(request.body ?? {});
-    if (!signature) {
-      throw new Error("Missing pickup callback signature.");
-    }
-
-    const expected = createSignature(settings.callbackSecret, rawBody);
-    if (signature !== expected) {
-      throw new Error("Invalid pickup callback signature.");
-    }
-
-    return match;
-  }
+  const callbackApi = createPickupCallbackApi({
+    applyMatchLive,
+    applyMatchResult,
+    applyProvisionResult,
+    authenticatePickupSession,
+    createSignature,
+    getLatestMatchById,
+    getPickupSettings,
+    getPlayerState,
+  });
+  const {
+    getPlayerStateByToken,
+    handleLiveCallback,
+    handleProvisionCallback,
+    handleResultCallback,
+  } = callbackApi;
 
   return {
     async getPublicState() {
@@ -2808,61 +2285,13 @@ export function createPickupService(io: Server) {
       });
     },
     async handleProvisionCallback(request: RawBodyRequest, response: express.Response) {
-      try {
-        const matchId =
-          typeof request.body?.matchId === "string" ? request.body.matchId.trim() : "";
-        if (!matchId) {
-          response.status(400).json({ ok: false, error: "matchId is required." });
-          return;
-        }
-
-        await verifyCallbackSignature(matchId, request);
-        await applyProvisionResult(matchId, request.body as Record<string, unknown>);
-        response.json({ ok: true });
-      } catch (error) {
-        response.status(400).json({
-          ok: false,
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
+      return handleProvisionCallback(request, response);
     },
     async handleLiveCallback(request: RawBodyRequest, response: express.Response) {
-      try {
-        const matchId =
-          typeof request.body?.matchId === "string" ? request.body.matchId.trim() : "";
-        if (!matchId) {
-          response.status(400).json({ ok: false, error: "matchId is required." });
-          return;
-        }
-
-        await verifyCallbackSignature(matchId, request);
-        await applyMatchLive(matchId, request.body as Record<string, unknown>);
-        response.json({ ok: true });
-      } catch (error) {
-        response.status(400).json({
-          ok: false,
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
+      return handleLiveCallback(request, response);
     },
     async handleResultCallback(request: RawBodyRequest, response: express.Response) {
-      try {
-        const matchId =
-          typeof request.body?.matchId === "string" ? request.body.matchId.trim() : "";
-        if (!matchId) {
-          response.status(400).json({ ok: false, error: "matchId is required." });
-          return;
-        }
-
-        await verifyCallbackSignature(matchId, request);
-        await applyMatchResult(matchId, request.body as Record<string, unknown>);
-        response.json({ ok: true });
-      } catch (error) {
-        response.status(400).json({
-          ok: false,
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
+      return handleResultCallback(request, response);
     },
   };
 }
