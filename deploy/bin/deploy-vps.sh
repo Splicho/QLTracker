@@ -17,6 +17,7 @@ NGINX_SITE_TARGET="${NGINX_SITE_TARGET:-/etc/nginx/sites-available/qltracker-pro
 FORCE_ACTIVE_SLOT_DEPLOY="${FORCE_ACTIVE_SLOT_DEPLOY:-0}"
 HEALTH_RETRIES="${HEALTH_RETRIES:-15}"
 HEALTH_RETRY_DELAY_SECONDS="${HEALTH_RETRY_DELAY_SECONDS:-2}"
+REQUIRED_NODE_MAJOR="${REQUIRED_NODE_MAJOR:-20}"
 
 log() {
   printf '[deploy] %s\n' "$*"
@@ -39,6 +40,22 @@ as_app_user() {
 require_root() {
   if [[ "${EUID}" -ne 0 ]]; then
     die "run this script as root"
+  fi
+}
+
+ensure_supported_node() {
+  local node_version
+  local node_major
+
+  if ! node_version="$(as_app_user node --version 2>/dev/null)"; then
+    die "node is not installed for $APP_USER"
+  fi
+
+  node_major="${node_version#v}"
+  node_major="${node_major%%.*}"
+
+  if [[ -z "$node_major" || "$node_major" != "$REQUIRED_NODE_MAJOR" ]]; then
+    die "unsupported node version ${node_version}; qltracker-provisioner requires Node ${REQUIRED_NODE_MAJOR}.x because zeromq@5.3.1 does not build on Node 22"
   fi
 }
 
@@ -136,6 +153,7 @@ main() {
   ensure_slots_idle
   ensure_repo_checkout
   sync_repo
+  ensure_supported_node
   build_app
   sync_runtime_assets
   restart_services
