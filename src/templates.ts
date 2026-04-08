@@ -88,6 +88,7 @@ export function buildServerCfg(
   const maxClients = teamSize * 2 + 2;
   const metadataFile = path.join(slotDir, "match.json");
   const queueLabel = formatQueueLabel(metadata.queueId, teamSize);
+  const pickupBrandName = `^1QLTracker^7 Pickup`;
 
   return [
     `set sv_hostname "^1QLTracker^7 Pickup | ${queueLabel}"`,
@@ -95,12 +96,15 @@ export function buildServerCfg(
     `set sv_maxclients "${maxClients}"`,
     `set sv_mapPoolFile "${getMapPoolFile(teamSize)}"`,
     `set qlx_owner "${config.qlxOwnerSteamId}"`,
-    `set qlx_plugins "plugin_manager,essentials,ban,permission,workshop,pickup_bridge,qltracker_sort,qltracker_admins,qltracker_rcon"`,
+    `set qlx_plugins "plugin_manager,essentials,ban,permission,workshop,branding,pickup_bridge,qltracker_sort,qltracker_admins,qltracker_rcon"`,
     `set qlx_database "Redis"`,
     `set qlx_redisAddress "127.0.0.1"`,
     `set qlx_redisDatabase "${slot.redisDb}"`,
     `set qlx_logs "5"`,
     `set qlx_workshopReferences "${PICKUP_WORKSHOP_IDS.join(",")}"`,
+    `set qlx_serverBrandName "${pickupBrandName}"`,
+    `set qlx_serverBrandTopField "${queueLabel}"`,
+    `set qlx_serverBrandBottomField "^7Hosted by ^1QLTracker"`,
     `set zmq_stats_enable "1"`,
     `set zmq_stats_ip "127.0.0.1"`,
     `set zmq_stats_port "${slot.zmqPort}"`,
@@ -122,6 +126,7 @@ export function buildManualServerCfg(
   rconToken: string,
 ) {
   const maxClients = teamSize * 2 + 2;
+  const manualLabel = `${teamSize}v${teamSize} CA`;
 
   return [
     `set sv_hostname "^1QLTracker^7 Manual Server"`,
@@ -129,12 +134,15 @@ export function buildManualServerCfg(
     `set sv_maxclients "${maxClients}"`,
     `set sv_mapPoolFile "${getMapPoolFile(teamSize)}"`,
     `set qlx_owner "${config.qlxOwnerSteamId}"`,
-    `set qlx_plugins "plugin_manager,essentials,ban,permission,workshop,qltracker_admins,qltracker_rcon"`,
+    `set qlx_plugins "plugin_manager,essentials,ban,permission,workshop,branding,qltracker_admins,qltracker_rcon"`,
     `set qlx_database "Redis"`,
     `set qlx_redisAddress "127.0.0.1"`,
     `set qlx_redisDatabase "${slot.redisDb}"`,
     `set qlx_logs "5"`,
     `set qlx_workshopReferences "${PICKUP_WORKSHOP_IDS.join(",")}"`,
+    `set qlx_serverBrandName "^1QLTracker^7 Manual Server"`,
+    `set qlx_serverBrandTopField "${manualLabel}"`,
+    `set qlx_serverBrandBottomField "^7Hosted by ^1QLTracker"`,
     `set zmq_stats_enable "1"`,
     `set zmq_stats_ip "127.0.0.1"`,
     `set zmq_stats_port "${slot.zmqPort}"`,
