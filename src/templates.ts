@@ -91,7 +91,7 @@ export function buildServerCfg(
   const pickupBrandName = `^1QLTracker^7 Pickup`;
 
   return [
-    `set sv_hostname "^1QLTracker^7 Pickup | ${queueLabel}"`,
+    `set sv_hostname "QLTracker Pickup | ${queueLabel}"`,
     `set teamsize "${teamSize}"`,
     `set sv_maxclients "${maxClients}"`,
     `set sv_mapPoolFile "${getMapPoolFile(teamSize)}"`,
@@ -129,7 +129,7 @@ export function buildManualServerCfg(
   const manualLabel = `${teamSize}v${teamSize} CA`;
 
   return [
-    `set sv_hostname "^1QLTracker^7 Manual Server"`,
+    `set sv_hostname "QLTracker Manual Server"`,
     `set teamsize "${teamSize}"`,
     `set sv_maxclients "${maxClients}"`,
     `set sv_mapPoolFile "${getMapPoolFile(teamSize)}"`,
