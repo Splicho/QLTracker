@@ -7,6 +7,12 @@ const PICKUP_WORKSHOP_IDS = [
   "1804815655",
   "3463480024",
   "2806460799",
+  "3694724670",
+  "3146629108",
+  "3008771992",
+  "3008846662",
+  "3287948013",
+  "3460015022",
 ] as const;
 
 function formatQueueLabel(queueId: string, teamSize: number) {
