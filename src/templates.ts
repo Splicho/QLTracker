@@ -75,6 +75,8 @@ export function buildServerCfg(
   slotDir: string,
   slot: SlotDefinition,
   metadata: SlotMetadata,
+  rconPort: number,
+  rconToken: string,
 ) {
   const teamSize = metadata.teams.red.length;
   const maxClients = teamSize * 2 + 2;
@@ -87,7 +89,7 @@ export function buildServerCfg(
     `set sv_maxclients "${maxClients}"`,
     `set sv_mapPoolFile "${getMapPoolFile(teamSize)}"`,
     `set qlx_owner "${config.qlxOwnerSteamId}"`,
-    `set qlx_plugins "plugin_manager,essentials,workshop,pickup_bridge,qltracker_sort,qltracker_admins"`,
+    `set qlx_plugins "plugin_manager,essentials,workshop,pickup_bridge,qltracker_sort,qltracker_admins,qltracker_rcon"`,
     `set qlx_database "Redis"`,
     `set qlx_redisAddress "127.0.0.1"`,
     `set qlx_redisDatabase "${slot.redisDb}"`,
@@ -96,6 +98,8 @@ export function buildServerCfg(
     `set zmq_stats_enable "1"`,
     `set zmq_stats_ip "127.0.0.1"`,
     `set zmq_stats_port "${slot.zmqPort}"`,
+    `set qlx_rconPort "${rconPort}"`,
+    `set qlx_rconToken "${rconToken}"`,
     `set qlx_pickupMetadataFile "${metadataFile}"`,
     `set qlx_pickupBridgeUrl "${metadata.callbackBaseUrl}"`,
     `set qlx_pickupBridgeToken "${metadata.callbackToken}"`,
@@ -107,14 +111,19 @@ export function buildManualServerCfg(
   slotDir: string,
   slot: SlotDefinition,
   map: string,
+  teamSize: number,
+  rconPort: number,
+  rconToken: string,
 ) {
+  const maxClients = teamSize * 2 + 2;
+
   return [
     `set sv_hostname "^1QLTracker^7 Manual Server"`,
-    `set teamsize "4"`,
-    `set sv_maxclients "10"`,
-    `set sv_mapPoolFile "mappool_capickup_4v4.txt"`,
+    `set teamsize "${teamSize}"`,
+    `set sv_maxclients "${maxClients}"`,
+    `set sv_mapPoolFile "${getMapPoolFile(teamSize)}"`,
     `set qlx_owner "${config.qlxOwnerSteamId}"`,
-    `set qlx_plugins "plugin_manager,essentials,workshop,qltracker_admins"`,
+    `set qlx_plugins "plugin_manager,essentials,workshop,qltracker_admins,qltracker_rcon"`,
     `set qlx_database "Redis"`,
     `set qlx_redisAddress "127.0.0.1"`,
     `set qlx_redisDatabase "${slot.redisDb}"`,
@@ -123,6 +132,8 @@ export function buildManualServerCfg(
     `set zmq_stats_enable "1"`,
     `set zmq_stats_ip "127.0.0.1"`,
     `set zmq_stats_port "${slot.zmqPort}"`,
+    `set qlx_rconPort "${rconPort}"`,
+    `set qlx_rconToken "${rconToken}"`,
     `set serverstartup "map ${map} hoq_ca"`,
   ].join("\n");
 }

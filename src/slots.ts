@@ -142,18 +142,18 @@ export async function allocateSlot(payload: ProvisionPayload) {
     }
 
     const token = randomToken();
+    const rconToken = randomToken();
+    const rconPort = RCON_BASE_PORT + slot.id;
     const currentDir = slotDir(slot.id);
     const metadata = buildSlotMetadata(payload, slot, token);
     fs.writeFileSync(metadataFile(slot.id), `${JSON.stringify(metadata, null, 2)}\n`, "utf8");
     fs.writeFileSync(
       path.join(currentDir, "home", "baseq3", "pickup-server.cfg"),
-      `${buildServerCfg(currentDir, slot, metadata)}\n`,
+      `${buildServerCfg(currentDir, slot, metadata, rconPort, rconToken)}\n`,
       "utf8",
     );
     fs.writeFileSync(path.join(currentDir, "slot.env"), `${buildSlotEnv(currentDir, slot)}\n`, "utf8");
 
-    const rconToken = randomToken();
-    const rconPort = RCON_BASE_PORT + slot.id;
     const nextState: SlotState = {
       ...state,
       matchId: payload.matchId,
@@ -226,7 +226,7 @@ export function releaseSlot(slotId: number) {
   writeSlotState(slotId, defaultSlotState(slot));
 }
 
-export function prepareManualSlot(slotId: number, map: string) {
+export function prepareManualSlot(slotId: number, map: string, teamSize = 4) {
   const slot = SLOT_DEFINITIONS.find((value) => value.id === slotId);
   if (!slot) {
     return null;
@@ -237,10 +237,12 @@ export function prepareManualSlot(slotId: number, map: string) {
     return null;
   }
 
+  const rconToken = randomToken();
+  const rconPort = RCON_BASE_PORT + slot.id;
   const currentDir = slotDir(slot.id);
   fs.writeFileSync(
     path.join(currentDir, "home", "baseq3", "pickup-server.cfg"),
-    `${buildManualServerCfg(currentDir, slot, map)}\n`,
+    `${buildManualServerCfg(currentDir, slot, map, teamSize, rconPort, rconToken)}\n`,
     "utf8",
   );
   fs.writeFileSync(path.join(currentDir, "slot.env"), `${buildSlotEnv(currentDir, slot)}\n`, "utf8");
@@ -249,6 +251,8 @@ export function prepareManualSlot(slotId: number, map: string) {
     ...state,
     matchId: `manual-${Date.now()}`,
     queueId: null,
+    rconPort,
+    rconToken,
     resultPostedAt: null,
     state: "busy",
     token: null,

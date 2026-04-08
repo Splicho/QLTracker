@@ -16,6 +16,7 @@ import {
   stopSlot,
 } from "./slots.js";
 import { provisionPayloadSchema } from "./types.js";
+import { connectSlot, disconnectSlot, getSlotEvents, getSlotPlayers, initializeZmqForActiveSlots } from "./zmq-consumer.js";
 
 type PendingReady = {
   reject: (error: Error) => void;
@@ -144,6 +145,7 @@ app.post("/api/pickups/provision", async (request, response) => {
 
     try {
       await startSlot(allocation.slot.id);
+      connectSlot(allocation.slot.id, allocation.slot.zmqPort);
       await waitForReady(allocation.slot.id);
       response.json({
         ip: config.publicIp,
@@ -153,6 +155,7 @@ app.post("/api/pickups/provision", async (request, response) => {
     } catch (error) {
       rejectReady(allocation.slot.id, error instanceof Error ? error : new Error(String(error)));
       await stopSlot(allocation.slot.id);
+      disconnectSlot(allocation.slot.id);
       releaseSlot(allocation.slot.id);
       response.status(500).json({
         ok: false,
@@ -267,6 +270,7 @@ app.post("/internal/slots/:slotId/completed", async (request, response) => {
 
     setTimeout(async () => {
       await stopSlot(slotId);
+      disconnectSlot(slotId);
       releaseSlot(slotId);
     }, config.postMatchGraceSeconds * 1000);
   } catch (error) {
@@ -302,6 +306,7 @@ app.post("/internal/slots/:slotId/failed", async (request, response) => {
 
     rejectReady(slotId, new Error(payload.error));
     await stopSlot(slotId);
+    disconnectSlot(slotId);
     releaseSlot(slotId);
     response.json({ ok: true });
   } catch (error) {
@@ -346,6 +351,7 @@ app.post("/api/admin/slots/:slotId/stop", async (request, response) => {
     }
 
     await stopSlot(slotId);
+    disconnectSlot(slotId);
     releaseSlot(slotId);
     response.json({ ok: true });
   } catch (error) {
@@ -360,6 +366,7 @@ app.post("/api/admin/slots/:slotId/stop", async (request, response) => {
 app.post("/api/admin/slots/:slotId/start-manual", async (request, response) => {
   const bodySchema = z.object({
     map: z.string().trim().min(1),
+    teamSize: z.number().int().min(1).max(8).default(4),
   });
 
   try {
@@ -372,13 +379,14 @@ app.post("/api/admin/slots/:slotId/start-manual", async (request, response) => {
     }
 
     const body = bodySchema.parse(request.body);
-    const result = prepareManualSlot(slotId, body.map);
+    const result = prepareManualSlot(slotId, body.map, body.teamSize);
     if (!result) {
       response.status(409).json({ ok: false, error: "Slot is not idle." });
       return;
     }
 
     await startSlot(slotId);
+    connectSlot(slotId, slot.zmqPort);
     response.json({
       ok: true,
       joinAddress: `${config.publicIp}:${result.slot.gamePort}`,
@@ -393,8 +401,88 @@ app.post("/api/admin/slots/:slotId/start-manual", async (request, response) => {
   }
 });
 
+app.get("/api/admin/slots/:slotId/events", (request, response) => {
+  try {
+    requireProvisionAuth(request);
+    const slotId = Number(request.params.slotId);
+    const slot = getSlotById(slotId);
+    if (!slot) {
+      response.status(404).json({ ok: false, error: "Unknown slot." });
+      return;
+    }
+
+    const since = typeof request.query.since === "string" ? request.query.since : undefined;
+    const events = getSlotEvents(slotId, since);
+    const players = getSlotPlayers(slotId);
+
+    response.json({ ok: true, events, players });
+  } catch (error) {
+    const status = error instanceof Error && error.message === "Unauthorized." ? 401 : 500;
+    response.status(status).json({
+      ok: false,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+});
+
+app.post("/api/admin/slots/:slotId/command", async (request, response) => {
+  const bodySchema = z.object({
+    action: z.enum(["kick", "ban", "say", "cmd"]),
+    target: z.string().optional(),
+    message: z.string().optional(),
+  });
+
+  try {
+    requireProvisionAuth(request);
+    const slotId = Number(request.params.slotId);
+    const slot = getSlotById(slotId);
+    if (!slot) {
+      response.status(404).json({ ok: false, error: "Unknown slot." });
+      return;
+    }
+
+    const state = readSlotState(slot);
+    if (state.state === "idle" || !state.rconPort || !state.rconToken) {
+      response.status(409).json({ ok: false, error: "Slot is not active or rcon is not available." });
+      return;
+    }
+
+    const body = bodySchema.parse(request.body);
+    const rconUrl = `http://127.0.0.1:${state.rconPort}/${body.action}`;
+    const rconPayload: Record<string, string> = {};
+    if (body.target) rconPayload.steamId = body.target;
+    if (body.message) rconPayload.message = body.message;
+    if (body.action === "cmd" && body.message) rconPayload.command = body.message;
+
+    const rconResponse = await fetch(rconUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${state.rconToken}`,
+      },
+      body: JSON.stringify(rconPayload),
+    });
+
+    if (!rconResponse.ok) {
+      const text = await rconResponse.text().catch(() => "Unknown error");
+      response.status(502).json({ ok: false, error: `Rcon error: ${text}` });
+      return;
+    }
+
+    const result = await rconResponse.json().catch(() => ({}));
+    response.json({ ok: true, ...result });
+  } catch (error) {
+    const status = error instanceof z.ZodError ? 400 : error instanceof Error && error.message === "Unauthorized." ? 401 : 500;
+    response.status(status).json({
+      ok: false,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+});
+
 ensureAppDirectories();
 await reconcileSlots();
+initializeZmqForActiveSlots();
 
 app.listen(config.port, () => {
   console.log(`qltracker-provisioner listening on :${config.port}`);
