@@ -1,4 +1,4 @@
-import { startBot } from './app/bootstrap.js';
+import { startBots } from './app/bootstrap.js';
 import { logger } from './shared/logger.js';
 
 process.on('unhandledRejection', (reason: unknown) => {
@@ -10,7 +10,7 @@ process.on('uncaughtException', (error: Error) => {
   process.exit(1);
 });
 
-void startBot().catch((error: unknown) => {
-  logger.fatal({ err: error }, 'Bot failed to start');
+void startBots().catch((error: unknown) => {
+  logger.fatal({ err: error }, 'Failed to start configured Discord bots');
   process.exitCode = 1;
 });

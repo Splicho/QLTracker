@@ -1,6 +1,6 @@
 import { ActivityType, type Client } from 'discord.js';
 
-export function applyDefaultPresence(client: Client): void {
+export function applyDefaultPresence(client: Client, activityName: string): void {
   if (!client.user) {
     return;
   }
@@ -9,7 +9,7 @@ export function applyDefaultPresence(client: Client): void {
     status: 'online',
     activities: [
       {
-        name: 'Quake Live',
+        name: activityName,
         type: ActivityType.Playing
       }
     ]

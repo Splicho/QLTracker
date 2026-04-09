@@ -5,8 +5,8 @@
 This repository contains a lightweight, production-minded Discord bot scaffold for Quake Live related automation and tracking.
 
 Current scope:
-- Run a single Discord bot process with slash commands
-- Keep a constant Discord presence of `Playing Quake Live`
+- Run one or two Discord bot clients from the same repository and process
+- Keep a constant Discord presence per bot: primary plays `Quake Live`, secondary plays `Pickup`
 - Provide a clean foundation for future Quake Live features such as stats, player lookups, match notifications, and server utilities
 
 Out of scope for the scaffold:
@@ -22,12 +22,13 @@ Out of scope for the scaffold:
 - Command style: slash commands only
 - Configuration: `.env` with runtime validation
 - Logging: structured logs
-- Architecture: small feature modules behind shared Discord contracts
+- Architecture: shared feature modules behind per-bot runtime definitions
 
 ## Working conventions
 
 - Keep the bot lightweight. Add dependencies only when they solve a concrete need.
 - Prefer slash commands over prefix commands or raw message parsing.
+- Define bot identity and credentials under `src/bots/`.
 - Put reusable Discord wiring under `src/discord/`.
 - Put user-facing bot features under `src/features/`.
 - Keep startup and lifecycle concerns under `src/app/`.
@@ -37,5 +38,5 @@ Out of scope for the scaffold:
 ## Operational expectations
 
 - Register commands with `npm run register:commands` after changing command definitions.
-- Use `DISCORD_GUILD_ID` during development for fast command iteration.
+- Use `DISCORD_PRIMARY_GUILD_ID` and `DISCORD_SECONDARY_GUILD_ID` during development for fast command iteration.
 - Run `npm run typecheck` and `npm run build` before handing off changes.
