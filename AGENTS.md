@@ -6,7 +6,7 @@ This repository contains a lightweight, production-minded Discord bot scaffold f
 
 Current scope:
 - Run one or two Discord bot clients from the same repository and process
-- Keep a constant Discord presence per bot: primary plays `Quake Live`, secondary plays `Pickup`
+- Keep a constant Discord presence of `Playing Quake Live` for each configured bot
 - Provide a clean foundation for future Quake Live features such as stats, player lookups, match notifications, and server utilities
 
 Out of scope for the scaffold:

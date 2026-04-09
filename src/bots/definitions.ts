@@ -20,7 +20,7 @@ const secondaryBot: BotDefinition | null =
         displayName: env.DISCORD_SECONDARY_NAME,
         token: env.DISCORD_SECONDARY_TOKEN,
         clientId: env.DISCORD_SECONDARY_CLIENT_ID,
-        activityName: 'Pickup',
+        activityName: 'Quake Live',
         commands: sharedSlashCommands,
         ...(env.DISCORD_SECONDARY_GUILD_ID ? { guildId: env.DISCORD_SECONDARY_GUILD_ID } : {})
       }

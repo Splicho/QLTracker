@@ -5,7 +5,7 @@ Lightweight Discord bot scaffold built with `discord.js` and TypeScript, with su
 ## Features
 
 - Slash-command based command handling
-- Per-bot startup presence: primary plays `Quake Live`, secondary plays `Pickup`
+- Per-bot startup presence: both bots play `Quake Live`
 - Strict env validation with `zod`
 - Structured logging with `pino`
 - Separate command registration flow for guild or global commands
