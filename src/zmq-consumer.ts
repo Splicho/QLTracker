@@ -1,5 +1,7 @@
+import fs from "node:fs";
+import path from "node:path";
 import zmq from "zeromq";
-import { SLOT_DEFINITIONS, type SlotDefinition } from "./config.js";
+import { config, SLOT_DEFINITIONS, type SlotDefinition } from "./config.js";
 import { postPickupStatsEvents, type PickupStatsRelayEvent } from "./stats-callback-client.js";
 import { parseZmqMessage } from "./stats-parser.js";
 import { readSlotState } from "./slots.js";
@@ -22,6 +24,7 @@ type SlotBuffer = {
   nextEventIndex: number;
   outbound: Promise<void>;
   players: Map<string, SlotPlayer>;
+  retryTimer: NodeJS.Timeout | null;
   socket: zmq.Socket | null;
 };
 
@@ -45,6 +48,7 @@ function createBuffer(): SlotBuffer {
     nextEventIndex: 0,
     outbound: Promise.resolve(),
     players: new Map(),
+    retryTimer: null,
     socket: null,
   };
 }
@@ -64,6 +68,42 @@ function pushEvent(buffer: SlotBuffer, type: string, data: unknown) {
   if (buffer.events.length > MAX_EVENTS) {
     buffer.events = buffer.events.slice(-MAX_EVENTS);
   }
+}
+
+function getZmqPassFile(slotId: number) {
+  return path.join(
+    config.slotsDir,
+    `slot-${slotId}`,
+    "home",
+    "baseq3",
+    "zmqpass.txt",
+  );
+}
+
+function readZmqCredentials(slotId: number) {
+  const file = getZmqPassFile(slotId);
+  if (!fs.existsSync(file)) {
+    return null;
+  }
+
+  const line = fs
+    .readFileSync(file, "utf8")
+    .split(/\r?\n/)
+    .map((value) => value.trim())
+    .find((value) => value.length > 0 && value.includes("="));
+
+  if (!line) {
+    return null;
+  }
+
+  const separatorIndex = line.indexOf("=");
+  const username = line.slice(0, separatorIndex).trim();
+  const password = line.slice(separatorIndex + 1).trim();
+  if (!username || !password) {
+    return null;
+  }
+
+  return { password, username };
 }
 
 function syncMatchContext(slot: SlotDefinition, buffer: SlotBuffer) {
@@ -142,6 +182,21 @@ function queueStatsRelay(
     });
 }
 
+function scheduleReconnect(slotId: number, zmqPort: number, delayMs = 1000) {
+  const buffer = slotBuffers.get(slotId);
+  if (!buffer || buffer.retryTimer) {
+    return;
+  }
+
+  buffer.retryTimer = setTimeout(() => {
+    const latest = slotBuffers.get(slotId);
+    if (latest) {
+      latest.retryTimer = null;
+    }
+    attachSocket(slotId, zmqPort);
+  }, delayMs);
+}
+
 function relayTrackedEvent(
   slot: SlotDefinition,
   buffer: SlotBuffer,
@@ -180,13 +235,31 @@ function handleZmqMessage(slotId: number, raw: Buffer) {
   relayTrackedEvent(slot, buffer, parsed.type, parsed.data);
 }
 
-export function connectSlot(slotId: number, zmqPort: number) {
-  disconnectSlot(slotId);
+function attachSocket(slotId: number, zmqPort: number) {
+  const slot = getSlotDefinition(slotId);
+  const buffer = slotBuffers.get(slotId);
+  if (!slot || !buffer) {
+    return;
+  }
 
-  const buffer = createBuffer();
+  const credentials = config.zmqStatsPassword ? readZmqCredentials(slotId) : null;
+  if (config.zmqStatsPassword && !credentials) {
+    scheduleReconnect(slotId, zmqPort);
+    return;
+  }
+
   const socket = zmq.socket("sub");
+  const authSocket = socket as unknown as {
+    plainPassword?: string;
+    plainUsername?: string;
+  };
 
-  socket.connect(`tcp://127.0.0.1:${zmqPort}`);
+  if (credentials) {
+    authSocket.plainUsername = credentials.username;
+    authSocket.plainPassword = credentials.password;
+  }
+
+  socket.connect(`tcp://${config.publicIp}:${zmqPort}`);
   socket.subscribe("");
 
   socket.on("message", (data: Buffer) => {
@@ -198,8 +271,17 @@ export function connectSlot(slotId: number, zmqPort: number) {
   });
 
   buffer.socket = socket;
+  console.info(
+    `[zmq] connected to slot ${slotId} on ${config.publicIp}:${zmqPort}${credentials ? " with auth" : ""}`,
+  );
+}
+
+export function connectSlot(slotId: number, zmqPort: number) {
+  disconnectSlot(slotId);
+
+  const buffer = createBuffer();
   slotBuffers.set(slotId, buffer);
-  console.info(`[zmq] connected to slot ${slotId} on port ${zmqPort}`);
+  attachSocket(slotId, zmqPort);
 }
 
 export function disconnectSlot(slotId: number) {
@@ -214,6 +296,10 @@ export function disconnectSlot(slotId: number) {
     } catch {
       // Ignore close errors.
     }
+  }
+
+  if (buffer.retryTimer) {
+    clearTimeout(buffer.retryTimer);
   }
 
   slotBuffers.delete(slotId);

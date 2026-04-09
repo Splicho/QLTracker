@@ -21,11 +21,13 @@ const envSchema = z.object({
   REALTIME_RESULT_CALLBACK_URL: z.string().url(),
   REALTIME_STATS_CALLBACK_URL: z.string().url(),
   SLOTS_DIR: z.string().min(1).default("/var/lib/qltracker-provisioner/slots"),
+  ZMQ_STATS_PASSWORD: z.string().trim().default(""),
 });
 
 const parsed = envSchema.parse(process.env);
 const normalizedPublicCountryCode = parsed.PUBLIC_COUNTRY_CODE.trim().toLowerCase();
 const normalizedPublicCountryName = parsed.PUBLIC_COUNTRY_NAME.trim();
+const normalizedZmqStatsPassword = parsed.ZMQ_STATS_PASSWORD.trim();
 
 export const config = {
   callbackSecret: parsed.CALLBACK_SECRET,
@@ -45,6 +47,8 @@ export const config = {
   realtimeResultCallbackUrl: parsed.REALTIME_RESULT_CALLBACK_URL,
   realtimeStatsCallbackUrl: parsed.REALTIME_STATS_CALLBACK_URL,
   slotsDir: parsed.SLOTS_DIR,
+  zmqStatsPassword:
+    normalizedZmqStatsPassword.length > 0 ? normalizedZmqStatsPassword : null,
 };
 
 export type SlotDefinition = {

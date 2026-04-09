@@ -91,7 +91,7 @@ export function buildServerCfg(
   const pickupBrandName = `^1QLTracker^7 Pickup`;
 
   return [
-    `set sv_hostname "QLTracker Pickup | ${queueLabel}"`,
+    `set sv_hostname "QLTracker Pickup | discord.gg/qltracker"`,
     `set teamsize "${teamSize}"`,
     `set sv_maxclients "${maxClients}"`,
     `set sv_mapPoolFile "${getMapPoolFile(teamSize)}"`,
@@ -106,8 +106,11 @@ export function buildServerCfg(
     `set qlx_serverBrandTopField "${queueLabel}"`,
     `set qlx_serverBrandBottomField "^7Hosted by ^1QLTracker"`,
     `set zmq_stats_enable "1"`,
-    `set zmq_stats_ip "127.0.0.1"`,
+    `set zmq_stats_ip "${config.publicIp}"`,
     `set zmq_stats_port "${slot.zmqPort}"`,
+    ...(config.zmqStatsPassword
+      ? [`set zmq_stats_password "${config.zmqStatsPassword}"`]
+      : []),
     `set qlx_rconPort "${rconPort}"`,
     `set qlx_rconToken "${rconToken}"`,
     `set qlx_pickupMetadataFile "${metadataFile}"`,
@@ -132,7 +135,7 @@ export function buildManualServerCfg(
   const manualBrandName = "^1QLTracker^7 | Clan Arena";
 
   return [
-    `set sv_hostname "QLTracker | Clan Arena"`,
+    `set sv_hostname "QLTracker | discord.gg/qltracker"`,
     `set teamsize "${teamSize}"`,
     `set sv_maxclients "${maxClients}"`,
     `set sv_mapPoolFile "${getMapPoolFile(teamSize)}"`,
@@ -147,8 +150,11 @@ export function buildManualServerCfg(
     `set qlx_serverBrandTopField "${manualLabel}"`,
     `set qlx_serverBrandBottomField "^7Hosted by ^1QLTracker"`,
     `set zmq_stats_enable "1"`,
-    `set zmq_stats_ip "127.0.0.1"`,
+    `set zmq_stats_ip "${config.publicIp}"`,
     `set zmq_stats_port "${slot.zmqPort}"`,
+    ...(config.zmqStatsPassword
+      ? [`set zmq_stats_password "${config.zmqStatsPassword}"`]
+      : []),
     `set qlx_rconPort "${rconPort}"`,
     `set qlx_rconToken "${rconToken}"`,
     `set serverstartup "map ${map} hoq_ca"`,
