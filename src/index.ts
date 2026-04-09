@@ -233,6 +233,13 @@ app.get("/health", async (_request, response) => {
   });
 });
 
+app.get("/api/servers", (_request, response) => {
+  response.json({
+    ok: true,
+    snapshots: Array.from(snapshotsByAddr.values()),
+  });
+});
+
 app.get("/api/pickup/public-state", async (_request, response) => {
   try {
     response.json({
