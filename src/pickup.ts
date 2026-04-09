@@ -385,7 +385,7 @@ export function createPickupService(io: Server) {
           p."id" as "id",
           p."steamId" as "steamId",
           p."personaName" as "personaName",
-          p."avatarUrl" as "avatarUrl",
+          coalesce(p."customAvatarUrl", p."avatarUrl") as "avatarUrl",
           p."profileUrl" as "profileUrl"
         from "PickupAppSession" s
         inner join "PickupPlayer" p on p."id" = s."playerId"
@@ -431,7 +431,7 @@ export function createPickupService(io: Server) {
           qm."joinedAt",
           p."id" as "id",
           p."personaName",
-          p."avatarUrl",
+          coalesce(p."customAvatarUrl", p."avatarUrl") as "avatarUrl",
           p."profileUrl",
           p."steamId"
         from "PickupQueueMember" qm
@@ -883,7 +883,7 @@ export function createPickupService(io: Server) {
           mp."won",
           p."id" as "id",
           p."personaName",
-          p."avatarUrl",
+          coalesce(p."customAvatarUrl", p."avatarUrl") as "avatarUrl",
           p."profileUrl",
           p."steamId"
         from "PickupMatchPlayer" mp
@@ -919,7 +919,7 @@ export function createPickupService(io: Server) {
           "id",
           "steamId",
           "personaName",
-          "avatarUrl",
+          coalesce("customAvatarUrl", "avatarUrl") as "avatarUrl",
           "profileUrl"
         from "PickupPlayer"
         where "id" = $1
@@ -1069,7 +1069,7 @@ export function createPickupService(io: Server) {
             qm."joinedAt",
             p."id" as "id",
             p."personaName",
-            p."avatarUrl",
+            coalesce(p."customAvatarUrl", p."avatarUrl") as "avatarUrl",
             p."profileUrl",
             p."steamId"
           from "PickupQueueMember" qm
