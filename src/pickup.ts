@@ -6,6 +6,7 @@ import { config } from "./config.js";
 import { pool } from "./db.js";
 import { lookupCountry } from "./geolite.js";
 import { createPickupCallbackApi } from "./pickup/callbacks.js";
+import { applyPickupMatchStats } from "./pickup/match-stats.js";
 import { defaultDisplayRating } from "./pickup/ratings.js";
 import { chooseBalancedTeams } from "./pickup/matchmaking.js";
 import { createPlayerStateApi } from "./pickup/player-state.js";
@@ -2091,6 +2092,18 @@ export function createPickupService(io: Server) {
     await broadcastPublicState();
   }
 
+  async function applyMatchStats(
+    matchId: string,
+    payload: Record<string, unknown>,
+  ) {
+    const match = await getLatestMatchById(matchId);
+    if (!match || match.status === "cancelled") {
+      return;
+    }
+
+    await applyPickupMatchStats(matchId, payload, getMatchPlayers);
+  }
+
   async function emitSocketState(socket: Socket, session: PickupSessionIdentity | null) {
     socket.emit("pickup:public-state", await getPublicState());
     if (session) {
@@ -2142,6 +2155,7 @@ export function createPickupService(io: Server) {
   const callbackApi = createPickupCallbackApi({
     applyMatchLive,
     applyMatchResult,
+    applyMatchStats,
     applyProvisionResult,
     authenticatePickupSession,
     createSignature,
@@ -2154,6 +2168,7 @@ export function createPickupService(io: Server) {
     handleLiveCallback,
     handleProvisionCallback,
     handleResultCallback,
+    handleStatsCallback,
   } = callbackApi;
 
   return {
@@ -2292,6 +2307,9 @@ export function createPickupService(io: Server) {
     },
     async handleResultCallback(request: RawBodyRequest, response: express.Response) {
       return handleResultCallback(request, response);
+    },
+    async handleStatsCallback(request: RawBodyRequest, response: express.Response) {
+      return handleStatsCallback(request, response);
     },
   };
 }

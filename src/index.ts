@@ -295,6 +295,13 @@ app.post("/api/pickup/callbacks/result", async (request, response) => {
   );
 });
 
+app.post("/api/pickup/callbacks/stats", async (request, response) => {
+  await pickupService.handleStatsCallback(
+    request as express.Request & { rawBody?: string },
+    response
+  );
+});
+
 app.get("/api/servers/:addr", async (request, response) => {
   const addr = decodeURIComponent(request.params.addr);
   const result = await pool.query(

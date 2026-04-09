@@ -8,6 +8,7 @@ import type {
 type PickupCallbackDeps = {
   applyMatchLive: (matchId: string, payload: Record<string, unknown>) => Promise<void>;
   applyMatchResult: (matchId: string, payload: Record<string, unknown>) => Promise<void>;
+  applyMatchStats: (matchId: string, payload: Record<string, unknown>) => Promise<void>;
   applyProvisionResult: (
     matchId: string,
     payload: Record<string, unknown>,
@@ -128,11 +129,35 @@ export function createPickupCallbackApi(deps: PickupCallbackDeps) {
     }
   }
 
+  async function handleStatsCallback(
+    request: RawBodyRequest,
+    response: express.Response,
+  ) {
+    try {
+      const matchId =
+        typeof request.body?.matchId === "string" ? request.body.matchId.trim() : "";
+      if (!matchId) {
+        response.status(400).json({ ok: false, error: "matchId is required." });
+        return;
+      }
+
+      await verifyCallbackSignature(matchId, request);
+      await deps.applyMatchStats(matchId, request.body as Record<string, unknown>);
+      response.json({ ok: true });
+    } catch (error) {
+      response.status(400).json({
+        ok: false,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
   return {
     getPlayerStateByToken,
     handleLiveCallback,
     handleProvisionCallback,
     handleResultCallback,
+    handleStatsCallback,
     verifyCallbackSignature,
   };
 }
