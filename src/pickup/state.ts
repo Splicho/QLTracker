@@ -13,6 +13,7 @@ import type {
 export function toPlayerCard(player: PickupMatchPlayerRow): PickupPlayerCard {
   return {
     avatarUrl: player.avatarUrl,
+    countryCode: player.countryCode,
     displayAfter: player.displayAfter,
     displayBefore: player.displayBefore,
     id: player.playerId,
@@ -33,6 +34,7 @@ export function toQueuedPlayerState(
 ): PickupPlayerIdentity & { joinedAt: string } {
   return {
     avatarUrl: player.avatarUrl,
+    countryCode: player.countryCode,
     id: player.playerId,
     joinedAt: player.joinedAt.toISOString(),
     personaName: player.personaName,

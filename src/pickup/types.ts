@@ -31,6 +31,7 @@ export type PickupSeasonRow = {
 
 export type PickupPlayerIdentity = {
   avatarUrl: string | null;
+  countryCode: string | null;
   id: string;
   personaName: string;
   profileUrl: string | null;
@@ -199,6 +200,7 @@ export type PickupActiveRatingState = {
 
 export type PickupPlayerCard = {
   avatarUrl: string | null;
+  countryCode: string | null;
   displayAfter: number | null;
   displayBefore: number;
   id: string;

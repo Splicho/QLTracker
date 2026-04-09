@@ -374,6 +374,7 @@ export function createPickupService(io: Server) {
     const result = await pool.query<
       PickupSessionIdentity & {
         avatarUrl: string | null;
+        countryCode: string | null;
         profileUrl: string | null;
         personaName: string;
         steamId: string;
@@ -387,6 +388,7 @@ export function createPickupService(io: Server) {
           p."steamId" as "steamId",
           p."personaName" as "personaName",
           coalesce(p."customAvatarUrl", p."avatarUrl") as "avatarUrl",
+          p."countryCode" as "countryCode",
           p."profileUrl" as "profileUrl"
         from "PickupAppSession" s
         inner join "PickupPlayer" p on p."id" = s."playerId"
@@ -412,6 +414,7 @@ export function createPickupService(io: Server) {
     return {
       player: {
         avatarUrl: row.avatarUrl,
+        countryCode: row.countryCode,
         id: row.id,
         personaName: row.personaName,
         profileUrl: row.profileUrl,
@@ -433,6 +436,7 @@ export function createPickupService(io: Server) {
           p."id" as "id",
           p."personaName",
           coalesce(p."customAvatarUrl", p."avatarUrl") as "avatarUrl",
+          p."countryCode",
           p."profileUrl",
           p."steamId"
         from "PickupQueueMember" qm
@@ -885,6 +889,7 @@ export function createPickupService(io: Server) {
           p."id" as "id",
           p."personaName",
           coalesce(p."customAvatarUrl", p."avatarUrl") as "avatarUrl",
+          p."countryCode",
           p."profileUrl",
           p."steamId"
         from "PickupMatchPlayer" mp
@@ -921,6 +926,7 @@ export function createPickupService(io: Server) {
           "steamId",
           "personaName",
           coalesce("customAvatarUrl", "avatarUrl") as "avatarUrl",
+          "countryCode",
           "profileUrl"
         from "PickupPlayer"
         where "id" = $1
@@ -1045,6 +1051,7 @@ export function createPickupService(io: Server) {
         rating: await getOrCreatePlayerSeasonRating(
           {
             avatarUrl: member.avatarUrl,
+            countryCode: member.countryCode,
             id: member.playerId,
             personaName: member.personaName,
             profileUrl: member.profileUrl,
@@ -1071,6 +1078,7 @@ export function createPickupService(io: Server) {
             p."id" as "id",
             p."personaName",
             coalesce(p."customAvatarUrl", p."avatarUrl") as "avatarUrl",
+            p."countryCode",
             p."profileUrl",
             p."steamId"
           from "PickupQueueMember" qm
