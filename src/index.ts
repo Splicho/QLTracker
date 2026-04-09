@@ -16,7 +16,14 @@ import {
   stopSlot,
 } from "./slots.js";
 import { provisionPayloadSchema } from "./types.js";
-import { connectSlot, disconnectSlot, getSlotEvents, getSlotPlayers, initializeZmqForActiveSlots } from "./zmq-consumer.js";
+import {
+  connectSlot,
+  disconnectSlot,
+  getSlotEvents,
+  getSlotPlayers,
+  initializeZmqForActiveSlots,
+  recordSupplementalEvent,
+} from "./zmq-consumer.js";
 
 type PendingReady = {
   reject: (error: Error) => void;
@@ -310,6 +317,66 @@ app.post("/internal/slots/:slotId/failed", async (request, response) => {
     await stopSlot(slotId);
     disconnectSlot(slotId);
     releaseSlot(slotId);
+    response.json({ ok: true });
+  } catch (error) {
+    response.status(400).json({
+      ok: false,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+});
+
+app.post("/internal/slots/:slotId/stats-supplemental", (request, response) => {
+  const schema = z.object({
+    blueScore: z.number().nullable().optional(),
+    factory: z.string().nullable().optional(),
+    gameType: z.string().nullable().optional(),
+    kind: z.enum(["start", "end"]),
+    map: z.string().nullable().optional(),
+    matchId: z.string().min(1),
+    players: z
+      .array(
+        z.object({
+          name: z.string().nullable().optional(),
+          steamId: z.string().nullable().optional(),
+          team: z.string().nullable().optional(),
+        }),
+      )
+      .optional(),
+    redScore: z.number().nullable().optional(),
+    token: z.string().min(1),
+  });
+
+  try {
+    const slotId = Number(request.params.slotId);
+    const payload = schema.parse(request.body);
+    const slot = getSlotById(slotId);
+    if (!slot) {
+      response.status(404).json({ ok: false, error: "Unknown slot." });
+      return;
+    }
+
+    const state = readSlotState(slot);
+    if (state.token !== payload.token || state.matchId !== payload.matchId) {
+      response.status(403).json({ ok: false, error: "Invalid slot token." });
+      return;
+    }
+
+    recordSupplementalEvent(
+      slotId,
+      payload.kind === "start"
+        ? "QLTRACKER_SUPPLEMENTAL_START"
+        : "QLTRACKER_SUPPLEMENTAL_END",
+      {
+        BLUE_SCORE: payload.blueScore ?? null,
+        FACTORY: payload.factory ?? null,
+        GAMETYPE: payload.gameType ?? null,
+        MAP: payload.map ?? null,
+        PLAYERS: payload.players ?? [],
+        RED_SCORE: payload.redScore ?? null,
+      },
+    );
+
     response.json({ ok: true });
   } catch (error) {
     response.status(400).json({

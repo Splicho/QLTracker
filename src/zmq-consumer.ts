@@ -1,5 +1,7 @@
 import zmq from "zeromq";
-import { SLOT_DEFINITIONS } from "./config.js";
+import { SLOT_DEFINITIONS, type SlotDefinition } from "./config.js";
+import { postPickupStatsEvents, type PickupStatsRelayEvent } from "./stats-callback-client.js";
+import { parseZmqMessage } from "./stats-parser.js";
 import { readSlotState } from "./slots.js";
 
 export type SlotEvent = {
@@ -15,20 +17,40 @@ export type SlotPlayer = {
 };
 
 type SlotBuffer = {
+  currentMatchId: string | null;
   events: SlotEvent[];
+  nextEventIndex: number;
+  outbound: Promise<void>;
   players: Map<string, SlotPlayer>;
   socket: zmq.Socket | null;
 };
 
 const MAX_EVENTS = 500;
+const TRACKED_EVENT_TYPES = new Set([
+  "MATCH_STARTED",
+  "ROUND_OVER",
+  "MATCH_REPORT",
+  "PLAYER_STATS",
+  "PLAYER_DEATH",
+  "PLAYER_KILL",
+  "PLAYER_MEDAL",
+  "PLAYER_SWITCHTEAM",
+]);
 const slotBuffers = new Map<number, SlotBuffer>();
 
 function createBuffer(): SlotBuffer {
   return {
+    currentMatchId: null,
     events: [],
+    nextEventIndex: 0,
+    outbound: Promise.resolve(),
     players: new Map(),
     socket: null,
   };
+}
+
+function getSlotDefinition(slotId: number) {
+  return SLOT_DEFINITIONS.find((slot) => slot.id === slotId) ?? null;
 }
 
 function pushEvent(buffer: SlotBuffer, type: string, data: unknown) {
@@ -44,57 +66,118 @@ function pushEvent(buffer: SlotBuffer, type: string, data: unknown) {
   }
 }
 
-function handleZmqMessage(slotId: number, raw: Buffer) {
-  const buffer = slotBuffers.get(slotId);
-  if (!buffer) return;
+function syncMatchContext(slot: SlotDefinition, buffer: SlotBuffer) {
+  const state = readSlotState(slot);
+  const matchId =
+    state.token && state.matchId && !state.matchId.startsWith("manual-")
+      ? state.matchId
+      : null;
 
-  try {
-    const msg = JSON.parse(raw.toString("utf8")) as { TYPE?: string; DATA?: Record<string, unknown> };
-    const type = msg.TYPE ?? "UNKNOWN";
-    const data = msg.DATA ?? {};
+  if (buffer.currentMatchId !== matchId) {
+    buffer.currentMatchId = matchId;
+    buffer.nextEventIndex = 0;
+  }
 
-    switch (type) {
-      case "PLAYER_CONNECT": {
-        const steamId = String(data.STEAM_ID ?? "");
-        const name = String(data.NAME ?? "unknown");
-        const team = String(data.TEAM ?? "spectator");
-        if (steamId) {
-          buffer.players.set(steamId, { name, steamId, team });
-        }
-        break;
+  return {
+    matchId,
+    state,
+  };
+}
+
+function updatePlayers(buffer: SlotBuffer, type: string, data: Record<string, unknown>) {
+  switch (type) {
+    case "PLAYER_CONNECT": {
+      const steamId = String(data.STEAM_ID ?? "");
+      const name = String(data.NAME ?? "unknown");
+      const team = String(data.TEAM ?? "spectator");
+      if (steamId) {
+        buffer.players.set(steamId, { name, steamId, team });
       }
-
-      case "PLAYER_DISCONNECT": {
-        const steamId = String(data.STEAM_ID ?? "");
-        if (steamId) {
-          buffer.players.delete(steamId);
-        }
-        break;
-      }
-
-      case "PLAYER_SWITCHTEAM": {
-        const steamId = String((data.PLAYER as Record<string, unknown>)?.STEAM_ID ?? data.STEAM_ID ?? "");
-        const team = String((data.PLAYER as Record<string, unknown>)?.TEAM ?? data.TEAM ?? "spectator");
-        const existing = steamId ? buffer.players.get(steamId) : undefined;
-        if (existing) {
-          existing.team = team;
-        }
-        break;
-      }
-
-      case "MATCH_STARTED": {
-        // Reset player list on new match - players will reconnect
-        break;
-      }
-
-      default:
-        break;
+      break;
     }
 
-    pushEvent(buffer, type, data);
-  } catch {
-    // Ignore unparseable messages
+    case "PLAYER_DISCONNECT": {
+      const steamId = String(data.STEAM_ID ?? "");
+      if (steamId) {
+        buffer.players.delete(steamId);
+      }
+      break;
+    }
+
+    case "PLAYER_SWITCHTEAM": {
+      const player = data.PLAYER as Record<string, unknown> | undefined;
+      const steamId = String(player?.STEAM_ID ?? data.STEAM_ID ?? "");
+      const team = String(player?.TEAM ?? data.TEAM ?? "spectator");
+      const existing = steamId ? buffer.players.get(steamId) : undefined;
+      if (existing) {
+        existing.team = team;
+      }
+      break;
+    }
+
+    default:
+      break;
   }
+}
+
+function queueStatsRelay(
+  buffer: SlotBuffer,
+  slotId: number,
+  matchId: string,
+  event: PickupStatsRelayEvent,
+) {
+  buffer.outbound = buffer.outbound
+    .then(() =>
+      postPickupStatsEvents({
+        events: [event],
+        matchId,
+        slotId,
+      }),
+    )
+    .catch((error) => {
+      console.error(
+        `[zmq] failed to relay stats event for slot ${slotId} match ${matchId}:`,
+        error,
+      );
+    });
+}
+
+function relayTrackedEvent(
+  slot: SlotDefinition,
+  buffer: SlotBuffer,
+  type: string,
+  data: Record<string, unknown>,
+) {
+  const { matchId } = syncMatchContext(slot, buffer);
+  if (!matchId || !TRACKED_EVENT_TYPES.has(type)) {
+    return;
+  }
+
+  const eventIndex = ++buffer.nextEventIndex;
+  queueStatsRelay(buffer, slot.id, matchId, {
+    data,
+    eventAt: new Date().toISOString(),
+    eventIndex,
+    source: "zmq",
+    type,
+  });
+}
+
+function handleZmqMessage(slotId: number, raw: Buffer) {
+  const slot = getSlotDefinition(slotId);
+  const buffer = slotBuffers.get(slotId);
+  if (!slot || !buffer) {
+    return;
+  }
+
+  const parsed = parseZmqMessage(raw);
+  if (!parsed) {
+    return;
+  }
+
+  updatePlayers(buffer, parsed.type, parsed.data);
+  pushEvent(buffer, parsed.type, parsed.data);
+  relayTrackedEvent(slot, buffer, parsed.type, parsed.data);
 }
 
 export function connectSlot(slotId: number, zmqPort: number) {
@@ -121,13 +204,15 @@ export function connectSlot(slotId: number, zmqPort: number) {
 
 export function disconnectSlot(slotId: number) {
   const buffer = slotBuffers.get(slotId);
-  if (!buffer) return;
+  if (!buffer) {
+    return;
+  }
 
   if (buffer.socket) {
     try {
       buffer.socket.close();
     } catch {
-      // Ignore close errors
+      // Ignore close errors.
     }
   }
 
@@ -137,18 +222,52 @@ export function disconnectSlot(slotId: number) {
 
 export function getSlotEvents(slotId: number, since?: string): SlotEvent[] {
   const buffer = slotBuffers.get(slotId);
-  if (!buffer) return [];
+  if (!buffer) {
+    return [];
+  }
 
-  if (!since) return buffer.events;
+  if (!since) {
+    return buffer.events;
+  }
 
   return buffer.events.filter((event) => event.timestamp > since);
 }
 
 export function getSlotPlayers(slotId: number): SlotPlayer[] {
   const buffer = slotBuffers.get(slotId);
-  if (!buffer) return [];
+  if (!buffer) {
+    return [];
+  }
 
   return Array.from(buffer.players.values());
+}
+
+export function recordSupplementalEvent(
+  slotId: number,
+  type: "QLTRACKER_SUPPLEMENTAL_END" | "QLTRACKER_SUPPLEMENTAL_START",
+  data: Record<string, unknown>,
+) {
+  const slot = getSlotDefinition(slotId);
+  const buffer = slotBuffers.get(slotId);
+  if (!slot || !buffer) {
+    return;
+  }
+
+  pushEvent(buffer, type, data);
+
+  const { matchId } = syncMatchContext(slot, buffer);
+  if (!matchId) {
+    return;
+  }
+
+  const eventIndex = ++buffer.nextEventIndex;
+  queueStatsRelay(buffer, slotId, matchId, {
+    data,
+    eventAt: new Date().toISOString(),
+    eventIndex,
+    source: "plugin",
+    type,
+  });
 }
 
 export function initializeZmqForActiveSlots() {

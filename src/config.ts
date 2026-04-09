@@ -19,6 +19,7 @@ const envSchema = z.object({
   QLX_OWNER_STEAM_ID: z.string().min(1),
   REALTIME_LIVE_CALLBACK_URL: z.string().url(),
   REALTIME_RESULT_CALLBACK_URL: z.string().url(),
+  REALTIME_STATS_CALLBACK_URL: z.string().url(),
   SLOTS_DIR: z.string().min(1).default("/var/lib/qltracker-provisioner/slots"),
 });
 
@@ -42,6 +43,7 @@ export const config = {
   qlxOwnerSteamId: parsed.QLX_OWNER_STEAM_ID,
   realtimeLiveCallbackUrl: parsed.REALTIME_LIVE_CALLBACK_URL,
   realtimeResultCallbackUrl: parsed.REALTIME_RESULT_CALLBACK_URL,
+  realtimeStatsCallbackUrl: parsed.REALTIME_STATS_CALLBACK_URL,
   slotsDir: parsed.SLOTS_DIR,
 };
 

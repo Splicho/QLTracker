@@ -96,7 +96,7 @@ export function buildServerCfg(
     `set sv_maxclients "${maxClients}"`,
     `set sv_mapPoolFile "${getMapPoolFile(teamSize)}"`,
     `set qlx_owner "${config.qlxOwnerSteamId}"`,
-    `set qlx_plugins "plugin_manager,essentials,ban,permission,workshop,branding,pickup_bridge,qltracker_sort,qltracker_admins,qltracker_rcon"`,
+    `set qlx_plugins "plugin_manager,essentials,ban,permission,workshop,branding,pickup_bridge,qltracker_stats_bridge,qltracker_sort,qltracker_admins,qltracker_rcon"`,
     `set qlx_database "Redis"`,
     `set qlx_redisAddress "127.0.0.1"`,
     `set qlx_redisDatabase "${slot.redisDb}"`,
@@ -113,6 +113,8 @@ export function buildServerCfg(
     `set qlx_pickupMetadataFile "${metadataFile}"`,
     `set qlx_pickupBridgeUrl "${metadata.callbackBaseUrl}"`,
     `set qlx_pickupBridgeToken "${metadata.callbackToken}"`,
+    `set qlx_pickupMatchId "${metadata.matchId}"`,
+    `set qlx_pickupStatsUrl "${metadata.callbackBaseUrl}/stats-supplemental"`,
     `set serverstartup "map ${metadata.finalMapKey} hoq_ca"`,
   ].join("\n");
 }
