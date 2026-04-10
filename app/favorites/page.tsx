@@ -1,25 +1,14 @@
-"use client";
+import type { Metadata } from "next";
+import { FavoritesPageClient } from "@/components/pages/favorites-page-client";
+import { createPageMetadata } from "@/lib/seo";
 
-import { FavoritesPage } from "@/components/pages/favorites-page";
-import { useLiveServers } from "@/hooks/use-live-servers";
-import { useServerInteractions } from "@/hooks/use-server-interactions";
+export const metadata: Metadata = createPageMetadata({
+  title: "Favorites",
+  path: "/favorites",
+  description:
+    "Track your favorite Quake Live servers on QLTracker and see live player counts across the servers you care about most.",
+});
 
 export default function FavoritesRoutePage() {
-  const { error, isLoading, isRefreshing, refetch, servers } = useLiveServers();
-  const interactions = useServerInteractions({});
-
-  return (
-    <>
-      <FavoritesPage
-        servers={servers}
-        isLoading={isLoading}
-        isRefreshing={isRefreshing}
-        error={error}
-        onRefresh={refetch}
-        onOpenServer={interactions.openServerDetails}
-        onJoinServer={interactions.requestJoin}
-      />
-      {interactions.overlays}
-    </>
-  );
+  return <FavoritesPageClient />;
 }

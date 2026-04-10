@@ -19,3 +19,11 @@ To use the components in your app, import them as follows:
 ```tsx
 import { Button } from "@/components/ui/button";
 ```
+
+## Analytics
+
+Google Analytics 4 is enabled when `NEXT_PUBLIC_GA_MEASUREMENT_ID` is set.
+
+```bash
+NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
+```
