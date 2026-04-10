@@ -3,16 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  ArrowLeft,
   BellRing,
   LayoutDashboard,
+  LogOut,
   Newspaper,
-  PanelLeft,
   Server,
   Settings2,
 } from "lucide-react";
 
 import type { PickupPlayerDto } from "@/lib/server/pickup";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -42,37 +42,22 @@ const NAV_ITEMS = [
 
 export function AdminShell({
   children,
-  viewer,
+  viewer: _viewer,
 }: {
   children: React.ReactNode;
   viewer: PickupPlayerDto;
 }) {
   const pathname = usePathname();
-  const initials =
-    viewer.personaName
-      .split(/\s+/)
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((value) => value[0]?.toUpperCase() ?? "")
-      .join("") || "QA";
 
   return (
     <SidebarProvider defaultOpen={true}>
       <Sidebar collapsible="icon" variant="inset">
-        <SidebarHeader className="gap-4 p-3">
-          <div className="flex items-center gap-3 rounded-lg border border-sidebar-border bg-sidebar-accent/40 px-3 py-3">
-            <div className="flex size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <PanelLeft className="size-4" />
-            </div>
-            <div className="min-w-0 group-data-[collapsible=icon]:hidden">
-              <p className="text-xs uppercase tracking-[0.22em] text-sidebar-foreground/60">
-                QLTracker
-              </p>
-              <p className="truncate text-sm font-semibold text-sidebar-foreground">
-                Pickup Admin
-              </p>
-            </div>
-          </div>
+        <SidebarHeader className="items-center p-3">
+          <img
+            alt="QLTracker"
+            className="size-8 object-contain"
+            src="/images/appicon.png"
+          />
         </SidebarHeader>
         <SidebarSeparator />
         <SidebarContent>
@@ -103,19 +88,27 @@ export function AdminShell({
         </SidebarContent>
         <SidebarSeparator />
         <SidebarFooter className="p-3">
-          <div className="flex items-center gap-3 rounded-lg border border-sidebar-border bg-sidebar-accent/30 px-3 py-3">
-            <Avatar>
-              <AvatarImage alt={viewer.personaName} src={viewer.avatarUrl ?? undefined} />
-              <AvatarFallback>{initials}</AvatarFallback>
-            </Avatar>
-            <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-              <p className="truncate text-sm font-medium text-sidebar-foreground">
-                {viewer.personaName}
-              </p>
-              <Button asChild className="mt-1 h-7 px-0 text-sidebar-foreground/60 hover:text-sidebar-foreground" variant="link">
-                <Link href="/admin/logout">Sign out</Link>
-              </Button>
-            </div>
+          <div className="flex flex-col gap-2 group-data-[collapsible=icon]:items-center">
+            <Button
+              asChild
+              className="h-10 w-full justify-start group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+              variant="outline"
+            >
+              <Link href="/servers">
+                <ArrowLeft />
+                <span className="group-data-[collapsible=icon]:hidden">Back to QLTracker</span>
+              </Link>
+            </Button>
+            <Button
+              asChild
+              className="h-10 w-full justify-start group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+              variant="destructive"
+            >
+              <Link href="/admin/logout">
+                <LogOut />
+                <span className="group-data-[collapsible=icon]:hidden">Logout</span>
+              </Link>
+            </Button>
           </div>
         </SidebarFooter>
         <SidebarRail />

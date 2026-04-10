@@ -2,7 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { ActionButton, Field, FieldInput, FieldTextArea } from "@/components/pickup-admin-fields";
+import {
+  ActionButton,
+  Field,
+  FieldDateTimePicker,
+  FieldInput,
+  FieldSelect,
+  FieldTextArea,
+} from "@/components/pickup-admin-fields";
 import {
   Button,
   Chip,
@@ -667,9 +674,8 @@ export function PickupAdminDashboard({
                         />
                       </Field>
                       <Field label="Starts at">
-                        <FieldInput
+                        <FieldDateTimePicker
                           disabled={isPending}
-                          type="datetime-local"
                           value={seasonForm.startsAt}
                           onChange={(value) =>
                             setSeasonForm((current) => ({ ...current, startsAt: value }))
@@ -677,32 +683,25 @@ export function PickupAdminDashboard({
                         />
                       </Field>
                       <Field label="Duration">
-                        <select
-                          className="h-12 rounded-2xl border border-white/10 bg-transparent px-4 text-sm text-white outline-none transition focus:border-accent"
+                        <FieldSelect
                           disabled={isPending}
+                          options={seasonPresetOptions.map((option) => ({
+                            label: option.label,
+                            value: option.key,
+                          }))}
                           value={seasonForm.durationPreset}
-                          onChange={(event) =>
+                          onChange={(value) =>
                             setSeasonForm((current) => ({
                               ...current,
-                              durationPreset: event.target.value as
-                                | "one_month"
-                                | "three_month"
-                                | "custom",
+                              durationPreset: value,
                             }))
                           }
-                        >
-                          {seasonPresetOptions.map((option) => (
-                            <option key={option.key} value={option.key}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
+                        />
                       </Field>
                       {seasonForm.durationPreset === "custom" ? (
                         <Field label="Ends at">
-                          <FieldInput
+                          <FieldDateTimePicker
                             disabled={isPending}
-                            type="datetime-local"
                             value={seasonForm.endsAt}
                             onChange={(value) =>
                               setSeasonForm((current) => ({ ...current, endsAt: value }))
@@ -711,23 +710,20 @@ export function PickupAdminDashboard({
                         </Field>
                       ) : null}
                       <Field label="Initial status">
-                        <select
-                          className="h-12 rounded-2xl border border-white/10 bg-transparent px-4 text-sm text-white outline-none transition focus:border-accent"
+                        <FieldSelect
                           disabled={isPending}
+                          options={seasonStatusOptions.map((option) => ({
+                            label: option.label,
+                            value: option.key,
+                          }))}
                           value={seasonForm.status}
-                          onChange={(event) =>
+                          onChange={(value) =>
                             setSeasonForm((current) => ({
                               ...current,
-                              status: event.target.value as "draft" | "active" | "completed",
+                              status: value,
                             }))
                           }
-                        >
-                          {seasonStatusOptions.map((option) => (
-                            <option key={option.key} value={option.key}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
+                        />
                       </Field>
                     </div>
 

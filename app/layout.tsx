@@ -1,4 +1,5 @@
 import { Inter } from "next/font/google"
+import { GoogleAnalytics } from "@next/third-parties/google";
 import { cookies } from "next/headers";
 
 import "./globals.css"
@@ -28,6 +29,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const googleAnalyticsId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim() ?? "";
   const cookieStore = await cookies();
   const initialThemeValue = cookieStore.get(THEME_COOKIE_NAME)?.value;
   const initialTheme = isTheme(initialThemeValue) ? initialThemeValue : "system";
@@ -64,6 +66,7 @@ export default async function RootLayout({
             <Toaster richColors position="bottom-right" />
           </AppQueryProvider>
         </ThemeProvider>
+        {googleAnalyticsId ? <GoogleAnalytics gaId={googleAnalyticsId} /> : null}
       </body>
     </html>
   )

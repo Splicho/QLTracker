@@ -1,21 +1,14 @@
-"use client";
+import type { Metadata } from "next";
+import { WatchlistPageClient } from "@/components/pages/watchlist-page-client";
+import { createPageMetadata } from "@/lib/seo";
 
-import { WatchlistPage } from "@/components/pages/watchlist-page";
-import { useLiveServers } from "@/hooks/use-live-servers";
-import { useServerInteractions } from "@/hooks/use-server-interactions";
+export const metadata: Metadata = createPageMetadata({
+  title: "Watchlist",
+  path: "/watchlist",
+  description:
+    "Follow tracked Quake Live players with the QLTracker watchlist and see when they are active across live servers.",
+});
 
 export default function WatchlistRoutePage() {
-  const { servers } = useLiveServers();
-  const interactions = useServerInteractions({});
-
-  return (
-    <>
-      <WatchlistPage
-        servers={servers}
-        onOpenServer={interactions.openServerDetails}
-        onJoinServer={interactions.requestJoin}
-      />
-      {interactions.overlays}
-    </>
-  );
+  return <WatchlistPageClient />;
 }

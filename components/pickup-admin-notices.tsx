@@ -2,7 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { ActionButton, Field, FieldTextArea } from "@/components/pickup-admin-fields";
+import {
+  ActionButton,
+  Field,
+  FieldSelect,
+  FieldTextArea,
+} from "@/components/pickup-admin-fields";
 import {
   Button,
   Input,
@@ -287,22 +292,16 @@ export function PickupAdminNotices({
                   </Field>
 
                   <Field label="Variant">
-                    <select
-                      className="h-12 rounded-2xl border border-white/10 bg-transparent px-4 text-sm text-white outline-none transition focus:border-accent"
+                    <FieldSelect
+                      options={variantOptions}
                       value={form.variant}
-                      onChange={(event) =>
+                      onChange={(value) =>
                         setForm((current) => ({
                           ...current,
-                          variant: event.target.value as NoticeVariant,
+                          variant: value,
                         }))
                       }
-                    >
-                      {variantOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
+                    />
                   </Field>
 
                   <div className="grid gap-4">

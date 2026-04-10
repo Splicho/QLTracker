@@ -4,7 +4,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
-import { ActionButton, Field, FieldInput } from "@/components/pickup-admin-fields";
+import {
+  ActionButton,
+  Field,
+  FieldDateTimePicker,
+  FieldInput,
+  FieldSelect,
+} from "@/components/pickup-admin-fields";
 import { NewsRichEditor } from "@/components/news-rich-editor";
 import {
   Button,
@@ -192,29 +198,25 @@ export function PickupAdminNewsEdit({
           </Field>
 
           <Field label="Category">
-            <select
-              className="h-12 rounded-2xl border border-white/10 bg-transparent px-4 text-sm text-white outline-none transition focus:border-accent"
+            <FieldSelect
               disabled={pendingAction !== null}
+              options={categoryOptions.map((option) => ({
+                label: option.label,
+                value: option.value,
+              }))}
               value={form.category}
-              onChange={(event) =>
+              onChange={(value) =>
                 setForm((current) => ({
                   ...current,
-                  category: event.target.value as typeof form.category,
+                  category: value,
                 }))
               }
-            >
-              {categoryOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            />
           </Field>
 
           <Field label="Publish date">
-            <FieldInput
+            <FieldDateTimePicker
               disabled={pendingAction !== null}
-              type="datetime-local"
               value={form.publishedAt}
               onChange={(value) => setForm((current) => ({ ...current, publishedAt: value }))}
             />
