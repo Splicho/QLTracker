@@ -1,0 +1,382 @@
+{
+  "navigation": {
+    "serverList": "Server 목록",
+    "favorites": "이름 *",
+    "watchlist": "추적",
+    "notifications": "공지사항",
+    "settings": "지원하다"
+  },
+  "common": {
+    "updated": "업데이트"
+  },
+  "header": {
+    "unknown": "이름 *",
+    "theme": {
+      "light": "빛 테마",
+      "dark": "어두운 테마",
+      "system": "시스템 테마"
+    }
+  },
+  "sidebar": {
+    "groupLabel": "QL 추적기",
+    "about": "QLTracker 소개"
+  },
+  "about": {
+    "version": "이름 *",
+    "author": "개발자",
+    "socials": "한국어",
+    "stack": "뚱 베어",
+    "repo": "로그아웃"
+  },
+  "notifications": {
+    "title": "Discord 알림",
+    "serviceUnavailable": "Notification service is unavailable in this build. Set `VITE_NOTIFICATION_API_URL` to enable Discord linking and delivery.",
+    "finishBrowser": "브라우저에서 Discord 링크 흐름을 완료하십시오.",
+    "loadingStatus": "로딩중...",
+    "account": "계좌정보",
+    "rules": "계정 정보",
+    "rulesSummary": "{{enabled}} active / {{total}} total",
+    "dmRefused": "QLTracker는 연결되지만 Discord는 여전히 DM 검사를 거부합니다. DM을 다시 테스트하는 설치 / 링크 흐름을 복원합니다.",
+    "relink": "링크 Discord",
+    "retryInstall": "Retry 설치 체크",
+    "disconnect": "연결하기",
+    "noAccount": "아직 연결된 Discord 계정 없음.",
+    "installLink": "Discord 연결",
+    "dialog": {
+      "editTitle": "Discord 알림",
+      "createTitle": "공지사항",
+      "descriptionWithServer": "Configure a Discord DM notification for {{server}}.",
+      "descriptionFallback": "이 서버에 대한 Discord DM 알림 구성.",
+      "enabled": "이름 *",
+      "enabledDescription": "이 규칙을 사용할 때만 DM을 보냅니다.",
+      "thresholdType": "Threshold 유형",
+      "thresholdPlaceholder": "임계 유형 선택",
+      "mode": {
+        "active_free_slots": {
+          "label": "게임 슬롯 왼쪽",
+          "description": "일치가 채우기 닫을 때, 전체 서버 슬롯 대신 총 활성 재생 슬롯을 사용하여."
+        },
+        "free_slots": {
+          "label": "무료 슬롯",
+          "description": "서버가이 많은 무료 슬롯이나 몇 가지가 있을 때 통지합니다."
+        },
+        "min_players": {
+          "label": "미니 선수",
+          "description": "서버가 적어도이 많은 플레이어에 도달 할 때 통지."
+        }
+      },
+      "totalPlayingSlots": "총 재생 슬롯",
+      "totalPlayingSlotsDescription": "팀 둘 다 결합해, per-team 크기 아닙니다. 4v4 서버의 경우, 8을 입력하십시오. 8v8 서버의 경우 16을 입력하십시오. 전체 서버 슬롯 수에서 분리됩니다.",
+      "minimumPlayerCount": "최소 플레이어 수",
+      "maximumActiveSlotsLeft": "최대 활성 슬롯 왼쪽",
+      "maximumFreeSlots": "최대 무료 슬롯",
+      "activeSlotsDescription": "This rule will evaluate against {{count}} total active playing slots.",
+      "serverSupportsDescription": "This server currently supports up to {{count}} players.",
+      "deleteRule": "삭제 규칙",
+      "saveChanges": "자주 묻는 질문",
+      "createRule": "규칙 만들기"
+    }
+  },
+  "serverList": {
+    "refresh": "지원하다",
+    "noServersMatch": "현재 필터와 일치하지 않습니다.",
+    "pageStatus": "Page {{current}} of {{total}}",
+    "table": {
+      "server": "계정 관리",
+      "location": "- 연혁",
+      "mode": "주요 특징",
+      "players": "계정 관리",
+      "ping": "핑거",
+      "actions": "팟캐스트"
+    },
+    "locationUnknown": "이름 *",
+    "modeUnknown": "이름 *",
+    "pingUnavailable": "사이트맵",
+    "passwordSaved": "비밀번호",
+    "passwordRequired": "비밀번호필수",
+    "notificationEnabled": "Discord 알림 활성화",
+    "actions": {
+      "notificationsPublicOnly": "공개 서버에만 알림이 있습니다.",
+      "connectDiscordFavorites": "알림 페이지에서 Discord를 연결하여 알림을 활성화합니다.",
+      "editNotification": "Discord 알림",
+      "notifyDiscord": "Discord에 통지",
+      "editFavorite": "자주 묻는 질문",
+      "removeFromFavorites": "자주 묻는 질문",
+      "addToFavorites": "자주 묻는 질문",
+      "copyAddress": "IP:Port 복사"
+    },
+    "drawer": {
+      "play": "뚱 베어",
+      "map": "맵",
+      "avgQeloTooltip": "이 서버에 평균 QElo",
+      "avgTrueskillTooltip": "이 서버의 평균 TSkill",
+      "topQeloTooltip": "이 서버에 가장 높은 QElo 플레이어",
+      "topTrueskillTooltip": "이 서버에 가장 높은 TSkill 플레이어",
+      "playersHeading": "계정 관리",
+      "player": "지원하다",
+      "points": "팟캐스트",
+      "qelo": "사이트맵",
+      "trueskill": "채용 정보",
+      "time": "(주)",
+      "watch": "추적",
+      "trackPlayer": "플레이어 추적",
+      "untrackPlayer": "워치리스트에서 제거",
+      "historyTitle": "기록",
+      "historyWindow": "지난 7일",
+      "historyLastSeen": "마지막 확인",
+      "historyPeakPlayers": "최대 플레이어 수",
+      "historyTimePopulated": "플레이어가 있던 시간",
+      "historyUnavailable": "서버 기록을 사용할 수 없습니다. 이 카드를 불러오려면 실시간 백엔드를 활성화하고 기록 엔드포인트를 배포하세요.",
+      "historyEmpty": "이 서버에는 아직 최근 기록이 없습니다.",
+      "lookupFailed": "Steam Player가 실패했습니다.",
+      "noPlayerData": "이 서버에 대한 플레이어 데이터 없음.",
+      "teams": {
+        "blue": "블루 팀",
+        "free": "무료 다운로드",
+        "players": "계정 관리",
+        "red": "레드 팀",
+        "spectators": "공지사항",
+        "unassigned": "지정되지 않음"
+      }
+    },
+    "favoriteDialog": {
+      "editTitle": "관련 기사",
+      "addTitle": "자주 묻는 질문",
+      "fallbackDescription": "이 서버에 로컬 즐겨찾기 목록에 추가합니다.",
+      "selectList": "자주 묻는 질문",
+      "listsUnavailable": "자주 묻는 질문 즐겨찾기에 추가하기.",
+      "remove": "기타 제품",
+      "saveChanges": "자주 묻는 질문",
+      "addToList": "기타 제품"
+    },
+    "passwordDialog": {
+      "title": "서버 비밀번호",
+      "descriptionWithServer": "Enter the password for {{server}}.",
+      "fallbackDescription": "이 서버에 대한 암호를 입력합니다.",
+      "inputPlaceholder": "서버 비밀번호",
+      "remember": "미래에 대한이 암호를 저장",
+      "join": "이름 *"
+    },
+    "toasts": {
+      "removedFromFavorites": "자주 묻는 질문.",
+      "notificationUpdated": "공지사항.",
+      "notificationCreated": "공지사항.",
+      "notificationRemoved": "알림 제거.",
+      "notificationSaveError": "알림 규칙을 저장할 수 없습니다.",
+      "notificationRemoveError": "알림 규칙을 제거 할 수 없습니다.",
+      "favoriteUpdated": "자주 묻는 질문.",
+      "addedToFavorites": "즐겨찾기에 추가.",
+      "serverAddressCopied": "IP:Port가 복사되었습니다.",
+      "serverAddressCopyError": "IP:Port를 복사할 수 없습니다."
+    }
+  },
+  "settings": {
+    "title": "지원하다",
+    "startupTitle": "Windows에서 시작",
+    "startupDescription": "Windows에 로그인할 때 자동으로 QLTracker를 시작합니다.",
+    "startupSaving": "저축 시작 선호도...",
+    "unavailable": "설정은이 빌드에서 사용할 수 없습니다.",
+    "languageTitle": "* 이름",
+    "languageDescription": "QLTracker 전체에서 사용할 언어를 선택하세요.",
+    "languagePlaceholder": "한국어",
+    "discordPresenceTitle": "Discord 활동 상태",
+    "discordPresenceDescription": "앱을 둘러보는 동안 QLTracker를 Discord 활동으로 표시합니다.",
+    "discordPresenceServerTitle": "현재 서버 정보 표시",
+    "discordPresenceServerDescription": "QLTracker가 서버를 실행하면 서버 이름, 맵, 모드, 플레이어 정보를 Discord 활동에 포함합니다.",
+    "discordPresenceSteamIdTitle": "실시간 서버 추적용 SteamID64",
+    "discordPresenceSteamIdDescription": "선택 사항입니다. SteamID64를 추가하면 Quake Live 안에서 서버를 바꿔도 Discord에 현재 들어가 있는 서버를 올바르게 표시할 수 있습니다.",
+    "discordPresenceSteamIdPlaceholder": "7656119...",
+    "sections": {
+      "general": "일반",
+      "generalDescription": "언어 및 핵심 앱 기본 설정.",
+      "startupTray": "시작 및 트레이",
+      "startupTrayDescription": "시작 동작, 트레이 모드 및 창 처리.",
+      "desktopAlerts": "데스크톱 알림",
+      "desktopAlertsDescription": "추적된 플레이어 및 즐겨찾는 서버에 대한 기본 알림.",
+      "notifications": "알림 및 불일치",
+      "notificationsDescription": "Discord 계정 연결 및 알림 규칙 액세스.",
+      "discordPresence": "불화의 존재",
+      "discordPresenceDescription": "QLTracker가 열려 있는 동안 Discord의 풍부한 존재감을 느껴보세요."
+    },
+    "backToApp": "앱으로 돌아가기",
+    "trayModeTitle": "트레이 모드",
+    "trayModeDescription": "트레이 아이콘과 빠른 작업을 통해 QLTracker를 백그라운드에서 계속 실행하세요.",
+    "closeToTrayTitle": "트레이 창 닫기",
+    "closeToTrayDescription": "메인 창을 닫을 때 종료하는 대신 QLTracker를 숨기십시오.",
+    "startMinimizedTitle": "트레이로 최소화된 상태로 시작",
+    "startMinimizedDescription": "트레이 아이콘에서 복원할 때까지 백그라운드에서 QLTracker를 실행하십시오.",
+    "desktopAlertsTitle": "데스크톱 알림",
+    "desktopAlertsDescription": "추적된 플레이어와 즐겨찾는 서버에 대한 기본 데스크톱 알림을 보냅니다.",
+    "desktopAlertsPausedTitle": "데스크톱 알림 일시중지",
+    "desktopAlertsPausedDescription": "경고 규칙을 변경하지 않고 모든 데스크톱 경고를 일시적으로 무음으로 설정합니다.",
+    "trackedPlayerAlertsTitle": "추적된 플레이어 알림",
+    "trackedPlayerAlertsDescription": "감시 중인 플레이어가 나타나거나 다른 서버로 이동하면 알림을 보냅니다. 실시간 백엔드가 필요합니다.",
+    "favoriteServerAlertsTitle": "즐겨찾는 서버 알림",
+    "favoriteServerAlertsDescription": "즐겨찾는 서버가 플레이어 임계값에 도달하면 알림을 보냅니다.",
+    "favoriteServerThresholdTitle": "선호하는 서버 플레이어 임계값",
+    "favoriteServerThresholdDescription": "즐겨찾는 서버가 이 플레이어 수를 초과하면 경고를 보냅니다.",
+    "favoriteServerThresholdPlaceholder": "플레이어",
+    "discordLinkTitle": "디스코드 계정 링크",
+    "discordLinkDescription": "Discord를 연결하여 DM 알림 전달 및 계정 상태를 관리하세요.",
+    "notificationsManageRulesTitle": "알림 규칙",
+    "notificationsManageRulesDescription": "서버별 Discord DM 규칙은 서버 목록에서 관리됩니다.",
+    "notificationsManageRulesHint": "서버를 열고 Discord 알림 작업을 사용하여 규칙을 생성하거나 편집하세요."
+  },
+  "language": {
+    "en": "English",
+    "de": "Deutsch",
+    "bg": "Български",
+    "ru": "Русский",
+    "uk": "Українська",
+    "hr": "Hrvatski",
+    "sr": "Српски",
+    "fr": "Français",
+    "it": "Italiano",
+    "et": "Eesti",
+    "nl": "Nederlands",
+    "fi": "Suomi",
+    "sv": "Svenska",
+    "hu": "Magyar",
+    "da": "Dansk",
+    "lv": "Latviešu",
+    "nb": "Norsk Bokmål",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ka": "ქართული",
+    "zh-Hant": "繁體中文",
+    "zh-Hans": "简体中文",
+    "es": "Español",
+    "pt-BR": "Português (Brasil)",
+    "pl": "Polski",
+    "ro": "Română",
+    "lt": "Lietuvių",
+    "cs": "Čeština"
+  },
+  "favorites": {
+    "lists": "이름 *",
+    "refresh": "지원하다",
+    "createList": "공지사항",
+    "createDialogTitle": "자주 묻는 질문",
+    "createDialogDescription": "저장된 서버를 구성하는 목록을 만듭니다.",
+    "listNamePlaceholder": "이름 *",
+    "playersTooltip": "총 라이브 플레이어 수",
+    "favoriteServers": "좋아하는 서버",
+    "savedServers_one": "{{count}} saved server",
+    "savedServers_other": "{{count}} saved servers",
+    "noLists": "아직 목록이 없습니다. 첫 번째 목록 만들기 시작.",
+    "noServers": "아직이 목록에 저장되지 않았습니다.",
+    "deleteList": "목록 삭제",
+    "deleteDialogTitle": "즐겨찾기 목록 삭제",
+    "deleteDialogDescription": "\"{{list}}\"을(를) 삭제할까요? 이 목록에만 저장된 서버는 즐겨찾기에서 제거됩니다.",
+    "deleteDialogCancel": "취소",
+    "toasts": {
+      "listDeleted": "\"{{list}}\"이(가) 삭제되었습니다."
+    }
+  },
+  "watchlist": {
+    "title": "플레이어 워치리스트",
+    "summary_one": "추적 중인 플레이어 {{count}}명 중 {{online}}명 온라인",
+    "summary_other": "추적 중인 플레이어 {{count}}명 중 {{online}}명 온라인",
+    "onlineCount": "{{count}}명 온라인",
+    "serviceUnavailableBadge": "실시간 상태를 사용할 수 없음",
+    "emptyTitle": "추적 중인 플레이어가 없습니다",
+    "emptyDescription": "플레이어가 어디에서 게임 중인지 확인하려면 서버 패널에서 플레이어를 추적하세요.",
+    "emptyHint": "아무 서버나 열고 SteamID가 확인된 플레이어 옆의 추적 버튼을 사용하세요.",
+    "offline": "오프라인",
+    "updatedUnavailable": "사용할 수 없음",
+    "statusOnline": "온라인",
+    "statusOffline": "오프라인",
+    "statusUnavailable": "사용할 수 없음",
+    "toasts": {
+      "tracked": "{{player}} 님을 워치리스트에 추가했습니다.",
+      "untracked": "{{player}} 님을 워치리스트에서 제거했습니다.",
+      "noteSaved": "{{player}} 메모를 저장했습니다.",
+      "noteCleared": "{{player}} 메모를 삭제했습니다.",
+      "steamIdCopied": "SteamID를 복사했습니다.",
+      "steamIdCopyError": "SteamID를 복사할 수 없습니다."
+    },
+    "columns": {
+      "player": "지원하다",
+      "status": "상태",
+      "server": "계정 관리",
+      "map": "맵",
+      "mode": "주요 특징",
+      "actions": "팟캐스트"
+    },
+    "noteDialog": {
+      "clear": "메모 지우기",
+      "description": "{{player}}에 대한 로컬 메모를 추가합니다.",
+      "hint": "메모는 이 기기에만 저장됩니다.",
+      "label": "메모",
+      "placeholder": "이 플레이어에 대한 메모를 추가하세요...",
+      "save": "메모 저장",
+      "title": "플레이어 메모"
+    },
+    "actions": {
+      "copySteamId": "SteamID 복사",
+      "editNote": "메모 편집",
+      "viewServer": "서버 보기"
+    }
+  },
+  "filters": {
+    "title": "필터링",
+    "expand": "확장 필터",
+    "collapse": "Collapse 필터",
+    "searchPlaceholder": "서버 이름",
+    "showFull": "전체보기",
+    "showEmpty": "쇼 빈",
+    "showFavorites": "자주 묻는 질문",
+    "clearAll": "모든 것",
+    "regions": {
+      "all": "모든 지역",
+      "eu": "·",
+      "na": "북아메리카",
+      "sa": "대한민국",
+      "za": "대한민국",
+      "apac": "아시아 태평양"
+    },
+    "visibility": {
+      "all": "모든 서버",
+      "public": "한국어",
+      "private": "한국어"
+    },
+    "modes": {
+      "all": "모든 모드",
+      "ca": "클랜 아레나",
+      "duel": "로드 중 ..",
+      "ffa": "모든 것",
+      "tdm": "팀 죽음",
+      "ctf": "사이트맵",
+      "ad": "공격 & 방어",
+      "dom": "뚱 베어",
+      "ft": "연락처",
+      "har": "인기 카테고리",
+      "race": "이름 *",
+      "rr": "레드 로버"
+    },
+    "rating": {
+      "title": "이름 *",
+      "description": "평균 QElo 또는 TSkill로 필터 서버.",
+      "systemPlaceholder": "등급 시스템",
+      "qelo": "사이트맵",
+      "trueskill": "채용 정보"
+    },
+    "maps": {
+      "all": "모든지도",
+      "selectedCount": "{{count}} maps selected",
+      "searchPlaceholder": "지도 검색...",
+      "empty": "지도가 없습니다."
+    },
+    "tags": {
+      "label": "이름 *",
+      "selectedCount": "{{count}}+ tags",
+      "none": "태그 선택 없음.",
+      "inputPlaceholder": "유형 태그 및 프레스 Enter"
+    }
+  },
+  "releaseNotes": {
+    "title": "{{버전}}의 새로운 기능",
+    "publishedOn": "게시됨 {{date}}",
+    "close": "닫기"
+  }
+}

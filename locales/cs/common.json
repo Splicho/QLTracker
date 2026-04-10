@@ -1,0 +1,382 @@
+{
+  "navigation": {
+    "serverList": "Seznam serverů",
+    "favorites": "Oblíbené",
+    "watchlist": "Sledování",
+    "notifications": "Oznámení",
+    "settings": "Nastavení"
+  },
+  "common": {
+    "updated": "Aktualizováno"
+  },
+  "header": {
+    "unknown": "Neznámé",
+    "theme": {
+      "light": "Téma světla",
+      "dark": "Tmavé téma",
+      "system": "Téma systému"
+    }
+  },
+  "sidebar": {
+    "groupLabel": "QLTracker",
+    "about": "O QLTracker"
+  },
+  "about": {
+    "version": "Verze",
+    "author": "Vývojář",
+    "socials": "Společnosti",
+    "stack": "Stack",
+    "repo": "Repo"
+  },
+  "notifications": {
+    "title": "Oznámení o nesplnění povinnosti",
+    "serviceUnavailable": "Notification service is unavailable in this build. Set `VITE_NOTIFICATION_API_URL` to enable Discord linking and delivery.",
+    "finishBrowser": "Dokončete Propojení Discord ve vašem prohlížeči.",
+    "loadingStatus": "Nahrávám status oznámení Discordu...",
+    "account": "Účet",
+    "rules": "Pravidla",
+    "rulesSummary": "{{enabled}} active / {{total}} total",
+    "dmRefused": "QLTracker je propojený, ale Discord stále odmítl šek DM. Znovu otestujte tok instalace / linky na DM.",
+    "relink": "Relink Discord",
+    "retryInstall": "Znovu nainstalovat kontrolu",
+    "disconnect": "Odpojení",
+    "noAccount": "Zatím žádný Discordův účet.",
+    "installLink": "Propojit Discord",
+    "dialog": {
+      "editTitle": "Upravit oznámení o nesouladu",
+      "createTitle": "Oznámení sporů",
+      "descriptionWithServer": "Configure a Discord DM notification for {{server}}.",
+      "descriptionFallback": "Nastavit oznámení Discord DM pro tento server.",
+      "enabled": "Povoleno",
+      "enabledDescription": "Vyšlete DM, dokud je toto pravidlo povoleno.",
+      "thresholdType": "Prahové hodnoty",
+      "thresholdPlaceholder": "Vybrat typ prahu",
+      "mode": {
+        "active_free_slots": {
+          "label": "Hra sloty vlevo",
+          "description": "Upozornit, když je zápas takhle blízko k plnění, pomocí celkové aktivní hrací sloty místo plné serverové sloty."
+        },
+        "free_slots": {
+          "label": "Volný sloty",
+          "description": "Upozornit, když server má tolik volných slotů nebo méně."
+        },
+        "min_players": {
+          "label": "Min přehrávače",
+          "description": "Upozornit, když server dosáhne alespoň tolik hráčů."
+        }
+      },
+      "totalPlayingSlots": "Celkové hrací časy",
+      "totalPlayingSlotsDescription": "Použijte oba týmy dohromady, ne velikost jednoho týmu. Pro server 4v4 zadejte 8. Pro server 8v8 zadejte 16. To je odděleno od plného počtu slotů serveru.",
+      "minimumPlayerCount": "Minimální počet hráčů",
+      "maximumActiveSlotsLeft": "Maximální aktivní sloty vlevo",
+      "maximumFreeSlots": "Maximální volné sloty",
+      "activeSlotsDescription": "This rule will evaluate against {{count}} total active playing slots.",
+      "serverSupportsDescription": "This server currently supports up to {{count}} players.",
+      "deleteRule": "Smazat pravidlo",
+      "saveChanges": "Uložit změny",
+      "createRule": "Vytvořit pravidlo"
+    }
+  },
+  "serverList": {
+    "refresh": "Obnovit",
+    "noServersMatch": "Žádné servery se neshodují se současnými filtry.",
+    "pageStatus": "Page {{current}} of {{total}}",
+    "table": {
+      "server": "Server",
+      "location": "Umístění",
+      "mode": "Režim",
+      "players": "Hráči",
+      "ping": "Ping",
+      "actions": "Akce"
+    },
+    "locationUnknown": "Neznámé",
+    "modeUnknown": "Neznámé",
+    "pingUnavailable": "N / A",
+    "passwordSaved": "Uložené heslo",
+    "passwordRequired": "Požadované heslo",
+    "notificationEnabled": "Povoleno oznámení sporů",
+    "actions": {
+      "notificationsPublicOnly": "Oznámení jsou k dispozici pouze pro veřejné servery.",
+      "connectDiscordFavorites": "Připojte Discord na stránce Oznámení, aby bylo možné oznámení.",
+      "editNotification": "Upravit oznámení o sporu",
+      "notifyDiscord": "Upozorňovat na discord",
+      "editFavorite": "Upravit oblíbené",
+      "removeFromFavorites": "Odstranit z oblíbených",
+      "addToFavorites": "Přidat do oblíbených",
+      "copyAddress": "Kopírovat IP:Port"
+    },
+    "drawer": {
+      "play": "Přehrát",
+      "map": "Mapa",
+      "avgQeloTooltip": "Průměr QElo na tomto serveru",
+      "avgTrueskillTooltip": "Průměrný TSkill na tomto serveru",
+      "topQeloTooltip": "Nejvyšší QElo přehrávač na tomto serveru",
+      "topTrueskillTooltip": "Nejvyšší TSkill přehrávač na tomto serveru",
+      "playersHeading": "Hráči",
+      "player": "Hráč",
+      "points": "Body",
+      "qelo": "QElo",
+      "trueskill": "TSkill",
+      "time": "Čas",
+      "watch": "Sledovat",
+      "trackPlayer": "Sledovat hráče",
+      "untrackPlayer": "Odebrat ze sledování",
+      "historyTitle": "Historie",
+      "historyWindow": "Posledních 7 dní",
+      "historyLastSeen": "Naposledy viděn",
+      "historyPeakPlayers": "Maximum hráčů",
+      "historyTimePopulated": "Doba obsazení",
+      "historyUnavailable": "Historie serveru není dostupná. Pro načtení této karty povol realtime backend a nasaď endpoint historie.",
+      "historyEmpty": "Pro tento server zatím není k dispozici žádná nedávná historie.",
+      "lookupFailed": "Vyhledávání parních přehrávačů selhalo.",
+      "noPlayerData": "Pro tento server žádná data.",
+      "teams": {
+        "blue": "Modrý tým",
+        "free": "Bez",
+        "players": "Hráči",
+        "red": "Červený tým",
+        "spectators": "Diváci",
+        "unassigned": "Nepřiděleno"
+      }
+    },
+    "favoriteDialog": {
+      "editTitle": "Upravit oblíbené",
+      "addTitle": "Přidat do oblíbených",
+      "fallbackDescription": "Přiřaďte tento server do jednoho z vašich oblíbených seznamů.",
+      "selectList": "Vybrat seznam",
+      "listsUnavailable": "Žádné oblíbené seznamy k dispozici. Vytvořit seznam na stránce Oblíbené jako první.",
+      "remove": "Odstranit",
+      "saveChanges": "Uložit změny",
+      "addToList": "Přidat do seznamu"
+    },
+    "passwordDialog": {
+      "title": "Heslo serveru",
+      "descriptionWithServer": "Enter the password for {{server}}.",
+      "fallbackDescription": "Zadejte heslo pro tento server.",
+      "inputPlaceholder": "Zadejte heslo serveru",
+      "remember": "Uložit toto heslo pro budoucí připojení",
+      "join": "Připojit"
+    },
+    "toasts": {
+      "removedFromFavorites": "Odstraněn z oblíbených.",
+      "notificationUpdated": "Oznámení aktualizováno.",
+      "notificationCreated": "Oznámení vytvořeno.",
+      "notificationRemoved": "Oznámení bylo zrušeno.",
+      "notificationSaveError": "Nelze uložit oznamovací pravidlo.",
+      "notificationRemoveError": "Nelze odstranit oznamovací pravidlo.",
+      "favoriteUpdated": "Oblíbené aktualizované.",
+      "addedToFavorites": "Přidáno k oblíbeným.",
+      "serverAddressCopied": "IP:Port zkopírován.",
+      "serverAddressCopyError": "IP:Port se nepodařilo zkopírovat."
+    }
+  },
+  "settings": {
+    "title": "Nastavení",
+    "startupTitle": "Zahájení na Windows",
+    "startupDescription": "Automaticky spustit QLTracker, když se přihlásíte do Windows.",
+    "startupSaving": "Uložení preferencí spuštění...",
+    "unavailable": "Nastavení je v této budově nedostupné.",
+    "languageTitle": "Jazyk",
+    "languageDescription": "Vyberte jazyk, který bude QLTracker používat v celé aplikaci.",
+    "languagePlaceholder": "Vybrat jazyk",
+    "discordPresenceTitle": "Aktivita na Discordu",
+    "discordPresenceDescription": "Zobrazit QLTracker jako vaši aktivitu na Discordu při procházení aplikace.",
+    "discordPresenceServerTitle": "Zobrazit podrobnosti o aktuálním serveru",
+    "discordPresenceServerDescription": "Když QLTracker spustí server, zahrňte do aktivity na Discordu název serveru, mapu, režim a hráče.",
+    "discordPresenceSteamIdTitle": "SteamID64 pro sledování aktuálního serveru",
+    "discordPresenceSteamIdDescription": "Volitelné. Přidej svůj SteamID64, aby Discord mohl zobrazit server, na kterém právě jsi, i když v Quake Live přepínáš mezi servery.",
+    "discordPresenceSteamIdPlaceholder": "7656119...",
+    "sections": {
+      "general": "Generál",
+      "generalDescription": "Předvolby jazyka a základní aplikace.",
+      "startupTray": "Spuštění a zásobník",
+      "startupTrayDescription": "Chování při spouštění, režim zásobníku a manipulace s oknem.",
+      "desktopAlerts": "Upozornění na ploše",
+      "desktopAlertsDescription": "Nativní upozornění pro sledované hráče a oblíbené servery.",
+      "notifications": "Oznámení a neshody",
+      "notificationsDescription": "Zrušte propojení účtů a přístup k pravidlům oznámení.",
+      "discordPresence": "Přítomnost nesouladu",
+      "discordPresenceDescription": "Když je otevřený QLTracker, rušte bohatou přítomnost."
+    },
+    "backToApp": "Zpět do aplikace",
+    "trayModeTitle": "Režim zásobníku",
+    "trayModeDescription": "Udržujte QLTracker spuštěný na pozadí pomocí ikony na hlavním panelu a rychlých akcí.",
+    "closeToTrayTitle": "Zavřete okno do zásobníku",
+    "closeToTrayDescription": "Skryjte QLTracker místo ukončení, když zavřete hlavní okno.",
+    "startMinimizedTitle": "Začněte minimalizováno do zásobníku",
+    "startMinimizedDescription": "Spusťte QLTracker na pozadí, dokud jej neobnovíte z ikony na hlavním panelu.",
+    "desktopAlertsTitle": "Upozornění na ploše",
+    "desktopAlertsDescription": "Odesílejte nativní upozornění na plochu pro sledované hráče a oblíbené servery.",
+    "desktopAlertsPausedTitle": "Pozastavit upozornění na ploše",
+    "desktopAlertsPausedDescription": "Dočasně ztište všechna upozornění na ploše, aniž byste změnili pravidla upozornění.",
+    "trackedPlayerAlertsTitle": "Upozornění na sledované hráče",
+    "trackedPlayerAlertsDescription": "Upozornit, když se sledovaný hráč objeví nebo se přesune na jiný server. Vyžaduje backend v reálném čase.",
+    "favoriteServerAlertsTitle": "Upozornění na oblíbené servery",
+    "favoriteServerAlertsDescription": "Upozornit, když oblíbený server dosáhne hranice vašeho hráče.",
+    "favoriteServerThresholdTitle": "Hranice oblíbeného hráče na serveru",
+    "favoriteServerThresholdDescription": "Poslat upozornění, když oblíbený server překročí tento počet hráčů.",
+    "favoriteServerThresholdPlaceholder": "Hráči",
+    "discordLinkTitle": "Odkaz na účet Discord",
+    "discordLinkDescription": "Připojte Discord a spravujte doručování oznámení DM a stav účtu.",
+    "notificationsManageRulesTitle": "Pravidla oznamování",
+    "notificationsManageRulesDescription": "Pravidla Discord DM specifická pro server jsou spravována ze seznamu serverů.",
+    "notificationsManageRulesHint": "Otevřete server a pomocí akce oznámení o neshodě vytvořte nebo upravte pravidlo."
+  },
+  "language": {
+    "en": "English",
+    "de": "Deutsch",
+    "bg": "Български",
+    "ru": "Русский",
+    "uk": "Українська",
+    "hr": "Hrvatski",
+    "sr": "Српски",
+    "fr": "Français",
+    "it": "Italiano",
+    "et": "Eesti",
+    "nl": "Nederlands",
+    "fi": "Suomi",
+    "sv": "Svenska",
+    "hu": "Magyar",
+    "da": "Dansk",
+    "lv": "Latviešu",
+    "nb": "Norsk Bokmål",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ka": "ქართული",
+    "zh-Hant": "繁體中文",
+    "zh-Hans": "简体中文",
+    "es": "Español",
+    "pt-BR": "Português (Brasil)",
+    "pl": "Polski",
+    "ro": "Română",
+    "lt": "Lietuvių",
+    "cs": "Čeština"
+  },
+  "favorites": {
+    "lists": "Seznamy",
+    "refresh": "Obnovit",
+    "createList": "Vytvořit seznam",
+    "createDialogTitle": "Vytvořit oblíbený seznam",
+    "createDialogDescription": "Vytvořte si seznam pro organizaci uložených serverů.",
+    "listNamePlaceholder": "Název seznamu",
+    "playersTooltip": "Celkem živých hráčů",
+    "favoriteServers": "Oblíbené servery",
+    "savedServers_one": "{{count}} saved server",
+    "savedServers_other": "{{count}} saved servers",
+    "noLists": "Zatím žádné seznamy. Vytvořte si svůj první seznam začít.",
+    "noServers": "V tomto seznamu ještě nejsou uloženy žádné servery.",
+    "deleteList": "Smazat seznam",
+    "deleteDialogTitle": "Smazat seznam oblíbených",
+    "deleteDialogDescription": "Smazat \"{{list}}\"? Servery uložené pouze v tomto seznamu budou odstraněny z oblíbených.",
+    "deleteDialogCancel": "Zrušit",
+    "toasts": {
+      "listDeleted": "Seznam \"{{list}}\" byl smazán."
+    }
+  },
+  "watchlist": {
+    "title": "Sledování hráčů",
+    "summary_one": "{{online}} online z {{count}} sledovaného hráče",
+    "summary_other": "{{online}} online z {{count}} sledovaných hráčů",
+    "onlineCount": "{{count}} online",
+    "serviceUnavailableBadge": "Živý stav není dostupný",
+    "emptyTitle": "Zatím žádní sledovaní hráči",
+    "emptyDescription": "Sleduj hráče z detailu serveru a měj přehled, kde právě hrají.",
+    "emptyHint": "Otevři libovolný server a použij tlačítko sledování vedle hráče s vyřešeným SteamID.",
+    "offline": "Offline",
+    "updatedUnavailable": "Nedostupné",
+    "statusOnline": "Online",
+    "statusOffline": "Offline",
+    "statusUnavailable": "Nedostupné",
+    "toasts": {
+      "tracked": "{{player}} byl přidán do sledování.",
+      "untracked": "{{player}} byl odebrán ze sledování.",
+      "noteSaved": "Poznámka pro {{player}} byla uložena.",
+      "noteCleared": "Poznámka pro {{player}} byla odstraněna.",
+      "steamIdCopied": "SteamID bylo zkopírováno.",
+      "steamIdCopyError": "SteamID se nepodařilo zkopírovat."
+    },
+    "columns": {
+      "player": "Hráč",
+      "status": "Stav",
+      "server": "Server",
+      "map": "Mapa",
+      "mode": "Režim",
+      "actions": "Akce"
+    },
+    "noteDialog": {
+      "clear": "Smazat poznámku",
+      "description": "Přidejte místní poznámku pro {{player}}.",
+      "hint": "Poznámky jsou uloženy pouze na tomto zařízení.",
+      "label": "Poznámka",
+      "placeholder": "Přidejte poznámku o tomto hráči...",
+      "save": "Uložit poznámku",
+      "title": "Poznámka k hráči"
+    },
+    "actions": {
+      "copySteamId": "Kopírovat SteamID",
+      "editNote": "Upravit poznámku",
+      "viewServer": "Zobrazit server"
+    }
+  },
+  "filters": {
+    "title": "Filtry",
+    "expand": "Rozšiřovací filtry",
+    "collapse": "Filtry na kolaps",
+    "searchPlaceholder": "Název vyhledávacího serveru",
+    "showFull": "Zobrazit plnou",
+    "showEmpty": "Zobrazit prázdný",
+    "showFavorites": "Zobrazit oblíbené",
+    "clearAll": "Vyčistit všechny",
+    "regions": {
+      "all": "Všechny regiony",
+      "eu": "Evropa",
+      "na": "Severní Amerika",
+      "sa": "Jižní Amerika",
+      "za": "Jižní Afrika",
+      "apac": "Asie Tichomoří"
+    },
+    "visibility": {
+      "all": "Všechny servery",
+      "public": "Veřejná",
+      "private": "Soukromý"
+    },
+    "modes": {
+      "all": "Všechny režimy",
+      "ca": "Klan Arena",
+      "duel": "Duel",
+      "ffa": "Volný pro všechny",
+      "tdm": "Tým Deathmatch",
+      "ctf": "CTF",
+      "ad": "Zaútočit & bránit",
+      "dom": "Dominance",
+      "ft": "Stopnout štítek",
+      "har": "Harvester",
+      "race": "Závod",
+      "rr": "Red Rover"
+    },
+    "rating": {
+      "title": "Hodnocení",
+      "description": "Filtrační servery podle průměru QElo nebo TSkill.",
+      "systemPlaceholder": "Systém hodnocení",
+      "qelo": "QElo",
+      "trueskill": "TSkill"
+    },
+    "maps": {
+      "all": "Všechny mapy",
+      "selectedCount": "{{count}} maps selected",
+      "searchPlaceholder": "Hledat mapy...",
+      "empty": "Žádné mapy nalezeny."
+    },
+    "tags": {
+      "label": "Značky",
+      "selectedCount": "{{count}}+ tags",
+      "none": "Žádné značky.",
+      "inputPlaceholder": "Zadejte značku a stiskněte Enter"
+    }
+  },
+  "releaseNotes": {
+    "title": "Co je nového ve {{version}}",
+    "publishedOn": "Publikováno {{date}}",
+    "close": "Zavřít"
+  }
+}

@@ -18,6 +18,9 @@
 # production
 /build
 
+# AI
+.codex
+
 # misc
 .DS_Store
 *.pem

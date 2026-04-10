@@ -1,0 +1,382 @@
+{
+  "navigation": {
+    "serverList": "Server List",
+    "favorites": "Favoriter",
+    "watchlist": "Bevakning",
+    "notifications": "Meddelanden",
+    "settings": "Inställningar"
+  },
+  "common": {
+    "updated": "Uppdaterad"
+  },
+  "header": {
+    "unknown": "Okänd",
+    "theme": {
+      "light": "Ljus tema",
+      "dark": "Mörk tema",
+      "system": "Systemtema"
+    }
+  },
+  "sidebar": {
+    "groupLabel": "QLTracker",
+    "about": "Om QLTracker"
+  },
+  "about": {
+    "version": "Version",
+    "author": "Utvecklare",
+    "socials": "Sociala",
+    "stack": "Stack",
+    "repo": "Repo"
+  },
+  "notifications": {
+    "title": "Discord Notifications",
+    "serviceUnavailable": "Notification service is unavailable in this build. Set `VITE_NOTIFICATION_API_URL` to enable Discord linking and delivery.",
+    "finishBrowser": "Avsluta länkflödet Discord i din webbläsare.",
+    "loadingStatus": "Loading Discord Notification status...",
+    "account": "Kontokonto",
+    "rules": "Regler",
+    "rulesSummary": "{{enabled}} active / {{total}} total",
+    "dmRefused": "QLTracker är kopplad, men Discord vägrade fortfarande DM-kontrollen. Försök installera / länk flöde för att testa DM igen.",
+    "relink": "Relink Discord",
+    "retryInstall": "Retry Installera Check",
+    "disconnect": "Disconnect",
+    "noAccount": "Inget Discord-konto länkat ännu.",
+    "installLink": "Länka Discord",
+    "dialog": {
+      "editTitle": "Edit Discord Notification",
+      "createTitle": "Discord Notification",
+      "descriptionWithServer": "Configure a Discord DM notification for {{server}}.",
+      "descriptionFallback": "Konfigurera en Discord DM-meddelande för denna server.",
+      "enabled": "Enabled",
+      "enabledDescription": "Skicka bara DM medan denna regel är aktiverad.",
+      "thresholdType": "Tröskeltyp",
+      "thresholdPlaceholder": "Välj en tröskeltyp",
+      "mode": {
+        "active_free_slots": {
+          "label": "Spela slots kvar",
+          "description": "Meddela när en match är detta nära att fylla, med de totala aktiva spelautomaterna istället för full server slots."
+        },
+        "free_slots": {
+          "label": "Gratis slots",
+          "description": "Meddela när servern har många gratis slots eller färre."
+        },
+        "min_players": {
+          "label": "Mina spelare",
+          "description": "Meddela när servern når åtminstone så många spelare."
+        }
+      },
+      "totalPlayingSlots": "Totalt spelautomater",
+      "totalPlayingSlotsDescription": "Använd båda lagen i kombination, inte per-team storlek. För en 4v4-server, ange 8. För en 8v8-server, ange 16. Detta är separat från hela server slot räkna.",
+      "minimumPlayerCount": "Minsta spelarantal",
+      "maximumActiveSlotsLeft": "Maximala aktiva slots kvar",
+      "maximumFreeSlots": "Maximal gratis slots",
+      "activeSlotsDescription": "This rule will evaluate against {{count}} total active playing slots.",
+      "serverSupportsDescription": "This server currently supports up to {{count}} players.",
+      "deleteRule": "Radera regel",
+      "saveChanges": "Spara förändringar",
+      "createRule": "Skapa regel"
+    }
+  },
+  "serverList": {
+    "refresh": "Refresh",
+    "noServersMatch": "Inga servrar matchar nuvarande filter.",
+    "pageStatus": "Page {{current}} of {{total}}",
+    "table": {
+      "server": "Server",
+      "location": "Plats",
+      "mode": "Mode",
+      "players": "Spelare",
+      "ping": "Ping",
+      "actions": "Aktiviteter"
+    },
+    "locationUnknown": "Okänd",
+    "modeUnknown": "Okänd",
+    "pingUnavailable": "N/A",
+    "passwordSaved": "Lösenord sparat",
+    "passwordRequired": "Lösenord krävs",
+    "notificationEnabled": "Discord-meddelande aktiverat",
+    "actions": {
+      "notificationsPublicOnly": "Meddelanden är endast tillgängliga för offentliga servrar.",
+      "connectDiscordFavorites": "Anslut Discord på sidan Meddelanden för att aktivera meddelanden.",
+      "editNotification": "Edit Discord-meddelande",
+      "notifyDiscord": "Meddela på Discord",
+      "editFavorite": "Redigera favorit",
+      "removeFromFavorites": "Ta bort från favoriter",
+      "addToFavorites": "Lägg till favoriter",
+      "copyAddress": "Kopiera IP:Port"
+    },
+    "drawer": {
+      "play": "Spela",
+      "map": "Karta",
+      "avgQeloTooltip": "Genomsnittlig QElo på denna server",
+      "avgTrueskillTooltip": "Genomsnittlig TSKill på denna server",
+      "topQeloTooltip": "Högsta QElo-spelare på denna server",
+      "topTrueskillTooltip": "Högsta TSKill-spelare på denna server",
+      "playersHeading": "Spelare",
+      "player": "Spelare",
+      "points": "Poäng",
+      "qelo": "QElo",
+      "trueskill": "TSKill",
+      "time": "Tid",
+      "watch": "Följ",
+      "trackPlayer": "Följ spelare",
+      "untrackPlayer": "Ta bort från bevakningen",
+      "historyTitle": "Historik",
+      "historyWindow": "Senaste 7 dagarna",
+      "historyLastSeen": "Senast sedd",
+      "historyPeakPlayers": "Flest spelare",
+      "historyTimePopulated": "Tid med spelare",
+      "historyUnavailable": "Serverhistorik är inte tillgänglig. Aktivera realtime-backenden och distribuera historik-endpointen för att läsa in det här kortet.",
+      "historyEmpty": "Det finns ännu ingen aktuell historik för den här servern.",
+      "lookupFailed": "Steam player lookup misslyckades.",
+      "noPlayerData": "Ingen spelardata för denna server.",
+      "teams": {
+        "blue": "Blue Team",
+        "free": "Gratis gratis",
+        "players": "Spelare",
+        "red": "Red Team",
+        "spectators": "Spectatorer",
+        "unassigned": "Unassigned"
+      }
+    },
+    "favoriteDialog": {
+      "editTitle": "Redigera favorit",
+      "addTitle": "Lägg till favoriter",
+      "fallbackDescription": "Tilldela denna server till en av dina lokala favoritlistor.",
+      "selectList": "Välj en lista",
+      "listsUnavailable": "Inga favoritlistor tillgängliga. Skapa en lista på favoritsidan först.",
+      "remove": "Ta bort",
+      "saveChanges": "Spara förändringar",
+      "addToList": "Lägg till lista"
+    },
+    "passwordDialog": {
+      "title": "Server lösenord",
+      "descriptionWithServer": "Enter the password for {{server}}.",
+      "fallbackDescription": "Ange lösenordet för denna server.",
+      "inputPlaceholder": "Ange server lösenord",
+      "remember": "Spara detta lösenord för framtida anslutningar",
+      "join": "Gå med"
+    },
+    "toasts": {
+      "removedFromFavorites": "Tas bort från favoriter.",
+      "notificationUpdated": "Notifiering uppdaterad.",
+      "notificationCreated": "Anmälan skapad.",
+      "notificationRemoved": "Avisering bort.",
+      "notificationSaveError": "Kunde inte spara anmälningsregeln.",
+      "notificationRemoveError": "Kunde inte ta bort anmälningsregeln.",
+      "favoriteUpdated": "Favorit uppdaterad.",
+      "addedToFavorites": "Tillsatt till favoriter.",
+      "serverAddressCopied": "IP:Port kopierad.",
+      "serverAddressCopyError": "Kunde inte kopiera IP:Port."
+    }
+  },
+  "settings": {
+    "title": "Inställningar",
+    "startupTitle": "Starta på Windows",
+    "startupDescription": "Automatiskt starta QLTracker när du loggar in på Windows.",
+    "startupSaving": "Spara startpreferens...",
+    "unavailable": "Inställningen är inte tillgänglig i denna byggnad.",
+    "languageTitle": "Språkspråk",
+    "languageDescription": "Välj språket som QLTracker ska använda i hela appen.",
+    "languagePlaceholder": "Välj språk",
+    "discordPresenceTitle": "Discord-närvaro",
+    "discordPresenceDescription": "Visa QLTracker som din Discord-aktivitet medan du använder appen.",
+    "discordPresenceServerTitle": "Visa information om aktuell server",
+    "discordPresenceServerDescription": "När QLTracker startar en server, inkludera servernamn, karta, läge och spelare i din Discord-aktivitet.",
+    "discordPresenceSteamIdTitle": "SteamID64 för spårning av aktiv server",
+    "discordPresenceSteamIdDescription": "Valfritt. Lägg till ditt SteamID64 så att Discord kan visa servern du faktiskt är på, även om du byter server inne i Quake Live.",
+    "discordPresenceSteamIdPlaceholder": "7656119...",
+    "sections": {
+      "general": "Allmänt",
+      "generalDescription": "Språk och grundläggande apppreferenser.",
+      "startupTray": "Startup & Tray",
+      "startupTrayDescription": "Startbeteende, fackläge och fönsterhantering.",
+      "desktopAlerts": "Skrivbordsvarningar",
+      "desktopAlertsDescription": "Inbyggda aviseringar för spårade spelare och favoritservrar.",
+      "notifications": "Meddelanden och discord",
+      "notificationsDescription": "Discord-kontolänkning och aviseringsregelåtkomst.",
+      "discordPresence": "Discord närvaro",
+      "discordPresenceDescription": "Discord rik närvaro medan QLTracker är öppen."
+    },
+    "backToApp": "Tillbaka till appen",
+    "trayModeTitle": "Fackläge",
+    "trayModeDescription": "Håll QLTracker igång i bakgrunden med en fackikon och snabba åtgärder.",
+    "closeToTrayTitle": "Stäng fönstret till facket",
+    "closeToTrayDescription": "Göm QLTracker istället för att avsluta när du stänger huvudfönstret.",
+    "startMinimizedTitle": "Börja minimeras till facket",
+    "startMinimizedDescription": "Starta QLTracker i bakgrunden tills du återställer den från ikonen i fältet.",
+    "desktopAlertsTitle": "Skrivbordsvarningar",
+    "desktopAlertsDescription": "Skicka inbyggda skrivbordsaviseringar för spårade spelare och favoritservrar.",
+    "desktopAlertsPausedTitle": "Pausa skrivbordsvarningar",
+    "desktopAlertsPausedDescription": "Stäng tillfälligt av alla skrivbordsvarningar utan att ändra dina varningsregler.",
+    "trackedPlayerAlertsTitle": "Spårade spelarvarningar",
+    "trackedPlayerAlertsDescription": "Meddela när en bevakad spelare dyker upp eller flyttar till en annan server. Kräver realtidsbackend.",
+    "favoriteServerAlertsTitle": "Favoritservervarningar",
+    "favoriteServerAlertsDescription": "Meddela när en favoritserver når din spelartröskel.",
+    "favoriteServerThresholdTitle": "Favorit serverspelare tröskel",
+    "favoriteServerThresholdDescription": "Skicka en varning när en favoritserver passerar detta spelarantal.",
+    "favoriteServerThresholdPlaceholder": "Spelare",
+    "discordLinkTitle": "Discord-kontolänk",
+    "discordLinkDescription": "Anslut Discord för att hantera leverans av DM-aviseringar och kontostatus.",
+    "notificationsManageRulesTitle": "Regler för anmälan",
+    "notificationsManageRulesDescription": "Serverspecifika Discord DM-regler hanteras från serverlistan.",
+    "notificationsManageRulesHint": "Öppna en server och använd Discord-aviseringsåtgärden för att skapa eller redigera en regel."
+  },
+  "language": {
+    "en": "English",
+    "de": "Deutsch",
+    "bg": "Български",
+    "ru": "Русский",
+    "uk": "Українська",
+    "hr": "Hrvatski",
+    "sr": "Српски",
+    "fr": "Français",
+    "it": "Italiano",
+    "et": "Eesti",
+    "nl": "Nederlands",
+    "fi": "Suomi",
+    "sv": "Svenska",
+    "hu": "Magyar",
+    "da": "Dansk",
+    "lv": "Latviešu",
+    "nb": "Norsk Bokmål",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ka": "ქართული",
+    "zh-Hant": "繁體中文",
+    "zh-Hans": "简体中文",
+    "es": "Español",
+    "pt-BR": "Português (Brasil)",
+    "pl": "Polski",
+    "ro": "Română",
+    "lt": "Lietuvių",
+    "cs": "Čeština"
+  },
+  "favorites": {
+    "lists": "Listor",
+    "refresh": "Refresh",
+    "createList": "Skapa lista",
+    "createDialogTitle": "Skapa favoritlista",
+    "createDialogDescription": "Skapa en lista för att organisera dina sparade servrar.",
+    "listNamePlaceholder": "List namn",
+    "playersTooltip": "Totalt antal livespelare",
+    "favoriteServers": "Favoritservrar",
+    "savedServers_one": "{{count}} saved server",
+    "savedServers_other": "{{count}} saved servers",
+    "noLists": "Inga listor ännu. Skapa din första lista för att komma igång.",
+    "noServers": "Inga servrar sparade i denna lista ännu.",
+    "deleteList": "Ta bort lista",
+    "deleteDialogTitle": "Ta bort favoritlista",
+    "deleteDialogDescription": "Ta bort \"{{list}}\"? Servrar som bara är sparade i den här listan tas bort från Favoriter.",
+    "deleteDialogCancel": "Avbryt",
+    "toasts": {
+      "listDeleted": "\"{{list}}\" togs bort."
+    }
+  },
+  "watchlist": {
+    "title": "Spelarbevakning",
+    "summary_one": "{{online}} online av {{count}} bevakad spelare",
+    "summary_other": "{{online}} online av {{count}} bevakade spelare",
+    "onlineCount": "{{count}} online",
+    "serviceUnavailableBadge": "Live-status är inte tillgänglig",
+    "emptyTitle": "Inga bevakade spelare ännu",
+    "emptyDescription": "Följ spelare från serverpanelen för att se var de spelar.",
+    "emptyHint": "Öppna en valfri server och använd följ-knappen bredvid en spelare med löst SteamID.",
+    "offline": "Offline",
+    "updatedUnavailable": "Otillgänglig",
+    "statusOnline": "Online",
+    "statusOffline": "Offline",
+    "statusUnavailable": "Otillgänglig",
+    "toasts": {
+      "tracked": "{{player}} lades till i bevakningen.",
+      "untracked": "{{player}} togs bort från bevakningen.",
+      "noteSaved": "Anteckning sparad för {{player}}.",
+      "noteCleared": "Anteckning borttagen för {{player}}.",
+      "steamIdCopied": "SteamID kopierat.",
+      "steamIdCopyError": "Kunde inte kopiera SteamID."
+    },
+    "columns": {
+      "player": "Spelare",
+      "status": "Status",
+      "server": "Server",
+      "map": "Karta",
+      "mode": "Mode",
+      "actions": "Aktiviteter"
+    },
+    "noteDialog": {
+      "clear": "Rensa anteckning",
+      "description": "Lägg till en lokal anteckning för {{player}}.",
+      "hint": "Anteckningar sparas bara på den här enheten.",
+      "label": "Anteckning",
+      "placeholder": "Lägg till en anteckning om den här spelaren...",
+      "save": "Spara anteckning",
+      "title": "Spelaranteckning"
+    },
+    "actions": {
+      "copySteamId": "Kopiera SteamID",
+      "editNote": "Redigera anteckning",
+      "viewServer": "Visa server"
+    }
+  },
+  "filters": {
+    "title": "Filter",
+    "expand": "Expandera filter",
+    "collapse": "Kollapsfilter",
+    "searchPlaceholder": "Sök servernamn",
+    "showFull": "Visa full",
+    "showEmpty": "Visa Tom",
+    "showFavorites": "Visa favoriter",
+    "clearAll": "Tydliga alla",
+    "regions": {
+      "all": "Alla regioner",
+      "eu": "Europa",
+      "na": "Nordamerika",
+      "sa": "Sydamerika",
+      "za": "Sydafrika",
+      "apac": "Asia Pacific"
+    },
+    "visibility": {
+      "all": "Alla servrar",
+      "public": "Offentliga",
+      "private": "Privat privat"
+    },
+    "modes": {
+      "all": "Alla lägen",
+      "ca": "Clan Arena",
+      "duel": "Duell",
+      "ffa": "Gratis för alla",
+      "tdm": "Team Deathmatch",
+      "ctf": "CTF",
+      "ad": "Attack & Defend",
+      "dom": "Dominans",
+      "ft": "Freeze Tag",
+      "har": "Harvester",
+      "race": "Ras",
+      "rr": "Röd Rover"
+    },
+    "rating": {
+      "title": "Rating",
+      "description": "Filterservrar i genomsnitt QElo eller TSkill.",
+      "systemPlaceholder": "Rating system",
+      "qelo": "QElo",
+      "trueskill": "TSKill"
+    },
+    "maps": {
+      "all": "Alla kartor",
+      "selectedCount": "{{count}} maps selected",
+      "searchPlaceholder": "Sök kartor...",
+      "empty": "Inga kartor hittades."
+    },
+    "tags": {
+      "label": "Taggar",
+      "selectedCount": "{{count}}+ tags",
+      "none": "Inga taggar valda.",
+      "inputPlaceholder": "Typ tag och tryck på Enter"
+    }
+  },
+  "releaseNotes": {
+    "title": "Vad är nytt i {{version}}",
+    "publishedOn": "Publicerad {{date}}",
+    "close": "Stäng"
+  }
+}

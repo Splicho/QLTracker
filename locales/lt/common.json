@@ -1,0 +1,382 @@
+{
+  "navigation": {
+    "serverList": "Serverių sąrašas",
+    "favorites": "Mėgiamos",
+    "watchlist": "Stebėjimas",
+    "notifications": "Pranešimai",
+    "settings": "Nustatymai"
+  },
+  "common": {
+    "updated": "Atnaujinta"
+  },
+  "header": {
+    "unknown": "Nežinoma",
+    "theme": {
+      "light": "Lengva tema",
+      "dark": "Tamsi tema",
+      "system": "Sistemos tema"
+    }
+  },
+  "sidebar": {
+    "groupLabel": "QLTracker",
+    "about": "Name"
+  },
+  "about": {
+    "version": "Versija",
+    "author": "Kūrėjas",
+    "socials": "Social",
+    "stack": "Stock",
+    "repo": "RPFP"
+  },
+  "notifications": {
+    "title": "@ info: whatsthis",
+    "serviceUnavailable": "Notification service is unavailable in this build. Set `VITE_NOTIFICATION_API_URL` to enable Discord linking and delivery.",
+    "finishBrowser": "Užbaigti Diskordo ryšio srautą naršyklėje.",
+    "loadingStatus": "@ info: whatsthis.",
+    "account": "Paskyra",
+    "rules": "Taisyklės",
+    "rulesSummary": "{{enabled}} active / {{total}} total",
+    "dmRefused": "Name @ info: whatsthis.",
+    "relink": "@ action: button",
+    "retryInstall": "Bandyti iš naujo įdiegti tikrinimą",
+    "disconnect": "NAME OF TRANSLATORS",
+    "noAccount": "Naršymo sąskaitos dar nėra susietos.",
+    "installLink": "Susieti Discord",
+    "dialog": {
+      "editTitle": "@ info: whatsthis",
+      "createTitle": "Pranešimas apie skirtumus",
+      "descriptionWithServer": "Configure a Discord DM notification for {{server}}.",
+      "descriptionFallback": "Name.",
+      "enabled": "Įjungtas",
+      "enabledDescription": "Siųsti DM, kai ši taisyklė yra įjungta.",
+      "thresholdType": "Riba",
+      "thresholdPlaceholder": "Parinkite slenksčio tipą",
+      "mode": {
+        "active_free_slots": {
+          "label": "Kairė žaidimų automatai",
+          "description": "Pasakykite, kai rungtynės yra tai arti užpildyti, naudojant bendrą aktyvaus žaisti žaidimų automatai vietoj visą serverio žaidimų automatai."
+        },
+        "free_slots": {
+          "label": "Nemokami laiko tarpsniai",
+          "description": "Pasakykite, kai serveris turi šį daug nemokamai žaidimų automatai arba mažiau."
+        },
+        "min_players": {
+          "label": "Min grotuvai",
+          "description": "Pasakykite, kai serveris pasiekia bent šį daug žaidėjų."
+        }
+      },
+      "totalPlayingSlots": "Viso žaidimų automatai",
+      "totalPlayingSlotsDescription": "Naudokite abi komandas kartu, ne komandos dydis. @ info: whatsthis 8 v8 serveriui įveskite 16. NAME OF TRANSLATORS.",
+      "minimumPlayerCount": "Mažiausias žaidėjų skaičius",
+      "maximumActiveSlotsLeft": "Ilgiausias paliktas aktyvusis laiko tarpsnis",
+      "maximumFreeSlots": "Didžiausias laisvas laiko tarpsnis",
+      "activeSlotsDescription": "This rule will evaluate against {{count}} total active playing slots.",
+      "serverSupportsDescription": "This server currently supports up to {{count}} players.",
+      "deleteRule": "Trinti taisyklę",
+      "saveChanges": "Įrašyti pakeitimus",
+      "createRule": "Sukurti taisyklę"
+    }
+  },
+  "serverList": {
+    "refresh": "Atnaujinti",
+    "noServersMatch": "Nr serveriai atitinka esamus filtrus.",
+    "pageStatus": "Page {{current}} of {{total}}",
+    "table": {
+      "server": "Serveris",
+      "location": "Vieta",
+      "mode": "Ręžimas",
+      "players": "Žaidėjai",
+      "ping": "Ping",
+      "actions": "Veiksmai"
+    },
+    "locationUnknown": "Nežinoma",
+    "modeUnknown": "Nežinoma",
+    "pingUnavailable": "NETAIKOMA",
+    "passwordSaved": "Slaptažodis įrašytas",
+    "passwordRequired": "Slaptažodis reikalingas",
+    "notificationEnabled": "@ info: whatsthis",
+    "actions": {
+      "notificationsPublicOnly": "Pranešimai prieinami tik viešiesiems serveriams.",
+      "connectDiscordFavorites": "Prijunkite atskirtį pranešimų puslapyje, kad būtų galima pranešimus.",
+      "editNotification": "@ info: whatsthis",
+      "notifyDiscord": "@ info: tooltip",
+      "editFavorite": "Keisti mėgstamą",
+      "removeFromFavorites": "Pašalinti iš mėgstamiausių",
+      "addToFavorites": "Pridėti prie mėgstamiausių",
+      "copyAddress": "Kopijuoti IP:Port"
+    },
+    "drawer": {
+      "play": "Groti",
+      "map": "Žemėlapis",
+      "avgQeloTooltip": "Name",
+      "avgTrueskillTooltip": "Vidutinis TSmurt šiame serveryje",
+      "topQeloTooltip": "Aukščiausias QElo grotuvas šiame serveryje",
+      "topTrueskillTooltip": "Aukščiausias TSslave grotuvas šiame serveryje",
+      "playersHeading": "Žaidėjai",
+      "player": "Žaidėjas",
+      "points": "Taškai",
+      "qelo": "QElo",
+      "trueskill": "Tslave",
+      "time": "Laikas",
+      "watch": "Stebėti",
+      "trackPlayer": "Stebėti žaidėją",
+      "untrackPlayer": "Pašalinti iš stebimųjų sąrašo",
+      "historyTitle": "Istorija",
+      "historyWindow": "Paskutinės 7 dienos",
+      "historyLastSeen": "Paskutinį kartą matytas",
+      "historyPeakPlayers": "Didžiausias žaidėjų skaičius",
+      "historyTimePopulated": "Laikas su žaidėjais",
+      "historyUnavailable": "Serverio istorija nepasiekiama. Įjunk realtime posistemę ir įdiek istorijos endpointą, kad ši kortelė būtų įkelta.",
+      "historyEmpty": "Šiam serveriui dar nėra naujausios istorijos.",
+      "lookupFailed": "Garo grotuvo peržiūra nepavyko.",
+      "noPlayerData": "Nėra grotuvo duomenų šiam serveriui.",
+      "teams": {
+        "blue": "Mėlyna komanda",
+        "free": "Nemokamai",
+        "players": "Žaidėjai",
+        "red": "Raudonoji komanda",
+        "spectators": "Spektoriai",
+        "unassigned": "Nekoordinuota"
+      }
+    },
+    "favoriteDialog": {
+      "editTitle": "Keisti mėgiamą",
+      "addTitle": "Pridėti į mėgiamus",
+      "fallbackDescription": "Priskirkite šį serverį į vieną iš savo mėgstamų sąrašų.",
+      "selectList": "Parinkite sąrašą",
+      "listsUnavailable": "Nėra mėgstamiausių sąrašų. Sukurti sąrašą Favorites puslapyje pirmas.",
+      "remove": "Pašalinti",
+      "saveChanges": "Įrašyti pakeitimus",
+      "addToList": "Pridėti į sąrašą"
+    },
+    "passwordDialog": {
+      "title": "Serverio slaptažodis",
+      "descriptionWithServer": "Enter the password for {{server}}.",
+      "fallbackDescription": "Įveskite šio serverio slaptažodį.",
+      "inputPlaceholder": "Įveskite serverio slaptažodį",
+      "remember": "Įrašyti šį slaptažodį būsimiems prisijungimams",
+      "join": "Prisijungti"
+    },
+    "toasts": {
+      "removedFromFavorites": "Pašalinti iš mėgstamiausių.",
+      "notificationUpdated": "Pranešimas atnaujintas.",
+      "notificationCreated": "Pranešimas sukurtas.",
+      "notificationRemoved": "Pranešimas pašalintas.",
+      "notificationSaveError": "Nepavyko išsaugoti pranešimo taisyklės.",
+      "notificationRemoveError": "Nepavyko pašalinti pranešimo taisyklės.",
+      "favoriteUpdated": "Mėgstamiausia atnaujinta.",
+      "addedToFavorites": "Pridėta prie mėgstamiausių.",
+      "serverAddressCopied": "IP:Port nukopijuotas.",
+      "serverAddressCopyError": "Nepavyko nukopijuoti IP:Port."
+    }
+  },
+  "settings": {
+    "title": "Nustatymai",
+    "startupTitle": "Startuolis languose",
+    "startupDescription": "Automatiškai paleisti QLTracker, kai prisijungsite prie Windows.",
+    "startupSaving": "Taupoma paleidimo pirmenybė...",
+    "unavailable": "@ info: whatsthis.",
+    "languageTitle": "Kalba",
+    "languageDescription": "Pasirinkite kalbą, kurią QLTracker naudos visoje programoje.",
+    "languagePlaceholder": "Pasirinkite kalbą",
+    "discordPresenceTitle": "Discord veikla",
+    "discordPresenceDescription": "Rodyti QLTracker kaip jūsų Discord veiklą, kol naršote programėlę.",
+    "discordPresenceServerTitle": "Rodyti dabartinio serverio informaciją",
+    "discordPresenceServerDescription": "Kai QLTracker paleidžia serverį, įtraukite serverio pavadinimą, žemėlapį, režimą ir žaidėjus į savo Discord veiklą.",
+    "discordPresenceSteamIdTitle": "SteamID64 dabartinio serverio sekimui",
+    "discordPresenceSteamIdDescription": "Neprivaloma. Pridėk savo SteamID64, kad Discord galėtų rodyti serverį, kuriame iš tikrųjų esi, net jei Quake Live viduje perjungi serverius.",
+    "discordPresenceSteamIdPlaceholder": "7656119...",
+    "sections": {
+      "general": "Generolas",
+      "generalDescription": "Kalbos ir pagrindinės programos nuostatos.",
+      "startupTray": "Paleidimas ir dėklas",
+      "startupTrayDescription": "Paleidimo elgsena, dėklo režimas ir langų tvarkymas.",
+      "desktopAlerts": "Darbalaukio įspėjimai",
+      "desktopAlertsDescription": "Vietiniai pranešimai stebimiems žaidėjams ir mėgstamiems serveriams.",
+      "notifications": "Pranešimai ir nesutarimai",
+      "notificationsDescription": "Nesuderinamas paskyros susiejimas ir prieiga prie pranešimų taisyklės.",
+      "discordPresence": "Nesantaika buvimas",
+      "discordPresenceDescription": "Discord turtingas buvimas, kai QLTracker veikia."
+    },
+    "backToApp": "Grįžti į programą",
+    "trayModeTitle": "Dėklo režimas",
+    "trayModeDescription": "Palaikykite QLTracker veikimą fone naudodami dėklo piktogramą ir greitus veiksmus.",
+    "closeToTrayTitle": "Uždarykite langą prie dėklo",
+    "closeToTrayDescription": "Paslėpkite QLTracker, o ne išeikite, kai uždarote pagrindinį langą.",
+    "startMinimizedTitle": "Pradėti sumažinta iki dėklo",
+    "startMinimizedDescription": "Paleiskite QLTracker fone, kol atkursite jį naudodami dėklo piktogramą.",
+    "desktopAlertsTitle": "Darbalaukio įspėjimai",
+    "desktopAlertsDescription": "Siųskite vietinius darbalaukio pranešimus apie sekamus žaidėjus ir mėgstamus serverius.",
+    "desktopAlertsPausedTitle": "Pristabdyti darbalaukio įspėjimus",
+    "desktopAlertsPausedDescription": "Laikinai nutildykite visus darbalaukio įspėjimus nekeisdami įspėjimų taisyklių.",
+    "trackedPlayerAlertsTitle": "Stebimi žaidėjo įspėjimai",
+    "trackedPlayerAlertsDescription": "Pranešti, kai stebimas žaidėjas pasirodo arba persikelia į kitą serverį. Reikia realaus laiko backend.",
+    "favoriteServerAlertsTitle": "Mėgstamiausi serverio įspėjimai",
+    "favoriteServerAlertsDescription": "Praneškite, kai mėgstamiausias serveris pasiekia jūsų žaidėjo slenkstį.",
+    "favoriteServerThresholdTitle": "Mėgstamiausio serverio žaidėjo slenkstis",
+    "favoriteServerThresholdDescription": "Siųsti įspėjimą, kai mėgstamas serveris peržengia šį žaidėjų skaičių.",
+    "favoriteServerThresholdPlaceholder": "Žaidėjai",
+    "discordLinkTitle": "„Discord“ paskyros nuoroda",
+    "discordLinkDescription": "Prijunkite Discord, kad galėtumėte valdyti DM pranešimų pristatymą ir paskyros būseną.",
+    "notificationsManageRulesTitle": "Pranešimų taisyklės",
+    "notificationsManageRulesDescription": "Konkrečiam serveriui skirtos „Discord DM“ taisyklės valdomos iš serverių sąrašo.",
+    "notificationsManageRulesHint": "Atidarykite serverį ir naudokite „Discord“ pranešimo veiksmą, kad sukurtumėte arba redaguotumėte taisyklę."
+  },
+  "language": {
+    "en": "English",
+    "de": "Deutsch",
+    "bg": "Български",
+    "ru": "Русский",
+    "uk": "Українська",
+    "hr": "Hrvatski",
+    "sr": "Српски",
+    "fr": "Français",
+    "it": "Italiano",
+    "et": "Eesti",
+    "nl": "Nederlands",
+    "fi": "Suomi",
+    "sv": "Svenska",
+    "hu": "Magyar",
+    "da": "Dansk",
+    "lv": "Latviešu",
+    "nb": "Norsk Bokmål",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ka": "ქართული",
+    "zh-Hant": "繁體中文",
+    "zh-Hans": "简体中文",
+    "es": "Español",
+    "pt-BR": "Português (Brasil)",
+    "pl": "Polski",
+    "ro": "Română",
+    "lt": "Lietuvių",
+    "cs": "Čeština"
+  },
+  "favorites": {
+    "lists": "Sąrašai",
+    "refresh": "Atnaujinti",
+    "createList": "Sukurti sąrašą",
+    "createDialogTitle": "Sukurti mėgiamų sąrašą",
+    "createDialogDescription": "@ info: whatsthis.",
+    "listNamePlaceholder": "Sąrašo pavadinimas",
+    "playersTooltip": "Iš viso gyvų žaidėjų",
+    "favoriteServers": "Mėgstamiausi serveriai",
+    "savedServers_one": "{{count}} saved server",
+    "savedServers_other": "{{count}} saved servers",
+    "noLists": "Dar nėra sąrašų. Sukurti savo pirmąjį sąrašą pradėti.",
+    "noServers": "Nr serveriai įrašyti šiame sąraše dar.",
+    "deleteList": "Ištrinti sąrašą",
+    "deleteDialogTitle": "Ištrinti mėgstamų sąrašą",
+    "deleteDialogDescription": "Ištrinti \"{{list}}\"? Serveriai, išsaugoti tik šiame sąraše, bus pašalinti iš mėgstamų.",
+    "deleteDialogCancel": "Atšaukti",
+    "toasts": {
+      "listDeleted": "\"{{list}}\" ištrintas."
+    }
+  },
+  "watchlist": {
+    "title": "Žaidėjų stebėjimo sąrašas",
+    "summary_one": "{{online}} prisijungęs iš {{count}} stebimo žaidėjo",
+    "summary_other": "{{online}} prisijungę iš {{count}} stebimų žaidėjų",
+    "onlineCount": "{{count}} prisijungę",
+    "serviceUnavailableBadge": "Tiesioginė būsena nepasiekiama",
+    "emptyTitle": "Dar nėra stebimų žaidėjų",
+    "emptyDescription": "Stebėk žaidėjus serverio skydelyje, kad matytum, kur jie žaidžia.",
+    "emptyHint": "Atidaryk bet kurį serverį ir naudok stebėjimo mygtuką šalia žaidėjo, kurio SteamID jau nustatytas.",
+    "offline": "Atsijungęs",
+    "updatedUnavailable": "Nepasiekiama",
+    "statusOnline": "Prisijungęs",
+    "statusOffline": "Atsijungęs",
+    "statusUnavailable": "Nepasiekiama",
+    "toasts": {
+      "tracked": "{{player}} pridėtas į stebėjimo sąrašą.",
+      "untracked": "{{player}} pašalintas iš stebėjimo sąrašo.",
+      "noteSaved": "Pastaba žaidėjui {{player}} išsaugota.",
+      "noteCleared": "Pastaba žaidėjui {{player}} pašalinta.",
+      "steamIdCopied": "SteamID nukopijuotas.",
+      "steamIdCopyError": "Nepavyko nukopijuoti SteamID."
+    },
+    "columns": {
+      "player": "Žaidėjas",
+      "status": "Būsena",
+      "server": "Serveris",
+      "map": "Žemėlapis",
+      "mode": "Ręžimas",
+      "actions": "Veiksmai"
+    },
+    "noteDialog": {
+      "clear": "Išvalyti pastabą",
+      "description": "Pridėkite vietinę pastabą žaidėjui {{player}}.",
+      "hint": "Pastabos saugomos tik šiame įrenginyje.",
+      "label": "Pastaba",
+      "placeholder": "Pridėkite pastabą apie šį žaidėją...",
+      "save": "Išsaugoti pastabą",
+      "title": "Žaidėjo pastaba"
+    },
+    "actions": {
+      "copySteamId": "Kopijuoti SteamID",
+      "editNote": "Redaguoti pastabą",
+      "viewServer": "Peržiūrėti serverį"
+    }
+  },
+  "filters": {
+    "title": "Filtrai",
+    "expand": "Filtrai",
+    "collapse": "Šaldymo filtrai",
+    "searchPlaceholder": "Paieškos serverio pavadinimas",
+    "showFull": "Rodyti visą",
+    "showEmpty": "Rodyti tuščią",
+    "showFavorites": "Rodyti mėgiamus",
+    "clearAll": "Išvalyti visus",
+    "regions": {
+      "all": "III PRIEDAS",
+      "eu": "Europa",
+      "na": "Šiaurės Amerika",
+      "sa": "Pietų Amerika",
+      "za": "Pietų Afrika",
+      "apac": "Azijos Ramusis vandenynas"
+    },
+    "visibility": {
+      "all": "Visi serveriai",
+      "public": "Viešas",
+      "private": "Privatus"
+    },
+    "modes": {
+      "all": "Vožtuvai",
+      "ca": "Clan ArenA",
+      "duel": "Duel",
+      "ffa": "Nemokamai visiems",
+      "tdm": "Team Deathmach",
+      "ctf": "BPŽ",
+      "ad": "@ info: tooltip",
+      "dom": "Dominavimas",
+      "ft": "Šaldyti žymę",
+      "har": "Harvester",
+      "race": "Rasė",
+      "rr": "Raudonasis Rover"
+    },
+    "rating": {
+      "title": "Reitingas",
+      "description": "Filtruoti serverius pagal vidutinį QElo arba TSslave.",
+      "systemPlaceholder": "Reitingų sistema",
+      "qelo": "QElo",
+      "trueskill": "Tslave"
+    },
+    "maps": {
+      "all": "Matomai",
+      "selectedCount": "{{count}} maps selected",
+      "searchPlaceholder": "Paieškos žemėlapiai...",
+      "empty": "Ženklių nerasta."
+    },
+    "tags": {
+      "label": "Žymos",
+      "selectedCount": "{{count}}+ tags",
+      "none": "@ info: whatsthis.",
+      "inputPlaceholder": "Įveskite žymę ir paspauskite Enter"
+    }
+  },
+  "releaseNotes": {
+    "title": "Kas naujo {{version}}",
+    "publishedOn": "Paskelbta {{data}}",
+    "close": "Uždaryti"
+  }
+}

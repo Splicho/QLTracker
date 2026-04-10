@@ -1,0 +1,536 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum LinkSessionStatus {
+  pending
+  complete
+  expired
+  error
+}
+
+enum ThresholdMode {
+  min_players
+  free_slots
+  active_free_slots
+}
+
+enum DeliveryStatus {
+  success
+  failed
+}
+
+enum PickupLinkSessionStatus {
+  pending
+  complete
+  expired
+  error
+}
+
+enum PickupLinkSessionFlow {
+  launcher
+  browser
+}
+
+enum PickupSeasonStatus {
+  draft
+  active
+  completed
+}
+
+enum PickupSeasonDurationPreset {
+  one_month
+  three_month
+  custom
+}
+
+enum PickupMatchStatus {
+  ready_check
+  veto
+  provisioning
+  server_ready
+  live
+  completed
+  cancelled
+}
+
+enum PickupReadyState {
+  pending
+  ready
+  dropped
+}
+
+enum PickupTeamSide {
+  left
+  right
+}
+
+enum NewsArticleCategory {
+  launcher
+  pickup
+  infrastructure
+  community
+}
+
+enum PickupNoticeVariant {
+  success
+  danger
+  alert
+  info
+}
+
+model User {
+  id            String                 @id @default(cuid())
+  discordUserId String                 @unique
+  username      String
+  globalName    String?
+  avatar        String?
+  dmAvailable   Boolean                @default(false)
+  dmErrorMessage String?
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  appSessions   AppSession[]
+  linkSessions  LinkSession[]
+  rules         NotificationRule[]
+  deliveries    NotificationDelivery[]
+}
+
+model AppSession {
+  id         String    @id @default(cuid())
+  userId     String
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime?
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model LinkSession {
+  id              String            @id @default(cuid())
+  oauthState      String            @unique
+  status          LinkSessionStatus @default(pending)
+  expiresAt       DateTime
+  appSessionToken String?
+  errorMessage    String?
+  completedAt     DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  userId          String?
+  user            User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+}
+
+model NotificationRule {
+  id                 String                 @id @default(cuid())
+  userId             String
+  serverAddr         String
+  serverNameSnapshot String
+  enabled            Boolean                @default(true)
+  thresholdMode      ThresholdMode
+  thresholdValue     Int
+  matchCapacity      Int?
+  lastMatched        Boolean                @default(false)
+  lastNotifiedAt     DateTime?
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+  user               User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deliveries         NotificationDelivery[]
+
+  @@unique([userId, serverAddr])
+  @@index([enabled])
+}
+
+model NotificationDelivery {
+  id                 String               @id @default(cuid())
+  ruleId             String
+  userId             String
+  serverAddr         String
+  serverNameSnapshot String
+  players            Int
+  maxPlayers         Int
+  activePlayers      Int?
+  matchCapacity      Int?
+  thresholdMode      ThresholdMode
+  thresholdValue     Int
+  status             DeliveryStatus       @default(success)
+  discordMessageId   String?
+  errorMessage       String?
+  createdAt          DateTime             @default(now())
+  rule               NotificationRule     @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  user               User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([ruleId])
+  @@index([userId])
+}
+
+model PickupPlayer {
+  id               String                     @id @default(cuid())
+  steamId          String                     @unique
+  personaName      String
+  avatarUrl        String?
+  customAvatarUrl  String?
+  customCoverUrl   String?
+  countryCode      String?                    @db.VarChar(2)
+  profileUrl       String?
+  createdAt        DateTime                   @default(now())
+  updatedAt        DateTime                   @updatedAt
+  lastLoginAt      DateTime?
+  appSessions      PickupAppSession[]
+  killEventsAsKiller PickupKillEvent[]       @relation("PickupKillEventKiller")
+  killEventsAsVictim PickupKillEvent[]       @relation("PickupKillEventVictim")
+  linkSessions     PickupLinkSession[]
+  matchStatLines   PickupPlayerMatchStat[]
+  queueMemberships PickupQueueMember[]
+  matchPlayers     PickupMatchPlayer[]
+  seasonRatings    PickupPlayerSeasonRating[]
+  weaponStatLines  PickupPlayerWeaponStat[]
+}
+
+model PickupAppSession {
+  id         String       @id @default(cuid())
+  playerId   String
+  tokenHash  String       @unique
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime     @default(now())
+  lastUsedAt DateTime?
+  player     PickupPlayer @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([playerId])
+}
+
+model PickupLinkSession {
+  id              String                  @id @default(cuid())
+  oauthState      String                  @unique
+  flow            PickupLinkSessionFlow   @default(launcher)
+  status          PickupLinkSessionStatus @default(pending)
+  redirectPath    String?
+  expiresAt       DateTime
+  appSessionToken String?
+  errorMessage    String?
+  completedAt     DateTime?
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+  playerId        String?
+  player          PickupPlayer?           @relation(fields: [playerId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([flow])
+}
+
+model PickupQueue {
+  id                       String               @id @default(cuid())
+  slug                     String               @unique
+  name                     String
+  description              String?
+  teamSize                 Int                  @default(4)
+  playerCount              Int                  @default(8)
+  enabled                  Boolean              @default(true)
+  createdAt                DateTime             @default(now())
+  updatedAt                DateTime             @updatedAt
+  mapPool                  PickupMapPool[]
+  matches                  PickupMatch[]
+  queueMembers             PickupQueueMember[]
+  seasons                  PickupSeason[]
+}
+
+model PickupSettings {
+  id                        String   @id @default("default")
+  readyCheckDurationSeconds Int      @default(30)
+  vetoTurnDurationSeconds   Int      @default(20)
+  provisionApiUrl           String?
+  provisionAuthToken        String?
+  callbackSecret            String?
+  r2AccountId               String?
+  r2BucketName              String?
+  r2PublicBaseUrl           String?
+  r2AccessKeyId             String?
+  r2SecretAccessKey         String?
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+}
+
+model PickupSeason {
+  id             String                     @id @default(cuid())
+  queueId        String
+  name           String
+  status         PickupSeasonStatus         @default(draft)
+  durationPreset PickupSeasonDurationPreset @default(custom)
+  startsAt       DateTime
+  endsAt         DateTime
+  createdAt      DateTime                   @default(now())
+  updatedAt      DateTime                   @updatedAt
+  matches        PickupMatch[]
+  queue          PickupQueue                @relation(fields: [queueId], references: [id], onDelete: Cascade)
+  ratings        PickupPlayerSeasonRating[]
+
+  @@index([queueId, status])
+  @@index([startsAt, endsAt])
+}
+
+model PickupMapPool {
+  id        String      @id @default(cuid())
+  queueId   String
+  mapKey    String
+  label     String
+  sortOrder Int         @default(0)
+  active    Boolean     @default(true)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  queue     PickupQueue @relation(fields: [queueId], references: [id], onDelete: Cascade)
+
+  @@unique([queueId, mapKey])
+}
+
+model PickupQueueMember {
+  id        String       @id @default(cuid())
+  queueId   String
+  playerId  String       @unique
+  joinedAt  DateTime     @default(now())
+  queue     PickupQueue  @relation(fields: [queueId], references: [id], onDelete: Cascade)
+  player    PickupPlayer @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([queueId, playerId])
+  @@index([queueId, joinedAt])
+}
+
+model PickupMatch {
+  id                        String            @id @default(cuid())
+  queueId                   String
+  seasonId                  String
+  status                    PickupMatchStatus @default(ready_check)
+  readyDeadlineAt           DateTime?
+  vetoDeadlineAt            DateTime?
+  currentCaptainPlayerId    String?
+  finalMapKey               String?
+  bannedMapKeys             Json?
+  vetoState                 Json?
+  balanceSummary            Json?
+  provisionPayload          Json?
+  resultPayload             Json?
+  serverIp                  String?
+  serverPort                Int?
+  serverJoinAddress         String?
+  serverLocationCountryCode String?
+  serverLocationCountryName String?
+  serverProvisionedAt       DateTime?
+  liveStartedAt             DateTime?
+  completedAt               DateTime?
+  winnerTeam                PickupTeamSide?
+  finalScore                String?
+  createdAt                 DateTime          @default(now())
+  updatedAt                 DateTime          @updatedAt
+  killEvents                PickupKillEvent[]
+  players                   PickupMatchPlayer[]
+  provisionEvents           PickupProvisionEvent[]
+  queue                     PickupQueue       @relation(fields: [queueId], references: [id], onDelete: Cascade)
+  rawEvents                 PickupMatchEventRaw[]
+  season                    PickupSeason      @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  statsSummary              PickupMatchStatsSummary?
+  playerStats               PickupPlayerMatchStat[]
+  weaponStats               PickupPlayerWeaponStat[]
+
+  @@index([queueId, status])
+  @@index([seasonId, status])
+}
+
+model PickupMatchPlayer {
+  id                String           @id @default(cuid())
+  matchId           String
+  playerId          String
+  joinedAt          DateTime
+  readyState        PickupReadyState @default(pending)
+  readyConfirmedAt  DateTime?
+  team              PickupTeamSide?
+  isCaptain         Boolean          @default(false)
+  muBefore          Float
+  sigmaBefore       Float
+  displayBefore     Int
+  muAfter           Float?
+  sigmaAfter        Float?
+  displayAfter      Int?
+  won               Boolean?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  match             PickupMatch      @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player            PickupPlayer     @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([matchId, playerId])
+  @@index([playerId, createdAt])
+}
+
+model PickupPlayerSeasonRating {
+  id            String       @id @default(cuid())
+  seasonId      String
+  playerId      String
+  mu            Float
+  sigma         Float
+  displayRating Int
+  gamesPlayed   Int          @default(0)
+  wins          Int          @default(0)
+  losses        Int          @default(0)
+  seededFrom    String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  player        PickupPlayer @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  season        PickupSeason @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+
+  @@unique([seasonId, playerId])
+  @@index([seasonId, displayRating])
+}
+
+model PickupProvisionEvent {
+  id        String      @id @default(cuid())
+  matchId   String
+  eventType String
+  payload   Json
+  createdAt DateTime    @default(now())
+  match     PickupMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  @@index([matchId, createdAt])
+}
+
+model PickupMatchEventRaw {
+  id         String      @id @default(cuid())
+  matchId    String
+  eventIndex Int
+  source     String
+  eventType  String
+  eventAt    DateTime?
+  payload    Json
+  createdAt  DateTime    @default(now())
+  match      PickupMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  @@unique([matchId, eventIndex])
+  @@index([matchId, createdAt])
+}
+
+model PickupMatchStatsSummary {
+  matchId               String      @id
+  sourceEventIndex      Int?
+  gameType              String?
+  factory               String?
+  mapKey                String?
+  roundsPlayed          Int?
+  redRounds             Int?
+  blueRounds            Int?
+  matchDurationSeconds  Int?
+  startedAt             DateTime?
+  endedAt               DateTime?
+  raw                   Json?
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+  match                 PickupMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
+}
+
+model PickupPlayerMatchStat {
+  id               String          @id @default(cuid())
+  matchId          String
+  playerId         String
+  team             PickupTeamSide?
+  score            Int?
+  kills            Int?
+  deaths           Int?
+  damageGiven      Int?
+  damageTaken      Int?
+  timeSeconds      Int?
+  ping             Int?
+  accuracy         Float?
+  medals           Json?
+  raw              Json?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  match            PickupMatch     @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player           PickupPlayer    @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([matchId, playerId])
+  @@index([playerId, createdAt])
+}
+
+model PickupPlayerWeaponStat {
+  id          String          @id @default(cuid())
+  matchId     String
+  playerId    String
+  weapon      String
+  shots       Int?
+  hits        Int?
+  accuracy    Float?
+  kills       Int?
+  deaths      Int?
+  damage      Int?
+  timeSeconds Int?
+  raw         Json?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  match       PickupMatch     @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player      PickupPlayer    @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([matchId, playerId, weapon])
+  @@index([playerId, createdAt])
+}
+
+model PickupKillEvent {
+  id            String          @id @default(cuid())
+  matchId       String
+  eventIndex    Int
+  killerPlayerId String?
+  killerSteamId String?
+  killerName    String?
+  victimPlayerId String?
+  victimSteamId String?
+  victimName    String?
+  weapon        String?
+  mod           String?
+  teamKill      Boolean         @default(false)
+  suicide       Boolean         @default(false)
+  occurredAt    DateTime?
+  raw           Json?
+  createdAt     DateTime        @default(now())
+  killerPlayer  PickupPlayer?   @relation("PickupKillEventKiller", fields: [killerPlayerId], references: [id], onDelete: SetNull)
+  match         PickupMatch     @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  victimPlayer  PickupPlayer?   @relation("PickupKillEventVictim", fields: [victimPlayerId], references: [id], onDelete: SetNull)
+
+  @@unique([matchId, eventIndex])
+  @@index([matchId, createdAt])
+  @@index([killerPlayerId])
+  @@index([victimPlayerId])
+}
+
+model NewsArticle {
+  id            String              @id @default(cuid())
+  slug          String              @unique
+  title         String
+  excerpt       String
+  content       String
+  category      NewsArticleCategory
+  coverImageUrl String?
+  publishedAt   DateTime            @default(now())
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  @@index([publishedAt(sort: Desc)])
+  @@index([category, publishedAt(sort: Desc)])
+}
+
+model PickupNotice {
+  id         String              @id @default(cuid())
+  content    String
+  linkHref   String?
+  linkLabel  String?
+  dismissable Boolean            @default(false)
+  enabled    Boolean             @default(true)
+  variant    PickupNoticeVariant @default(info)
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  @@index([enabled, updatedAt(sort: Desc)])
+}

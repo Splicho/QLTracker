@@ -1,0 +1,382 @@
+{
+  "navigation": {
+    "serverList": "Serveru saraksts",
+    "favorites": "Iecienītās",
+    "watchlist": "Novērošana",
+    "notifications": "Paziņojumi",
+    "settings": "Iestatījumi"
+  },
+  "common": {
+    "updated": "Atjaunināts"
+  },
+  "header": {
+    "unknown": "Nezināms",
+    "theme": {
+      "light": "Gaismas tēma",
+      "dark": "Tumša tēma",
+      "system": "Sistēmas tēma"
+    }
+  },
+  "sidebar": {
+    "groupLabel": "QLTracker",
+    "about": "Par QLTracker"
+  },
+  "about": {
+    "version": "Versija",
+    "author": "Izstrādātājs",
+    "socials": "Sociālie pakalpojumi",
+    "stack": "Steks",
+    "repo": "Repo"
+  },
+  "notifications": {
+    "title": "Neatbilstoši paziņojumi",
+    "serviceUnavailable": "Notification service is unavailable in this build. Set `VITE_NOTIFICATION_API_URL` to enable Discord linking and delivery.",
+    "finishBrowser": "Pabeigt Discord saites plūsmu savā pārlūkprogrammā.",
+    "loadingStatus": "Ielādē nesaskaņās paziņojumu statusu...",
+    "account": "Konts",
+    "rules": "Noteikumi",
+    "rulesSummary": "{{enabled}} active / {{total}} total",
+    "dmRefused": "QLTracker ir saistīts, bet Discord joprojām atteicās DM pārbaudi. Mēģiniet vēlreiz instalēt / saite plūsmu, lai pārbaudītu DMs vēlreiz.",
+    "relink": "Saikne",
+    "retryInstall": "Mēģināt vēlreiz instalēt pārbaudi",
+    "disconnect": "Atslēgties",
+    "noAccount": "Vēl nav nesaskaņām piesaistīta konta.",
+    "installLink": "Saistīt Discord",
+    "dialog": {
+      "editTitle": "Rediģēt nesaskaņu paziņojumu",
+      "createTitle": "Neatbilstošs paziņojums",
+      "descriptionWithServer": "Configure a Discord DM notification for {{server}}.",
+      "descriptionFallback": "Konfigurēt Discord DM paziņojumu šim serverim.",
+      "enabled": "Aktivizēts",
+      "enabledDescription": "Sūtiet tikai DM, kamēr šis noteikums ir ieslēgts.",
+      "thresholdType": "Robežvērtības tips",
+      "thresholdPlaceholder": "Izvēlēties sliekšņa tipu",
+      "mode": {
+        "active_free_slots": {
+          "label": "Atskaņo atlikušās laika nišas",
+          "description": "Paziņot, kad spēles ir tuvu pildīšanai, izmantojot kopējo aktīvo spēlē spēļu automāti, nevis pilnu servera slots."
+        },
+        "free_slots": {
+          "label": "Bezmaksas laika nišas",
+          "description": "Paziņot, kad serveris ir tik daudz bezmaksas slots vai mazāk."
+        },
+        "min_players": {
+          "label": "Minimālie spēlētāji",
+          "description": "Paziņot, kad serveris sasniedz vismaz šo daudz spēlētāju."
+        }
+      },
+      "totalPlayingSlots": "Kopā spēļu automāti",
+      "totalPlayingSlotsDescription": "Izmantojiet abas komandas kopā, nevis vienu komandu lielumu. 4v4 serverim ievadiet 8. 8v8 serverim ievadiet 16. Tas ir atsevišķi no pilna servera slotu skaita.",
+      "minimumPlayerCount": "Minimālais spēlētāju skaits",
+      "maximumActiveSlotsLeft": "Atlikušas maksimālās aktīvās slotas",
+      "maximumFreeSlots": "Maksimālās brīvās laika nišas",
+      "activeSlotsDescription": "This rule will evaluate against {{count}} total active playing slots.",
+      "serverSupportsDescription": "This server currently supports up to {{count}} players.",
+      "deleteRule": "Dzēst noteikumu",
+      "saveChanges": "Saglabāt izmaiņas",
+      "createRule": "Izveidot noteikumu"
+    }
+  },
+  "serverList": {
+    "refresh": "Atsvaidzināt",
+    "noServersMatch": "Neviens serveris neatbilst aktīvajiem filtriem.",
+    "pageStatus": "Page {{current}} of {{total}}",
+    "table": {
+      "server": "Serveris",
+      "location": "Vieta",
+      "mode": "Režīms",
+      "players": "Spēlētāji",
+      "ping": "Ping",
+      "actions": "Darbības"
+    },
+    "locationUnknown": "Nezināms",
+    "modeUnknown": "Nezināms",
+    "pingUnavailable": "N/P",
+    "passwordSaved": "Parole saglabāta",
+    "passwordRequired": "Nepieciešama parole",
+    "notificationEnabled": "Neatbilstošs paziņojums ieslēgts",
+    "actions": {
+      "notificationsPublicOnly": "Paziņojumi ir pieejami tikai publiskajiem serveriem.",
+      "connectDiscordFavorites": "Pievienojiet neatbilstības paziņojumu lapā, lai ieslēgtu paziņojumus.",
+      "editNotification": "Rediģēt neatbilstības paziņojumu",
+      "notifyDiscord": "Paziņot par nesaskaņu",
+      "editFavorite": "Rediģēt iecienīto",
+      "removeFromFavorites": "Izņemt no favorītiem",
+      "addToFavorites": "Pievienot iecienītajiem",
+      "copyAddress": "Kopēt IP:Port"
+    },
+    "drawer": {
+      "play": "Atskaņot",
+      "map": "Karte",
+      "avgQeloTooltip": "Vidējais QElo šajā serverī",
+      "avgTrueskillTooltip": "Vidēji TSkill uz šī servera",
+      "topQeloTooltip": "Augstākais QElo atskaņotājs šajā serverī",
+      "topTrueskillTooltip": "Augstākais TSkills spēlētājs šajā serverī",
+      "playersHeading": "Spēlētāji",
+      "player": "Spēlētājs",
+      "points": "Punkti",
+      "qelo": "QElo",
+      "trueskill": "TSkill",
+      "time": "Laiks",
+      "watch": "Sekot",
+      "trackPlayer": "Sekot spēlētājam",
+      "untrackPlayer": "Noņemt no novērošanas saraksta",
+      "historyTitle": "Vēsture",
+      "historyWindow": "Pēdējās 7 dienas",
+      "historyLastSeen": "Pēdējo reizi redzēts",
+      "historyPeakPlayers": "Lielākais spēlētāju skaits",
+      "historyTimePopulated": "Laiks ar spēlētājiem",
+      "historyUnavailable": "Servera vēsture nav pieejama. Lai ielādētu šo kartīti, iespējo reāllaika aizmugursistēmu un izvieto vēstures galapunktu.",
+      "historyEmpty": "Šim serverim vēl nav pieejama nesena vēsture.",
+      "lookupFailed": "Neveiksmīga Steam atskaņotāja meklēšana.",
+      "noPlayerData": "Šim serverim nav spēlētāju datu.",
+      "teams": {
+        "blue": "Zilā komanda",
+        "free": "Bez nodokļa",
+        "players": "Spēlētāji",
+        "red": "Sarkanā komanda",
+        "spectators": "Spuldzes",
+        "unassigned": "Nepiešķirts"
+      }
+    },
+    "favoriteDialog": {
+      "editTitle": "Rediģēt iecienīto",
+      "addTitle": "Pievienot iecienītajām",
+      "fallbackDescription": "Piešķirt šo serveri vienam no jūsu iecienītākajiem sarakstiem.",
+      "selectList": "Izvēlieties sarakstu",
+      "listsUnavailable": "Nav pieejami iecienīti saraksti. Izveidojiet sarakstu vispirms iecienītajā lapā.",
+      "remove": "Izņemt",
+      "saveChanges": "Saglabāt izmaiņas",
+      "addToList": "Pievienot sarakstam"
+    },
+    "passwordDialog": {
+      "title": "Sūtītājs",
+      "descriptionWithServer": "Enter the password for {{server}}.",
+      "fallbackDescription": "Ievadiet servera paroli.",
+      "inputPlaceholder": "Ievadiet servera paroli",
+      "remember": "Saglabāt šo paroli nākamajiem pievienošanās gadījumiem",
+      "join": "Pievienoties"
+    },
+    "toasts": {
+      "removedFromFavorites": "Izņemts no favorītiem.",
+      "notificationUpdated": "Paziņojums atjaunināts.",
+      "notificationCreated": "Paziņojums izveidots.",
+      "notificationRemoved": "Paziņojums noņemts.",
+      "notificationSaveError": "Neizdevās saglabāt paziņošanas noteikumu.",
+      "notificationRemoveError": "Neizdevās izņemt paziņojuma noteikumu.",
+      "favoriteUpdated": "Iecienīts atjaunināts.",
+      "addedToFavorites": "Pievienots favorītiem.",
+      "serverAddressCopied": "IP:Port nokopēts.",
+      "serverAddressCopyError": "Neizdevās nokopēt IP:Port."
+    }
+  },
+  "settings": {
+    "title": "Iestatījumi",
+    "startupTitle": "Palaist Windows",
+    "startupDescription": "Automātiski palaist QLTracker, kad pierakstāties Windows.",
+    "startupSaving": "Saglabā palaišanas izvēli...",
+    "unavailable": "Iestatījumi šajā būvē nav pieejami.",
+    "languageTitle": "Valoda",
+    "languageDescription": "Izvēlieties valodu, ko QLTracker izmantos visā lietotnē.",
+    "languagePlaceholder": "Izvēlieties valodu",
+    "discordPresenceTitle": "Discord aktivitāte",
+    "discordPresenceDescription": "Rādīt QLTracker kā jūsu Discord aktivitāti, kamēr pārlūkojat lietotni.",
+    "discordPresenceServerTitle": "Rādīt pašreizējā servera informāciju",
+    "discordPresenceServerDescription": "Kad QLTracker palaiž serveri, iekļaujiet servera nosaukumu, karti, režīmu un spēlētājus savā Discord aktivitātē.",
+    "discordPresenceSteamIdTitle": "SteamID64 pašreizējā servera izsekošanai",
+    "discordPresenceSteamIdDescription": "Neobligāti. Pievieno savu SteamID64, lai Discord varētu rādīt serveri, kurā patiesībā esi, pat ja pārslēdz serverus pašā Quake Live.",
+    "discordPresenceSteamIdPlaceholder": "7656119...",
+    "sections": {
+      "general": "Ģenerālis",
+      "generalDescription": "Valodas un galvenās lietotņu preferences.",
+      "startupTray": "Startēšana un paplāte",
+      "startupTrayDescription": "Startēšanas uzvedība, paplātes režīms un logu apstrāde.",
+      "desktopAlerts": "Darbvirsmas brīdinājumi",
+      "desktopAlertsDescription": "Vietējie paziņojumi izsekotajiem spēlētājiem un iecienītākajiem serveriem.",
+      "notifications": "Paziņojumi un nesaskaņas",
+      "notificationsDescription": "Discord konta saistīšana un piekļuve paziņojumu kārtulai.",
+      "discordPresence": "Nesaskaņu klātbūtne",
+      "discordPresenceDescription": "Discord bagātīga klātbūtne, kamēr QLTracker ir atvērts."
+    },
+    "backToApp": "Atpakaļ uz lietotni",
+    "trayModeTitle": "Paplātes režīms",
+    "trayModeDescription": "Nodrošiniet QLTracker darbību fonā, izmantojot paplātes ikonu un ātras darbības.",
+    "closeToTrayTitle": "Aizveriet logu uz paplātes",
+    "closeToTrayDescription": "Paslēpiet QLTracker, nevis aizveriet galveno logu.",
+    "startMinimizedTitle": "Sāciet samazināt līdz paplātei",
+    "startMinimizedDescription": "Palaidiet QLTracker fonā, līdz to atjaunojat no teknes ikonas.",
+    "desktopAlertsTitle": "Darbvirsmas brīdinājumi",
+    "desktopAlertsDescription": "Sūtiet vietējos darbvirsmas paziņojumus izsekotajiem spēlētājiem un iecienītākajiem serveriem.",
+    "desktopAlertsPausedTitle": "Apturēt darbvirsmas brīdinājumus",
+    "desktopAlertsPausedDescription": "Uz laiku apklusiniet visus darbvirsmas brīdinājumus, nemainot brīdinājuma noteikumus.",
+    "trackedPlayerAlertsTitle": "Izsekoti spēlētāju brīdinājumi",
+    "trackedPlayerAlertsDescription": "Paziņot, kad skatītais spēlētājs parādās vai pāriet uz citu serveri. Nepieciešama reāllaika aizmugursistēma.",
+    "favoriteServerAlertsTitle": "Brīdinājumi par iecienītākajiem serveriem",
+    "favoriteServerAlertsDescription": "Paziņot, kad iecienītākais serveris sasniedz jūsu spēlētāja slieksni.",
+    "favoriteServerThresholdTitle": "Iecienītākā servera spēlētāja slieksnis",
+    "favoriteServerThresholdDescription": "Nosūtiet brīdinājumu, kad izlases serveris pārsniedz šo spēlētāju skaitu.",
+    "favoriteServerThresholdPlaceholder": "Spēlētāji",
+    "discordLinkTitle": "Discord konta saite",
+    "discordLinkDescription": "Pievienojiet Discord, lai pārvaldītu DM paziņojumu piegādi un konta statusu.",
+    "notificationsManageRulesTitle": "Paziņošanas noteikumi",
+    "notificationsManageRulesDescription": "Serverim specifiski Discord DM noteikumi tiek pārvaldīti no serveru saraksta.",
+    "notificationsManageRulesHint": "Atveriet serveri un izmantojiet Discord paziņojumu darbību, lai izveidotu vai rediģētu kārtulu."
+  },
+  "language": {
+    "en": "English",
+    "de": "Deutsch",
+    "bg": "Български",
+    "ru": "Русский",
+    "uk": "Українська",
+    "hr": "Hrvatski",
+    "sr": "Српски",
+    "fr": "Français",
+    "it": "Italiano",
+    "et": "Eesti",
+    "nl": "Nederlands",
+    "fi": "Suomi",
+    "sv": "Svenska",
+    "hu": "Magyar",
+    "da": "Dansk",
+    "lv": "Latviešu",
+    "nb": "Norsk Bokmål",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ka": "ქართული",
+    "zh-Hant": "繁體中文",
+    "zh-Hans": "简体中文",
+    "es": "Español",
+    "pt-BR": "Português (Brasil)",
+    "pl": "Polski",
+    "ro": "Română",
+    "lt": "Lietuvių",
+    "cs": "Čeština"
+  },
+  "favorites": {
+    "lists": "Saraksti",
+    "refresh": "Atsvaidzināt",
+    "createList": "Izveidot sarakstu",
+    "createDialogTitle": "Izveidot iecienīto sarakstu",
+    "createDialogDescription": "Izveidot sarakstu, lai organizētu jūsu saglabātos serverus.",
+    "listNamePlaceholder": "Saraksta nosaukums",
+    "playersTooltip": "Kopā dzīvie spēlētāji",
+    "favoriteServers": "Iecienītie serveri",
+    "savedServers_one": "{{count}} saved server",
+    "savedServers_other": "{{count}} saved servers",
+    "noLists": "Vēl nav sarakstu. Izveidot savu pirmo sarakstu, lai sāktu.",
+    "noServers": "Šajā sarakstā vēl nav saglabāts neviens serveris.",
+    "deleteList": "Dzēst sarakstu",
+    "deleteDialogTitle": "Dzēst izlases sarakstu",
+    "deleteDialogDescription": "Dzēst \"{{list}}\"? Serveri, kas saglabāti tikai šajā sarakstā, tiks noņemti no izlases.",
+    "deleteDialogCancel": "Atcelt",
+    "toasts": {
+      "listDeleted": "\"{{list}}\" tika dzēsts."
+    }
+  },
+  "watchlist": {
+    "title": "Spēlētāju novērošanas saraksts",
+    "summary_one": "{{online}} tiešsaistē no {{count}} novērotā spēlētāja",
+    "summary_other": "{{online}} tiešsaistē no {{count}} novērotajiem spēlētājiem",
+    "onlineCount": "{{count}} tiešsaistē",
+    "serviceUnavailableBadge": "Tiešsaistes statuss nav pieejams",
+    "emptyTitle": "Vēl nav novēroto spēlētāju",
+    "emptyDescription": "Seko spēlētājiem no servera paneļa, lai redzētu, kur viņi spēlē.",
+    "emptyHint": "Atver jebkuru serveri un izmanto sekošanas pogu blakus spēlētājam ar atrisinātu SteamID.",
+    "offline": "Bezsaistē",
+    "updatedUnavailable": "Nav pieejams",
+    "statusOnline": "Tiešsaistē",
+    "statusOffline": "Bezsaistē",
+    "statusUnavailable": "Nav pieejams",
+    "toasts": {
+      "tracked": "{{player}} pievienots novērošanas sarakstam.",
+      "untracked": "{{player}} noņemts no novērošanas saraksta.",
+      "noteSaved": "Piezīme spēlētājam {{player}} ir saglabāta.",
+      "noteCleared": "Piezīme spēlētājam {{player}} ir noņemta.",
+      "steamIdCopied": "SteamID nokopēts.",
+      "steamIdCopyError": "SteamID nevarēja nokopēt."
+    },
+    "columns": {
+      "player": "Spēlētājs",
+      "status": "Statuss",
+      "server": "Serveris",
+      "map": "Karte",
+      "mode": "Režīms",
+      "actions": "Darbības"
+    },
+    "noteDialog": {
+      "clear": "Notīrīt piezīmi",
+      "description": "Pievienojiet lokālu piezīmi spēlētājam {{player}}.",
+      "hint": "Piezīmes tiek glabātas tikai šajā ierīcē.",
+      "label": "Piezīme",
+      "placeholder": "Pievienojiet piezīmi par šo spēlētāju...",
+      "save": "Saglabāt piezīmi",
+      "title": "Spēlētāja piezīme"
+    },
+    "actions": {
+      "copySteamId": "Kopēt SteamID",
+      "editNote": "Rediģēt piezīmi",
+      "viewServer": "Skatīt serveri"
+    }
+  },
+  "filters": {
+    "title": "Filtri",
+    "expand": "Izvērst filtrus",
+    "collapse": "Sakļaut filtrus",
+    "searchPlaceholder": "Meklēšanas servera nosaukums",
+    "showFull": "Rādīt pilnu",
+    "showEmpty": "Rādīt tukšu",
+    "showFavorites": "Rādīt iecienītās",
+    "clearAll": "Notīrīt visu",
+    "regions": {
+      "all": "Visi reģioni",
+      "eu": "Eiropa",
+      "na": "Ziemeļamerika",
+      "sa": "Dienvidamerika",
+      "za": "Dienvidāfrika",
+      "apac": "Klusā okeāna Āzija"
+    },
+    "visibility": {
+      "all": "Visi serveri",
+      "public": "Publiska",
+      "private": "Privāts"
+    },
+    "modes": {
+      "all": "Visi režīmi",
+      "ca": "Clan Arena",
+      "duel": "Duelis",
+      "ffa": "Bez maksas visiem",
+      "tdm": "Komandas nāves mačs",
+      "ctf": "CTF",
+      "ad": "Uzbrukums un aizstāvēšana",
+      "dom": "Dominācija",
+      "ft": "Iesaldēšanas tags",
+      "har": "Novācējs",
+      "race": "Rase",
+      "rr": "Sarkanā reveraName"
+    },
+    "rating": {
+      "title": "Vērtējums",
+      "description": "Filtrē serverus ar vidējo QElo vai TSkill.",
+      "systemPlaceholder": "Reitingu sistēma",
+      "qelo": "QElo",
+      "trueskill": "TSkill"
+    },
+    "maps": {
+      "all": "Visas kartes",
+      "selectedCount": "{{count}} maps selected",
+      "searchPlaceholder": "Meklēt kartes...",
+      "empty": "Nav atrasta neviena karte."
+    },
+    "tags": {
+      "label": "Tagi",
+      "selectedCount": "{{count}}+ tags",
+      "none": "Nav izvēlēts tags.",
+      "inputPlaceholder": "Veidot tagu un nospiediet 'Enter'"
+    }
+  },
+  "releaseNotes": {
+    "title": "Kas jauns versijā {{version}}",
+    "publishedOn": "Publicēts {{datums}}",
+    "close": "Aizvērt"
+  }
+}

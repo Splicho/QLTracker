@@ -1,0 +1,382 @@
+{
+  "navigation": {
+    "serverList": "სერვერების სია",
+    "favorites": "ფავორიტები",
+    "watchlist": "მონიტორინგი",
+    "notifications": "შეტყობინებები",
+    "settings": "პარამეტრები"
+  },
+  "common": {
+    "updated": "განახლდა"
+  },
+  "header": {
+    "unknown": "უცნობი",
+    "theme": {
+      "light": "ღია თემა",
+      "dark": "მუქი თემა",
+      "system": "სისტემური თემა"
+    }
+  },
+  "sidebar": {
+    "groupLabel": "QLTracker",
+    "about": "QLTracker-ის შესახებ"
+  },
+  "about": {
+    "version": "ვერსია",
+    "author": "დეველოპერი",
+    "socials": "სოციალური ქსელები",
+    "stack": "სტეკი",
+    "repo": "რეპოზიტორია"
+  },
+  "notifications": {
+    "title": "Discord შეტყობინებები",
+    "serviceUnavailable": "Notification service is unavailable in this build. Set `VITE_NOTIFICATION_API_URL` to enable Discord linking and delivery.",
+    "finishBrowser": "Discord-ის დაკავშირების პროცესი დაასრულეთ ბრაუზერში.",
+    "loadingStatus": "Discord შეტყობინებების სტატუსი იტვირთება...",
+    "account": "ანგარიში",
+    "rules": "წესები",
+    "rulesSummary": "{{enabled}} active / {{total}} total",
+    "dmRefused": "QLTracker დაკავშირებულია, მაგრამ Discord-მა DM შემოწმება მაინც უარყო. DM-ების ხელახლა შესამოწმებლად თავიდან სცადეთ ინსტალაციის/დაკავშირების პროცესი.",
+    "relink": "Discord-ის ხელახლა დაკავშირება",
+    "retryInstall": "ინსტალაციის შემოწმების გამეორება",
+    "disconnect": "გათიშვა",
+    "noAccount": "Discord-ის ანგარიში ჯერ არ არის დაკავშირებული.",
+    "installLink": "Discord-ის დაკავშირება",
+    "dialog": {
+      "editTitle": "Discord შეტყობინების რედაქტირება",
+      "createTitle": "Discord შეტყობინება",
+      "descriptionWithServer": "Configure a Discord DM notification for {{server}}.",
+      "descriptionFallback": "დააყენეთ Discord DM შეტყობინება ამ სერვერისთვის.",
+      "enabled": "ჩართულია",
+      "enabledDescription": "DM-ები გაიგზავნება მხოლოდ მაშინ, როცა ეს წესი ჩართულია.",
+      "thresholdType": "ზღვრის ტიპი",
+      "thresholdPlaceholder": "აირჩიეთ ზღვრის ტიპი",
+      "mode": {
+        "active_free_slots": {
+          "label": "დარჩენილი სათამაშო სლოტები",
+          "description": "შეტყობინება მაშინ, როცა მატჩი შევსებას ამდენით უახლოვდება, სრული სერვერის სლოტების ნაცვლად კი გამოყენებულია აქტიური სათამაშო სლოტების საერთო რაოდენობა."
+        },
+        "free_slots": {
+          "label": "თავისუფალი სლოტები",
+          "description": "შეტყობინება მაშინ, როცა სერვერზე ამდენი ან ნაკლები თავისუფალი სლოტი დარჩება."
+        },
+        "min_players": {
+          "label": "მოთამაშეების მინიმუმი",
+          "description": "შეტყობინება მაშინ, როცა სერვერი სულ მცირე ამდენ მოთამაშეს მიაღწევს."
+        }
+      },
+      "totalPlayingSlots": "სათამაშო სლოტები სულ",
+      "totalPlayingSlotsDescription": "გამოიყენეთ ორივე გუნდის ჯამი და არა თითო გუნდის ზომა. 4v4 სერვერისთვის შეიყვანეთ 8. 8v8 სერვერისთვის შეიყვანეთ 16. ეს განსხვავდება სერვერის სრული სლოტების რაოდენობისგან.",
+      "minimumPlayerCount": "მოთამაშეების მინიმალური რაოდენობა",
+      "maximumActiveSlotsLeft": "დარჩენილი აქტიური სლოტების მაქსიმუმი",
+      "maximumFreeSlots": "თავისუფალი სლოტების მაქსიმუმი",
+      "activeSlotsDescription": "This rule will evaluate against {{count}} total active playing slots.",
+      "serverSupportsDescription": "This server currently supports up to {{count}} players.",
+      "deleteRule": "წესის წაშლა",
+      "saveChanges": "ცვლილებების შენახვა",
+      "createRule": "წესის შექმნა"
+    }
+  },
+  "serverList": {
+    "refresh": "განახლება",
+    "noServersMatch": "არცერთი სერვერი არ შეესაბამება მიმდინარე ფილტრებს.",
+    "pageStatus": "Page {{current}} of {{total}}",
+    "table": {
+      "server": "სერვერი",
+      "location": "ლოკაცია",
+      "mode": "რეჟიმი",
+      "players": "მოთამაშეები",
+      "ping": "პინგი",
+      "actions": "მოქმედებები"
+    },
+    "locationUnknown": "უცნობი",
+    "modeUnknown": "უცნობი",
+    "pingUnavailable": "N/A",
+    "passwordSaved": "პაროლი შენახულია",
+    "passwordRequired": "საჭიროა პაროლი",
+    "notificationEnabled": "Discord შეტყობინება ჩართულია",
+    "actions": {
+      "notificationsPublicOnly": "შეტყობინებები ხელმისაწვდომია მხოლოდ საჯარო სერვერებისთვის.",
+      "connectDiscordFavorites": "შეტყობინებების გვერდზე დააკავშირეთ Discord, რომ შეტყობინებები ჩაირთოს.",
+      "editNotification": "Discord შეტყობინების რედაქტირება",
+      "notifyDiscord": "შეტყობინება Discord-ზე",
+      "editFavorite": "ფავორიტის რედაქტირება",
+      "removeFromFavorites": "ფავორიტებიდან წაშლა",
+      "addToFavorites": "ფავორიტებში დამატება",
+      "copyAddress": "IP:Port-ის კოპირება"
+    },
+    "drawer": {
+      "play": "თამაში",
+      "map": "რუკა",
+      "avgQeloTooltip": "ამ სერვერზე საშუალო QElo",
+      "avgTrueskillTooltip": "ამ სერვერზე საშუალო TSkill",
+      "topQeloTooltip": "ამ სერვერზე ყველაზე მაღალი QElo-ის მქონე მოთამაშე",
+      "topTrueskillTooltip": "ამ სერვერზე ყველაზე მაღალი TSkill-ის მქონე მოთამაშე",
+      "playersHeading": "მოთამაშეები",
+      "player": "მოთამაშე",
+      "points": "ქულები",
+      "qelo": "QElo",
+      "trueskill": "TSkill",
+      "time": "დრო",
+      "watch": "თვალი ადევნე",
+      "trackPlayer": "თვალი ადევნე მოთამაშეს",
+      "untrackPlayer": "ამოშლა დაკვირვების სიიდან",
+      "historyTitle": "ისტორია",
+      "historyWindow": "ბოლო 7 დღე",
+      "historyLastSeen": "ბოლოს ნანახი",
+      "historyPeakPlayers": "მოთამაშეთა პიკი",
+      "historyTimePopulated": "მოთამაშეებით დატვირთული დრო",
+      "historyUnavailable": "სერვერის ისტორია მიუწვდომელია. ამ ბარათის ჩასატვირთად ჩართე realtime backend და განათავსე ისტორიის endpoint.",
+      "historyEmpty": "ამ სერვერისთვის ბოლო ისტორია ჯერ ხელმისაწვდომი არ არის.",
+      "lookupFailed": "Steam მოთამაშეების მოძიება ვერ მოხერხდა.",
+      "noPlayerData": "ამ სერვერისთვის მოთამაშის მონაცემები არ არის.",
+      "teams": {
+        "blue": "ლურჯი გუნდი",
+        "free": "თავისუფალი",
+        "players": "მოთამაშეები",
+        "red": "წითელი გუნდი",
+        "spectators": "მაყურებლები",
+        "unassigned": "მიუნიჭებელი"
+      }
+    },
+    "favoriteDialog": {
+      "editTitle": "ფავორიტის რედაქტირება",
+      "addTitle": "ფავორიტებში დამატება",
+      "fallbackDescription": "მიანიჭეთ ეს სერვერი თქვენს ერთ-ერთ ლოკალურ ფავორიტების სიას.",
+      "selectList": "აირჩიეთ სია",
+      "listsUnavailable": "ფავორიტების სიები არ არის ხელმისაწვდომი. ჯერ შექმენით სია ფავორიტების გვერდზე.",
+      "remove": "წაშლა",
+      "saveChanges": "ცვლილებების შენახვა",
+      "addToList": "სიაში დამატება"
+    },
+    "passwordDialog": {
+      "title": "სერვერის პაროლი",
+      "descriptionWithServer": "Enter the password for {{server}}.",
+      "fallbackDescription": "შეიყვანეთ ამ სერვერის პაროლი.",
+      "inputPlaceholder": "შეიყვანეთ სერვერის პაროლი",
+      "remember": "შეინახე ეს პაროლი შემდეგი შეერთებებისთვის",
+      "join": "შეერთება"
+    },
+    "toasts": {
+      "removedFromFavorites": "ფავორიტებიდან წაიშალა.",
+      "notificationUpdated": "შეტყობინება განახლდა.",
+      "notificationCreated": "შეტყობინება შეიქმნა.",
+      "notificationRemoved": "შეტყობინება წაიშალა.",
+      "notificationSaveError": "შეტყობინების წესის შენახვა ვერ მოხერხდა.",
+      "notificationRemoveError": "შეტყობინების წესის წაშლა ვერ მოხერხდა.",
+      "favoriteUpdated": "ფავორიტი განახლდა.",
+      "addedToFavorites": "ფავორიტებში დაემატა.",
+      "serverAddressCopied": "IP:Port დაკოპირდა.",
+      "serverAddressCopyError": "IP:Port-ის კოპირება ვერ მოხერხდა."
+    }
+  },
+  "settings": {
+    "title": "პარამეტრები",
+    "startupTitle": "Windows-თან ერთად გაშვება",
+    "startupDescription": "Windows-ში შესვლისას QLTracker ავტომატურად გაეშვას.",
+    "startupSaving": "გაშვების პარამეტრი ინახება...",
+    "unavailable": "ეს პარამეტრი ამ ვერსიაში მიუწვდომელია.",
+    "languageTitle": "ენა",
+    "languageDescription": "აირჩიეთ ენა, რომელსაც QLTracker მთელ აპში გამოიყენებს.",
+    "languagePlaceholder": "აირჩიეთ ენა",
+    "discordPresenceTitle": "Discord აქტივობა",
+    "discordPresenceDescription": "აპის დათვალიერებისას აჩვენე QLTracker, როგორც შენი Discord აქტივობა.",
+    "discordPresenceServerTitle": "მიმდინარე სერვერის დეტალების ჩვენება",
+    "discordPresenceServerDescription": "როცა QLTracker სერვერს გაუშვებს, Discord აქტივობაში ჩასვი სერვერის სახელი, რუკა, რეჟიმი და მოთამაშეები.",
+    "discordPresenceSteamIdTitle": "SteamID64 მიმდინარე სერვერის თვალყურისთვის",
+    "discordPresenceSteamIdDescription": "არასავალდებულოა. დაამატე შენი SteamID64, რომ Discord-მა აჩვენოს რომელ სერვერზე ხარ ახლა, მაშინაც კი თუ Quake Live-ში სერვერს ცვლი.",
+    "discordPresenceSteamIdPlaceholder": "7656119...",
+    "sections": {
+      "general": "გენერალი",
+      "generalDescription": "ენისა და აპის ძირითადი პარამეტრები.",
+      "startupTray": "გაშვება და უჯრა",
+      "startupTrayDescription": "გაშვების ქცევა, უჯრის რეჟიმი და ფანჯრის დამუშავება.",
+      "desktopAlerts": "დესკტოპის გაფრთხილებები",
+      "desktopAlertsDescription": "მშობლიური შეტყობინებები თვალყურის დევნილი მოთამაშეებისთვის და საყვარელი სერვერებისთვის.",
+      "notifications": "შეტყობინებები და უთანხმოება",
+      "notificationsDescription": "ანგარიშის მიბმისა და შეტყობინებების წესზე წვდომის დარღვევა.",
+      "discordPresence": "უთანხმოების არსებობა",
+      "discordPresenceDescription": "უთანხმოება მდიდარი ყოფნა სანამ QLTracker ღიაა."
+    },
+    "backToApp": "აპში დაბრუნება",
+    "trayModeTitle": "უჯრის რეჟიმი",
+    "trayModeDescription": "გააგრძელეთ QLTracker გაშვება ფონზე უჯრის ხატულებით და სწრაფი მოქმედებებით.",
+    "closeToTrayTitle": "დახურეთ ფანჯარა უჯრაზე",
+    "closeToTrayDescription": "მთავარი ფანჯრის დახურვისას დახურვის ნაცვლად, დამალეთ QLTracker.",
+    "startMinimizedTitle": "დაწყება მინიმუმამდე უჯრაზე",
+    "startMinimizedDescription": "გაუშვით QLTracker ფონზე, სანამ არ აღადგენთ მას უჯრის ხატიდან.",
+    "desktopAlertsTitle": "დესკტოპის გაფრთხილებები",
+    "desktopAlertsDescription": "გაგზავნეთ მშობლიური დესკტოპის შეტყობინებები თვალყურის დევნილი მოთამაშეებისთვის და საყვარელი სერვერებისთვის.",
+    "desktopAlertsPausedTitle": "დესკტოპის გაფრთხილებების პაუზა",
+    "desktopAlertsPausedDescription": "დროებით გააჩუმეთ ყველა დესკტოპის გაფრთხილება თქვენი გაფრთხილების წესების შეცვლის გარეშე.",
+    "trackedPlayerAlertsTitle": "მოთამაშის გაფრთხილებების თვალყურის დევნება",
+    "trackedPlayerAlertsDescription": "შეატყობინეთ, როდესაც უყურებს მოთამაშე გამოჩნდება ან გადადის სხვა სერვერზე. საჭიროებს რეალურ დროში backend-ს.",
+    "favoriteServerAlertsTitle": "საყვარელი სერვერის გაფრთხილებები",
+    "favoriteServerAlertsDescription": "შეატყობინეთ, როდესაც საყვარელი სერვერი მიაღწევს თქვენი მოთამაშის ზღვარს.",
+    "favoriteServerThresholdTitle": "საყვარელი სერვერის მოთამაშის ბარიერი",
+    "favoriteServerThresholdDescription": "გაგზავნეთ გაფრთხილება, როდესაც საყვარელი სერვერი გადაკვეთს ამ მოთამაშეთა რაოდენობას.",
+    "favoriteServerThresholdPlaceholder": "მოთამაშეები",
+    "discordLinkTitle": "Discord ანგარიშის ბმული",
+    "discordLinkDescription": "დააკავშირეთ Discord DM შეტყობინების მიწოდებისა და ანგარიშის სტატუსის სამართავად.",
+    "notificationsManageRulesTitle": "შეტყობინების წესები",
+    "notificationsManageRulesDescription": "სერვერის სპეციფიკური Discord DM წესები იმართება სერვერების სიიდან.",
+    "notificationsManageRulesHint": "გახსენით სერვერი და გამოიყენეთ Discord შეტყობინების ქმედება, რომ შექმნათ ან შეცვალოთ წესი."
+  },
+  "language": {
+    "en": "English",
+    "de": "Deutsch",
+    "bg": "Български",
+    "ru": "Русский",
+    "uk": "Українська",
+    "hr": "Hrvatski",
+    "sr": "Српски",
+    "fr": "Français",
+    "it": "Italiano",
+    "et": "Eesti",
+    "nl": "Nederlands",
+    "fi": "Suomi",
+    "sv": "Svenska",
+    "hu": "Magyar",
+    "da": "Dansk",
+    "lv": "Latviešu",
+    "nb": "Norsk Bokmål",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ka": "ქართული",
+    "zh-Hant": "繁體中文",
+    "zh-Hans": "简体中文",
+    "es": "Español",
+    "pt-BR": "Português (Brasil)",
+    "pl": "Polski",
+    "ro": "Română",
+    "lt": "Lietuvių",
+    "cs": "Čeština"
+  },
+  "favorites": {
+    "lists": "სიები",
+    "refresh": "განახლება",
+    "createList": "სიის შექმნა",
+    "createDialogTitle": "ფავორიტების სიის შექმნა",
+    "createDialogDescription": "შექმენით სია თქვენი შენახული სერვერების დასაორგანიზებლად.",
+    "listNamePlaceholder": "სიის სახელი",
+    "playersTooltip": "სულ აქტიური მოთამაშეები",
+    "favoriteServers": "ფავორიტი სერვერები",
+    "savedServers_one": "{{count}} saved server",
+    "savedServers_other": "{{count}} saved servers",
+    "noLists": "სიები ჯერ არ არის. დასაწყებად შექმენით თქვენი პირველი სია.",
+    "noServers": "ამ სიაში ჯერ არცერთი სერვერი არ არის შენახული.",
+    "deleteList": "სიის წაშლა",
+    "deleteDialogTitle": "ფავორიტების სიის წაშლა",
+    "deleteDialogDescription": "წავშალოთ \"{{list}}\"? სერვერები, რომლებიც მხოლოდ ამ სიაშია შენახული, ფავორიტებიდან მოიხსნება.",
+    "deleteDialogCancel": "გაუქმება",
+    "toasts": {
+      "listDeleted": "\"{{list}}\" წაიშალა."
+    }
+  },
+  "watchlist": {
+    "title": "მოთამაშეთა დაკვირვების სია",
+    "summary_one": "{{online}} ონლაინ {{count}} დაკვირვებული მოთამაშიდან",
+    "summary_other": "{{online}} ონლაინ {{count}} დაკვირვებული მოთამაშიდან",
+    "onlineCount": "{{count}} ონლაინ",
+    "serviceUnavailableBadge": "ცოცხალი სტატუსი მიუწვდომელია",
+    "emptyTitle": "ჯერ დაკვირვებული მოთამაშეები არ არის",
+    "emptyDescription": "დააკვირდი მოთამაშეებს სერვერის ფანჯრიდან, რომ ნახო სად თამაშობენ.",
+    "emptyHint": "გახსენი ნებისმიერი სერვერი და გამოიყენე თვალთვალის ღილაკი მოთამაშის გვერდით, რომელსაც განსაზღვრული SteamID აქვს.",
+    "offline": "ოფლაინ",
+    "updatedUnavailable": "მიუწვდომელია",
+    "statusOnline": "ონლაინ",
+    "statusOffline": "ოფლაინ",
+    "statusUnavailable": "მიუწვდომელია",
+    "toasts": {
+      "tracked": "{{player}} დაემატა დაკვირვების სიას.",
+      "untracked": "{{player}} წაიშალა დაკვირვების სიიდან.",
+      "noteSaved": "{{player}}-ისთვის შენიშვნა შენახულია.",
+      "noteCleared": "{{player}}-ისთვის შენიშვნა წაიშალა.",
+      "steamIdCopied": "SteamID დაკოპირდა.",
+      "steamIdCopyError": "SteamID-ის კოპირება ვერ მოხერხდა."
+    },
+    "columns": {
+      "player": "მოთამაშე",
+      "status": "სტატუსი",
+      "server": "სერვერი",
+      "map": "რუკა",
+      "mode": "რეჟიმი",
+      "actions": "მოქმედებები"
+    },
+    "noteDialog": {
+      "clear": "შენიშვნის წაშლა",
+      "description": "დაამატეთ ლოკალური შენიშვნა მოთამაშისთვის {{player}}.",
+      "hint": "შენიშვნები ინახება მხოლოდ ამ მოწყობილობაზე.",
+      "label": "შენიშვნა",
+      "placeholder": "დაამატეთ შენიშვნა ამ მოთამაშეზე...",
+      "save": "შენიშვნის შენახვა",
+      "title": "მოთამაშის შენიშვნა"
+    },
+    "actions": {
+      "copySteamId": "SteamID-ის კოპირება",
+      "editNote": "შენიშვნის ჩასწორება",
+      "viewServer": "სერვერის ნახვა"
+    }
+  },
+  "filters": {
+    "title": "ფილტრები",
+    "expand": "ფილტრების გაშლა",
+    "collapse": "ფილტრების ჩაკეცვა",
+    "searchPlaceholder": "მოძებნე სერვერის სახელი",
+    "showFull": "სავსეების ჩვენება",
+    "showEmpty": "ცარიელების ჩვენება",
+    "showFavorites": "ფავორიტების ჩვენება",
+    "clearAll": "ყველაფრის გასუფთავება",
+    "regions": {
+      "all": "ყველა რეგიონი",
+      "eu": "ევროპა",
+      "na": "ჩრდილოეთი ამერიკა",
+      "sa": "სამხრეთი ამერიკა",
+      "za": "სამხრეთი აფრიკა",
+      "apac": "აზია-წყნარი ოკეანე"
+    },
+    "visibility": {
+      "all": "ყველა სერვერი",
+      "public": "საჯარო",
+      "private": "პირადი"
+    },
+    "modes": {
+      "all": "ყველა რეჟიმი",
+      "ca": "Clan Arena",
+      "duel": "დუელი",
+      "ffa": "ყველა ყველას წინააღმდეგ",
+      "tdm": "გუნდური სიკვდილის მატჩი",
+      "ctf": "CTF",
+      "ad": "თავდასხმა და დაცვა",
+      "dom": "დომინაცია",
+      "ft": "გაყინვის ტეგი",
+      "har": "ჰარვესტერი",
+      "race": "რბოლა",
+      "rr": "Red Rover"
+    },
+    "rating": {
+      "title": "რეიტინგი",
+      "description": "გაფილტრეთ სერვერები საშუალო QElo-ს ან TSkill-ის მიხედვით.",
+      "systemPlaceholder": "რეიტინგის სისტემა",
+      "qelo": "QElo",
+      "trueskill": "TSkill"
+    },
+    "maps": {
+      "all": "ყველა რუკა",
+      "selectedCount": "{{count}} maps selected",
+      "searchPlaceholder": "რუკების ძებნა...",
+      "empty": "რუკები ვერ მოიძებნა."
+    },
+    "tags": {
+      "label": "თეგები",
+      "selectedCount": "{{count}}+ tags",
+      "none": "არცერთი თეგი არჩეული არ არის.",
+      "inputPlaceholder": "შეიყვანეთ თეგი და დააჭირეთ Enter-ს"
+    }
+  },
+  "releaseNotes": {
+    "title": "რა არის ახალი {{ვერსია}}-ში",
+    "publishedOn": "გამოქვეყნებულია {{თარიღი}}",
+    "close": "დახურვა"
+  }
+}

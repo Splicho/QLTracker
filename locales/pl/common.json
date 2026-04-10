@@ -1,0 +1,382 @@
+{
+  "navigation": {
+    "serverList": "Lista serwerów",
+    "favorites": "Ulubione",
+    "watchlist": "Obserwowani",
+    "notifications": "Powiadomienia",
+    "settings": "Ustawienia"
+  },
+  "common": {
+    "updated": "Zaktualizowano"
+  },
+  "header": {
+    "unknown": "Nieznany",
+    "theme": {
+      "light": "Motyw świetlny",
+      "dark": "Ciemny motyw",
+      "system": "Motyw systemowy"
+    }
+  },
+  "sidebar": {
+    "groupLabel": "QLTracker",
+    "about": "O QLTracker"
+  },
+  "about": {
+    "version": "Wersja",
+    "author": "Programista",
+    "socials": "Społeczeństwo",
+    "stack": "Stack",
+    "repo": "Repo"
+  },
+  "notifications": {
+    "title": "Powiadomienia o niezgodnościach",
+    "serviceUnavailable": "Notification service is unavailable in this build. Set `VITE_NOTIFICATION_API_URL` to enable Discord linking and delivery.",
+    "finishBrowser": "Zakończ przepływ łącza Discord w przeglądarce.",
+    "loadingStatus": "Wczytywanie statusu powiadomienia o niezgodzie...",
+    "account": "Konto",
+    "rules": "Zasady",
+    "rulesSummary": "{{enabled}} active / {{total}} total",
+    "dmRefused": "QLTracker jest połączony, ale Discord nadal odmówił sprawdzenia DM. Przywróć przepływ instalacji / łącza, aby ponownie przetestować DM.",
+    "relink": "Relink Discord",
+    "retryInstall": "Sprawdź instalację pobierania",
+    "disconnect": "Rozłącz",
+    "noAccount": "Nie ma jeszcze połączenia z kontem Discord.",
+    "installLink": "Połącz Discord",
+    "dialog": {
+      "editTitle": "Edytuj zgłoszenie niezgody",
+      "createTitle": "Zawiadomienie o braku zgody",
+      "descriptionWithServer": "Configure a Discord DM notification for {{server}}.",
+      "descriptionFallback": "Konfiguracja powiadomienia Discord DM dla tego serwera.",
+      "enabled": "Włączone",
+      "enabledDescription": "Wyślijcie DM tylko wtedy, gdy ta zasada jest włączona.",
+      "thresholdType": "Typ progów",
+      "thresholdPlaceholder": "Wybierz typ progu",
+      "mode": {
+        "active_free_slots": {
+          "label": "Odtwarzanie szczeliny lewo",
+          "description": "Informuj, kiedy mecz jest tak blisko wypełnienia, używając całkowitej aktywnej gry szczeliny zamiast pełnego serwera szczeliny."
+        },
+        "free_slots": {
+          "label": "Free slots",
+          "description": "Informuj, kiedy serwer ma tyle wolnych szczelin lub mniej."
+        },
+        "min_players": {
+          "label": "Min graczy",
+          "description": "Informuj, kiedy serwer osiągnie co najmniej tyle graczy."
+        }
+      },
+      "totalPlayingSlots": "Całkowity czas gry",
+      "totalPlayingSlotsDescription": "Użyj obu zespołów razem, a nie rozmiar zespołu. Dla serwera 4v4 wprowadź 8. Dla serwera 8v8, wprowadź 16. Jest to oddzielone od pełnej liczby gniazd serwera.",
+      "minimumPlayerCount": "Minimalna liczba graczy",
+      "maximumActiveSlotsLeft": "Maksymalna liczba aktywnych szczelin w lewo",
+      "maximumFreeSlots": "Maksymalne wolne szczeliny",
+      "activeSlotsDescription": "This rule will evaluate against {{count}} total active playing slots.",
+      "serverSupportsDescription": "This server currently supports up to {{count}} players.",
+      "deleteRule": "Skreślić zasadę",
+      "saveChanges": "Zapisz zmiany",
+      "createRule": "Utwórz zasadę"
+    }
+  },
+  "serverList": {
+    "refresh": "Odśwież",
+    "noServersMatch": "Żadne serwery nie pasują do obecnych filtrów.",
+    "pageStatus": "Page {{current}} of {{total}}",
+    "table": {
+      "server": "Serwer",
+      "location": "Lokalizacja",
+      "mode": "Tryb",
+      "players": "Gracze",
+      "ping": "Ping",
+      "actions": "Działania"
+    },
+    "locationUnknown": "Nieznany",
+    "modeUnknown": "Nieznany",
+    "pingUnavailable": "NIE DOTYCZY",
+    "passwordSaved": "Zapisane hasło",
+    "passwordRequired": "Wymagane hasło",
+    "notificationEnabled": "Powiadomienie o niezgodzie włączone",
+    "actions": {
+      "notificationsPublicOnly": "Powiadomienia są dostępne tylko dla serwerów publicznych.",
+      "connectDiscordFavorites": "Połącz Discord na stronie powiadomień, aby umożliwić powiadomienia.",
+      "editNotification": "Edytuj zgłoszenie niezgody",
+      "notifyDiscord": "Informuj o niezgodzie",
+      "editFavorite": "Edycja ulubionych",
+      "removeFromFavorites": "Usuń z ulubionych",
+      "addToFavorites": "Dodaj do ulubionych",
+      "copyAddress": "Kopiuj IP:Port"
+    },
+    "drawer": {
+      "play": "Zagraj",
+      "map": "Mapa",
+      "avgQeloTooltip": "Średnia QElo na tym serwerze",
+      "avgTrueskillTooltip": "Średnia TSkill na tym serwerze",
+      "topQeloTooltip": "Najwyższy gracz QElo na tym serwerze",
+      "topTrueskillTooltip": "Najwyższy odtwarzacz TSkill na tym serwerze",
+      "playersHeading": "Gracze",
+      "player": "Gracz",
+      "points": "Punkty",
+      "qelo": "QElo",
+      "trueskill": "TSkill",
+      "time": "Czas",
+      "watch": "Obserwuj",
+      "trackPlayer": "Obserwuj gracza",
+      "untrackPlayer": "Usuń z obserwowanych",
+      "historyTitle": "Historia",
+      "historyWindow": "Ostatnie 7 dni",
+      "historyLastSeen": "Ostatnio widziany",
+      "historyPeakPlayers": "Maksimum graczy",
+      "historyTimePopulated": "Czas z graczami",
+      "historyUnavailable": "Historia serwera jest niedostępna. Włącz backend realtime i wdroż endpoint historii, aby wczytać tę kartę.",
+      "historyEmpty": "Dla tego serwera nie ma jeszcze dostępnej najnowszej historii.",
+      "lookupFailed": "Przeszukanie odtwarzacza parowego nie powiodło się.",
+      "noPlayerData": "Brak danych dla tego serwera.",
+      "teams": {
+        "blue": "Drużyna niebieska",
+        "free": "Wolne",
+        "players": "Gracze",
+        "red": "Czerwony zespół",
+        "spectators": "Widzarki",
+        "unassigned": "Nieprzypisane"
+      }
+    },
+    "favoriteDialog": {
+      "editTitle": "Edytuj ulubiony",
+      "addTitle": "Dodaj do ulubionych",
+      "fallbackDescription": "Przypisz ten serwer do jednej z twoich ulubionych list.",
+      "selectList": "Wybierz listę",
+      "listsUnavailable": "Żadnych ulubionych list. Utwórz najpierw listę na stronie Ulubione.",
+      "remove": "Usuń",
+      "saveChanges": "Zapisz zmiany",
+      "addToList": "Dodaj do listy"
+    },
+    "passwordDialog": {
+      "title": "Hasło serwera",
+      "descriptionWithServer": "Enter the password for {{server}}.",
+      "fallbackDescription": "Wprowadź hasło dla tego serwera.",
+      "inputPlaceholder": "Podaj hasło serwera",
+      "remember": "Zapisz to hasło dla przyszłych połączeń",
+      "join": "Dołącz"
+    },
+    "toasts": {
+      "removedFromFavorites": "Usunięty z ulubionych.",
+      "notificationUpdated": "Zawiadomienie zaktualizowane.",
+      "notificationCreated": "Zgłoszenie utworzone.",
+      "notificationRemoved": "Powiadomienie usunięte.",
+      "notificationSaveError": "Nie można zapisać reguły powiadomienia.",
+      "notificationRemoveError": "Nie można usunąć reguły powiadamiania.",
+      "favoriteUpdated": "Ulubione zaktualizowane.",
+      "addedToFavorites": "Dodano do ulubionych.",
+      "serverAddressCopied": "Skopiowano IP:Port.",
+      "serverAddressCopyError": "Nie udało się skopiować IP:Port."
+    }
+  },
+  "settings": {
+    "title": "Ustawienia",
+    "startupTitle": "Uruchomienie systemu Windows",
+    "startupDescription": "Automatycznie uruchamia QLTracker po zalogowaniu się do systemu Windows.",
+    "startupSaving": "Zapisywanie preferencji startowych...",
+    "unavailable": "Ustawienie jest niedostępne w tej konstrukcji.",
+    "languageTitle": "Język",
+    "languageDescription": "Wybierz język używany w całym QLTrackerze.",
+    "languagePlaceholder": "Wybierz język",
+    "discordPresenceTitle": "Aktywność Discord",
+    "discordPresenceDescription": "Pokazuj QLTracker jako twoją aktywność na Discordzie podczas przeglądania aplikacji.",
+    "discordPresenceServerTitle": "Pokazuj szczegóły bieżącego serwera",
+    "discordPresenceServerDescription": "Gdy QLTracker uruchomi serwer, uwzględnij nazwę serwera, mapę, tryb i graczy w swojej aktywności na Discordzie.",
+    "discordPresenceSteamIdTitle": "SteamID64 do śledzenia aktualnego serwera",
+    "discordPresenceSteamIdDescription": "Opcjonalne. Dodaj swój SteamID64, aby Discord mógł pokazywać serwer, na którym naprawdę jesteś, nawet jeśli zmieniasz serwer w samym Quake Live.",
+    "discordPresenceSteamIdPlaceholder": "7656119...",
+    "sections": {
+      "general": "Generał",
+      "generalDescription": "Preferencje dotyczące języka i podstawowej aplikacji.",
+      "startupTray": "Uruchomienie i taca",
+      "startupTrayDescription": "Zachowanie podczas uruchamiania, tryb zasobnika i obsługa okien.",
+      "desktopAlerts": "Alerty na pulpicie",
+      "desktopAlertsDescription": "Natywne powiadomienia dla śledzonych graczy i ulubionych serwerów.",
+      "notifications": "Powiadomienia i niezgoda",
+      "notificationsDescription": "Dostęp do łączenia kont Discord i reguł powiadomień.",
+      "discordPresence": "Obecność Discorda",
+      "discordPresenceDescription": "Bogata obecność Discord, gdy QLTracker jest otwarty."
+    },
+    "backToApp": "Powrót do aplikacji",
+    "trayModeTitle": "Tryb tacy",
+    "trayModeDescription": "Utrzymuj QLTracker działający w tle dzięki ikonie na pasku zadań i szybkim działaniom.",
+    "closeToTrayTitle": "Zamknij okno do zasobnika",
+    "closeToTrayDescription": "Ukryj QLTracker zamiast wychodzić po zamknięciu głównego okna.",
+    "startMinimizedTitle": "Rozpocznij zminimalizowany do zasobnika",
+    "startMinimizedDescription": "Uruchom QLTracker w tle, dopóki nie przywrócisz go z ikony w zasobniku.",
+    "desktopAlertsTitle": "Alerty na pulpicie",
+    "desktopAlertsDescription": "Wysyłaj natywne powiadomienia na pulpit dla śledzonych graczy i ulubionych serwerów.",
+    "desktopAlertsPausedTitle": "Wstrzymaj alerty na pulpicie",
+    "desktopAlertsPausedDescription": "Tymczasowo wycisz wszystkie alerty na pulpicie bez zmiany reguł alertów.",
+    "trackedPlayerAlertsTitle": "Śledzone alerty graczy",
+    "trackedPlayerAlertsDescription": "Powiadamiaj, gdy pojawi się obserwowany gracz lub przejdzie na inny serwer. Wymaga zaplecza czasu rzeczywistego.",
+    "favoriteServerAlertsTitle": "Ulubione alerty serwera",
+    "favoriteServerAlertsDescription": "Powiadamiaj, gdy ulubiony serwer osiągnie Twój próg gracza.",
+    "favoriteServerThresholdTitle": "Próg ulubionego gracza serwerowego",
+    "favoriteServerThresholdDescription": "Wyślij alert, gdy ulubiony serwer przekroczy tę liczbę graczy.",
+    "favoriteServerThresholdPlaceholder": "Gracze",
+    "discordLinkTitle": "Link do konta Discord",
+    "discordLinkDescription": "Połącz Discord, aby zarządzać dostarczaniem powiadomień przez DM i statusem konta.",
+    "notificationsManageRulesTitle": "Zasady powiadamiania",
+    "notificationsManageRulesDescription": "Reguły Discord DM specyficzne dla serwera są zarządzane z listy serwerów.",
+    "notificationsManageRulesHint": "Otwórz serwer i użyj akcji powiadomienia Discord, aby utworzyć lub edytować regułę."
+  },
+  "language": {
+    "en": "English",
+    "de": "Deutsch",
+    "bg": "Български",
+    "ru": "Русский",
+    "uk": "Українська",
+    "hr": "Hrvatski",
+    "sr": "Српски",
+    "fr": "Français",
+    "it": "Italiano",
+    "et": "Eesti",
+    "nl": "Nederlands",
+    "fi": "Suomi",
+    "sv": "Svenska",
+    "hu": "Magyar",
+    "da": "Dansk",
+    "lv": "Latviešu",
+    "nb": "Norsk Bokmål",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ka": "ქართული",
+    "zh-Hant": "繁體中文",
+    "zh-Hans": "简体中文",
+    "es": "Español",
+    "pt-BR": "Português (Brasil)",
+    "pl": "Polski",
+    "ro": "Română",
+    "lt": "Lietuvių",
+    "cs": "Čeština"
+  },
+  "favorites": {
+    "lists": "Listy",
+    "refresh": "Odśwież",
+    "createList": "Utwórz listę",
+    "createDialogTitle": "Utwórz listę ulubionych",
+    "createDialogDescription": "Utwórz listę do organizacji zapisanych serwerów.",
+    "listNamePlaceholder": "Nazwa listy",
+    "playersTooltip": "Łączna liczba graczy na żywo",
+    "favoriteServers": "Ulubione serwery",
+    "savedServers_one": "{{count}} saved server",
+    "savedServers_other": "{{count}} saved servers",
+    "noLists": "Nie ma jeszcze list. Utwórz pierwszą listę, aby zacząć.",
+    "noServers": "Na tej liście nie zapisano jeszcze serwerów.",
+    "deleteList": "Usuń listę",
+    "deleteDialogTitle": "Usuń listę ulubionych",
+    "deleteDialogDescription": "Usunąć \"{{list}}\"? Serwery zapisane tylko na tej liście zostaną usunięte z ulubionych.",
+    "deleteDialogCancel": "Anuluj",
+    "toasts": {
+      "listDeleted": "Usunięto \"{{list}}\"."
+    }
+  },
+  "watchlist": {
+    "title": "Lista obserwowanych graczy",
+    "summary_one": "{{online}} online z {{count}} obserwowanego gracza",
+    "summary_other": "{{online}} online z {{count}} obserwowanych graczy",
+    "onlineCount": "{{count}} online",
+    "serviceUnavailableBadge": "Status na żywo niedostępny",
+    "emptyTitle": "Brak obserwowanych graczy",
+    "emptyDescription": "Obserwuj graczy z panelu serwera, aby widzieć, gdzie grają.",
+    "emptyHint": "Otwórz dowolny serwer i użyj przycisku obserwowania obok gracza z rozpoznanym SteamID.",
+    "offline": "Offline",
+    "updatedUnavailable": "Niedostępne",
+    "statusOnline": "Online",
+    "statusOffline": "Offline",
+    "statusUnavailable": "Niedostępne",
+    "toasts": {
+      "tracked": "{{player}} dodano do obserwowanych.",
+      "untracked": "{{player}} usunięto z obserwowanych.",
+      "noteSaved": "Notatka dla {{player}} została zapisana.",
+      "noteCleared": "Notatka dla {{player}} została usunięta.",
+      "steamIdCopied": "SteamID skopiowano.",
+      "steamIdCopyError": "Nie udało się skopiować SteamID."
+    },
+    "columns": {
+      "player": "Gracz",
+      "status": "Status",
+      "server": "Serwer",
+      "map": "Mapa",
+      "mode": "Tryb",
+      "actions": "Działania"
+    },
+    "noteDialog": {
+      "clear": "Wyczyść notatkę",
+      "description": "Dodaj lokalną notatkę dla {{player}}.",
+      "hint": "Notatki są przechowywane tylko na tym urządzeniu.",
+      "label": "Notatka",
+      "placeholder": "Dodaj notatkę o tym graczu...",
+      "save": "Zapisz notatkę",
+      "title": "Notatka o graczu"
+    },
+    "actions": {
+      "copySteamId": "Kopiuj SteamID",
+      "editNote": "Edytuj notatkę",
+      "viewServer": "Pokaż serwer"
+    }
+  },
+  "filters": {
+    "title": "Filtry",
+    "expand": "Rozwiń filtry",
+    "collapse": "Filtry zwijania",
+    "searchPlaceholder": "Nazwa serwera wyszukiwania",
+    "showFull": "Pokaż pełną",
+    "showEmpty": "Pokaż puste",
+    "showFavorites": "Pokaż ulubione",
+    "clearAll": "Wyczyść wszystko",
+    "regions": {
+      "all": "Wszystkie regiony",
+      "eu": "Europa",
+      "na": "Ameryka Północna",
+      "sa": "Ameryka Południowa",
+      "za": "Republika Południowej Afryki",
+      "apac": "Azja Pacyfik"
+    },
+    "visibility": {
+      "all": "Wszystkie serwery",
+      "public": "Publiczny",
+      "private": "Prywatne"
+    },
+    "modes": {
+      "all": "Wszystkie tryby",
+      "ca": "Klan Arena",
+      "duel": "Duel",
+      "ffa": "Free For All",
+      "tdm": "Zespół Deathmatch",
+      "ctf": "CTF",
+      "ad": "Atak i obrona",
+      "dom": "Dominacja",
+      "ft": "Zatrzymaj znacznik",
+      "har": "Żniwiarz",
+      "race": "Wyścig",
+      "rr": "Red Rover"
+    },
+    "rating": {
+      "title": "Ocena",
+      "description": "Filtruj serwery średnio QElo lub TSkill.",
+      "systemPlaceholder": "System ratingowy",
+      "qelo": "QElo",
+      "trueskill": "TSkill"
+    },
+    "maps": {
+      "all": "Wszystkie mapy",
+      "selectedCount": "{{count}} maps selected",
+      "searchPlaceholder": "Szukaj map...",
+      "empty": "Nie znaleziono map."
+    },
+    "tags": {
+      "label": "Tags",
+      "selectedCount": "{{count}}+ tags",
+      "none": "Nie wybrano znaczników.",
+      "inputPlaceholder": "Wpisz znacznik i naciśnij Enter"
+    }
+  },
+  "releaseNotes": {
+    "title": "Co nowego w {{version}}",
+    "publishedOn": "Opublikowano {{data}}",
+    "close": "Zamknij"
+  }
+}
