@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer, useRef } from "react"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import {
   appendPickupLog,
@@ -151,6 +151,7 @@ export function usePickupState(
 ) {
   const realtimeAvailable = isPickupRealtimeConfigured()
   const mockMode = pickupMockMode
+  const queryClient = useQueryClient()
   const [state, dispatch] = useReducer(
     pickupStateReducer,
     {
@@ -361,9 +362,10 @@ export function usePickupState(
         type: "set_public_state",
         nextState: publicQuery.data,
       })
+      queryClient.setQueryData(["pickup", "public-state"], publicQuery.data)
       logPublicStateSnapshot("pickup.query.public_state", publicQuery.data)
     }
-  }, [logPublicStateSnapshot, publicQuery.data, realtimeAvailable])
+  }, [logPublicStateSnapshot, publicQuery.data, queryClient, realtimeAvailable])
 
   useEffect(() => {
     if (playerQuery.data) {
@@ -424,6 +426,7 @@ export function usePickupState(
         type: "set_public_state",
         nextState,
       })
+      queryClient.setQueryData(["pickup", "public-state"], nextState)
       logPublicStateSnapshot("pickup.socket.public_state", nextState)
     }
 
@@ -475,6 +478,7 @@ export function usePickupState(
     logPlayerStateSnapshot,
     logPublicStateSnapshot,
     mockMode,
+    queryClient,
     realtimeAvailable,
     refetchPlayerState,
     refetchPublicState,
@@ -517,6 +521,7 @@ export function usePickupState(
           type: "set_public_state",
           nextState: nextPublicResult.data,
         })
+        queryClient.setQueryData(["pickup", "public-state"], nextPublicResult.data)
         logPublicStateSnapshot(
           "pickup.ready_timeout.public_state",
           nextPublicResult.data
@@ -555,6 +560,7 @@ export function usePickupState(
     logPlayerStateSnapshot,
     logPublicStateSnapshot,
     mockMode,
+    queryClient,
     refetchPlayerState,
     playerState,
     refetchPublicState,

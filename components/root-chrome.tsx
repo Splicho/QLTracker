@@ -220,10 +220,10 @@ export function RootChrome({
       sidebar={
         <AppSidebar
           initialNewsArticles={initialNewsArticles}
+          initialPickupPublicState={initialPickupState?.publicState ?? null}
           initialReadNewsSlugs={initialReadNewsSlugs}
           noticeVisible={activeNotice != null}
           pickupPlayer={pickupAuth.player}
-          pickupQueueCount={pickupState.publicState?.queue?.currentPlayers ?? 0}
         />
       }
     />

@@ -30,7 +30,12 @@ import {
   parseReadNewsSlugsCookie,
   serializeReadNewsSlugsCookie,
 } from "@/lib/news-read-state"
-import { type PickupPlayer } from "@/lib/pickup"
+import {
+  fetchPickupPublicState,
+  isPickupRealtimeConfigured,
+  type PickupPlayer,
+  type PickupPublicState,
+} from "@/lib/pickup"
 import {
   fetchRealtimePlayerPresenceLookup,
   isRealtimeEnabled,
@@ -138,15 +143,15 @@ function getSettingsHref(section: SettingsSectionId) {
 
 export function AppSidebar({
   initialNewsArticles = [],
+  initialPickupPublicState = null,
   initialReadNewsSlugs = [],
   pickupPlayer,
-  pickupQueueCount = null,
   noticeVisible = false,
 }: {
   initialNewsArticles?: NewsArticleDto[]
+  initialPickupPublicState?: PickupPublicState | null
   initialReadNewsSlugs?: string[]
   pickupPlayer?: PickupPlayer | null
-  pickupQueueCount?: number | null
   noticeVisible?: boolean
 }) {
   const lastAppPathStorageKey = "qltracker-last-app-path"
@@ -156,6 +161,7 @@ export function AppSidebar({
   const { players: trackedPlayers } = useTrackedPlayers()
   const { servers: liveServers } = useLiveServers()
   const realtimeAvailable = isRealtimeEnabled()
+  const pickupRealtimeAvailable = isPickupRealtimeConfigured()
   const isSettingsPage = pathname.startsWith("/settings")
   const settingsSection: SettingsSectionId = pathname.startsWith(
     "/settings/profile"
@@ -188,6 +194,15 @@ export function AppSidebar({
     queryFn: fetchNewsArticlesQuery,
     initialData: initialNewsArticles,
     staleTime: 60_000,
+  })
+  const pickupPublicStateQuery = useQuery({
+    queryKey: ["pickup", "public-state"],
+    queryFn: fetchPickupPublicState,
+    enabled: pickupRealtimeAvailable,
+    initialData: initialPickupPublicState ?? undefined,
+    staleTime: 10_000,
+    refetchInterval: 15_000,
+    placeholderData: (previous) => previous,
   })
   const readNewsSlugsSnapshot = useSyncExternalStore(
     (onStoreChange) => {
@@ -236,6 +251,14 @@ export function AppSidebar({
   const overallQuakeLivePlayers = useMemo(
     () => liveServers.reduce((sum, server) => sum + (server.players ?? 0), 0),
     [liveServers]
+  )
+  const pickupQueueCount = useMemo(
+    () =>
+      (pickupPublicStateQuery.data?.queues ?? []).reduce(
+        (sum, queue) => sum + queue.currentPlayers,
+        0
+      ),
+    [pickupPublicStateQuery.data]
   )
   const currentNewsSlug = useMemo(() => {
     if (!pathname.startsWith("/news/")) {
