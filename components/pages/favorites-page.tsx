@@ -110,7 +110,7 @@ export function FavoritesPage({
           </div>
           <Dialog open={createListOpen} onOpenChange={setCreateListOpen}>
             <DialogTrigger asChild>
-              <Button className="w-full">{t("favorites.createList")}</Button>
+              <Button className="self-start">{t("favorites.createList")}</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
