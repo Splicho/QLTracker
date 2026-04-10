@@ -47,6 +47,14 @@ function getHeaderState(pathname: string) {
     return { pageTitle: "Leaderboard" }
   }
 
+  if (pathname.startsWith("/privacy-policy")) {
+    return { pageTitle: "Privacy Policy" }
+  }
+
+  if (pathname.startsWith("/cookie-policy")) {
+    return { pageTitle: "Cookie Policy" }
+  }
+
   if (pathname.startsWith("/news/archive")) {
     return { breadcrumbParent: "News", pageTitle: "Article Archive" }
   }
@@ -204,7 +212,12 @@ export function RootChrome({
         />
       }
       notice={activeNotice ? <NoticeBar notice={activeNotice} /> : null}
-      sidebar={<AppSidebar pickupPlayer={pickupAuth.player} />}
+      sidebar={
+        <AppSidebar
+          noticeVisible={activeNotice != null}
+          pickupPlayer={pickupAuth.player}
+        />
+      }
     />
   )
 }

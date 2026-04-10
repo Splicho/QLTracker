@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Cookie, Shield } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import packageJson from "../../package.json"
 import { useQuery } from "@tanstack/react-query"
@@ -114,8 +114,10 @@ function getSettingsHref(section: SettingsSectionId) {
 
 export function AppSidebar({
   pickupPlayer,
+  noticeVisible = false,
 }: {
   pickupPlayer?: PickupPlayer | null
+  noticeVisible?: boolean
 }) {
   const lastAppPathStorageKey = "qltracker-last-app-path"
   const pathname = usePathname() ?? "/servers"
@@ -263,7 +265,15 @@ export function AppSidebar({
   }
 
   return (
-    <Sidebar className="!p-0" collapsible="icon" variant="inset">
+    <Sidebar
+      className={
+        noticeVisible
+          ? "!top-12 !h-[calc(100svh-3rem)] !p-0"
+          : "!p-0"
+      }
+      collapsible="icon"
+      variant="inset"
+    >
       <SidebarHeader>
         <div className="relative h-14 px-2">
           <div className="absolute inset-y-0 left-2 flex items-center group-data-[collapsible=icon]:hidden">
@@ -411,6 +421,41 @@ export function AppSidebar({
           </SidebarMenuItem>
         </SidebarMenu>
         <Dialog onOpenChange={setAboutOpen} open={aboutOpen}>
+          <SidebarMenu>
+            <SidebarMenuItem className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
+              <SidebarMenuButton
+                asChild
+                className="cursor-pointer group-data-[collapsible=icon]:!size-10 group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!p-0 [&_svg]:size-5!"
+                isActive={pathname.startsWith("/privacy-policy")}
+                size="lg"
+                tooltip="Privacy Policy"
+              >
+                <Link href="/privacy-policy">
+                  <Shield className="size-5" />
+                  <span className="group-data-[collapsible=icon]:hidden">
+                    Privacy Policy
+                  </span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
+              <SidebarMenuButton
+                asChild
+                className="cursor-pointer group-data-[collapsible=icon]:!size-10 group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!p-0 [&_svg]:size-5!"
+                isActive={pathname.startsWith("/cookie-policy")}
+                size="lg"
+                tooltip="Cookie Policy"
+              >
+                <Link href="/cookie-policy">
+                  <Cookie className="size-5" />
+                  <span className="group-data-[collapsible=icon]:hidden">
+                    Cookie Policy
+                  </span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+          <div className="border-t border-sidebar-border" />
           <SidebarMenu>
             <SidebarMenuItem className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
               <SidebarMenuButton
