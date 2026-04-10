@@ -450,7 +450,7 @@ export function AppSidebar({
                     </div>
                   </TooltipTrigger>
                   <TooltipContent side="top">
-                    {overallQuakeLivePlayers} players on Quake Live servers
+                    Players on Quake Live servers
                   </TooltipContent>
                 </Tooltip>
                 <Tooltip>
@@ -468,7 +468,7 @@ export function AppSidebar({
                     </div>
                   </TooltipTrigger>
                   <TooltipContent side="top">
-                    {pickupQueueCount ?? 0} players currently in pickup queue
+                    Players currently in pickup queue
                   </TooltipContent>
                 </Tooltip>
               </div>
