@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { ArrowLeft, Cookie, Shield } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react"
 import packageJson from "../../package.json"
 import { useQuery } from "@tanstack/react-query"
 import {
@@ -22,6 +22,13 @@ import {
 } from "@/components/icon"
 import { useFavorites } from "@/hooks/use-favorites"
 import { useTrackedPlayers } from "@/hooks/use-tracked-players"
+import { fetchNewsArticlesQuery, newsQueryKeys } from "@/lib/news-query"
+import {
+  READ_NEWS_SLUGS_COOKIE_NAME,
+  getReadNewsSlugsCookieMaxAge,
+  parseReadNewsSlugsCookie,
+  serializeReadNewsSlugsCookie,
+} from "@/lib/news-read-state"
 import { type PickupPlayer } from "@/lib/pickup"
 import {
   fetchRealtimePlayerPresenceLookup,
@@ -31,6 +38,7 @@ import {
   settingsNavigationItems,
   type SettingsSectionId,
 } from "@/lib/settings-navigation"
+import type { NewsArticleDto } from "@/lib/server/news"
 import { openExternalUrl } from "@/lib/open-url"
 import {
   Dialog,
@@ -40,6 +48,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Badge } from "@/components/ui/badge"
 import {
   Sidebar,
   SidebarContent,
@@ -92,6 +101,20 @@ const competitiveNavigationItems: readonly NavItem[] = [
   },
 ] as const
 
+const NEWS_READ_STATE_EVENT = "qltracker-news-read-state"
+
+function readNewsSlugsCookieSnapshot() {
+  if (typeof document === "undefined") {
+    return ""
+  }
+
+  const match = document.cookie.match(
+    new RegExp(`(?:^|; )${READ_NEWS_SLUGS_COOKIE_NAME}=([^;]*)`)
+  )
+
+  return match ? decodeURIComponent(match[1]) : ""
+}
+
 function isItemActive(pathname: string, href: string) {
   if (href === "/servers") {
     return pathname === "/" || pathname === href
@@ -113,9 +136,13 @@ function getSettingsHref(section: SettingsSectionId) {
 }
 
 export function AppSidebar({
+  initialNewsArticles = [],
+  initialReadNewsSlugs = [],
   pickupPlayer,
   noticeVisible = false,
 }: {
+  initialNewsArticles?: NewsArticleDto[]
+  initialReadNewsSlugs?: string[]
   pickupPlayer?: PickupPlayer | null
   noticeVisible?: boolean
 }) {
@@ -153,6 +180,32 @@ export function AppSidebar({
     refetchInterval: 15_000,
     placeholderData: (previous) => previous,
   })
+  const latestNewsArticleQuery = useQuery({
+    queryKey: newsQueryKeys.articles,
+    queryFn: fetchNewsArticlesQuery,
+    initialData: initialNewsArticles,
+    staleTime: 60_000,
+  })
+  const readNewsSlugsSnapshot = useSyncExternalStore(
+    (onStoreChange) => {
+      if (typeof window === "undefined") {
+        return () => undefined
+      }
+
+      const handleChange = () => onStoreChange()
+      window.addEventListener(NEWS_READ_STATE_EVENT, handleChange)
+
+      return () => {
+        window.removeEventListener(NEWS_READ_STATE_EVENT, handleChange)
+      }
+    },
+    readNewsSlugsCookieSnapshot,
+    () => serializeReadNewsSlugsCookie(initialReadNewsSlugs)
+  )
+  const readNewsSlugs = useMemo(
+    () => parseReadNewsSlugsCookie(readNewsSlugsSnapshot),
+    [readNewsSlugsSnapshot]
+  )
   const onlineTrackedPlayerCount = useMemo(
     () =>
       Object.values(trackedPresenceQuery.data ?? {}).filter(
@@ -177,6 +230,37 @@ export function AppSidebar({
       return sum + (server.players ?? 0)
     }, 0)
   }, [favoritesState.servers, liveServers])
+  const currentNewsSlug = useMemo(() => {
+    if (!pathname.startsWith("/news/")) {
+      return null
+    }
+
+    const slug = pathname.slice("/news/".length).split("/")[0]
+    return slug ? decodeURIComponent(slug) : null
+  }, [pathname])
+  const unreadNewsCount = useMemo(() => {
+    const readSlugs = new Set(readNewsSlugs)
+
+    if (currentNewsSlug) {
+      readSlugs.add(currentNewsSlug)
+    }
+
+    return (latestNewsArticleQuery.data ?? []).reduce((count, article) => {
+      return readSlugs.has(article.slug) ? count : count + 1
+    }, 0)
+  }, [currentNewsSlug, latestNewsArticleQuery.data, readNewsSlugs])
+
+  useEffect(() => {
+    if (!currentNewsSlug || readNewsSlugs.includes(currentNewsSlug)) {
+      return
+    }
+
+    const encodedValue = encodeURIComponent(
+      serializeReadNewsSlugsCookie([currentNewsSlug, ...readNewsSlugs])
+    )
+    document.cookie = `${READ_NEWS_SLUGS_COOKIE_NAME}=${encodedValue}; path=/; max-age=${getReadNewsSlugsCookieMaxAge()}`
+    window.dispatchEvent(new Event(NEWS_READ_STATE_EVENT))
+  }, [currentNewsSlug, readNewsSlugs])
   const lastAppPath = useMemo(() => {
     if (!isSettingsPage) {
       return pathname
@@ -258,6 +342,20 @@ export function AppSidebar({
             <TooltipContent side="top">
               {onlineTrackedPlayerCount} online
             </TooltipContent>
+          </Tooltip>
+        ) : item.id === "news" && unreadNewsCount > 0 ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <SidebarMenuBadge className="pointer-events-auto top-1/2 right-2 z-[150] -translate-y-1/2 bg-transparent p-0 peer-data-[size=default]/menu-button:top-1/2 peer-data-[size=lg]/menu-button:top-1/2 peer-data-[size=sm]/menu-button:top-1/2">
+                <Badge
+                  variant="destructive"
+                  className="size-5 rounded-full p-0 text-[11px] font-semibold"
+                >
+                  1
+                </Badge>
+              </SidebarMenuBadge>
+            </TooltipTrigger>
+            <TooltipContent side="top">Unread article available</TooltipContent>
           </Tooltip>
         ) : null}
       </SidebarMenuItem>

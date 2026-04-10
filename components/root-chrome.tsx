@@ -11,6 +11,7 @@ import { usePickupAuth } from "@/hooks/use-pickup-auth"
 import { usePickupState } from "@/hooks/use-pickup-state"
 import { fetchNewsArticleQuery, newsQueryKeys } from "@/lib/news-query"
 import { fetchPickupNotices } from "@/lib/pickup"
+import type { NewsArticleDto } from "@/lib/server/news"
 import type { PublicPickupNoticeDto } from "@/lib/server/notices"
 import type { InitialPickupBrowserState } from "@/lib/server/pickup-browser"
 
@@ -88,12 +89,16 @@ function getHeaderState(pathname: string) {
 
 export function RootChrome({
   children,
+  initialNewsArticles = [],
   initialNotices,
   initialPickupState,
+  initialReadNewsSlugs = [],
 }: {
   children: React.ReactNode
+  initialNewsArticles?: NewsArticleDto[]
   initialNotices: PublicPickupNoticeDto[]
   initialPickupState?: InitialPickupBrowserState
+  initialReadNewsSlugs?: string[]
 }) {
   const pathname = usePathname() ?? "/"
   const newsArticleSlug =
@@ -214,6 +219,8 @@ export function RootChrome({
       notice={activeNotice ? <NoticeBar notice={activeNotice} /> : null}
       sidebar={
         <AppSidebar
+          initialNewsArticles={initialNewsArticles}
+          initialReadNewsSlugs={initialReadNewsSlugs}
           noticeVisible={activeNotice != null}
           pickupPlayer={pickupAuth.player}
         />

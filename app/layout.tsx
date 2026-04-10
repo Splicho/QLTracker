@@ -11,7 +11,12 @@ import {
   COOKIE_CONSENT_COOKIE_NAME,
   isCookieConsentValue,
 } from "@/lib/cookie-consent"
+import {
+  parseReadNewsSlugsCookie,
+  READ_NEWS_SLUGS_COOKIE_NAME,
+} from "@/lib/news-read-state"
 import { createSiteMetadata } from "@/lib/seo"
+import { listNewsArticleDtos } from "@/lib/server/news"
 import { getInitialPickupBrowserState } from "@/lib/server/pickup-browser"
 import { listPublicPickupNoticeDtos } from "@/lib/server/notices"
 import {
@@ -38,6 +43,9 @@ export default async function RootLayout({
     process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim() ?? ""
   const cookieStore = await cookies()
   const consentValue = cookieStore.get(COOKIE_CONSENT_COOKIE_NAME)?.value
+  const initialReadNewsSlugs = parseReadNewsSlugsCookie(
+    cookieStore.get(READ_NEWS_SLUGS_COOKIE_NAME)?.value
+  )
   const initialThemeValue = cookieStore.get(THEME_COOKIE_NAME)?.value
   const initialTheme = isTheme(initialThemeValue) ? initialThemeValue : "system"
   const initialResolvedTheme = getServerResolvedTheme(
@@ -48,10 +56,12 @@ export default async function RootLayout({
   const initialCookieConsent = isCookieConsentValue(consentValue)
     ? consentValue
     : null
-  const [initialPickupState, initialNotices] = await Promise.all([
-    getInitialPickupBrowserState(),
-    listPublicPickupNoticeDtos(),
-  ])
+  const [initialNewsArticles, initialPickupState, initialNotices] =
+    await Promise.all([
+      listNewsArticleDtos(),
+      getInitialPickupBrowserState(),
+      listPublicPickupNoticeDtos(),
+    ])
 
   return (
     <html
@@ -74,8 +84,10 @@ export default async function RootLayout({
         >
           <AppQueryProvider>
             <RootChrome
+              initialNewsArticles={initialNewsArticles}
               initialNotices={initialNotices}
               initialPickupState={initialPickupState}
+              initialReadNewsSlugs={initialReadNewsSlugs}
             >
               {children}
             </RootChrome>

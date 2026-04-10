@@ -118,6 +118,8 @@ function pickupStateReducer(
     case "reset_session":
       return {
         ...state,
+        dismissedCompletedMatchId: null,
+        playerState: null,
         readyActionPending: false,
       }
     case "set_mock_stage":
