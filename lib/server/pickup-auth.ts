@@ -114,19 +114,73 @@ function shouldOmitCookieDomainForRequest(request: Request | undefined): boolean
   }
 }
 
+/** Treat as HTTPS when TLS terminates at Cloudflare/nginx and Node sees http://localhost. */
+function isRequestEffectivelyHttps(request: Request | undefined): boolean {
+  if (!request) {
+    return false
+  }
+
+  const forwarded = request.headers.get("x-forwarded-proto")
+  if (forwarded) {
+    const first = forwarded.split(",")[0]?.trim().toLowerCase()
+    if (first === "https") {
+      return true
+    }
+    if (first === "http") {
+      return false
+    }
+  }
+
+  try {
+    return new URL(request.url).protocol === "https:"
+  } catch {
+    return false
+  }
+}
+
+/**
+ * `Secure` must match what the browser used. If we only look at `NODE_ENV` + PUBLIC_BASE_URL,
+ * we set `Secure` while Next still sees `http://localhost:3000` — the cookie is dropped.
+ * Prefer `x-forwarded-proto` when present.
+ */
+function shouldUseSecurePickupCookie(
+  request: Request | undefined,
+  publicBaseUrl: string
+): boolean {
+  if (request) {
+    return isRequestEffectivelyHttps(request)
+  }
+
+  return (
+    process.env.NODE_ENV === "production" || isHttpsPublicUrl(publicBaseUrl)
+  )
+}
+
 /** Use for Set-Cookie on browser pickup sessions (Steam callback, etc.). */
 export function getPickupSessionCookieSetOptions(request?: Request) {
   const env = getNotificationEnv()
   const publicBaseUrl = env.PUBLIC_BASE_URL.replace(/\/$/, "")
   const omitDomain = shouldOmitCookieDomainForRequest(request)
   const domain = omitDomain ? undefined : resolvePickupAuthCookieDomain()
-  const secure =
-    process.env.NODE_ENV === "production" || isHttpsPublicUrl(publicBaseUrl)
+  const secure = shouldUseSecurePickupCookie(request, publicBaseUrl)
 
-  if (omitDomain && isPickupAuthDebugEnabled()) {
-    logPickupAuthDebug(
-      "getPickupSessionCookieSetOptions: omitting Domain (request.url host ≠ PUBLIC_BASE_URL host; reverse proxy / Cloudflare)"
-    )
+  if (isPickupAuthDebugEnabled()) {
+    if (omitDomain) {
+      logPickupAuthDebug(
+        "getPickupSessionCookieSetOptions: omitting Domain (request.url host ≠ PUBLIC_BASE_URL host; reverse proxy / Cloudflare)"
+      )
+    }
+    logPickupAuthDebug("getPickupSessionCookieSetOptions: secure flag", {
+      secure,
+      requestUrlProtocol: (() => {
+        try {
+          return new URL(request?.url ?? "about:blank").protocol
+        } catch {
+          return "invalid"
+        }
+      })(),
+      xForwardedProto: request?.headers.get("x-forwarded-proto") ?? null,
+    })
   }
 
   return {
