@@ -1,8 +1,10 @@
+import type { Server as HttpServer } from 'node:http';
 import { Client, GatewayIntentBits } from 'discord.js';
 
 import { botDefinitions } from '../bots/definitions.js';
 import { registerEvents } from '../discord/register-events.js';
 import { createDiscordEvents } from '../events/index.js';
+import { startPickupQueueAlertsWebhook } from '../features/pickup-queue-alerts/webhook-server.js';
 import { logger } from '../shared/logger.js';
 
 import type { BotDefinition } from '../bots/types.js';
@@ -18,7 +20,10 @@ function createClient(): Client {
   });
 }
 
-function registerShutdownHandlers(runtimes: readonly BotRuntime[]): void {
+function registerShutdownHandlers(
+  runtimes: readonly BotRuntime[],
+  cleanupCallbacks: readonly (() => void)[],
+): void {
   let isShuttingDown = false;
 
   const shutdown = (signal: NodeJS.Signals): void => {
@@ -29,6 +34,10 @@ function registerShutdownHandlers(runtimes: readonly BotRuntime[]): void {
     isShuttingDown = true;
 
     logger.info({ signal, botCount: runtimes.length }, 'Shutting down Discord bots');
+
+    for (const cleanup of cleanupCallbacks) {
+      cleanup();
+    }
 
     for (const runtime of runtimes) {
       runtime.client.destroy();
@@ -56,18 +65,26 @@ export async function startBots(): Promise<void> {
     bot,
     client: createClient()
   }));
-
-  registerShutdownHandlers(runtimes);
+  let queueAlertsServer: HttpServer | null = null;
 
   try {
     await Promise.all(runtimes.map((runtime) => startRuntime(runtime)));
+    queueAlertsServer = startPickupQueueAlertsWebhook(runtimes);
   } catch (error: unknown) {
+    queueAlertsServer?.close();
+
     for (const runtime of runtimes) {
       runtime.client.destroy();
     }
 
     throw error;
   }
+
+  registerShutdownHandlers(runtimes, [
+    () => {
+      queueAlertsServer?.close();
+    }
+  ]);
 
   logger.info({ botCount: runtimes.length }, 'Configured Discord bots started');
 }

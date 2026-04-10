@@ -12,6 +12,10 @@ const envSchema = z
     DISCORD_SECONDARY_CLIENT_ID: z.string().min(1).optional(),
     DISCORD_SECONDARY_GUILD_ID: z.string().min(1).optional(),
     DISCORD_SECONDARY_NAME: z.string().min(1).default('secondary'),
+    INTERNAL_WEBHOOK_PORT: z.coerce.number().int().positive().default(8788),
+    PICKUP_QUEUE_ALERTS_CHANNEL_ID: z.string().min(1).optional(),
+    PICKUP_QUEUE_ALERTS_ROLE_ID: z.string().min(1).optional(),
+    PICKUP_QUEUE_ALERTS_WEBHOOK_SECRET: z.string().min(16).optional(),
     LOG_LEVEL: z
       .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])
       .default('info')
@@ -38,6 +42,45 @@ const envSchema = z
         code: z.ZodIssueCode.custom,
         path: ['DISCORD_SECONDARY_CLIENT_ID'],
         message: 'DISCORD_SECONDARY_CLIENT_ID is required when configuring the secondary bot'
+      });
+    }
+
+    const hasQueueAlertsChannelId = Boolean(value.PICKUP_QUEUE_ALERTS_CHANNEL_ID);
+    const hasQueueAlertsSecret = Boolean(value.PICKUP_QUEUE_ALERTS_WEBHOOK_SECRET);
+
+    if (!hasQueueAlertsChannelId && !hasQueueAlertsSecret) {
+      return;
+    }
+
+    if (!hasSecondaryToken) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['DISCORD_SECONDARY_TOKEN'],
+        message: 'DISCORD_SECONDARY_TOKEN is required when pickup queue alerts are enabled'
+      });
+    }
+
+    if (!hasSecondaryClientId) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['DISCORD_SECONDARY_CLIENT_ID'],
+        message: 'DISCORD_SECONDARY_CLIENT_ID is required when pickup queue alerts are enabled'
+      });
+    }
+
+    if (!hasQueueAlertsChannelId) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['PICKUP_QUEUE_ALERTS_CHANNEL_ID'],
+        message: 'PICKUP_QUEUE_ALERTS_CHANNEL_ID is required when pickup queue alerts are enabled'
+      });
+    }
+
+    if (!hasQueueAlertsSecret) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['PICKUP_QUEUE_ALERTS_WEBHOOK_SECRET'],
+        message: 'PICKUP_QUEUE_ALERTS_WEBHOOK_SECRET is required when pickup queue alerts are enabled'
       });
     }
   });
