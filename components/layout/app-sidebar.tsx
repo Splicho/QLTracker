@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import NumberFlow from "@number-flow/react"
+import { AnimatePresence, motion } from "framer-motion"
 import { ArrowLeft, Cookie, Shield } from "lucide-react"
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react"
 import packageJson from "../../package.json"
@@ -139,6 +139,34 @@ function getSettingsHref(section: SettingsSectionId) {
   }
 
   return "/settings"
+}
+
+function SidebarAnimatedCount({ value }: { value: number }) {
+  const digits = value.toString().split("")
+
+  return (
+    <span className="inline-flex items-center justify-start text-sm font-semibold leading-none text-foreground tabular-nums">
+      {digits.map((digit, index) => (
+        <span
+          className="relative inline-flex h-[1em] w-[0.68em] items-center justify-center overflow-hidden"
+          key={index}
+        >
+          <AnimatePresence initial={false} mode="popLayout">
+            <motion.span
+              key={`${index}:${digit}`}
+              animate={{ opacity: 1, y: 0 }}
+              className="absolute inset-0 flex items-center justify-center"
+              exit={{ opacity: 0, y: -8 }}
+              initial={{ opacity: 0, y: 8 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+            >
+              {digit}
+            </motion.span>
+          </AnimatePresence>
+        </span>
+      ))}
+    </span>
+  )
 }
 
 export function AppSidebar({
@@ -462,10 +490,7 @@ export function AppSidebar({
                   <TooltipTrigger asChild>
                     <div className="flex min-w-0 items-center gap-2 px-3 py-2">
                       <GameController className="size-3.5 shrink-0 text-muted-foreground" />
-                      <NumberFlow
-                        className="truncate text-sm font-semibold text-foreground"
-                        value={overallQuakeLivePlayers}
-                      />
+                      <SidebarAnimatedCount value={overallQuakeLivePlayers} />
                       <span className="relative inline-flex size-2 shrink-0">
                         <span className="absolute inset-0 animate-ping rounded-full bg-emerald-400/70" />
                         <span className="relative inline-flex size-2 rounded-full bg-emerald-400" />
@@ -480,10 +505,7 @@ export function AppSidebar({
                   <TooltipTrigger asChild>
                     <div className="flex min-w-0 items-center gap-2 border-l border-sidebar-border px-3 py-2">
                       <Medal className="size-3.5 shrink-0 text-muted-foreground" />
-                      <NumberFlow
-                        className="truncate text-sm font-semibold text-foreground"
-                        value={pickupQueueCount ?? 0}
-                      />
+                      <SidebarAnimatedCount value={pickupQueueCount ?? 0} />
                       <span className="relative inline-flex size-2 shrink-0">
                         <span className="absolute inset-0 animate-ping rounded-full bg-emerald-400/70" />
                         <span className="relative inline-flex size-2 rounded-full bg-emerald-400" />
