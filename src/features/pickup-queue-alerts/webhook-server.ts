@@ -77,7 +77,7 @@ async function postQueueOpenedAlert(
   };
 
   const embed = new EmbedBuilder()
-    .setColor(0x22c55e)
+    .setColor(0xff5c58)
     .setTitle(`${payload.queue.name} queue is now open`)
     .setDescription(`${payload.player.personaName} joined the queue.`)
     .setTimestamp(new Date(payload.joinedAt))
