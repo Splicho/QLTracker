@@ -73,7 +73,7 @@ export function buildSlotEnv(slotDir: string, slot: SlotDefinition) {
     `GAME_PORT=${slot.gamePort}`,
     `ZMQ_PORT=${slot.zmqPort}`,
     `ZMQ_STATS_ENABLE=1`,
-    `ZMQ_STATS_IP=${config.publicIp}`,
+    `ZMQ_STATS_IP=127.0.0.1`,
     `ZMQ_STATS_PORT=${slot.zmqPort}`,
     `ZMQ_STATS_PASSWORD=${config.zmqStatsPassword ?? ""}`,
     `SLOT_DIR=${slotDir}`,

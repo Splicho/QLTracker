@@ -218,7 +218,7 @@ function relayTrackedEvent(
   });
 }
 
-function handleZmqMessage(slotId: number, raw: Buffer) {
+function handleZmqMessage(slotId: number, raw: Buffer | readonly Buffer[]) {
   const slot = getSlotDefinition(slotId);
   const buffer = slotBuffers.get(slotId);
   if (!slot || !buffer) {
@@ -259,11 +259,11 @@ function attachSocket(slotId: number, zmqPort: number) {
     authSocket.plainPassword = credentials.password;
   }
 
-  socket.connect(`tcp://${config.publicIp}:${zmqPort}`);
+  socket.connect(`tcp://127.0.0.1:${zmqPort}`);
   socket.subscribe("");
 
-  socket.on("message", (data: Buffer) => {
-    handleZmqMessage(slotId, data);
+  socket.on("message", (...frames: Buffer[]) => {
+    handleZmqMessage(slotId, frames);
   });
 
   socket.on("error", (error: Error) => {
@@ -272,7 +272,7 @@ function attachSocket(slotId: number, zmqPort: number) {
 
   buffer.socket = socket;
   console.info(
-    `[zmq] connected to slot ${slotId} on ${config.publicIp}:${zmqPort}${credentials ? " with auth" : ""}`,
+    `[zmq] connected to slot ${slotId} on 127.0.0.1:${zmqPort}${credentials ? " with auth" : ""}`,
   );
 }
 
