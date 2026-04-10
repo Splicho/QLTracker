@@ -9,7 +9,7 @@ import {
 
 export const runtime = "nodejs"
 
-export async function GET() {
+export async function GET(request: Request) {
   const cookieStore = await cookies()
   const cookieName = getNotificationEnv().PICKUP_AUTH_COOKIE_NAME
   const token = cookieStore.get(cookieName)?.value
@@ -21,7 +21,7 @@ export async function GET() {
   const response = NextResponse.redirect(
     new URL("/admin/login", getNotificationEnv().PUBLIC_BASE_URL)
   )
-  response.cookies.set(cookieName, "", getPickupSessionCookieDeleteOptions())
+  response.cookies.set(cookieName, "", getPickupSessionCookieDeleteOptions(request))
 
   return response
 }

@@ -84,13 +84,50 @@ function resolvePickupAuthCookieDomain(): string | undefined {
   }
 }
 
+/**
+ * When Cloudflare/nginx forwards to Node, `request.url` is often http://localhost:3000/...
+ * while the browser used https://qltracker.com. Next.js rejects Set-Cookie with
+ * Domain=qltracker.com for that internal host, so the cookie never reaches the client.
+ * Omit Domain in that case; the browser still scopes the cookie to the public host.
+ */
+function shouldOmitCookieDomainForRequest(request: Request | undefined): boolean {
+  if (!request) {
+    return false
+  }
+
+  let publicHost: string
+  try {
+    publicHost = new URL(getNotificationEnv().PUBLIC_BASE_URL).hostname.toLowerCase()
+  } catch {
+    return false
+  }
+
+  if (!publicHost || publicHost === "localhost" || publicHost === "127.0.0.1") {
+    return false
+  }
+
+  try {
+    const requestHost = new URL(request.url).hostname.toLowerCase()
+    return requestHost !== publicHost
+  } catch {
+    return false
+  }
+}
+
 /** Use for Set-Cookie on browser pickup sessions (Steam callback, etc.). */
-export function getPickupSessionCookieSetOptions() {
+export function getPickupSessionCookieSetOptions(request?: Request) {
   const env = getNotificationEnv()
   const publicBaseUrl = env.PUBLIC_BASE_URL.replace(/\/$/, "")
-  const domain = resolvePickupAuthCookieDomain()
+  const omitDomain = shouldOmitCookieDomainForRequest(request)
+  const domain = omitDomain ? undefined : resolvePickupAuthCookieDomain()
   const secure =
     process.env.NODE_ENV === "production" || isHttpsPublicUrl(publicBaseUrl)
+
+  if (omitDomain && isPickupAuthDebugEnabled()) {
+    logPickupAuthDebug(
+      "getPickupSessionCookieSetOptions: omitting Domain (request.url host ≠ PUBLIC_BASE_URL host; reverse proxy / Cloudflare)"
+    )
+  }
 
   return {
     httpOnly: true,
@@ -103,8 +140,8 @@ export function getPickupSessionCookieSetOptions() {
 }
 
 /** Clear cookie with the same domain/path/secure as login so the browser actually drops it. */
-export function getPickupSessionCookieDeleteOptions() {
-  const opts = getPickupSessionCookieSetOptions()
+export function getPickupSessionCookieDeleteOptions(request?: Request) {
+  const opts = getPickupSessionCookieSetOptions(request)
   return {
     ...opts,
     expires: new Date(0),

@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     response.cookies.set(
       getNotificationEnv().PICKUP_AUTH_COOKIE_NAME,
       "",
-      getPickupSessionCookieDeleteOptions()
+      getPickupSessionCookieDeleteOptions(request)
     )
 
     return response

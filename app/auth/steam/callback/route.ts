@@ -168,7 +168,7 @@ export async function GET(request: Request) {
         linkSession.redirectPath || "/admin",
         publicBaseUrl
       )
-      const cookieOpts = getPickupSessionCookieSetOptions()
+      const cookieOpts = getPickupSessionCookieSetOptions(request)
       logPickupAuthDebug("steam callback: success — setting session cookie", {
         PUBLIC_BASE_URL: publicBaseUrl,
         redirectTo: redirectTo.toString(),
