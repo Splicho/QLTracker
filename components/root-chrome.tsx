@@ -7,6 +7,7 @@ import { AppFrame } from "@/components/layout/app-frame"
 import { AppSidebar } from "@/components/layout/app-sidebar"
 import { Header } from "@/components/layout/header"
 import { NoticeBar } from "@/components/layout/notice-bar"
+import { PickupReadyModal } from "@/components/pickup/pickup-ready-modal"
 import { usePickupAuth } from "@/hooks/use-pickup-auth"
 import { usePickupState } from "@/hooks/use-pickup-state"
 import { fetchNewsArticleQuery, newsQueryKeys } from "@/lib/news-query"
@@ -188,6 +189,12 @@ export function RootChrome({
   const pickupStackCapacity =
     activePickupQueue?.playerCount ??
     (pickupStackPlayers.length > 0 ? pickupStackPlayers.length : null)
+  const readyCheckMatch =
+    pickupState.playerState &&
+    "match" in pickupState.playerState &&
+    pickupState.playerState.match.status === "ready_check"
+      ? pickupState.playerState.match
+      : null
 
   if (!isPublicShellPath(pathname)) {
     return <>{children}</>
@@ -195,7 +202,19 @@ export function RootChrome({
 
   return (
     <AppFrame
-      content={children}
+      content={
+        <>
+          {children}
+          {readyCheckMatch ? (
+            <PickupReadyModal
+              currentPlayerId={activePickupViewer?.id ?? null}
+              match={readyCheckMatch}
+              onReadyUp={pickupState.readyUp}
+              readyActionPending={pickupState.readyActionPending}
+            />
+          ) : null}
+        </>
+      }
       header={
         <Header
           breadcrumbParent={resolvedHeaderState.breadcrumbParent}

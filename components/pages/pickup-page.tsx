@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react"
-import { Crown, LoaderCircle, MapPinned, ShieldCheck } from "lucide-react"
-import { Medal, Spinner, Steam } from "@/components/icon"
+import { useEffect, useState } from "react"
+import { Crown, LoaderCircle, MapPinned } from "lucide-react"
+import { Medal, Steam } from "@/components/icon"
 import { PickupEmptyBackground } from "@/components/pickup/pickup-empty-background"
 import { PickupLiveMatches } from "@/components/pickup/pickup-live-matches"
 import { PlayerAvatar } from "@/components/pickup/player-avatar"
@@ -10,12 +10,6 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import {
   Empty,
   EmptyContent,
   EmptyDescription,
@@ -23,12 +17,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { getCountryFlagSrc } from "@/lib/countries"
 import { getMapEntry } from "@/lib/maps"
 import { navigateToUrl } from "@/lib/open-url"
@@ -45,23 +33,6 @@ import type {
   PickupQueueSummary,
 } from "@/lib/pickup"
 
-const fogHornSound = "/sounds/fog_horn.ogg"
-const tickSound = "/sounds/tick.wav"
-const readyCheckFogHornVolume = 0.15
-const readyCheckTickVolume = 0.3
-
-function playAudioClip(audio: HTMLAudioElement | null, volume: number) {
-  if (!audio) {
-    return
-  }
-
-  audio.currentTime = 0
-  audio.volume = volume
-  void audio.play().catch(() => {
-    // Ignore autoplay failures.
-  })
-}
-
 function formatCountdown(deadlineAt: string | null, nowMs = Date.now()) {
   if (!deadlineAt) {
     return "--:--"
@@ -73,10 +44,6 @@ function formatCountdown(deadlineAt: string | null, nowMs = Date.now()) {
   const seconds = totalSeconds % 60
 
   return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
-}
-
-function hasDeadlineExpired(deadlineAt: string | null, nowMs: number) {
-  return deadlineAt ? new Date(deadlineAt).getTime() <= nowMs : false
 }
 
 function formatElapsed(startedAt: string | null, nowMs: number) {
@@ -551,133 +518,6 @@ function PickupActiveMatchLayout({
   )
 }
 
-function ReadyPlayerTile({
-  player,
-  spinnerPlayerId,
-}: {
-  player: PickupMatchPlayerCard
-  spinnerPlayerId: string | null
-}) {
-  const isReady = player.readyState === "ready"
-  const shouldShowAvatarImage = !!player.avatarUrl
-  const normalizedName =
-    stripQuakeColors(player.personaName).trim() || "Unknown player"
-  const showSpinner = !isReady && spinnerPlayerId === player.id
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <div className="flex items-center justify-center">
-          <div className="relative">
-            <PlayerAvatar
-              avatarUrl={shouldShowAvatarImage ? player.avatarUrl : null}
-              className="rounded-md"
-              fallbackClassName="rounded-md"
-              personaName={player.personaName}
-              size="lg"
-            />
-            {showSpinner ? (
-              <span className="absolute inset-0 z-10 flex items-center justify-center rounded-md bg-background/90">
-                <Spinner className="size-4 animate-spin" />
-              </span>
-            ) : null}
-          </div>
-        </div>
-      </TooltipTrigger>
-      <TooltipContent side="top" sideOffset={2}>
-        {normalizedName}
-      </TooltipContent>
-    </Tooltip>
-  )
-}
-
-function PickupReadyModal({
-  countdownNowMs,
-  currentPlayerId,
-  match,
-  onReadyUp,
-  readyActionPending = false,
-}: {
-  countdownNowMs: number
-  currentPlayerId: string | null
-  match: PickupMatchState
-  onReadyUp: () => void
-  readyActionPending?: boolean
-}) {
-  const players = [...match.teams.left, ...match.teams.right]
-  const readyCount = players.filter(
-    (player) => player.readyState === "ready"
-  ).length
-  const viewerReady = players.some(
-    (player) => player.id === currentPlayerId && player.readyState === "ready"
-  )
-  const readyExpired = hasDeadlineExpired(match.readyDeadlineAt, countdownNowMs)
-  const countdownLabel = formatCountdown(match.readyDeadlineAt, countdownNowMs)
-  const spinnerPlayerId =
-    players.find((player) =>
-      player.id === currentPlayerId ? player.readyState !== "ready" : false
-    )?.id ??
-    players.find((player) => player.readyState !== "ready")?.id ??
-    null
-
-  return (
-    <Dialog open>
-      <DialogContent
-        className="max-w-5xl border-0 bg-transparent p-0 shadow-none"
-        showCloseButton={false}
-      >
-        <div className="flex flex-col gap-8 rounded-lg bg-background px-6 py-8 sm:px-8">
-          <DialogHeader className="items-center text-center sm:text-center">
-            <DialogTitle className="text-3xl font-semibold tracking-[0.08em] uppercase sm:text-5xl">
-              Pickup started!
-            </DialogTitle>
-          </DialogHeader>
-
-          <TooltipProvider>
-            <div className="flex flex-wrap justify-center gap-3">
-              {players.map((queuedPlayer) => (
-                <ReadyPlayerTile
-                  key={queuedPlayer.id}
-                  player={queuedPlayer}
-                  spinnerPlayerId={spinnerPlayerId}
-                />
-              ))}
-            </div>
-          </TooltipProvider>
-
-          <div className="flex flex-col items-center gap-4">
-            <p className="text-sm font-medium text-foreground">
-              {readyCount} / {players.length} players ready
-            </p>
-            <p className="text-xs tracking-[0.16em] text-muted-foreground uppercase">
-              {viewerReady
-                ? `Ready confirmed | ${countdownLabel} remaining`
-                : readyExpired
-                  ? "Ready check expired"
-                  : `Accept within ${countdownLabel}`}
-            </p>
-            <Button
-              className="min-w-40 gap-2"
-              disabled={viewerReady || readyExpired || readyActionPending}
-              onClick={onReadyUp}
-              size="lg"
-            >
-              <ShieldCheck data-icon="inline-start" />
-              {viewerReady
-                ? "Ready confirmed"
-                : readyExpired
-                  ? "Expired"
-                  : readyActionPending
-                    ? "Submitting..."
-                    : "Ready"}
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
 const mockStages: PickupMockStage[] = [
   "idle",
   "queue",
@@ -699,13 +539,11 @@ export function PickupPage({
   onOpenMatch,
   onOpenPlayerProfile,
   onSetMockStage,
-  onReadyUp,
   onVetoBan,
   pickupAvailable,
   player,
   playerState,
   publicState,
-  readyActionPending = false,
   recentMatches,
   userLoading = false,
 }: {
@@ -730,13 +568,6 @@ export function PickupPage({
 }) {
   const shouldGatePlayAction = guestMode || (!player && !userLoading)
   const activeState = playerState?.stage ?? "idle"
-  const fogHornAudioRef = useRef<HTMLAudioElement | null>(null)
-  const tickAudioRef = useRef<HTMLAudioElement | null>(null)
-  const playedReadyCheckMatchIdRef = useRef<string | null>(null)
-  const readyCheckCountRef = useRef<{ count: number; matchId: string | null }>({
-    count: 0,
-    matchId: null,
-  })
   const [countdownNowMs, setCountdownNowMs] = useState(() => Date.now())
   const match = playerState && "match" in playerState ? playerState.match : null
   const activeCaptainId = match?.veto.currentCaptainPlayerId ?? null
@@ -789,60 +620,6 @@ export function PickupPage({
     match?.status,
     match?.veto.deadlineAt,
   ])
-
-  useEffect(() => {
-    const fogHornAudio = new Audio(fogHornSound)
-    fogHornAudio.preload = "auto"
-    fogHornAudio.volume = readyCheckFogHornVolume
-    fogHornAudioRef.current = fogHornAudio
-
-    const tickAudio = new Audio(tickSound)
-    tickAudio.preload = "auto"
-    tickAudio.volume = readyCheckTickVolume
-    tickAudioRef.current = tickAudio
-
-    return () => {
-      fogHornAudioRef.current = null
-      tickAudioRef.current = null
-    }
-  }, [])
-
-  useEffect(() => {
-    if (match?.status !== "ready_check") {
-      playedReadyCheckMatchIdRef.current = null
-      return
-    }
-
-    if (playedReadyCheckMatchIdRef.current === match.id) {
-      return
-    }
-
-    playedReadyCheckMatchIdRef.current = match.id
-    playAudioClip(fogHornAudioRef.current, readyCheckFogHornVolume)
-  }, [match?.id, match?.status])
-
-  useEffect(() => {
-    if (match?.status !== "ready_check") {
-      readyCheckCountRef.current = { count: 0, matchId: null }
-      return
-    }
-
-    const readyCount = [...match.teams.left, ...match.teams.right].filter(
-      (queuedPlayer) => queuedPlayer.readyState === "ready"
-    ).length
-    const previous = readyCheckCountRef.current
-
-    if (previous.matchId !== match.id) {
-      readyCheckCountRef.current = { count: readyCount, matchId: match.id }
-      return
-    }
-
-    if (readyCount > previous.count) {
-      playAudioClip(tickAudioRef.current, readyCheckTickVolume)
-    }
-
-    readyCheckCountRef.current = { count: readyCount, matchId: match.id }
-  }, [match])
 
   if (!pickupAvailable) {
     return (
@@ -919,16 +696,6 @@ export function PickupPage({
             </CardContent>
           </Card>
         </div>
-      ) : null}
-
-      {match?.status === "ready_check" ? (
-        <PickupReadyModal
-          countdownNowMs={countdownNowMs}
-          currentPlayerId={player?.id ?? null}
-          match={match}
-          onReadyUp={onReadyUp}
-          readyActionPending={readyActionPending}
-        />
       ) : null}
 
       {match && player && activeState !== "ready_check" ? (
