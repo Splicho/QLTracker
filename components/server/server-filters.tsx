@@ -116,7 +116,7 @@ export function ServerFilters({
 
   return (
     <section className="border-b border-border px-4 py-4">
-      <div className="flex flex-col gap-3">
+      <div className="flex w-full max-w-5xl flex-col gap-3">
         <div className="flex items-center justify-between gap-2">
           <h2 className="text-sm font-medium">{t("filters.title")}</h2>
           <div className="flex items-center gap-1">
@@ -173,7 +173,7 @@ export function ServerFilters({
               </div>
 
               <div className="flex flex-col gap-3">
-                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)_minmax(0,0.85fr)_minmax(0,0.9fr)]">
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)_minmax(0,0.8fr)_minmax(0,0.8fr)_minmax(0,0.85fr)]">
                   <TagFilter
                     value={value.tags}
                     onChange={(tags) => onChange({ ...value, tags })}
@@ -242,9 +242,7 @@ export function ServerFilters({
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
 
-                <div className="grid gap-3">
                   <MapMultiSelect
                     value={value.maps}
                     onChange={(maps) => onChange({ ...value, maps })}
@@ -264,13 +262,12 @@ export function ServerFilters({
                   />
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-3">
+                <div className="flex flex-wrap gap-3">
                   <Button
                     variant={value.showFull ? "default" : "outline"}
                     onClick={() =>
                       onChange({ ...value, showFull: !value.showFull })
                     }
-                    className="w-full"
                   >
                     {t("filters.showFull")}
                   </Button>
@@ -280,7 +277,6 @@ export function ServerFilters({
                     onClick={() =>
                       onChange({ ...value, showEmpty: !value.showEmpty })
                     }
-                    className="w-full"
                   >
                     {t("filters.showEmpty")}
                   </Button>
@@ -293,7 +289,7 @@ export function ServerFilters({
                         showFavorites: !value.showFavorites,
                       })
                     }
-                    className="w-full gap-2"
+                    className="gap-2"
                   >
                     <Heart className="size-4" />
                     {t("filters.showFavorites")}
@@ -301,7 +297,11 @@ export function ServerFilters({
                 </div>
 
                 {hasActiveFilters ? (
-                  <Button variant="ghost" onClick={onReset} className="w-full">
+                  <Button
+                    variant="ghost"
+                    onClick={onReset}
+                    className="self-start"
+                  >
                     <X className="size-4" />
                     {t("filters.clearAll")}
                   </Button>

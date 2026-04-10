@@ -1406,7 +1406,7 @@ export function ServerList({
             variant="outline"
             onClick={onRefresh}
             disabled={isRefreshing || !onRefresh}
-            className="w-full gap-2"
+            className="gap-2"
           >
             <RefreshCw
               className={`size-4 ${isRefreshing ? "animate-spin" : ""}`}
