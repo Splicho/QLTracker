@@ -63,31 +63,7 @@ async function postQueueOpenedAlert(
   client: Client,
   payload: z.infer<typeof queueOpenedPayloadSchema>,
 ): Promise<void> {
-  logger.info(
-    {
-      channelId: env.PICKUP_QUEUE_ALERTS_CHANNEL_ID,
-      currentPlayers: payload.currentPlayers,
-      action: payload.action,
-      playerId: payload.player.id,
-      playerName: payload.player.personaName,
-      queueId: payload.queue.id,
-      queueName: payload.queue.name,
-      queueSlug: payload.queue.slug,
-    },
-    'Preparing pickup queue alert for Discord',
-  );
-
   const channel = await client.channels.fetch(env.PICKUP_QUEUE_ALERTS_CHANNEL_ID ?? '');
-
-  logger.info(
-    {
-      channelFound: Boolean(channel),
-      channelId: env.PICKUP_QUEUE_ALERTS_CHANNEL_ID,
-      channelType: channel?.type,
-      isTextBased: channel?.isTextBased?.() ?? false,
-    },
-    'Resolved pickup queue alerts channel',
-  );
 
   if (!channel || !channel.isTextBased() || !('send' in channel)) {
     throw new Error('Configured pickup queue alerts channel is not a sendable text channel.');
@@ -167,36 +143,7 @@ async function postQueueOpenedAlert(
     messagePayload.content = `<@&${env.PICKUP_QUEUE_ALERTS_ROLE_ID}>`;
   }
 
-  logger.info(
-    {
-      buttonUrl: new URL('/pickup', env.PUBLIC_APP_URL).toString(),
-      channelId: env.PICKUP_QUEUE_ALERTS_CHANNEL_ID,
-      action: payload.action,
-      mentionRoleId:
-        isQueueOpened && env.PICKUP_QUEUE_ALERTS_ROLE_ID
-          ? env.PICKUP_QUEUE_ALERTS_ROLE_ID
-          : null,
-      status: `${payload.currentPlayers}/${payload.queue.playerCount}`,
-    },
-    'Sending pickup queue alert to Discord',
-  );
-
-  const sentMessage = await sendableChannel.send(messagePayload);
-
-  logger.info(
-    {
-      channelId: env.PICKUP_QUEUE_ALERTS_CHANNEL_ID,
-      messageId:
-        typeof sentMessage === 'object' &&
-        sentMessage !== null &&
-        'id' in sentMessage &&
-        typeof sentMessage.id === 'string'
-          ? sentMessage.id
-          : null,
-      queueSlug: payload.queue.slug,
-    },
-    'Posted pickup queue alert to Discord',
-  );
+  await sendableChannel.send(messagePayload);
 }
 
 export function startPickupQueueAlertsWebhook(runtimes: readonly BotRuntime[]): HttpServer | null {
@@ -216,14 +163,6 @@ export function startPickupQueueAlertsWebhook(runtimes: readonly BotRuntime[]): 
       response.writeHead(404).end('Not found');
       return;
     }
-
-    logger.info(
-      {
-        method: request.method,
-        path: request.url,
-      },
-      'Received pickup queue alert webhook request',
-    );
 
     let rawBody = '';
     let bodyTooLarge = false;
@@ -253,30 +192,14 @@ export function startPickupQueueAlertsWebhook(runtimes: readonly BotRuntime[]): 
         return;
       }
 
-      logger.info(
-        {
-          bodyLength: rawBody.length,
-        },
-        'Finished reading pickup queue alert webhook request body',
-      );
-
       const signatureHeader = Array.isArray(request.headers[PICKUP_QUEUE_ALERTS_SIGNATURE_HEADER])
         ? request.headers[PICKUP_QUEUE_ALERTS_SIGNATURE_HEADER][0]
         : request.headers[PICKUP_QUEUE_ALERTS_SIGNATURE_HEADER];
 
       if (!hasValidSignature(rawBody, signatureHeader)) {
-        logger.warn(
-          {
-            bodyLength: rawBody.length,
-            hasSignatureHeader: Boolean(signatureHeader),
-          },
-          'Rejected pickup queue alert webhook due to invalid signature',
-        );
         response.writeHead(401).end('Invalid signature');
         return;
       }
-
-      logger.info('Validated pickup queue alert webhook signature');
 
       let parsedPayload: z.infer<typeof queueOpenedPayloadSchema>;
 
@@ -288,27 +211,8 @@ export function startPickupQueueAlertsWebhook(runtimes: readonly BotRuntime[]): 
         return;
       }
 
-      logger.info(
-        {
-          currentPlayers: parsedPayload.currentPlayers,
-          action: parsedPayload.action,
-          playerId: parsedPayload.player.id,
-          playerName: parsedPayload.player.personaName,
-          queueId: parsedPayload.queue.id,
-          queueName: parsedPayload.queue.name,
-          queueSlug: parsedPayload.queue.slug,
-        },
-        'Accepted pickup queue alert webhook payload',
-      );
-
       void postQueueOpenedAlert(secondaryRuntime.client, parsedPayload)
         .then(() => {
-          logger.info(
-            {
-              queueSlug: parsedPayload.queue.slug,
-            },
-            'Pickup queue alert webhook request completed successfully',
-          );
           response.writeHead(204).end();
         })
         .catch((error: unknown) => {
