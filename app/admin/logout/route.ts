@@ -5,6 +5,8 @@ import { getNotificationEnv } from "@/lib/server/env"
 import {
   getPickupSessionCookieDeleteOptions,
   invalidatePickupSession,
+  serializePickupSessionSetCookie,
+  type PickupSessionCookieSetOpts,
 } from "@/lib/server/pickup-auth"
 
 export const runtime = "nodejs"
@@ -18,10 +20,17 @@ export async function GET(request: Request) {
     await invalidatePickupSession(token)
   }
 
-  const response = NextResponse.redirect(
-    new URL("/admin/login", getNotificationEnv().PUBLIC_BASE_URL)
-  )
-  response.cookies.set(cookieName, "", getPickupSessionCookieDeleteOptions(request))
-
-  return response
+  const delOpts = getPickupSessionCookieDeleteOptions(request)
+  const loginUrl = new URL("/admin/login", getNotificationEnv().PUBLIC_BASE_URL)
+  return new NextResponse(null, {
+    status: 302,
+    headers: {
+      Location: loginUrl.toString(),
+      "Set-Cookie": serializePickupSessionSetCookie(
+        cookieName,
+        "",
+        delOpts as PickupSessionCookieSetOpts
+      ),
+    },
+  })
 }

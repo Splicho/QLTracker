@@ -8,6 +8,7 @@ import {
   createPickupAppSession,
   getPickupSessionCookieSetOptions,
   logPickupAuthDebug,
+  serializePickupSessionSetCookie,
 } from "@/lib/server/pickup-auth"
 import { getNotificationEnv } from "@/lib/server/env"
 import {
@@ -177,13 +178,21 @@ export async function GET(request: Request) {
         sessionTokenLength: sessionToken.length,
         NODE_ENV: process.env.NODE_ENV,
       })
-      const response = NextResponse.redirect(redirectTo)
-      response.cookies.set(
-        getNotificationEnv().PICKUP_AUTH_COOKIE_NAME,
+      // Raw Set-Cookie: some reverse-proxy + Next stacks drop cookies set only via
+      // `response.cookies` on redirect responses (see Next.js GH issues on LB / wrong host).
+      const cookieName = getNotificationEnv().PICKUP_AUTH_COOKIE_NAME
+      const setCookie = serializePickupSessionSetCookie(
+        cookieName,
         sessionToken,
         cookieOpts
       )
-      return response
+      return new NextResponse(null, {
+        status: 302,
+        headers: {
+          Location: redirectTo.toString(),
+          "Set-Cookie": setCookie,
+        },
+      })
     }
 
     logPickupAuthDebug("steam callback: success — launcher flow (localStorage)")

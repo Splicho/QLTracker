@@ -5,6 +5,8 @@ import {
   extractPickupSessionToken,
   getPickupSessionCookieDeleteOptions,
   invalidatePickupSession,
+  serializePickupSessionSetCookie,
+  type PickupSessionCookieSetOpts,
 } from "@/lib/server/pickup-auth"
 import { getNotificationEnv } from "@/lib/server/env"
 
@@ -17,14 +19,20 @@ export async function POST(request: Request) {
       await invalidatePickupSession(token)
     }
 
-    const response = NextResponse.json({ ok: true })
-    response.cookies.set(
-      getNotificationEnv().PICKUP_AUTH_COOKIE_NAME,
-      "",
-      getPickupSessionCookieDeleteOptions(request)
+    const cookieName = getNotificationEnv().PICKUP_AUTH_COOKIE_NAME
+    const delOpts = getPickupSessionCookieDeleteOptions(request)
+    return NextResponse.json(
+      { ok: true },
+      {
+        headers: {
+          "Set-Cookie": serializePickupSessionSetCookie(
+            cookieName,
+            "",
+            delOpts as PickupSessionCookieSetOpts
+          ),
+        },
+      }
     )
-
-    return response
   } catch (error) {
     return handleRouteError(error, "Pickup logout failed.")
   }

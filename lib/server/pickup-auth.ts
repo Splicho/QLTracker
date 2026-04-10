@@ -193,6 +193,45 @@ export function getPickupSessionCookieSetOptions(request?: Request) {
   }
 }
 
+export type PickupSessionCookieSetOpts = ReturnType<
+  typeof getPickupSessionCookieSetOptions
+>
+
+/**
+ * Single `Set-Cookie` header value (name=value; attributes…).
+ * Use in Route Handlers when `NextResponse.cookies.set` is dropped or merged wrong behind
+ * Traefik / Cloudflare / Docker (see e.g. Next.js issues on wrong `request.url` behind LB).
+ */
+export function serializePickupSessionSetCookie(
+  name: string,
+  value: string,
+  opts: PickupSessionCookieSetOpts
+): string {
+  const parts: string[] = [`${name}=${encodeURIComponent(value)}`]
+  parts.push(`Path=${opts.path}`)
+  if (typeof opts.maxAge === "number") {
+    parts.push(`Max-Age=${opts.maxAge}`)
+  }
+  if (opts.httpOnly) {
+    parts.push("HttpOnly")
+  }
+  if (opts.secure) {
+    parts.push("Secure")
+  }
+  const ss = opts.sameSite
+  if (ss === "lax") {
+    parts.push("SameSite=Lax")
+  } else if (ss === "strict") {
+    parts.push("SameSite=Strict")
+  } else if (ss === "none") {
+    parts.push("SameSite=None")
+  }
+  if ("domain" in opts && opts.domain) {
+    parts.push(`Domain=${opts.domain}`)
+  }
+  return parts.join("; ")
+}
+
 /** Clear cookie with the same domain/path/secure as login so the browser actually drops it. */
 export function getPickupSessionCookieDeleteOptions(request?: Request) {
   const opts = getPickupSessionCookieSetOptions(request)

@@ -28,8 +28,7 @@ export default async function AdminDashboardLayout({
             Pickup admin access is restricted
           </h1>
           <p className="mt-4 text-sm text-white/60">
-            Add this SteamID to <code>PICKUP_ADMIN_STEAM_IDS</code> and sign in
-            again.
+            This Steam account is not authorized for the pickup admin dashboard.
           </p>
         </div>
       </main>
