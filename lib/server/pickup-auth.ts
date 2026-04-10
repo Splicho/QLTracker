@@ -128,6 +128,14 @@ async function requirePickupSessionByToken(token: string) {
     routeError(401, "Pickup session is invalid.")
   }
 
+  if (!session.player) {
+    await prisma.pickupAppSession.update({
+      where: { id: session.id },
+      data: { revokedAt: new Date() },
+    })
+    routeError(401, "Pickup session is invalid.")
+  }
+
   await prisma.pickupAppSession.update({
     where: { id: session.id },
     data: { lastUsedAt: new Date() },

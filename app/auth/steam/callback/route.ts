@@ -15,6 +15,14 @@ import { getPrisma } from "@/lib/server/prisma"
 
 export const runtime = "nodejs"
 
+function shouldUseSecureCookie(publicBaseUrl: string) {
+  try {
+    return new URL(publicBaseUrl).protocol === "https:"
+  } catch {
+    return process.env.NODE_ENV === "production"
+  }
+}
+
 function redirectToLauncherPath(pathname: string | null | undefined) {
   const publicBaseUrl = getNotificationEnv().PUBLIC_BASE_URL.replace(/\/$/, "")
   return NextResponse.redirect(new URL(pathname || "/pickup", publicBaseUrl))
@@ -132,6 +140,7 @@ export async function GET(request: Request) {
         /\/$/,
         ""
       )
+      const secureCookie = shouldUseSecureCookie(publicBaseUrl)
       const response = NextResponse.redirect(
         new URL(linkSession.redirectPath || "/admin", publicBaseUrl)
       )
@@ -143,7 +152,7 @@ export async function GET(request: Request) {
           maxAge: 60 * 60 * 24 * 90,
           path: "/",
           sameSite: "lax",
-          secure: true,
+          secure: secureCookie,
         }
       )
       return response
