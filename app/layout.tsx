@@ -1,3 +1,4 @@
+import { styles as numberFlowStyles } from "@number-flow/react"
 import { Inter } from "next/font/google"
 import { cookies } from "next/headers"
 
@@ -74,7 +75,11 @@ export default async function RootLayout({
       )}
       style={{ colorScheme: initialResolvedTheme }}
     >
-      <head />
+      <head>
+        <style
+          dangerouslySetInnerHTML={{ __html: numberFlowStyles.join("\n") }}
+        />
+      </head>
       <body>
         <ThemeProvider
           defaultTheme="system"
