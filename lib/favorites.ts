@@ -1,4 +1,4 @@
-export const FAVORITES_STORAGE_KEY = "qtracker-favorites"
+export const FAVORITES_STORAGE_KEY = "qltracker-favorites"
 
 export type FavoriteList = {
   id: string

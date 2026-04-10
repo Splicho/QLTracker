@@ -25,7 +25,7 @@ export const settingsNavigationItems: readonly SettingsNavigationItem[] = [
     title: "Pickup Profile",
   },
   {
-    description: "Import favorites and watchlist data exported from QTracker.",
+    description: "Import favorites and watchlist data exported from QLTracker.",
     icon: Download,
     id: "import-data",
     title: "Import Data",

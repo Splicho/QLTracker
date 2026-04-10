@@ -1,4 +1,4 @@
-export const TRACKED_PLAYERS_STORAGE_KEY = "qtracker-tracked-players"
+export const TRACKED_PLAYERS_STORAGE_KEY = "qltracker-tracked-players"
 const MAX_TRACKED_PLAYER_ALIASES = 12
 
 export type TrackedPlayer = {

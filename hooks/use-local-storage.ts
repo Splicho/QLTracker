@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 
-const LOCAL_STORAGE_SYNC_EVENT = "qtracker-local-storage-sync"
+const LOCAL_STORAGE_SYNC_EVENT = "qltracker-local-storage-sync"
 
 export function useLocalStorage(key: string, initialValue: string) {
   const [value, setValue] = useState(() =>

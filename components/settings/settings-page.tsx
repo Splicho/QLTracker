@@ -544,7 +544,7 @@ function ImportDataSettingsPanel() {
       const data = parseQLTrackerDataExport(rawValue)
 
       if (!data) {
-        throw new Error("Invalid QTracker export file.")
+        throw new Error("Invalid QLTracker export file.")
       }
 
       window.localStorage.setItem(
@@ -552,7 +552,7 @@ function ImportDataSettingsPanel() {
         serializeFavoritesState(data.favorites)
       )
       window.dispatchEvent(
-        new CustomEvent("qtracker-local-storage-sync", {
+        new CustomEvent("QLTracker-local-storage-sync", {
           detail: {
             key: FAVORITES_STORAGE_KEY,
             value: serializeFavoritesState(data.favorites),
@@ -565,7 +565,7 @@ function ImportDataSettingsPanel() {
         serializeTrackedPlayers(data.trackedPlayers)
       )
       window.dispatchEvent(
-        new CustomEvent("qtracker-local-storage-sync", {
+        new CustomEvent("QLTracker-local-storage-sync", {
           detail: {
             key: TRACKED_PLAYERS_STORAGE_KEY,
             value: serializeTrackedPlayers(data.trackedPlayers),
@@ -573,7 +573,7 @@ function ImportDataSettingsPanel() {
         })
       )
 
-      toast.success("QTracker data imported.")
+      toast.success("QLTracker data imported.")
     } catch (error) {
       toast.error(getErrorMessage(error, "Import failed."))
     } finally {
@@ -584,8 +584,8 @@ function ImportDataSettingsPanel() {
   return (
     <div className="space-y-4">
       <SettingsBlock
-        description="Import favorites and watchlist data exported from the old QTracker desktop app. This replaces the current data stored in this browser."
-        title="QTracker Import"
+        description="Import favorites and watchlist data exported from the old QLTracker desktop app. This replaces the current data stored in this browser."
+        title="QLTracker Import"
       >
         <div className="space-y-4">
           <div className="rounded-lg border border-border/70 bg-background/40 px-4 py-3 text-sm text-muted-foreground">
@@ -597,7 +597,7 @@ function ImportDataSettingsPanel() {
           </div>
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border/70 bg-background/40 px-4 py-3">
             <div className="text-sm text-muted-foreground">
-              Select the JSON export created from QTracker settings.
+              Select the JSON export created from QLTracker settings.
             </div>
             <input
               accept="application/json,.json"
