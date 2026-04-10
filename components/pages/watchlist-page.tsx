@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
   Empty,
-  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
@@ -201,12 +200,14 @@ export function WatchlistPage({
             <div className="text-sm font-medium text-foreground">
               {t("watchlist.title")}
             </div>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {t("watchlist.summary", {
-                count: players.length,
-                online: onlineCount,
-              })}
-            </p>
+            {players.length > 0 ? (
+              <p className="mt-1 text-sm text-muted-foreground">
+                {t("watchlist.summary", {
+                  count: players.length,
+                  online: onlineCount,
+                })}
+              </p>
+            ) : null}
           </div>
           {serviceUnavailable ? (
             <Badge variant="outline" className="rounded-md">
@@ -227,9 +228,6 @@ export function WatchlistPage({
                   {t("watchlist.emptyDescription")}
                 </EmptyDescription>
               </EmptyHeader>
-              <EmptyContent className="text-muted-foreground">
-                {t("watchlist.emptyHint")}
-              </EmptyContent>
             </Empty>
           </div>
         ) : (

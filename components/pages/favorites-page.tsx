@@ -104,86 +104,99 @@ export function FavoritesPage({
   return (
     <section className="flex min-h-0 flex-1 flex-col px-4 py-4">
       <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4">
-        <div className="flex flex-col gap-3 rounded-lg border border-border p-3">
-          <div className="text-sm font-medium text-foreground">
-            {t("favorites.lists")}
-          </div>
-          <Dialog open={createListOpen} onOpenChange={setCreateListOpen}>
-            <DialogTrigger asChild>
-              <Button className="self-start">{t("favorites.createList")}</Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{t("favorites.createDialogTitle")}</DialogTitle>
-                <DialogDescription>
-                  {t("favorites.createDialogDescription")}
-                </DialogDescription>
-              </DialogHeader>
-              <Input
-                value={listName}
-                onChange={(event) => setListName(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    event.preventDefault()
-                    if (!listName.trim()) {
-                      return
-                    }
-
-                    createList(listName)
-                    setListName("")
-                    setCreateListOpen(false)
+        <Dialog open={createListOpen} onOpenChange={setCreateListOpen}>
+          <DialogTrigger asChild>
+            <Button className="self-start">{t("favorites.createList")}</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t("favorites.createDialogTitle")}</DialogTitle>
+              <DialogDescription>
+                {t("favorites.createDialogDescription")}
+              </DialogDescription>
+            </DialogHeader>
+            <Input
+              value={listName}
+              onChange={(event) => setListName(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault()
+                  if (!listName.trim()) {
+                    return
                   }
-                }}
-                placeholder={t("favorites.listNamePlaceholder")}
-                autoFocus
-              />
-              <DialogFooter>
-                <Button
-                  type="button"
-                  onClick={() => {
-                    if (!listName.trim()) {
-                      return
-                    }
 
-                    createList(listName)
-                    setListName("")
-                    setCreateListOpen(false)
-                  }}
-                >
-                  {t("favorites.createList")}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {state.lists.map((list) => (
-              <button
-                key={list.id}
+                  createList(listName)
+                  setListName("")
+                  setCreateListOpen(false)
+                }
+              }}
+              placeholder={t("favorites.listNamePlaceholder")}
+              autoFocus
+            />
+            <DialogFooter>
+              <Button
                 type="button"
-                onClick={() => setPreferredListId(list.id)}
-                className={`flex min-w-fit cursor-pointer items-center justify-between gap-2 rounded-md py-1.5 pr-2 pl-2.5 text-left text-sm whitespace-nowrap ${
-                  selectedList?.id === list.id
-                    ? "bg-accent text-accent-foreground"
-                    : "text-foreground hover:bg-accent/50"
-                }`}
+                onClick={() => {
+                  if (!listName.trim()) {
+                    return
+                  }
+
+                  createList(listName)
+                  setListName("")
+                  setCreateListOpen(false)
+                }}
               >
-                <span className="truncate">{list.name}</span>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Badge
-                      variant="outline"
-                      className="flex h-6 min-w-6 items-center justify-center gap-1 rounded-md px-1.5 text-xs leading-none"
-                    >
-                      <GameController className="size-3" />
-                      <span>{playerCountsByList[list.id] ?? 0}</span>
-                    </Badge>
-                  </TooltipTrigger>
-                  <TooltipContent side="top" className="z-[200]">
-                    {t("favorites.playersTooltip")}
-                  </TooltipContent>
-                </Tooltip>
-              </button>
-            ))}
+                {t("favorites.createList")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <div className="flex flex-col rounded-lg border border-border">
+          <div className="border-b border-border px-4 py-3">
+            <div className="text-sm font-medium text-foreground">
+              {t("favorites.lists")}
+            </div>
+          </div>
+          <div className="flex flex-col gap-3 p-3">
+          {state.lists.length > 0 ? (
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {state.lists.map((list) => (
+                <button
+                  key={list.id}
+                  type="button"
+                  onClick={() => setPreferredListId(list.id)}
+                  className={`flex min-w-fit cursor-pointer items-center justify-between gap-2 rounded-md py-1.5 pr-2 pl-2.5 text-left text-sm whitespace-nowrap ${
+                    selectedList?.id === list.id
+                      ? "bg-accent text-accent-foreground"
+                      : "text-foreground hover:bg-accent/50"
+                  }`}
+                >
+                  <span className="truncate">{list.name}</span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Badge
+                        variant="outline"
+                        className="flex h-6 min-w-6 items-center justify-center gap-1 rounded-md px-1.5 text-xs leading-none"
+                      >
+                        <GameController className="size-3" />
+                        <span>{playerCountsByList[list.id] ?? 0}</span>
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="z-[200]">
+                      {t("favorites.playersTooltip")}
+                    </TooltipContent>
+                  </Tooltip>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center px-4 py-6">
+              <p className="text-sm text-muted-foreground">
+                {t("favorites.noLists")}
+              </p>
+            </div>
+          )}
           </div>
         </div>
 
@@ -193,13 +206,13 @@ export function FavoritesPage({
               <div className="text-sm font-medium text-foreground">
                 {selectedList?.name ?? t("favorites.favoriteServers")}
               </div>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {selectedList
-                  ? t("favorites.savedServers", {
-                      count: serversForSelectedList.length,
-                    })
-                  : t("favorites.noLists")}
-              </p>
+              {selectedList ? (
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {t("favorites.savedServers", {
+                    count: serversForSelectedList.length,
+                  })}
+                </p>
+              ) : null}
             </div>
             {selectedList ? (
               <AlertDialog
