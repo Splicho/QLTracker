@@ -223,6 +223,7 @@ export function RootChrome({
           initialReadNewsSlugs={initialReadNewsSlugs}
           noticeVisible={activeNotice != null}
           pickupPlayer={pickupAuth.player}
+          pickupQueueCount={pickupState.publicState?.queue?.currentPlayers ?? 0}
         />
       }
     />

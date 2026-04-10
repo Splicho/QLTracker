@@ -369,6 +369,7 @@ export function PlayerProfilePage({
           value="overview"
         >
           <PlayerProfileOverviewPane
+            key={resolvedPlayer.id}
             onOpenMatch={onOpenMatch}
             onOpenMatches={() => setActiveTab("matches")}
             profile={profile}

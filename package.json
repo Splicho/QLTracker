@@ -24,6 +24,7 @@
     "@hookform/resolvers": "^5.2.2",
     "@iconify/react": "^6.0.2",
     "@next/third-parties": "^16.2.3",
+    "@number-flow/react": "^0.6.0",
     "@platejs/basic-nodes": "^52.3.10",
     "@platejs/basic-styles": "^52.3.10",
     "@platejs/link": "^52.3.17",

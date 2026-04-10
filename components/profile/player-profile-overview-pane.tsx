@@ -1,4 +1,8 @@
+"use client"
+
+import NumberFlow from "@number-flow/react"
 import { ArrowLeft } from "lucide-react"
+import { useEffect, useState } from "react"
 import { Medal } from "@/components/icon"
 import { RecentMatchRow } from "@/components/profile/recent-match-row"
 import { Badge } from "@/components/ui/badge"
@@ -18,6 +22,14 @@ function formatWinRate(value: number | null) {
   }
 
   return `${Math.round(value)}%`
+}
+
+function getRoundedWinRate(value: number | null) {
+  if (value == null) {
+    return null
+  }
+
+  return Math.round(value)
 }
 
 function getHighestRating(ratings: PickupSeasonalRating[]) {
@@ -40,10 +52,22 @@ export function PlayerProfileOverviewPane({
   onOpenMatches: () => void
 }) {
   const highestRating = getHighestRating(profile.ratings)
+  const roundedWinRate = getRoundedWinRate(profile.stats.winRate)
+  const [hasEntered, setHasEntered] = useState(false)
   const hasOverviewData =
     profile.stats.totalMatches > 0 ||
     profile.ratings.length > 0 ||
     profile.recentMatches.length > 0
+
+  useEffect(() => {
+    const frameId = window.requestAnimationFrame(() => {
+      setHasEntered(true)
+    })
+
+    return () => {
+      window.cancelAnimationFrame(frameId)
+    }
+  }, [profile.player.id])
 
   if (!hasOverviewData) {
     return (
@@ -73,33 +97,48 @@ export function PlayerProfileOverviewPane({
             <p className="text-[11px] font-medium text-muted-foreground uppercase">
               Matches
             </p>
-            <p className="mt-1 text-2xl font-semibold text-foreground">
-              {profile.stats.totalMatches}
-            </p>
+            <NumberFlow
+              className="mt-1 text-2xl font-semibold text-foreground"
+              value={hasEntered ? profile.stats.totalMatches : 0}
+            />
           </div>
           <div className="border-b border-border px-4 py-4 sm:border-r sm:border-b-0">
             <p className="text-[11px] font-medium text-muted-foreground uppercase">
               Wins
             </p>
-            <p className="mt-1 text-2xl font-semibold text-foreground">
-              {profile.stats.wins}
-            </p>
+            <NumberFlow
+              className="mt-1 text-2xl font-semibold text-foreground"
+              value={hasEntered ? profile.stats.wins : 0}
+            />
           </div>
           <div className="px-4 py-4 sm:border-r">
             <p className="text-[11px] font-medium text-muted-foreground uppercase">
               Win Rate
             </p>
-            <p className="mt-1 text-2xl font-semibold text-foreground">
-              {formatWinRate(profile.stats.winRate)}
-            </p>
+            {roundedWinRate == null ? (
+              <p className="mt-1 text-2xl font-semibold text-foreground">
+                {formatWinRate(profile.stats.winRate)}
+              </p>
+            ) : (
+              <NumberFlow
+                className="mt-1 text-2xl font-semibold text-foreground"
+                suffix="%"
+                value={hasEntered ? roundedWinRate : 0}
+              />
+            )}
           </div>
           <div className="px-4 py-4">
             <p className="text-[11px] font-medium text-muted-foreground uppercase">
               Peak Rating
             </p>
-            <p className="mt-1 text-2xl font-semibold text-foreground">
-              {highestRating?.displayRating ?? "-"}
-            </p>
+            {highestRating ? (
+              <NumberFlow
+                className="mt-1 text-2xl font-semibold text-foreground"
+                value={hasEntered ? highestRating.displayRating : 0}
+              />
+            ) : (
+              <p className="mt-1 text-2xl font-semibold text-foreground">-</p>
+            )}
           </div>
         </div>
       </div>
