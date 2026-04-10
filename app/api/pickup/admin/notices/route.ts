@@ -1,10 +1,14 @@
-import { NextResponse } from "next/server";
-import type { PickupNoticeVariant } from "@prisma/client";
-import { z } from "zod";
+import { NextResponse } from "next/server"
+import type { PickupNoticeVariant } from "@prisma/client"
+import { z } from "zod"
 
-import { handleRouteError } from "@/lib/server/errors";
-import { createPickupNotice, listPickupNoticeDtos, toPickupNoticeDto } from "@/lib/server/notices";
-import { requirePickupAdminSession } from "@/lib/server/pickup-auth";
+import { handleRouteError } from "@/lib/server/errors"
+import {
+  createPickupNotice,
+  listPickupNoticeDtos,
+  toPickupNoticeDto,
+} from "@/lib/server/notices"
+import { requirePickupAdminSession } from "@/lib/server/pickup-auth"
 
 const bodySchema = z
   .object({
@@ -16,36 +20,36 @@ const bodySchema = z
     variant: z.enum(["success", "danger", "alert", "info"]),
   })
   .superRefine((value, ctx) => {
-    const hasHref = Boolean(value.linkHref);
-    const hasLabel = Boolean(value.linkLabel);
+    const hasHref = Boolean(value.linkHref)
+    const hasLabel = Boolean(value.linkLabel)
 
     if (hasHref !== hasLabel) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Link URL and label must be set together.",
         path: hasHref ? ["linkLabel"] : ["linkHref"],
-      });
+      })
     }
-  });
+  })
 
-export const runtime = "nodejs";
+export const runtime = "nodejs"
 
 export async function GET(request: Request) {
   try {
-    await requirePickupAdminSession(request);
+    await requirePickupAdminSession(request)
 
     return NextResponse.json({
       notices: await listPickupNoticeDtos(),
-    });
+    })
   } catch (error) {
-    return handleRouteError(error, "Notices could not be loaded.");
+    return handleRouteError(error, "Notices could not be loaded.")
   }
 }
 
 export async function POST(request: Request) {
   try {
-    await requirePickupAdminSession(request);
-    const body = bodySchema.parse(await request.json());
+    await requirePickupAdminSession(request)
+    const body = bodySchema.parse(await request.json())
 
     const notice = await createPickupNotice({
       content: body.content,
@@ -54,12 +58,12 @@ export async function POST(request: Request) {
       linkHref: body.linkHref ?? null,
       linkLabel: body.linkLabel ?? null,
       variant: body.variant as PickupNoticeVariant,
-    });
+    })
 
     return NextResponse.json({
       notice: toPickupNoticeDto(notice),
-    });
+    })
   } catch (error) {
-    return handleRouteError(error, "Notice could not be created.");
+    return handleRouteError(error, "Notice could not be created.")
   }
 }

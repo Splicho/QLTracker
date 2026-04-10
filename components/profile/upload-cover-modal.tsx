@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { UploadCloud } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useCallback, useEffect, useRef, useState } from "react"
+import { UploadCloud } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -8,12 +8,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"]
 
 function isAcceptedImage(file: File) {
-  return ACCEPTED_IMAGE_TYPES.includes(file.type);
+  return ACCEPTED_IMAGE_TYPES.includes(file.type)
 }
 
 export function UploadCoverModal({
@@ -24,12 +24,12 @@ export function UploadCoverModal({
   open,
   title,
 }: {
-  description: string;
-  hint: string;
-  onClose: () => void;
-  onPickFile: (file: File) => void;
-  open: boolean;
-  title: string;
+  description: string
+  hint: string
+  onClose: () => void
+  onPickFile: (file: File) => void
+  open: boolean
+  title: string
 }) {
   return (
     <Dialog onOpenChange={(nextOpen) => !nextOpen && onClose()} open={open}>
@@ -43,7 +43,7 @@ export function UploadCoverModal({
         />
       ) : null}
     </Dialog>
-  );
+  )
 }
 
 function UploadCoverModalContent({
@@ -53,54 +53,54 @@ function UploadCoverModalContent({
   onPickFile,
   title,
 }: {
-  description: string;
-  hint: string;
-  onClose: () => void;
-  onPickFile: (file: File) => void;
-  title: string;
+  description: string
+  hint: string
+  onClose: () => void
+  onPickFile: (file: File) => void
+  title: string
 }) {
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
+  const inputRef = useRef<HTMLInputElement | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
   const handleFiles = useCallback(
     (fileList: FileList | null) => {
-      const file = fileList?.[0];
+      const file = fileList?.[0]
       if (!file || !isAcceptedImage(file)) {
-        return;
+        return
       }
 
-      onPickFile(file);
+      onPickFile(file)
     },
-    [onPickFile],
-  );
+    [onPickFile]
+  )
 
   useEffect(() => {
     const handleWindowDragOver = (event: DragEvent) => {
-      event.preventDefault();
-      setIsDragging(true);
-    };
+      event.preventDefault()
+      setIsDragging(true)
+    }
 
     const handleWindowDrop = (event: DragEvent) => {
-      event.preventDefault();
-      setIsDragging(false);
-      handleFiles(event.dataTransfer?.files ?? null);
-    };
+      event.preventDefault()
+      setIsDragging(false)
+      handleFiles(event.dataTransfer?.files ?? null)
+    }
 
     const handleWindowDragLeave = (event: DragEvent) => {
       if (event.clientX === 0 && event.clientY === 0) {
-        setIsDragging(false);
+        setIsDragging(false)
       }
-    };
+    }
 
-    window.addEventListener("dragover", handleWindowDragOver);
-    window.addEventListener("drop", handleWindowDrop);
-    window.addEventListener("dragleave", handleWindowDragLeave);
+    window.addEventListener("dragover", handleWindowDragOver)
+    window.addEventListener("drop", handleWindowDrop)
+    window.addEventListener("dragleave", handleWindowDragLeave)
 
     return () => {
-      window.removeEventListener("dragover", handleWindowDragOver);
-      window.removeEventListener("drop", handleWindowDrop);
-      window.removeEventListener("dragleave", handleWindowDragLeave);
-    };
-  }, [handleFiles]);
+      window.removeEventListener("dragover", handleWindowDragOver)
+      window.removeEventListener("drop", handleWindowDrop)
+      window.removeEventListener("dragleave", handleWindowDragLeave)
+    }
+  }, [handleFiles])
 
   return (
     <DialogContent className="max-w-2xl">
@@ -117,40 +117,38 @@ function UploadCoverModalContent({
         }`}
         onKeyDown={(event) => {
           if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            inputRef.current?.click();
+            event.preventDefault()
+            inputRef.current?.click()
           }
         }}
         onClick={() => inputRef.current?.click()}
         onDragEnter={(event) => {
-          event.preventDefault();
-          setIsDragging(true);
+          event.preventDefault()
+          setIsDragging(true)
         }}
         onDragLeave={(event) => {
-          event.preventDefault();
+          event.preventDefault()
           if (event.currentTarget.contains(event.relatedTarget as Node)) {
-            return;
+            return
           }
-          setIsDragging(false);
+          setIsDragging(false)
         }}
         onDragOver={(event) => {
-          event.preventDefault();
-          event.dataTransfer.dropEffect = "copy";
-          setIsDragging(true);
+          event.preventDefault()
+          event.dataTransfer.dropEffect = "copy"
+          setIsDragging(true)
         }}
         onDrop={(event) => {
-          event.preventDefault();
-          setIsDragging(false);
-          handleFiles(event.dataTransfer.files);
+          event.preventDefault()
+          setIsDragging(false)
+          handleFiles(event.dataTransfer.files)
         }}
         role="button"
         tabIndex={0}
       >
         <UploadCloud className="size-8 text-muted-foreground" />
         <div className="space-y-1">
-          <p className="text-sm font-medium text-foreground">
-            Drop image
-          </p>
+          <p className="text-sm font-medium text-foreground">Drop image</p>
           <p className="text-sm text-muted-foreground">
             Or click to browse from your computer.
           </p>
@@ -177,5 +175,5 @@ function UploadCoverModalContent({
         </Button>
       </DialogFooter>
     </DialogContent>
-  );
+  )
 }

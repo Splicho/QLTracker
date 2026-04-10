@@ -27,15 +27,15 @@ export const SUPPORTED_APP_LANGUAGES = [
   "ro",
   "lt",
   "cs",
-] as const;
+] as const
 
-export type AppLanguage = (typeof SUPPORTED_APP_LANGUAGES)[number];
+export type AppLanguage = (typeof SUPPORTED_APP_LANGUAGES)[number]
 
-export const DEFAULT_APP_LANGUAGE: AppLanguage = "en";
-export const APP_LANGUAGE_STORAGE_KEY = "qltracker-language";
+export const DEFAULT_APP_LANGUAGE: AppLanguage = "en"
+export const APP_LANGUAGE_STORAGE_KEY = "qltracker-language"
 
 export function isSupportedAppLanguage(
   value: string | null | undefined
 ): value is AppLanguage {
-  return SUPPORTED_APP_LANGUAGES.includes(value as AppLanguage);
+  return SUPPORTED_APP_LANGUAGES.includes(value as AppLanguage)
 }

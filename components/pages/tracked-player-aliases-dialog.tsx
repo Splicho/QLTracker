@@ -1,22 +1,22 @@
-import { useTranslation } from "react-i18next";
-import { PlayerName } from "@/components/pickup/player-name";
+import { useTranslation } from "react-i18next"
+import { PlayerName } from "@/components/pickup/player-name"
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { stripQuakeColors } from "@/lib/quake";
-import type { TrackedPlayer } from "@/lib/tracked-players";
+} from "@/components/ui/dialog"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { stripQuakeColors } from "@/lib/quake"
+import type { TrackedPlayer } from "@/lib/tracked-players"
 
 type TrackedPlayerAliasesDialogProps = {
-  aliases: string[];
-  open: boolean;
-  trackedPlayer: TrackedPlayer | null;
-  onOpenChange: (open: boolean) => void;
-};
+  aliases: string[]
+  open: boolean
+  trackedPlayer: TrackedPlayer | null
+  onOpenChange: (open: boolean) => void
+}
 
 export function TrackedPlayerAliasesDialog({
   aliases,
@@ -24,16 +24,16 @@ export function TrackedPlayerAliasesDialog({
   trackedPlayer,
   onOpenChange,
 }: TrackedPlayerAliasesDialogProps) {
-  const { t } = useTranslation();
+  const { t } = useTranslation()
   const playerLabel = trackedPlayer
     ? stripQuakeColors(trackedPlayer.playerName)
-    : "";
+    : ""
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="sm:max-w-lg"
         onOpenAutoFocus={(event) => {
-          event.preventDefault();
+          event.preventDefault()
         }}
       >
         <DialogHeader>
@@ -46,7 +46,7 @@ export function TrackedPlayerAliasesDialog({
         </DialogHeader>
 
         <div className="rounded-lg border border-border/70 bg-muted/20 p-4">
-          <div className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+          <div className="text-xs tracking-[0.12em] text-muted-foreground uppercase">
             {t("watchlist.previousNicknames")}
           </div>
           {aliases.length > 0 ? (
@@ -70,5 +70,5 @@ export function TrackedPlayerAliasesDialog({
         </div>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

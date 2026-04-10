@@ -1,26 +1,26 @@
-import { Medal } from "@/components/icon";
-import { PlayerAvatar } from "@/components/pickup/player-avatar";
-import { PlayerName } from "@/components/pickup/player-name";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Medal } from "@/components/icon"
+import { PlayerAvatar } from "@/components/pickup/player-avatar"
+import { PlayerName } from "@/components/pickup/player-name"
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent } from "@/components/ui/card"
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/components/ui/empty";
-import { getMapEntry } from "@/lib/maps";
-import type { PickupMatchState } from "@/lib/pickup";
+} from "@/components/ui/empty"
+import { getMapEntry } from "@/lib/maps"
+import type { PickupMatchState } from "@/lib/pickup"
 
 export function PickupLiveMatches({
   matches,
   onOpenMatch,
   onOpenPlayerProfile,
 }: {
-  matches: PickupMatchState[];
-  onOpenMatch: (matchId: string) => void;
-  onOpenPlayerProfile: (playerId: string) => void;
+  matches: PickupMatchState[]
+  onOpenMatch: (matchId: string) => void
+  onOpenPlayerProfile: (playerId: string) => void
 }) {
   return (
     <section className="border-t border-border">
@@ -38,11 +38,11 @@ export function PickupLiveMatches({
       {matches.length > 0 ? (
         <div className="grid items-stretch gap-4 px-6 py-6 xl:grid-cols-2">
           {matches.map((match) => {
-            const map = getMapEntry(match.finalMapKey ?? "default");
+            const map = getMapEntry(match.finalMapKey ?? "default")
             const maxTeamSize = Math.max(
               match.teams.left.length,
-              match.teams.right.length,
-            );
+              match.teams.right.length
+            )
 
             return (
               <Card
@@ -89,52 +89,55 @@ export function PickupLiveMatches({
                           Blue Team
                         </p>
                         <div className="space-y-2">
-                          {Array.from({ length: maxTeamSize }).map((_, index) => {
-                            const player = match.teams.left[index];
+                          {Array.from({ length: maxTeamSize }).map(
+                            (_, index) => {
+                              const player = match.teams.left[index]
 
-                            if (!player) {
+                              if (!player) {
+                                return (
+                                  <div
+                                    className="h-[46px] rounded-md border border-border bg-sidebar"
+                                    key={`left-empty-${match.id}-${index}`}
+                                  />
+                                )
+                              }
+
                               return (
-                                <div
-                                  className="h-[46px] rounded-md border border-border bg-sidebar"
-                                  key={`left-empty-${match.id}-${index}`}
-                                />
-                              );
-                            }
-
-                            return (
-                              <button
-                                className="flex h-[46px] w-full cursor-pointer items-center gap-2 rounded-md border border-border bg-sidebar px-2.5 py-2 text-left transition-colors hover:border-border/80 hover:bg-sidebar-accent"
-                                key={player.id}
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  onOpenPlayerProfile(player.steamId);
-                                }}
-                                type="button"
-                              >
-                                <PlayerAvatar
-                                  avatarUrl={player.avatarUrl}
-                                  className="size-6"
-                                  personaName={player.personaName}
-                                  size="sm"
-                                />
-                                <PlayerName
-                                  className="min-w-0 flex-1 text-sm font-medium text-foreground"
-                                  country
-                                  countryClassName="h-3 w-4 rounded-[2px]"
-                                  countryCode={player.countryCode}
-                                  fallbackClassName="truncate"
-                                  personaName={player.personaName}
-                                />
-                                <Badge
-                                  className="h-5 shrink-0 gap-1 rounded-md border-border/70 bg-muted px-1.5 text-[11px] font-semibold text-foreground"
-                                  variant="outline"
+                                <button
+                                  className="flex h-[46px] w-full cursor-pointer items-center gap-2 rounded-md border border-border bg-sidebar px-2.5 py-2 text-left transition-colors hover:border-border/80 hover:bg-sidebar-accent"
+                                  key={player.id}
+                                  onClick={(event) => {
+                                    event.stopPropagation()
+                                    onOpenPlayerProfile(player.steamId)
+                                  }}
+                                  type="button"
                                 >
-                                  <Medal className="size-3 text-amber-400" />
-                                  {player.displayAfter ?? player.displayBefore}
-                                </Badge>
-                              </button>
-                            );
-                          })}
+                                  <PlayerAvatar
+                                    avatarUrl={player.avatarUrl}
+                                    className="size-6"
+                                    personaName={player.personaName}
+                                    size="sm"
+                                  />
+                                  <PlayerName
+                                    className="min-w-0 flex-1 text-sm font-medium text-foreground"
+                                    country
+                                    countryClassName="h-3 w-4 rounded-[2px]"
+                                    countryCode={player.countryCode}
+                                    fallbackClassName="truncate"
+                                    personaName={player.personaName}
+                                  />
+                                  <Badge
+                                    className="h-5 shrink-0 gap-1 rounded-md border-border/70 bg-muted px-1.5 text-[11px] font-semibold text-foreground"
+                                    variant="outline"
+                                  >
+                                    <Medal className="size-3 text-amber-400" />
+                                    {player.displayAfter ??
+                                      player.displayBefore}
+                                  </Badge>
+                                </button>
+                              )
+                            }
+                          )}
                         </div>
                       </div>
 
@@ -143,59 +146,62 @@ export function PickupLiveMatches({
                           Red Team
                         </p>
                         <div className="space-y-2">
-                          {Array.from({ length: maxTeamSize }).map((_, index) => {
-                            const player = match.teams.right[index];
+                          {Array.from({ length: maxTeamSize }).map(
+                            (_, index) => {
+                              const player = match.teams.right[index]
 
-                            if (!player) {
+                              if (!player) {
+                                return (
+                                  <div
+                                    className="h-[46px] rounded-md border border-border bg-sidebar"
+                                    key={`right-empty-${match.id}-${index}`}
+                                  />
+                                )
+                              }
+
                               return (
-                                <div
-                                  className="h-[46px] rounded-md border border-border bg-sidebar"
-                                  key={`right-empty-${match.id}-${index}`}
-                                />
-                              );
-                            }
-
-                            return (
-                              <button
-                                className="flex h-[46px] w-full cursor-pointer items-center gap-2 rounded-md border border-border bg-sidebar px-2.5 py-2 text-left transition-colors hover:border-border/80 hover:bg-sidebar-accent"
-                                key={player.id}
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  onOpenPlayerProfile(player.steamId);
-                                }}
-                                type="button"
-                              >
-                                <PlayerAvatar
-                                  avatarUrl={player.avatarUrl}
-                                  className="size-6"
-                                  personaName={player.personaName}
-                                  size="sm"
-                                />
-                                <PlayerName
-                                  className="min-w-0 flex-1 text-sm font-medium text-foreground"
-                                  country
-                                  countryClassName="h-3 w-4 rounded-[2px]"
-                                  countryCode={player.countryCode}
-                                  fallbackClassName="truncate"
-                                  personaName={player.personaName}
-                                />
-                                <Badge
-                                  className="h-5 shrink-0 gap-1 rounded-md border-border/70 bg-muted px-1.5 text-[11px] font-semibold text-foreground"
-                                  variant="outline"
+                                <button
+                                  className="flex h-[46px] w-full cursor-pointer items-center gap-2 rounded-md border border-border bg-sidebar px-2.5 py-2 text-left transition-colors hover:border-border/80 hover:bg-sidebar-accent"
+                                  key={player.id}
+                                  onClick={(event) => {
+                                    event.stopPropagation()
+                                    onOpenPlayerProfile(player.steamId)
+                                  }}
+                                  type="button"
                                 >
-                                  <Medal className="size-3 text-amber-400" />
-                                  {player.displayAfter ?? player.displayBefore}
-                                </Badge>
-                              </button>
-                            );
-                          })}
+                                  <PlayerAvatar
+                                    avatarUrl={player.avatarUrl}
+                                    className="size-6"
+                                    personaName={player.personaName}
+                                    size="sm"
+                                  />
+                                  <PlayerName
+                                    className="min-w-0 flex-1 text-sm font-medium text-foreground"
+                                    country
+                                    countryClassName="h-3 w-4 rounded-[2px]"
+                                    countryCode={player.countryCode}
+                                    fallbackClassName="truncate"
+                                    personaName={player.personaName}
+                                  />
+                                  <Badge
+                                    className="h-5 shrink-0 gap-1 rounded-md border-border/70 bg-muted px-1.5 text-[11px] font-semibold text-foreground"
+                                    variant="outline"
+                                  >
+                                    <Medal className="size-3 text-amber-400" />
+                                    {player.displayAfter ??
+                                      player.displayBefore}
+                                  </Badge>
+                                </button>
+                              )
+                            }
+                          )}
                         </div>
                       </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-            );
+            )
           })}
         </div>
       ) : (
@@ -207,13 +213,13 @@ export function PickupLiveMatches({
               </EmptyMedia>
               <EmptyTitle>No live matches right now</EmptyTitle>
               <EmptyDescription>
-                Active pickup matches will show up here once the live match
-                feed is wired.
+                Active pickup matches will show up here once the live match feed
+                is wired.
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
         </div>
       )}
     </section>
-  );
+  )
 }

@@ -1,10 +1,10 @@
-import { appendStructuredLog, inferLogLevel } from "@/lib/logger";
+import { appendStructuredLog, inferLogLevel } from "@/lib/logger"
 
 export async function appendRealtimeLog(source: string, payload: unknown) {
-  const normalizedSource = source.trim();
+  const normalizedSource = source.trim()
 
   if (!normalizedSource) {
-    return;
+    return
   }
 
   await appendStructuredLog({
@@ -13,5 +13,5 @@ export async function appendRealtimeLog(source: string, payload: unknown) {
     event: normalizedSource,
     source: normalizedSource,
     payload,
-  });
+  })
 }

@@ -1,20 +1,20 @@
-import { Leaderboard } from "@/components/icon";
-import { RecentMatchRow } from "@/components/profile/recent-match-row";
+import { Leaderboard } from "@/components/icon"
+import { RecentMatchRow } from "@/components/profile/recent-match-row"
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/components/ui/empty";
-import type { PickupPlayerProfile } from "@/lib/pickup";
+} from "@/components/ui/empty"
+import type { PickupPlayerProfile } from "@/lib/pickup"
 
 export function PlayerProfileMatchesPane({
   onOpenMatch,
   profile,
 }: {
-  onOpenMatch: (matchId: string) => void;
-  profile: PickupPlayerProfile;
+  onOpenMatch: (matchId: string) => void
+  profile: PickupPlayerProfile
 }) {
   if (profile.recentMatches.length === 0) {
     return (
@@ -34,7 +34,7 @@ export function PlayerProfileMatchesPane({
           </Empty>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -53,5 +53,5 @@ export function PlayerProfileMatchesPane({
         ))}
       </div>
     </div>
-  );
+  )
 }

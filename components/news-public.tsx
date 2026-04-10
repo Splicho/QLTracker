@@ -1,21 +1,22 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { useMemo } from "react";
-import { useRouter } from "next/navigation";
-import type { DehydratedState } from "@tanstack/react-query";
-import { HydrationBoundary, useQuery } from "@tanstack/react-query";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import Link from "next/link"
+import { useMemo } from "react"
+import { useRouter } from "next/navigation"
+import { useQuery } from "@tanstack/react-query"
+import ReactMarkdown from "react-markdown"
+import rehypeRaw from "rehype-raw"
+import remarkBreaks from "remark-breaks"
+import remarkGfm from "remark-gfm"
 
-import { ArrowRight } from "@/components/icon";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowRight, ArrowUpRight } from "@/components/icon"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   fetchNewsArticleQuery,
   fetchNewsArticlesQuery,
   newsQueryKeys,
-} from "@/lib/news-query";
-import type { NewsArticleDto } from "@/lib/server/news";
+} from "@/lib/news-query"
+import type { NewsArticleDto } from "@/lib/server/news"
 
 const categoryOrder = [
   "All",
@@ -23,20 +24,22 @@ const categoryOrder = [
   "Pickup",
   "Infrastructure",
   "Community",
-] as const;
+] as const
 
-type CategoryFilter = (typeof categoryOrder)[number];
+type CategoryFilter = (typeof categoryOrder)[number]
 
-function toLabel(category: NewsArticleDto["category"]): Exclude<CategoryFilter, "All"> {
+function toLabel(
+  category: NewsArticleDto["category"]
+): Exclude<CategoryFilter, "All"> {
   switch (category) {
     case "community":
-      return "Community";
+      return "Community"
     case "infrastructure":
-      return "Infrastructure";
+      return "Infrastructure"
     case "launcher":
-      return "Launcher";
+      return "Launcher"
     case "pickup":
-      return "Pickup";
+      return "Pickup"
   }
 }
 
@@ -45,7 +48,7 @@ function formatPublishedAt(value: string) {
     day: "numeric",
     month: "short",
     year: "numeric",
-  }).format(new Date(value));
+  }).format(new Date(value))
 }
 
 function NewsImage({
@@ -53,9 +56,9 @@ function NewsImage({
   className,
   src,
 }: {
-  alt: string;
-  className?: string;
-  src: string | null;
+  alt: string
+  className?: string
+  src: string | null
 }) {
   if (!src) {
     return (
@@ -64,28 +67,26 @@ function NewsImage({
       >
         No cover image
       </div>
-    );
+    )
   }
 
-  return <img alt={alt} className={className} src={src} />;
+  return <img alt={alt} className={className} src={src} />
 }
 
-function NewsTabs({
-  activeCategory,
-}: {
-  activeCategory: CategoryFilter;
-}) {
-  const router = useRouter();
+function NewsTabs({ activeCategory }: { activeCategory: CategoryFilter }) {
+  const router = useRouter()
 
   return (
     <Tabs
       className="w-full"
       value={activeCategory}
       onValueChange={(value) => {
-        const category = value as CategoryFilter;
+        const category = value as CategoryFilter
         router.push(
-          category === "All" ? "/news" : `/news?category=${category.toLowerCase()}`,
-        );
+          category === "All"
+            ? "/news"
+            : `/news?category=${category.toLowerCase()}`
+        )
       }}
     >
       <TabsList
@@ -96,7 +97,7 @@ function NewsTabs({
         {categoryOrder.map((category) => (
           <TabsTrigger
             key={category}
-            className="h-14 rounded-none px-3 text-sm font-medium text-white/60 hover:text-white data-[state=active]:text-white dark:text-white/60 dark:hover:text-white dark:data-[state=active]:text-white after:bg-white group-data-[orientation=horizontal]/tabs:after:bottom-[-1px]"
+            className="h-14 rounded-none px-3 text-sm font-medium text-white/60 after:bg-white group-data-[orientation=horizontal]/tabs:after:bottom-[-1px] hover:text-white data-[state=active]:text-white dark:text-white/60 dark:hover:text-white dark:data-[state=active]:text-white"
             value={category}
           >
             {category}
@@ -104,31 +105,35 @@ function NewsTabs({
         ))}
       </TabsList>
     </Tabs>
-  );
+  )
 }
 
 function NewsFeedInner({
   activeCategory,
+  initialArticles,
 }: {
-  activeCategory: CategoryFilter;
+  activeCategory: CategoryFilter
+  initialArticles: NewsArticleDto[]
 }) {
   const articlesQuery = useQuery({
     queryKey: newsQueryKeys.articles,
     queryFn: fetchNewsArticlesQuery,
-  });
+    initialData: initialArticles,
+    staleTime: 60_000,
+  })
 
-  const articles = articlesQuery.data ?? [];
   const visibleArticles = useMemo(
     () =>
-      articles.filter(
+      (articlesQuery.data ?? []).filter(
         (article) =>
-          activeCategory === "All" || toLabel(article.category) === activeCategory,
+          activeCategory === "All" ||
+          toLabel(article.category) === activeCategory
       ),
-    [activeCategory, articles],
-  );
-  const featuredArticles = visibleArticles.slice(0, 2);
-  const listArticles = visibleArticles.slice(2, 12);
-  const archivedArticles = visibleArticles.slice(12);
+    [activeCategory, articlesQuery.data]
+  )
+  const featuredArticles = visibleArticles.slice(0, 2)
+  const listArticles = visibleArticles.slice(2, 12)
+  const archivedArticles = visibleArticles.slice(12)
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
@@ -167,16 +172,18 @@ function NewsFeedInner({
                 />
               </Link>
 
-              <p className="relative text-sm font-semibold uppercase tracking-[0.14em] text-white/55">
+              <p className="relative text-sm font-semibold tracking-[0.14em] text-white/55 uppercase">
                 {toLabel(article.category)}
               </p>
               <p className="relative text-sm text-white/50">
                 {formatPublishedAt(article.publishedAt)}
               </p>
-              <h2 className="relative text-2xl font-semibold leading-tight text-white">
+              <h2 className="relative text-2xl leading-tight font-semibold text-white">
                 {article.title}
               </h2>
-              <p className="relative text-sm leading-6 text-white/65">{article.excerpt}</p>
+              <p className="relative text-sm leading-6 text-white/65">
+                {article.excerpt}
+              </p>
               <Link
                 className="relative inline-flex w-fit items-center gap-2 text-sm font-semibold text-white"
                 href={`/news/${article.slug}`}
@@ -201,12 +208,14 @@ function NewsFeedInner({
                   href={`/news/${article.slug}`}
                 >
                   <div className="flex min-w-0 flex-col gap-2">
-                    <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.14em] text-white/45">
+                    <div className="flex items-center gap-3 text-xs font-semibold tracking-[0.14em] text-white/45 uppercase">
                       <span>{toLabel(article.category)}</span>
                       <span className="h-1 w-1 rounded-full bg-white/35" />
                       <span>{formatPublishedAt(article.publishedAt)}</span>
                     </div>
-                    <h3 className="text-lg font-semibold text-white">{article.title}</h3>
+                    <h3 className="text-lg font-semibold text-white">
+                      {article.title}
+                    </h3>
                     <p className="max-w-2xl text-sm leading-6 text-white/60">
                       {article.excerpt}
                     </p>
@@ -235,29 +244,36 @@ function NewsFeedInner({
         </>
       ) : null}
     </div>
-  );
+  )
 }
 
 export function NewsFeed({
   activeCategory,
-  state,
+  initialArticles,
 }: {
-  activeCategory: CategoryFilter;
-  state: DehydratedState;
+  activeCategory: CategoryFilter
+  initialArticles: NewsArticleDto[]
 }) {
   return (
-    <HydrationBoundary state={state}>
-      <NewsFeedInner activeCategory={activeCategory} />
-    </HydrationBoundary>
-  );
+    <NewsFeedInner
+      activeCategory={activeCategory}
+      initialArticles={initialArticles}
+    />
+  )
 }
 
-function NewsArchiveInner() {
+function NewsArchiveInner({
+  initialArticles,
+}: {
+  initialArticles: NewsArticleDto[]
+}) {
   const articlesQuery = useQuery({
     queryKey: newsQueryKeys.articles,
     queryFn: fetchNewsArticlesQuery,
-  });
-  const archivedArticles = (articlesQuery.data ?? []).slice(12);
+    initialData: initialArticles,
+    staleTime: 60_000,
+  })
+  const archivedArticles = (articlesQuery.data ?? []).slice(12)
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
@@ -287,13 +303,17 @@ function NewsArchiveInner() {
                 href={`/news/${article.slug}`}
               >
                 <div className="flex min-w-0 flex-col gap-2">
-                  <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.14em] text-white/45">
+                  <div className="flex items-center gap-3 text-xs font-semibold tracking-[0.14em] text-white/45 uppercase">
                     <span>{toLabel(article.category)}</span>
                     <span className="h-1 w-1 rounded-full bg-white/35" />
                     <span>{formatPublishedAt(article.publishedAt)}</span>
                   </div>
-                  <h3 className="text-lg font-semibold text-white">{article.title}</h3>
-                  <p className="max-w-2xl text-sm leading-6 text-white/60">{article.excerpt}</p>
+                  <h3 className="text-lg font-semibold text-white">
+                    {article.title}
+                  </h3>
+                  <p className="max-w-2xl text-sm leading-6 text-white/60">
+                    {article.excerpt}
+                  </p>
                 </div>
 
                 <ArrowRight className="mt-1 size-5 shrink-0 text-white/45" />
@@ -303,30 +323,38 @@ function NewsArchiveInner() {
         </div>
       )}
     </div>
-  );
+  )
 }
 
-export function NewsArchive({ state }: { state: DehydratedState }) {
-  return (
-    <HydrationBoundary state={state}>
-      <NewsArchiveInner />
-    </HydrationBoundary>
-  );
+export function NewsArchive({
+  initialArticles,
+}: {
+  initialArticles: NewsArticleDto[]
+}) {
+  return <NewsArchiveInner initialArticles={initialArticles} />
 }
 
-function NewsArticleInner({ slug }: { slug: string }) {
+function NewsArticleInner({
+  initialArticle,
+  slug,
+}: {
+  initialArticle: NewsArticleDto
+  slug: string
+}) {
   const articleQuery = useQuery({
     queryKey: newsQueryKeys.article(slug),
     queryFn: () => fetchNewsArticleQuery(slug),
-  });
+    initialData: initialArticle,
+    staleTime: 60_000,
+  })
 
   if (articleQuery.error instanceof Error) {
-    return <p className="text-sm text-rose-300">{articleQuery.error.message}</p>;
+    return <p className="text-sm text-rose-300">{articleQuery.error.message}</p>
   }
 
-  const article = articleQuery.data;
+  const article = articleQuery.data
   if (!article) {
-    return null;
+    return null
   }
 
   return (
@@ -339,46 +367,84 @@ function NewsArticleInner({ slug }: { slug: string }) {
         />
       </div>
 
-      <div className="flex flex-col gap-3">
-        <p className="text-sm font-semibold uppercase tracking-[0.14em] text-white/55">
+      <div className="flex w-full flex-col gap-3">
+        <p className="text-sm font-semibold tracking-[0.14em] text-white/55 uppercase">
           {toLabel(article.category)}
         </p>
-        <p className="text-sm text-white/50">{formatPublishedAt(article.publishedAt)}</p>
-        <h1 className="text-3xl font-semibold leading-tight text-white">{article.title}</h1>
-        <p className="max-w-3xl text-base leading-7 text-white/60">{article.excerpt}</p>
+        <p className="text-sm text-white/50">
+          {formatPublishedAt(article.publishedAt)}
+        </p>
+        <h1 className="text-3xl leading-tight font-semibold text-white">
+          {article.title}
+        </h1>
         <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeRaw]}
+          remarkPlugins={[remarkGfm, remarkBreaks]}
           components={{
             a(props) {
+              const { children, className, ...rest } = props
               return (
                 <a
-                  {...props}
-                  className="text-white underline underline-offset-4"
+                  {...rest}
+                  className={`inline-flex items-center gap-1.5 text-white underline underline-offset-4 ${className ?? ""}`.trim()}
                   rel="noreferrer"
                   target="_blank"
-                />
-              );
+                >
+                  <span>{children}</span>
+                  <ArrowUpRight className="size-3.5 shrink-0" />
+                </a>
+              )
             },
             h1(props) {
-              return <h1 className="mt-6 text-2xl font-semibold text-white" {...props} />;
+              return (
+                <h1
+                  className="mt-6 w-full text-2xl font-semibold text-white"
+                  {...props}
+                />
+              )
             },
             h2(props) {
-              return <h2 className="mt-6 text-xl font-semibold text-white" {...props} />;
+              return (
+                <h2
+                  className="mt-6 w-full text-xl font-semibold text-white"
+                  {...props}
+                />
+              )
             },
             h3(props) {
-              return <h3 className="mt-5 text-lg font-semibold text-white" {...props} />;
+              return (
+                <h3
+                  className="mt-5 w-full text-lg font-semibold text-white"
+                  {...props}
+                />
+              )
             },
             p(props) {
-              return <p className="max-w-3xl text-base leading-7 text-white/65" {...props} />;
+              return (
+                <p
+                  className="w-full text-base leading-7 text-white/65"
+                  {...props}
+                />
+              )
             },
             ul(props) {
-              return <ul className="max-w-3xl list-disc space-y-2 pl-6 text-base text-white/65" {...props} />;
+              return (
+                <ul
+                  className="w-full list-disc space-y-2 pl-6 text-base text-white/65"
+                  {...props}
+                />
+              )
             },
             ol(props) {
-              return <ol className="max-w-3xl list-decimal space-y-2 pl-6 text-base text-white/65" {...props} />;
+              return (
+                <ol
+                  className="w-full list-decimal space-y-2 pl-6 text-base text-white/65"
+                  {...props}
+                />
+              )
             },
             li(props) {
-              return <li className="leading-7" {...props} />;
+              return <li className="leading-7" {...props} />
             },
             code({ className, ...props }) {
               return (
@@ -386,20 +452,24 @@ function NewsArticleInner({ slug }: { slug: string }) {
                   className={`rounded bg-white/10 px-1.5 py-0.5 text-[0.9em] ${className ?? ""}`.trim()}
                   {...props}
                 />
-              );
+              )
             },
             pre(props) {
               return (
                 <pre
-                  className="max-w-3xl overflow-x-auto rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-white"
+                  className="w-full overflow-x-auto rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-white"
                   {...props}
                 />
-              );
+              )
             },
             img({ alt, src }) {
               return src ? (
-                <img alt={alt ?? ""} className="max-w-3xl rounded-2xl object-cover" src={src} />
-              ) : null;
+                <img
+                  alt={alt ?? ""}
+                  className="w-full rounded-2xl object-cover"
+                  src={src}
+                />
+              ) : null
             },
           }}
         >
@@ -407,19 +477,15 @@ function NewsArticleInner({ slug }: { slug: string }) {
         </ReactMarkdown>
       </div>
     </div>
-  );
+  )
 }
 
 export function NewsArticlePage({
+  initialArticle,
   slug,
-  state,
 }: {
-  slug: string;
-  state: DehydratedState;
+  initialArticle: NewsArticleDto
+  slug: string
 }) {
-  return (
-    <HydrationBoundary state={state}>
-      <NewsArticleInner slug={slug} />
-    </HydrationBoundary>
-  );
+  return <NewsArticleInner initialArticle={initialArticle} slug={slug} />
 }

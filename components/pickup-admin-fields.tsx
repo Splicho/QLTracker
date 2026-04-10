@@ -1,22 +1,22 @@
-"use client";
+"use client"
 
-import type React from "react";
-import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
+import type React from "react"
+import { CalendarIcon } from "lucide-react"
+import { format } from "date-fns"
 import {
   Field as UiField,
   FieldContent,
   FieldDescription,
   FieldLabel,
-} from "@/components/ui/field";
-import { cn } from "@/lib/utils";
-import { Button as UiButton } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+} from "@/components/ui/field"
+import { cn } from "@/lib/utils"
+import { Button as UiButton } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@/components/ui/popover"
 import {
   Select,
   SelectContent,
@@ -24,13 +24,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {
-  Button,
-  Input,
-  Spinner,
-  TextArea,
-} from "@/components/pickup-admin-ui";
+} from "@/components/ui/select"
+import { Button, Input, Spinner, TextArea } from "@/components/pickup-admin-ui"
 
 export function ActionButton({
   children,
@@ -39,14 +34,19 @@ export function ActionButton({
   variant,
   onPress,
 }: {
-  children: React.ReactNode;
-  isDisabled?: boolean;
-  isPending: boolean;
-  variant: "primary" | "secondary" | "outline";
-  onPress: () => void;
+  children: React.ReactNode
+  isDisabled?: boolean
+  isPending: boolean
+  variant: "primary" | "secondary" | "outline"
+  onPress: () => void
 }) {
   return (
-    <Button isDisabled={isDisabled} isPending={isPending} onPress={onPress} variant={variant}>
+    <Button
+      isDisabled={isDisabled}
+      isPending={isPending}
+      onPress={onPress}
+      variant={variant}
+    >
       {({ isPending: buttonIsPending }) => (
         <>
           {buttonIsPending ? <Spinner color="current" size="sm" /> : null}
@@ -54,7 +54,7 @@ export function ActionButton({
         </>
       )}
     </Button>
-  );
+  )
 }
 
 export function Field({
@@ -63,10 +63,10 @@ export function Field({
   description,
   label,
 }: {
-  children: React.ReactNode;
-  className?: string;
-  description?: string;
-  label: string;
+  children: React.ReactNode
+  className?: string
+  description?: string
+  label: string
 }) {
   return (
     <UiField className={cn("gap-2", className)}>
@@ -80,7 +80,7 @@ export function Field({
       </FieldContent>
       {children}
     </UiField>
-  );
+  )
 }
 
 export function FieldInput({
@@ -91,12 +91,12 @@ export function FieldInput({
   value,
   onChange,
 }: {
-  disabled?: boolean;
-  min?: number;
-  placeholder?: string;
-  type?: React.HTMLInputTypeAttribute;
-  value: string;
-  onChange: (value: string) => void;
+  disabled?: boolean
+  min?: number
+  placeholder?: string
+  type?: React.HTMLInputTypeAttribute
+  value: string
+  onChange: (value: string) => void
 }) {
   return (
     <Input
@@ -109,7 +109,7 @@ export function FieldInput({
       value={value}
       onChange={(event) => onChange(event.target.value)}
     />
-  );
+  )
 }
 
 export function FieldTextArea({
@@ -119,11 +119,11 @@ export function FieldTextArea({
   value,
   onChange,
 }: {
-  disabled?: boolean;
-  minRows?: number;
-  placeholder?: string;
-  value: string;
-  onChange: (value: string) => void;
+  disabled?: boolean
+  minRows?: number
+  placeholder?: string
+  value: string
+  onChange: (value: string) => void
 }) {
   return (
     <TextArea
@@ -135,39 +135,39 @@ export function FieldTextArea({
       value={value}
       onChange={(event) => onChange(event.target.value)}
     />
-  );
+  )
 }
 
 function parseDateTimeValue(value: string) {
   if (!value) {
-    return null;
+    return null
   }
 
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? null : date
 }
 
 function formatDateTimeValue(date: Date) {
-  return format(date, "yyyy-MM-dd'T'HH:mm");
+  return format(date, "yyyy-MM-dd'T'HH:mm")
 }
 
 function mergeDateAndTime(
   value: string,
   nextDate: Date | null,
-  nextTime: string,
+  nextTime: string
 ) {
-  const baseDate = nextDate ?? parseDateTimeValue(value) ?? new Date();
-  const [hours, minutes] = nextTime.split(":").map((part) => Number(part));
-  const mergedDate = new Date(baseDate);
+  const baseDate = nextDate ?? parseDateTimeValue(value) ?? new Date()
+  const [hours, minutes] = nextTime.split(":").map((part) => Number(part))
+  const mergedDate = new Date(baseDate)
 
   mergedDate.setHours(
     Number.isFinite(hours) ? hours : 0,
     Number.isFinite(minutes) ? minutes : 0,
     0,
-    0,
-  );
+    0
+  )
 
-  return formatDateTimeValue(mergedDate);
+  return formatDateTimeValue(mergedDate)
 }
 
 export function FieldSelect<TValue extends string>({
@@ -177,11 +177,11 @@ export function FieldSelect<TValue extends string>({
   value,
   onChange,
 }: {
-  disabled?: boolean;
-  options: Array<{ label: string; value: TValue }>;
-  placeholder?: string;
-  value: TValue;
-  onChange: (value: TValue) => void;
+  disabled?: boolean
+  options: Array<{ label: string; value: TValue }>
+  placeholder?: string
+  value: TValue
+  onChange: (value: TValue) => void
 }) {
   return (
     <Select
@@ -206,7 +206,7 @@ export function FieldSelect<TValue extends string>({
         </SelectGroup>
       </SelectContent>
     </Select>
-  );
+  )
 }
 
 export function FieldDateTimePicker({
@@ -215,16 +215,16 @@ export function FieldDateTimePicker({
   value,
   onChange,
 }: {
-  disabled?: boolean;
-  placeholder?: string;
-  value: string;
-  onChange: (value: string) => void;
+  disabled?: boolean
+  placeholder?: string
+  value: string
+  onChange: (value: string) => void
 }) {
-  const selectedDate = parseDateTimeValue(value);
-  const timeValue = selectedDate ? format(selectedDate, "HH:mm") : "12:00";
+  const selectedDate = parseDateTimeValue(value)
+  const timeValue = selectedDate ? format(selectedDate, "HH:mm") : "12:00"
   const triggerLabel = selectedDate
     ? format(selectedDate, "dd MMM yyyy, HH:mm")
-    : placeholder;
+    : placeholder
 
   return (
     <Popover>
@@ -232,7 +232,7 @@ export function FieldDateTimePicker({
         <UiButton
           className={cn(
             "!h-12 min-h-12 w-full justify-between rounded-2xl border border-white/10 bg-transparent px-4 text-left text-sm font-normal text-white shadow-none hover:bg-white/[0.04]",
-            !selectedDate && "text-white/45",
+            !selectedDate && "text-white/45"
           )}
           disabled={disabled}
           type="button"
@@ -252,10 +252,10 @@ export function FieldDateTimePicker({
             selected={selectedDate ?? undefined}
             onSelect={(nextDate) => {
               if (!nextDate) {
-                return;
+                return
               }
 
-              onChange(mergeDateAndTime(value, nextDate, timeValue));
+              onChange(mergeDateAndTime(value, nextDate, timeValue))
             }}
           />
           <Input
@@ -266,11 +266,13 @@ export function FieldDateTimePicker({
             value={timeValue}
             variant="secondary"
             onChange={(event) =>
-              onChange(mergeDateAndTime(value, selectedDate, event.target.value))
+              onChange(
+                mergeDateAndTime(value, selectedDate, event.target.value)
+              )
             }
           />
         </div>
       </PopoverContent>
     </Popover>
-  );
+  )
 }

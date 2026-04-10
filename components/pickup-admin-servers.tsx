@@ -1,9 +1,9 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link"
+import { useCallback, useEffect, useRef, useState } from "react"
 
-import { Field } from "@/components/pickup-admin-fields";
+import { Field } from "@/components/pickup-admin-fields"
 import {
   Button,
   Chip,
@@ -12,29 +12,29 @@ import {
   Spinner,
   toast,
   useOverlayState,
-} from "@/components/pickup-admin-ui";
-import { requestJson } from "@/lib/client/request-json";
-import type { SlotState, SlotsResponse } from "@/lib/client/pickup-admin-types";
+} from "@/components/pickup-admin-ui"
+import { requestJson } from "@/lib/client/request-json"
+import type { SlotState, SlotsResponse } from "@/lib/client/pickup-admin-types"
 
-type PendingAction = `start:${number}` | `stop:${number}` | null;
+type PendingAction = `start:${number}` | `stop:${number}` | null
 
 function timeAgo(iso: string) {
-  const seconds = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
-  if (seconds < 60) return `${seconds}s ago`;
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  return `${hours}h ago`;
+  const seconds = Math.floor((Date.now() - new Date(iso).getTime()) / 1000)
+  if (seconds < 60) return `${seconds}s ago`
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.floor(minutes / 60)
+  return `${hours}h ago`
 }
 
 function statusColor(state: SlotState["state"]) {
   switch (state) {
     case "idle":
-      return "default" as const;
+      return "default" as const
     case "provisioning":
-      return "warning" as const;
+      return "warning" as const
     case "busy":
-      return "success" as const;
+      return "success" as const
   }
 }
 
@@ -44,18 +44,20 @@ function SlotCard({
   onStart,
   onStop,
 }: {
-  slot: SlotState;
-  pendingAction: PendingAction;
-  onStart: (slotId: number) => void;
-  onStop: (slotId: number) => void;
+  slot: SlotState
+  pendingAction: PendingAction
+  onStart: (slotId: number) => void
+  onStop: (slotId: number) => void
 }) {
-  const isIdle = slot.state === "idle";
+  const isIdle = slot.state === "idle"
 
   return (
     <div className="rounded-3xl border border-white/10 bg-[#0d0d0d] p-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="text-lg font-medium text-white">Slot {slot.slotId}</span>
+          <span className="text-lg font-medium text-white">
+            Slot {slot.slotId}
+          </span>
           <span className="text-sm text-white/40">:{slot.gamePort}</span>
         </div>
         <Chip color={statusColor(slot.state)} variant="soft">
@@ -66,7 +68,12 @@ function SlotCard({
       {!isIdle && (
         <div className="mt-3 space-y-1 text-sm text-white/50">
           {slot.matchId && (
-            <p>Match: <span className="font-mono text-xs text-white/70">{slot.matchId.slice(0, 12)}...</span></p>
+            <p>
+              Match:{" "}
+              <span className="font-mono text-xs text-white/70">
+                {slot.matchId.slice(0, 12)}...
+              </span>
+            </p>
           )}
           {slot.queueId && <p>Queue: {slot.queueId}</p>}
           <p>Updated: {timeAgo(slot.updatedAt)}</p>
@@ -102,101 +109,101 @@ function SlotCard({
         )}
       </div>
     </div>
-  );
+  )
 }
 
 export function PickupAdminServers() {
-  const [slots, setSlots] = useState<SlotState[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [pendingAction, setPendingAction] = useState<PendingAction>(null);
-  const [startMap, setStartMap] = useState("");
-  const [startTeamSize, setStartTeamSize] = useState(4);
-  const startSlotRef = useRef<number | null>(null);
+  const [slots, setSlots] = useState<SlotState[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [pendingAction, setPendingAction] = useState<PendingAction>(null)
+  const [startMap, setStartMap] = useState("")
+  const [startTeamSize, setStartTeamSize] = useState(4)
+  const startSlotRef = useRef<number | null>(null)
 
-  const startModal = useOverlayState();
-  const stopModal = useOverlayState();
-  const stopSlotRef = useRef<number | null>(null);
+  const startModal = useOverlayState()
+  const stopModal = useOverlayState()
+  const stopSlotRef = useRef<number | null>(null)
 
   const fetchSlots = useCallback(async () => {
     try {
-      const data = await requestJson<SlotsResponse>("/api/pickup/admin/servers");
-      setSlots(data.slots);
-      setError(null);
+      const data = await requestJson<SlotsResponse>("/api/pickup/admin/servers")
+      setSlots(data.slots)
+      setError(null)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch servers.");
+      setError(err instanceof Error ? err.message : "Failed to fetch servers.")
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  }, []);
+  }, [])
 
   useEffect(() => {
-    void fetchSlots();
-    const interval = setInterval(() => void fetchSlots(), 5000);
-    return () => clearInterval(interval);
-  }, [fetchSlots]);
+    void fetchSlots()
+    const interval = setInterval(() => void fetchSlots(), 5000)
+    return () => clearInterval(interval)
+  }, [fetchSlots])
 
   const openStartModal = (slotId: number) => {
-    startSlotRef.current = slotId;
-    setStartMap("");
-    setStartTeamSize(4);
-    startModal.open();
-  };
+    startSlotRef.current = slotId
+    setStartMap("")
+    setStartTeamSize(4)
+    startModal.open()
+  }
 
   const openStopModal = (slotId: number) => {
-    stopSlotRef.current = slotId;
-    stopModal.open();
-  };
+    stopSlotRef.current = slotId
+    stopModal.open()
+  }
 
   const confirmStart = async () => {
-    const slotId = startSlotRef.current;
-    if (slotId === null || !startMap.trim()) return;
+    const slotId = startSlotRef.current
+    if (slotId === null || !startMap.trim()) return
 
-    setPendingAction(`start:${slotId}`);
+    setPendingAction(`start:${slotId}`)
     try {
       await requestJson(`/api/pickup/admin/servers/${slotId}/start`, {
         method: "POST",
         body: JSON.stringify({ map: startMap.trim(), teamSize: startTeamSize }),
-      });
-      toast.success(`Server started on Slot ${slotId}.`);
-      startModal.close();
-      void fetchSlots();
+      })
+      toast.success(`Server started on Slot ${slotId}.`)
+      startModal.close()
+      void fetchSlots()
     } catch (err) {
       toast.danger("Failed to start server.", {
         description: err instanceof Error ? err.message : "Request failed.",
-      });
+      })
     } finally {
-      setPendingAction(null);
+      setPendingAction(null)
     }
-  };
+  }
 
   const confirmStop = async () => {
-    const slotId = stopSlotRef.current;
-    if (slotId === null) return;
+    const slotId = stopSlotRef.current
+    if (slotId === null) return
 
-    setPendingAction(`stop:${slotId}`);
+    setPendingAction(`stop:${slotId}`)
     try {
       await requestJson(`/api/pickup/admin/servers/${slotId}/stop`, {
         method: "POST",
-      });
-      toast.success(`Server on Slot ${slotId} stopped.`);
-      stopModal.close();
-      void fetchSlots();
+      })
+      toast.success(`Server on Slot ${slotId} stopped.`)
+      stopModal.close()
+      void fetchSlots()
     } catch (err) {
       toast.danger("Failed to stop server.", {
         description: err instanceof Error ? err.message : "Request failed.",
-      });
+      })
     } finally {
-      setPendingAction(null);
+      setPendingAction(null)
     }
-  };
+  }
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center px-6 py-20">
         <Spinner size="lg" />
       </div>
-    );
+    )
   }
 
   return (
@@ -209,7 +216,7 @@ export function PickupAdminServers() {
       </header>
 
       {error && (
-        <div className="rounded-2xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
+        <div className="border-danger/30 bg-danger/10 text-danger rounded-2xl border px-4 py-3 text-sm">
           {error}
         </div>
       )}
@@ -228,7 +235,8 @@ export function PickupAdminServers() {
 
       {slots.length === 0 && !error && (
         <div className="rounded-2xl border border-dashed border-white/10 px-4 py-8 text-center text-sm text-white/55">
-          No slot data available. Ensure the provision API URL is configured in Settings.
+          No slot data available. Ensure the provision API URL is configured in
+          Settings.
         </div>
       )}
 
@@ -238,7 +246,9 @@ export function PickupAdminServers() {
             <Modal.Dialog>
               <Modal.Header className="border-b border-white/10 px-6 py-4">
                 <div>
-                  <Modal.Heading className="text-xl font-medium">Start Server</Modal.Heading>
+                  <Modal.Heading className="text-xl font-medium">
+                    Start Server
+                  </Modal.Heading>
                   <p className="mt-1 text-sm text-white/60">
                     Manually start a game server on Slot {startSlotRef.current}.
                   </p>
@@ -270,8 +280,8 @@ export function PickupAdminServers() {
                       value={String(startTeamSize)}
                       variant="secondary"
                       onChange={(e) => {
-                        const v = Number(e.target.value);
-                        if (v >= 1 && v <= 8) setStartTeamSize(v);
+                        const v = Number(e.target.value)
+                        if (v >= 1 && v <= 8) setStartTeamSize(v)
                       }}
                     />
                   </Field>
@@ -306,17 +316,20 @@ export function PickupAdminServers() {
             <Modal.Dialog>
               <Modal.Header className="border-b border-white/10 px-6 py-4">
                 <div>
-                  <Modal.Heading className="text-xl font-medium">Stop Server</Modal.Heading>
+                  <Modal.Heading className="text-xl font-medium">
+                    Stop Server
+                  </Modal.Heading>
                   <p className="mt-1 text-sm text-white/60">
-                    This will immediately kill the game server on Slot {stopSlotRef.current}.
+                    This will immediately kill the game server on Slot{" "}
+                    {stopSlotRef.current}.
                   </p>
                 </div>
                 <Modal.CloseTrigger />
               </Modal.Header>
               <Modal.Body className="px-6 py-5">
                 <p className="text-sm text-white/70">
-                  Are you sure? Any active match on this slot will be terminated and players will be
-                  disconnected immediately.
+                  Are you sure? Any active match on this slot will be terminated
+                  and players will be disconnected immediately.
                 </p>
               </Modal.Body>
               <Modal.Footer className="flex justify-end gap-3 border-t border-white/10 px-6 py-4">
@@ -341,5 +354,5 @@ export function PickupAdminServers() {
         </Modal.Backdrop>
       </Modal>
     </div>
-  );
+  )
 }

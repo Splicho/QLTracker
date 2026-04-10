@@ -1,11 +1,11 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import packageJson from "../../package.json";
-import { useQuery } from "@tanstack/react-query";
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { ArrowLeft } from "lucide-react"
+import { useEffect, useMemo, useState } from "react"
+import packageJson from "../../package.json"
+import { useQuery } from "@tanstack/react-query"
 import {
   Cog,
   Discord,
@@ -19,19 +19,19 @@ import {
   Medal,
   News,
   ServerStack,
-} from "@/components/icon";
-import { useFavorites } from "@/hooks/use-favorites";
-import { useTrackedPlayers } from "@/hooks/use-tracked-players";
-import { type PickupPlayer } from "@/lib/pickup";
+} from "@/components/icon"
+import { useFavorites } from "@/hooks/use-favorites"
+import { useTrackedPlayers } from "@/hooks/use-tracked-players"
+import { type PickupPlayer } from "@/lib/pickup"
 import {
   fetchRealtimePlayerPresenceLookup,
   isRealtimeEnabled,
-} from "@/lib/realtime";
+} from "@/lib/realtime"
 import {
   settingsNavigationItems,
   type SettingsSectionId,
-} from "@/lib/settings-navigation";
-import { openExternalUrl } from "@/lib/open-url";
+} from "@/lib/settings-navigation"
+import { openExternalUrl } from "@/lib/open-url"
 import {
   Dialog,
   DialogContent,
@@ -39,7 +39,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 import {
   Sidebar,
   SidebarContent,
@@ -52,85 +52,97 @@ import {
   SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
+} from "@/components/ui/sidebar"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useLiveServers } from "@/hooks/use-live-servers";
+} from "@/components/ui/tooltip"
+import { useLiveServers } from "@/hooks/use-live-servers"
 
 type NavItem = {
-  href: string;
-  icon: React.ComponentType<{ className?: string }>;
-  id: string;
-  label: string;
-};
+  href: string
+  icon: React.ComponentType<{ className?: string }>
+  id: string
+  label: string
+}
 
 const newsNavigationItems: readonly NavItem[] = [
   { href: "/news", icon: News, id: "news", label: "News" },
-] as const;
+] as const
 
 const primaryNavigationItems: readonly NavItem[] = [
   { href: "/servers", icon: ServerStack, id: "servers", label: "Server List" },
-  { href: "/favorites", icon: HeartOutline, id: "favorites", label: "Favorites" },
+  {
+    href: "/favorites",
+    icon: HeartOutline,
+    id: "favorites",
+    label: "Favorites",
+  },
   { href: "/watchlist", icon: Eye, id: "watchlist", label: "Watchlist" },
-] as const;
+] as const
 
 const competitiveNavigationItems: readonly NavItem[] = [
   { href: "/pickup", icon: Medal, id: "pickup", label: "Pickup" },
-  { href: "/leaderboards", icon: Leaderboard, id: "leaderboards", label: "Leaderboard" },
-] as const;
+  {
+    href: "/leaderboards",
+    icon: Leaderboard,
+    id: "leaderboards",
+    label: "Leaderboard",
+  },
+] as const
 
 function isItemActive(pathname: string, href: string) {
   if (href === "/servers") {
-    return pathname === "/" || pathname === href;
+    return pathname === "/" || pathname === href
   }
 
-  return pathname === href || pathname.startsWith(`${href}/`);
+  return pathname === href || pathname.startsWith(`${href}/`)
 }
 
 function getSettingsHref(section: SettingsSectionId) {
   if (section === "pickup-profile") {
-    return "/settings/profile";
+    return "/settings/profile"
   }
 
   if (section === "import-data") {
-    return "/settings/import-data";
+    return "/settings/import-data"
   }
 
-  return "/settings";
+  return "/settings"
 }
 
 export function AppSidebar({
   pickupPlayer,
 }: {
-  pickupPlayer?: PickupPlayer | null;
+  pickupPlayer?: PickupPlayer | null
 }) {
-  const lastAppPathStorageKey = "qltracker-last-app-path";
-  const pathname = usePathname() ?? "/servers";
-  const [aboutOpen, setAboutOpen] = useState(false);
-  const { state: favoritesState } = useFavorites();
-  const { players: trackedPlayers } = useTrackedPlayers();
-  const { servers: liveServers } = useLiveServers();
-  const realtimeAvailable = isRealtimeEnabled();
-  const isSettingsPage = pathname.startsWith("/settings");
-  const settingsSection: SettingsSectionId = pathname.startsWith("/settings/profile")
+  const lastAppPathStorageKey = "qltracker-last-app-path"
+  const pathname = usePathname() ?? "/servers"
+  const [aboutOpen, setAboutOpen] = useState(false)
+  const { state: favoritesState } = useFavorites()
+  const { players: trackedPlayers } = useTrackedPlayers()
+  const { servers: liveServers } = useLiveServers()
+  const realtimeAvailable = isRealtimeEnabled()
+  const isSettingsPage = pathname.startsWith("/settings")
+  const settingsSection: SettingsSectionId = pathname.startsWith(
+    "/settings/profile"
+  )
     ? "pickup-profile"
     : pathname.startsWith("/settings/import-data")
       ? "import-data"
-      : "general";
+      : "general"
   const availableSettingsItems = useMemo(
     () =>
       settingsNavigationItems.filter(
         (item) => item.id !== "pickup-profile" || pickupPlayer != null
       ),
     [pickupPlayer]
-  );
+  )
   const trackedSteamIds = useMemo(
     () => trackedPlayers.map((player) => player.steamId),
-    [trackedPlayers],
-  );
+    [trackedPlayers]
+  )
   const trackedPresenceQuery = useQuery({
     queryKey: ["realtime", "presence-lookup", trackedSteamIds],
     queryFn: () => fetchRealtimePlayerPresenceLookup(trackedSteamIds),
@@ -138,59 +150,61 @@ export function AppSidebar({
     staleTime: 10_000,
     refetchInterval: 15_000,
     placeholderData: (previous) => previous,
-  });
+  })
   const onlineTrackedPlayerCount = useMemo(
     () =>
       Object.values(trackedPresenceQuery.data ?? {}).filter(
-        (presence) => presence != null,
+        (presence) => presence != null
       ).length,
-    [trackedPresenceQuery.data],
-  );
+    [trackedPresenceQuery.data]
+  )
   const favoritePlayerCount = useMemo(() => {
     if (favoritesState.servers.length === 0 || liveServers.length === 0) {
-      return 0;
+      return 0
     }
 
     const favoriteAddresses = new Set(
-      favoritesState.servers.map((server) => server.addr),
-    );
+      favoritesState.servers.map((server) => server.addr)
+    )
 
     return liveServers.reduce((sum, server) => {
       if (!favoriteAddresses.has(server.addr)) {
-        return sum;
+        return sum
       }
 
-      return sum + (server.players ?? 0);
-    }, 0);
-  }, [favoritesState.servers, liveServers]);
+      return sum + (server.players ?? 0)
+    }, 0)
+  }, [favoritesState.servers, liveServers])
   const lastAppPath = useMemo(() => {
     if (!isSettingsPage) {
-      return pathname;
+      return pathname
     }
 
     try {
-      return window.sessionStorage.getItem(lastAppPathStorageKey) ?? "/servers";
+      return window.sessionStorage.getItem(lastAppPathStorageKey) ?? "/servers"
     } catch {
-      return "/servers";
+      return "/servers"
     }
-  }, [isSettingsPage, lastAppPathStorageKey, pathname]);
+  }, [isSettingsPage, lastAppPathStorageKey, pathname])
   const backToAppHref =
-    lastAppPath.startsWith("/settings") || !lastAppPath ? "/servers" : lastAppPath;
+    lastAppPath.startsWith("/settings") || !lastAppPath
+      ? "/servers"
+      : lastAppPath
 
   useEffect(() => {
     if (isSettingsPage) {
-      return;
+      return
     }
 
     try {
-      window.sessionStorage.setItem(lastAppPathStorageKey, pathname);
+      window.sessionStorage.setItem(lastAppPathStorageKey, pathname)
     } catch {
       // Ignore sessionStorage failures in unsupported environments.
     }
-  }, [isSettingsPage, lastAppPathStorageKey, pathname]);
+  }, [isSettingsPage, lastAppPathStorageKey, pathname])
 
   const renderNavigationItem = (item: NavItem) => {
-    const active = isItemActive(pathname, item.href);
+    const active = isItemActive(pathname, item.href)
 
     return (
       <SidebarMenuItem
@@ -212,14 +226,14 @@ export function AppSidebar({
           </Link>
         </SidebarMenuButton>
         {item.id === "pickup" ? (
-          <SidebarMenuBadge className="pointer-events-auto z-[150] right-2 top-1/2 h-6 min-w-6 -translate-y-1/2 gap-1.5 rounded-md border border-yellow-500/30 bg-yellow-500/12 px-2 text-[11px] leading-none font-semibold text-yellow-700 peer-data-[size=sm]/menu-button:top-1/2 peer-data-[size=default]/menu-button:top-1/2 peer-data-[size=lg]/menu-button:top-1/2 dark:text-yellow-300">
+          <SidebarMenuBadge className="pointer-events-auto top-1/2 right-2 z-[150] h-6 min-w-6 -translate-y-1/2 gap-1.5 rounded-md border border-yellow-500/30 bg-yellow-500/12 px-2 text-[11px] leading-none font-semibold text-yellow-700 peer-data-[size=default]/menu-button:top-1/2 peer-data-[size=lg]/menu-button:top-1/2 peer-data-[size=sm]/menu-button:top-1/2 dark:text-yellow-300">
             <Flask className="size-3" />
             <span>ALPHA</span>
           </SidebarMenuBadge>
         ) : item.id === "favorites" && favoritesState.servers.length > 0 ? (
           <Tooltip>
             <TooltipTrigger asChild>
-              <SidebarMenuBadge className="pointer-events-auto z-[150] right-2 top-1/2 h-6 min-w-6 -translate-y-1/2 gap-1.5 rounded-md border border-sidebar-border/70 bg-muted px-2 text-xs leading-none peer-data-[size=sm]/menu-button:top-1/2 peer-data-[size=default]/menu-button:top-1/2 peer-data-[size=lg]/menu-button:top-1/2">
+              <SidebarMenuBadge className="pointer-events-auto top-1/2 right-2 z-[150] h-6 min-w-6 -translate-y-1/2 gap-1.5 rounded-md border border-sidebar-border/70 bg-muted px-2 text-xs leading-none peer-data-[size=default]/menu-button:top-1/2 peer-data-[size=lg]/menu-button:top-1/2 peer-data-[size=sm]/menu-button:top-1/2">
                 <GameController className="size-3" />
                 <span>{favoritePlayerCount}</span>
               </SidebarMenuBadge>
@@ -234,7 +248,7 @@ export function AppSidebar({
           !trackedPresenceQuery.isError ? (
           <Tooltip>
             <TooltipTrigger asChild>
-              <SidebarMenuBadge className="pointer-events-auto z-[150] right-2 top-1/2 h-6 min-w-6 -translate-y-1/2 gap-1.5 rounded-md border border-sidebar-border/70 bg-muted px-2 text-xs leading-none peer-data-[size=sm]/menu-button:top-1/2 peer-data-[size=default]/menu-button:top-1/2 peer-data-[size=lg]/menu-button:top-1/2">
+              <SidebarMenuBadge className="pointer-events-auto top-1/2 right-2 z-[150] h-6 min-w-6 -translate-y-1/2 gap-1.5 rounded-md border border-sidebar-border/70 bg-muted px-2 text-xs leading-none peer-data-[size=default]/menu-button:top-1/2 peer-data-[size=lg]/menu-button:top-1/2 peer-data-[size=sm]/menu-button:top-1/2">
                 <GameController className="size-3" />
                 <span>{onlineTrackedPlayerCount}</span>
               </SidebarMenuBadge>
@@ -245,8 +259,8 @@ export function AppSidebar({
           </Tooltip>
         ) : null}
       </SidebarMenuItem>
-    );
-  };
+    )
+  }
 
   return (
     <Sidebar className="!p-0" collapsible="icon" variant="inset">
@@ -266,7 +280,7 @@ export function AppSidebar({
           </div>
           <img
             alt="QLTracker app icon"
-            className="absolute left-1/2 top-1/2 size-8 -translate-x-1/2 -translate-y-1/2 object-contain opacity-0 transition-opacity duration-200 ease-linear group-data-[collapsible=icon]:opacity-100"
+            className="absolute top-1/2 left-1/2 size-8 -translate-x-1/2 -translate-y-1/2 object-contain opacity-0 transition-opacity duration-200 ease-linear group-data-[collapsible=icon]:opacity-100"
             src="/images/appicon.png"
           />
         </div>
@@ -274,7 +288,7 @@ export function AppSidebar({
       <SidebarContent>
         {isSettingsPage ? (
           <SidebarGroup>
-            <SidebarGroupLabel className="uppercase tracking-[0.18em]">
+            <SidebarGroupLabel className="tracking-[0.18em] uppercase">
               Settings
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -306,23 +320,27 @@ export function AppSidebar({
         ) : (
           <>
             <SidebarGroup>
-              <SidebarGroupLabel className="uppercase tracking-[0.18em]">
+              <SidebarGroupLabel className="tracking-[0.18em] uppercase">
                 News
               </SidebarGroupLabel>
               <SidebarGroupContent>
-                <SidebarMenu>{newsNavigationItems.map(renderNavigationItem)}</SidebarMenu>
+                <SidebarMenu>
+                  {newsNavigationItems.map(renderNavigationItem)}
+                </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
             <SidebarGroup>
-              <SidebarGroupLabel className="uppercase tracking-[0.18em]">
+              <SidebarGroupLabel className="tracking-[0.18em] uppercase">
                 QLTracker
               </SidebarGroupLabel>
               <SidebarGroupContent>
-                <SidebarMenu>{primaryNavigationItems.map(renderNavigationItem)}</SidebarMenu>
+                <SidebarMenu>
+                  {primaryNavigationItems.map(renderNavigationItem)}
+                </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
             <SidebarGroup>
-              <SidebarGroupLabel className="uppercase tracking-[0.18em]">
+              <SidebarGroupLabel className="tracking-[0.18em] uppercase">
                 Competitive
               </SidebarGroupLabel>
               <SidebarGroupContent>
@@ -435,14 +453,20 @@ export function AppSidebar({
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   <button
                     className="flex size-7 cursor-pointer items-center justify-center rounded-md border border-border hover:bg-muted"
-                    onClick={() => openExternalUrl("https://discord.gg/qltracker")}
+                    onClick={() =>
+                      openExternalUrl("https://discord.gg/qltracker")
+                    }
                     type="button"
                   >
                     <Discord className="size-4" />
                   </button>
                   <button
                     className="flex size-7 cursor-pointer items-center justify-center rounded-md border border-border hover:bg-muted"
-                    onClick={() => openExternalUrl("https://github.com/Splicho/qltracker-web")}
+                    onClick={() =>
+                      openExternalUrl(
+                        "https://github.com/Splicho/qltracker-web"
+                      )
+                    }
                     type="button"
                   >
                     <Github className="size-4" />
@@ -454,5 +478,5 @@ export function AppSidebar({
         </Dialog>
       </SidebarFooter>
     </Sidebar>
-  );
+  )
 }

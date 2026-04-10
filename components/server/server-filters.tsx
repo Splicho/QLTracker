@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useMemo, useState } from "react"
+import { AnimatePresence, motion } from "framer-motion"
 import {
   Check,
   ChevronDown,
@@ -7,7 +7,7 @@ import {
   Heart,
   Search,
   X,
-} from "lucide-react";
+} from "lucide-react"
 import {
   RegionAll,
   RegionApac,
@@ -15,17 +15,17 @@ import {
   RegionNorthAmerica,
   RegionSouthAfrica,
   RegionSouthAmerica,
-} from "@/components/icon";
-import { mapEntries } from "@/lib/maps";
+} from "@/components/icon"
+import { mapEntries } from "@/lib/maps"
 import {
   RATING_FILTER_MAX,
   RATING_FILTER_MIN,
   type RatingSystem,
   type ServerFiltersValue,
-} from "@/lib/server-filters";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+} from "@/lib/server-filters"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Command,
   CommandEmpty,
@@ -33,28 +33,28 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
-import { Input } from "@/components/ui/input";
+} from "@/components/ui/command"
+import { Input } from "@/components/ui/input"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@/components/ui/popover"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
+} from "@/components/ui/select"
+import { Slider } from "@/components/ui/slider"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useTranslation } from "react-i18next";
+} from "@/components/ui/tooltip"
+import { useTranslation } from "react-i18next"
 
 const regionOptions = [
   { value: "all", labelKey: "filters.regions.all", icon: RegionAll },
@@ -63,13 +63,13 @@ const regionOptions = [
   { value: "sa", labelKey: "filters.regions.sa", icon: RegionSouthAmerica },
   { value: "za", labelKey: "filters.regions.za", icon: RegionSouthAfrica },
   { value: "apac", labelKey: "filters.regions.apac", icon: RegionApac },
-];
+]
 
 const visibilityOptions = [
   { value: "all", labelKey: "filters.visibility.all" },
   { value: "public", labelKey: "filters.visibility.public" },
   { value: "private", labelKey: "filters.visibility.private" },
-];
+]
 
 const gameModeOptions = [
   { value: "all", labelKey: "filters.modes.all" },
@@ -84,19 +84,19 @@ const gameModeOptions = [
   { value: "har", labelKey: "filters.modes.har" },
   { value: "race", labelKey: "filters.modes.race" },
   { value: "rr", labelKey: "filters.modes.rr" },
-];
+]
 
 export function ServerFilters({
   value,
   onChange,
   onReset,
 }: {
-  value: ServerFiltersValue;
-  onChange: (next: ServerFiltersValue) => void;
-  onReset: () => void;
+  value: ServerFiltersValue
+  onChange: (next: ServerFiltersValue) => void
+  onReset: () => void
 }) {
-  const { t } = useTranslation();
-  const [collapsed, setCollapsed] = useState(false);
+  const { t } = useTranslation()
+  const [collapsed, setCollapsed] = useState(false)
   const hasActiveFilters =
     value.search.trim().length > 0 ||
     value.region !== "all" ||
@@ -108,11 +108,11 @@ export function ServerFilters({
     value.tags.length > 0 ||
     value.showEmpty ||
     value.showFull ||
-    value.showFavorites;
+    value.showFavorites
   const selectedRegion =
     regionOptions.find((option) => option.value === value.region) ??
-    regionOptions[0];
-  const SelectedRegionIcon = selectedRegion.icon;
+    regionOptions[0]
+  const SelectedRegionIcon = selectedRegion.icon
 
   return (
     <section className="border-b border-border px-4 py-4">
@@ -160,7 +160,7 @@ export function ServerFilters({
             <div className="flex flex-col gap-3 px-1 pt-1">
               <div className="grid gap-3">
                 <div className="relative">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                  <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     value={value.search}
                     onChange={(event) =>
@@ -325,7 +325,7 @@ export function ServerFilters({
         </div>
       </div>
     </section>
-  );
+  )
 }
 
 function RatingRangeFilter({
@@ -334,29 +334,29 @@ function RatingRangeFilter({
   onSystemChange,
   onRangeChange,
 }: {
-  system: RatingSystem;
-  range: [number, number];
-  onSystemChange: (system: RatingSystem) => void;
-  onRangeChange: (range: [number, number]) => void;
+  system: RatingSystem
+  range: [number, number]
+  onSystemChange: (system: RatingSystem) => void
+  onRangeChange: (range: [number, number]) => void
 }) {
-  const { t } = useTranslation();
-  const [draftRange, setDraftRange] = useState<[number, number]>(range);
+  const { t } = useTranslation()
+  const [draftRange, setDraftRange] = useState<[number, number]>(range)
 
   useEffect(() => {
-    setDraftRange(range);
-  }, [range]);
+    setDraftRange(range)
+  }, [range])
 
   useEffect(() => {
     if (draftRange[0] === range[0] && draftRange[1] === range[1]) {
-      return;
+      return
     }
 
     const timeout = window.setTimeout(() => {
-      onRangeChange(draftRange);
-    }, 120);
+      onRangeChange(draftRange)
+    }, 120)
 
-    return () => window.clearTimeout(timeout);
-  }, [draftRange, onRangeChange, range]);
+    return () => window.clearTimeout(timeout)
+  }, [draftRange, onRangeChange, range])
 
   return (
     <div className="rounded-lg border border-border p-3">
@@ -401,44 +401,44 @@ function RatingRangeFilter({
           value={draftRange}
           onValueChange={(next) => {
             if (next.length === 2) {
-              setDraftRange([next[0], next[1]]);
+              setDraftRange([next[0], next[1]])
             }
           }}
         />
       </div>
     </div>
-  );
+  )
 }
 
 function MapMultiSelect({
   value,
   onChange,
 }: {
-  value: string[];
-  onChange: (maps: string[]) => void;
+  value: string[]
+  onChange: (maps: string[]) => void
 }) {
-  const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
+  const { t } = useTranslation()
+  const [open, setOpen] = useState(false)
 
   const selectedMaps = useMemo(
     () => mapEntries.filter((map) => value.includes(map.id)),
     [value]
-  );
+  )
 
   const label =
     selectedMaps.length === 0
       ? t("filters.maps.all")
       : selectedMaps.length === 1
         ? selectedMaps[0].name
-        : t("filters.maps.selectedCount", { count: selectedMaps.length });
+        : t("filters.maps.selectedCount", { count: selectedMaps.length })
 
   function toggleMap(mapId: string) {
     if (value.includes(mapId)) {
-      onChange(value.filter((item) => item !== mapId));
-      return;
+      onChange(value.filter((item) => item !== mapId))
+      return
     }
 
-    onChange([...value, mapId]);
+    onChange([...value, mapId])
   }
 
   return (
@@ -477,7 +477,7 @@ function MapMultiSelect({
               ) : null}
 
               {mapEntries.map((map) => {
-                const checked = value.includes(map.id);
+                const checked = value.includes(map.id)
 
                 return (
                   <CommandItem
@@ -498,37 +498,37 @@ function MapMultiSelect({
                     <span className="flex-1 truncate">{map.name}</span>
                     {checked ? <Check className="size-4 text-primary" /> : null}
                   </CommandItem>
-                );
+                )
               })}
             </CommandGroup>
           </CommandList>
         </Command>
       </PopoverContent>
     </Popover>
-  );
+  )
 }
 
 function TagFilter({
   value,
   onChange,
 }: {
-  value: string[];
-  onChange: (tags: string[]) => void;
+  value: string[]
+  onChange: (tags: string[]) => void
 }) {
-  const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
-  const [tagInput, setTagInput] = useState("");
+  const { t } = useTranslation()
+  const [open, setOpen] = useState(false)
+  const [tagInput, setTagInput] = useState("")
 
   function addTag(rawTag: string) {
-    const tag = rawTag.trim();
+    const tag = rawTag.trim()
     if (!tag || value.includes(tag)) {
-      return;
+      return
     }
-    onChange([...value, tag]);
+    onChange([...value, tag])
   }
 
   function removeTag(tag: string) {
-    onChange(value.filter((item) => item !== tag));
+    onChange(value.filter((item) => item !== tag))
   }
 
   const label =
@@ -536,7 +536,7 @@ function TagFilter({
       ? t("filters.tags.label")
       : value.length === 1
         ? value[0]
-        : t("filters.tags.selectedCount", { count: value.length });
+        : t("filters.tags.selectedCount", { count: value.length })
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -584,21 +584,21 @@ function TagFilter({
                   tagInput.length === 0 &&
                   value.length > 0
                 ) {
-                  event.preventDefault();
-                  removeTag(value[value.length - 1]);
-                  return;
+                  event.preventDefault()
+                  removeTag(value[value.length - 1])
+                  return
                 }
 
                 if (event.key === "Enter") {
-                  event.preventDefault();
-                  addTag(tagInput);
-                  setTagInput("");
+                  event.preventDefault()
+                  addTag(tagInput)
+                  setTagInput("")
                 }
               }}
               onBlur={() => {
                 if (tagInput.trim()) {
-                  addTag(tagInput);
-                  setTagInput("");
+                  addTag(tagInput)
+                  setTagInput("")
                 }
               }}
               placeholder={t("filters.tags.inputPlaceholder")}
@@ -608,5 +608,5 @@ function TagFilter({
         </div>
       </PopoverContent>
     </Popover>
-  );
+  )
 }

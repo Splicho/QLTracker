@@ -1,5 +1,5 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { stripQuakeColors } from "@/lib/quake";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { stripQuakeColors } from "@/lib/quake"
 
 function getInitials(name: string) {
   return stripQuakeColors(name)
@@ -8,7 +8,7 @@ function getInitials(name: string) {
     .map((part) => part[0] ?? "")
     .join("")
     .slice(0, 2)
-    .toUpperCase();
+    .toUpperCase()
 }
 
 export function PlayerAvatar({
@@ -18,11 +18,11 @@ export function PlayerAvatar({
   personaName,
   size = "default",
 }: {
-  avatarUrl: string | null | undefined;
-  className?: string;
-  fallbackClassName?: string;
-  personaName: string;
-  size?: "default" | "sm" | "lg";
+  avatarUrl: string | null | undefined
+  className?: string
+  fallbackClassName?: string
+  personaName: string
+  size?: "default" | "sm" | "lg"
 }) {
   return (
     <Avatar className={className} size={size}>
@@ -31,5 +31,5 @@ export function PlayerAvatar({
         {getInitials(personaName)}
       </AvatarFallback>
     </Avatar>
-  );
+  )
 }

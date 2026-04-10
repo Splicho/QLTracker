@@ -1,28 +1,33 @@
-import { cache } from "react";
+import { cache } from "react"
 
-import { getNewsArticleBySlug } from "@/lib/server/news";
-import { getPickupMatchDetail, getPickupPlayerProfile } from "@/lib/server/pickup";
-import { getPrisma } from "@/lib/server/prisma";
+import { getNewsArticleBySlug } from "@/lib/server/news"
+import {
+  getPickupMatchDetail,
+  getPickupPlayerProfile,
+} from "@/lib/server/pickup"
+import { getPrisma } from "@/lib/server/prisma"
 
 export const getPublicNewsArticle = cache(async (slug: string) => {
-  return getNewsArticleBySlug(slug);
-});
+  return getNewsArticleBySlug(slug)
+})
 
-export const getPublicPickupPlayerProfile = cache(async (playerIdOrSteamId: string) => {
-  try {
-    return await getPickupPlayerProfile(playerIdOrSteamId);
-  } catch {
-    return null;
+export const getPublicPickupPlayerProfile = cache(
+  async (playerIdOrSteamId: string) => {
+    try {
+      return await getPickupPlayerProfile(playerIdOrSteamId)
+    } catch {
+      return null
+    }
   }
-});
+)
 
 export const getPublicPickupMatchDetail = cache(async (matchId: string) => {
   try {
-    return await getPickupMatchDetail(matchId);
+    return await getPickupMatchDetail(matchId)
   } catch {
-    return null;
+    return null
   }
-});
+})
 
 export async function listSitemapNewsArticles() {
   return getPrisma().newsArticle.findMany({
@@ -32,7 +37,7 @@ export async function listSitemapNewsArticles() {
       slug: true,
       updatedAt: true,
     },
-  });
+  })
 }
 
 export async function listSitemapPickupPlayers() {
@@ -42,7 +47,7 @@ export async function listSitemapPickupPlayers() {
       steamId: true,
       updatedAt: true,
     },
-  });
+  })
 }
 
 export async function listSitemapPickupMatches() {
@@ -52,5 +57,5 @@ export async function listSitemapPickupMatches() {
       id: true,
       updatedAt: true,
     },
-  });
+  })
 }

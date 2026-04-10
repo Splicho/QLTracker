@@ -1,8 +1,8 @@
-import type { RealtimePlayerPresence } from "@/lib/realtime";
-import type { SteamServer } from "@/lib/steam";
+import type { RealtimePlayerPresence } from "@/lib/realtime"
+import type { SteamServer } from "@/lib/steam"
 
 const steamAppId =
-  Number(process.env.NEXT_PUBLIC_STEAM_APP_ID?.trim() ?? "282440") || 282440;
+  Number(process.env.NEXT_PUBLIC_STEAM_APP_ID?.trim() ?? "282440") || 282440
 
 export const modeLabelKeys: Record<string, string> = {
   ca: "filters.modes.ca",
@@ -18,7 +18,7 @@ export const modeLabelKeys: Record<string, string> = {
   rr: "filters.modes.rr",
   td: "filters.modes.tdm",
   "1f": "filters.modes.ctf",
-};
+}
 
 export function normalizeGameMode(server: Pick<SteamServer, "keywords">) {
   const knownModes: Record<string, string> = {
@@ -42,52 +42,52 @@ export function normalizeGameMode(server: Pick<SteamServer, "keywords">) {
     race: "race",
     rr: "rr",
     redrover: "rr",
-  };
+  }
 
   const keywordParts =
     server.keywords
       ?.split(",")
       .map((part) => part.trim().toLowerCase())
-      .filter(Boolean) ?? [];
+      .filter(Boolean) ?? []
 
   for (const part of keywordParts) {
     if (part.startsWith("g_")) {
-      const normalized = part.replace(/^g_/, "");
-      return knownModes[normalized] ?? normalized;
+      const normalized = part.replace(/^g_/, "")
+      return knownModes[normalized] ?? normalized
     }
 
-    const compact = part.replace(/[\s_-]+/g, "");
+    const compact = part.replace(/[\s_-]+/g, "")
     if (compact in knownModes) {
-      return knownModes[compact];
+      return knownModes[compact]
     }
   }
 
-  return null;
+  return null
 }
 
 export function getGameModeLabel(
   gameMode: string | null | undefined,
-  t: (key: string) => string,
+  t: (key: string) => string
 ) {
   if (!gameMode) {
-    return null;
+    return null
   }
 
-  const normalizedMode = gameMode.trim().toLowerCase();
-  const key = modeLabelKeys[normalizedMode];
+  const normalizedMode = gameMode.trim().toLowerCase()
+  const key = modeLabelKeys[normalizedMode]
 
-  return key ? t(key) : normalizedMode.toUpperCase();
+  return key ? t(key) : normalizedMode.toUpperCase()
 }
 
 export function buildSteamConnectUrl(serverAddress: string, password?: string) {
-  const trimmedPassword = password?.trim();
+  const trimmedPassword = password?.trim()
   return trimmedPassword
     ? `steam://connect/${serverAddress}/${encodeURIComponent(trimmedPassword)}`
-    : `steam://connect/${serverAddress}`;
+    : `steam://connect/${serverAddress}`
 }
 
 export function createFallbackServerFromPresence(
-  presence: RealtimePlayerPresence,
+  presence: RealtimePlayerPresence
 ): SteamServer {
   return {
     addr: presence.addr,
@@ -106,5 +106,5 @@ export function createFallbackServerFromPresence(
     keywords: null,
     connect_url: `steam://connect/${presence.addr}`,
     players_info: [],
-  };
+  }
 }

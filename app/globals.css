@@ -95,11 +95,7 @@
   }
 
   html {
-    font-family:
-      var(--font-sans),
-      ui-sans-serif,
-      system-ui,
-      sans-serif;
+    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   }
 
   a {
@@ -108,8 +104,11 @@
 
   * {
     scrollbar-width: thin;
-    scrollbar-color:
-      color-mix(in oklch, var(--color-foreground) 14%, transparent)
+    scrollbar-color: color-mix(
+        in oklch,
+        var(--color-foreground) 14%,
+        transparent
+      )
       transparent;
   }
 

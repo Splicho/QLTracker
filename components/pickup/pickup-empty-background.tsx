@@ -1,6 +1,6 @@
-import { ChevronDown } from "lucide-react";
-import { Play, Spinner, Steam } from "@/components/icon";
-import { Button } from "@/components/ui/button";
+import { ChevronDown } from "lucide-react"
+import { Play, Spinner, Steam } from "@/components/icon"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,8 +9,8 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import type { PickupQueueSummary } from "@/lib/pickup";
+} from "@/components/ui/dropdown-menu"
+import type { PickupQueueSummary } from "@/lib/pickup"
 
 const pickupQueueGroupLabels: Record<string, string> = {
   ca: "Clan Arena",
@@ -18,36 +18,35 @@ const pickupQueueGroupLabels: Record<string, string> = {
   duel: "Duel",
   ffa: "Free For All",
   tdm: "Team Deathmatch",
-};
+}
 
 function buildQueueGroups(queues: PickupQueueSummary[]) {
   const groups = new Map<
     string,
     Array<{ label: string; queue: PickupQueueSummary }>
-  >();
+  >()
 
   for (const queue of queues) {
-    const segments = queue.name.trim().split(/\s+/).filter(Boolean);
-    const label = segments[0] ?? queue.name;
+    const segments = queue.name.trim().split(/\s+/).filter(Boolean)
+    const label = segments[0] ?? queue.name
     const rawGroupName =
-      segments.length > 1 ? segments.slice(1).join(" ") : "Queues";
-    const normalizedGroupKey = rawGroupName.trim().toLowerCase();
-    const groupName =
-      pickupQueueGroupLabels[normalizedGroupKey] ?? rawGroupName;
-    const group = groups.get(groupName);
+      segments.length > 1 ? segments.slice(1).join(" ") : "Queues"
+    const normalizedGroupKey = rawGroupName.trim().toLowerCase()
+    const groupName = pickupQueueGroupLabels[normalizedGroupKey] ?? rawGroupName
+    const group = groups.get(groupName)
 
     if (group) {
-      group.push({ label, queue });
-      continue;
+      group.push({ label, queue })
+      continue
     }
 
-    groups.set(groupName, [{ label, queue }]);
+    groups.set(groupName, [{ label, queue }])
   }
 
   return Array.from(groups.entries()).map(([name, entries]) => ({
     entries,
     name,
-  }));
+  }))
 }
 
 export function PickupEmptyBackground({
@@ -58,15 +57,15 @@ export function PickupEmptyBackground({
   queues,
   selectedQueue,
 }: {
-  guestMode: boolean;
-  isQueued: boolean;
-  onConnectWithSteam: () => void;
-  onJoinQueue: (queue: PickupQueueSummary) => void;
-  queues: PickupQueueSummary[];
-  selectedQueue: PickupQueueSummary | null;
+  guestMode: boolean
+  isQueued: boolean
+  onConnectWithSteam: () => void
+  onJoinQueue: (queue: PickupQueueSummary) => void
+  queues: PickupQueueSummary[]
+  selectedQueue: PickupQueueSummary | null
 }) {
-  const enabledQueues = queues.filter((queue) => queue.enabled);
-  const groupedQueues = buildQueueGroups(enabledQueues);
+  const enabledQueues = queues.filter((queue) => queue.enabled)
+  const groupedQueues = buildQueueGroups(enabledQueues)
 
   return (
     <div className="relative h-[26rem] w-full overflow-hidden">
@@ -174,7 +173,8 @@ export function PickupEmptyBackground({
                         {selectedQueue.name}
                       </span>
                       <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-md border border-border/70 bg-muted px-2 text-xs leading-none">
-                        {selectedQueue.currentPlayers}/{selectedQueue.playerCount}
+                        {selectedQueue.currentPlayers}/
+                        {selectedQueue.playerCount}
                       </span>
                     </DropdownMenuItem>
                   ) : null}
@@ -185,5 +185,5 @@ export function PickupEmptyBackground({
         </div>
       </div>
     </div>
-  );
+  )
 }

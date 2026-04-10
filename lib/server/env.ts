@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod"
 
 const envSchema = z.object({
   PUBLIC_BASE_URL: z.string().url().default("http://localhost:3000"),
@@ -9,23 +9,23 @@ const envSchema = z.object({
   PICKUP_AUTH_COOKIE_NAME: z.string().default("qltracker-pickup-session"),
   SESSION_SECRET: z.string().min(16),
   WORKER_POLL_INTERVAL_MS: z.coerce.number().int().positive().default(60_000),
-});
+})
 
-export type ServerEnv = z.infer<typeof envSchema>;
+export type ServerEnv = z.infer<typeof envSchema>
 
-let cachedEnv: ServerEnv | null = null;
+let cachedEnv: ServerEnv | null = null
 
 export function getNotificationEnv() {
   if (!cachedEnv) {
-    cachedEnv = envSchema.parse(process.env);
+    cachedEnv = envSchema.parse(process.env)
   }
 
-  return cachedEnv;
+  return cachedEnv
 }
 
 export function getPickupAdminSteamIds() {
   return getNotificationEnv()
     .PICKUP_ADMIN_STEAM_IDS.split(",")
     .map((value) => value.trim())
-    .filter((value) => value.length > 0);
+    .filter((value) => value.length > 0)
 }

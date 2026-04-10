@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { useState } from "react"
+import { useTranslation } from "react-i18next"
+import { toast } from "sonner"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -9,17 +9,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { stripQuakeColors } from "@/lib/quake";
-import type { TrackedPlayer } from "@/lib/tracked-players";
+} from "@/components/ui/dialog"
+import { Textarea } from "@/components/ui/textarea"
+import { stripQuakeColors } from "@/lib/quake"
+import type { TrackedPlayer } from "@/lib/tracked-players"
 
 type TrackedPlayerNoteDialogProps = {
-  open: boolean;
-  trackedPlayer: TrackedPlayer | null;
-  onOpenChange: (open: boolean) => void;
-  onSaveNote: (steamId: string, note: string) => boolean;
-};
+  open: boolean
+  trackedPlayer: TrackedPlayer | null
+  onOpenChange: (open: boolean) => void
+  onSaveNote: (steamId: string, note: string) => boolean
+}
 
 export function TrackedPlayerNoteDialog({
   open,
@@ -27,7 +27,7 @@ export function TrackedPlayerNoteDialog({
   onOpenChange,
   onSaveNote,
 }: TrackedPlayerNoteDialogProps) {
-  const dialogKey = trackedPlayer?.steamId ?? "tracked-player-note";
+  const dialogKey = trackedPlayer?.steamId ?? "tracked-player-note"
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {open ? (
@@ -39,7 +39,7 @@ export function TrackedPlayerNoteDialog({
         />
       ) : null}
     </Dialog>
-  );
+  )
 }
 
 function TrackedPlayerNoteDialogContent({
@@ -47,49 +47,49 @@ function TrackedPlayerNoteDialogContent({
   onOpenChange,
   onSaveNote,
 }: Omit<TrackedPlayerNoteDialogProps, "open">) {
-  const { t } = useTranslation();
-  const [draftNote, setDraftNote] = useState(trackedPlayer?.note ?? "");
+  const { t } = useTranslation()
+  const [draftNote, setDraftNote] = useState(trackedPlayer?.note ?? "")
   const playerLabel = trackedPlayer
     ? stripQuakeColors(trackedPlayer.playerName)
-    : "";
+    : ""
 
   const handleClear = () => {
     if (!trackedPlayer) {
-      return;
+      return
     }
 
-    const didChange = onSaveNote(trackedPlayer.steamId, "");
-    onOpenChange(false);
+    const didChange = onSaveNote(trackedPlayer.steamId, "")
+    onOpenChange(false)
     if (didChange) {
       toast.success(
         t("watchlist.toasts.noteCleared", {
           player: playerLabel,
         })
-      );
+      )
     }
-  };
+  }
 
   const handleSave = () => {
     if (!trackedPlayer) {
-      return;
+      return
     }
 
-    const didChange = onSaveNote(trackedPlayer.steamId, draftNote);
-    onOpenChange(false);
+    const didChange = onSaveNote(trackedPlayer.steamId, draftNote)
+    onOpenChange(false)
     if (didChange) {
       toast.success(
         t("watchlist.toasts.noteSaved", {
           player: playerLabel,
         })
-      );
+      )
     }
-  };
+  }
 
   return (
     <DialogContent
       className="sm:max-w-2xl!"
       onOpenAutoFocus={(event) => {
-        event.preventDefault();
+        event.preventDefault()
       }}
     >
       <DialogHeader>
@@ -110,7 +110,7 @@ function TrackedPlayerNoteDialogContent({
           maxLength={500}
           placeholder={t("watchlist.noteDialog.placeholder")}
           onChange={(event) => {
-            setDraftNote(event.target.value);
+            setDraftNote(event.target.value)
           }}
         />
         <p className="text-xs text-muted-foreground">
@@ -126,5 +126,5 @@ function TrackedPlayerNoteDialogContent({
         </Button>
       </DialogFooter>
     </DialogContent>
-  );
+  )
 }

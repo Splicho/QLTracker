@@ -1,12 +1,12 @@
-import { appendStructuredLog, inferLogLevel } from "@/lib/logger";
+import { appendStructuredLog, inferLogLevel } from "@/lib/logger"
 
 function normalizePickupLogMessage(payload: unknown) {
   if (typeof payload === "string") {
-    return payload;
+    return payload
   }
 
   if (payload instanceof Error) {
-    return payload.stack ?? payload.message;
+    return payload.stack ?? payload.message
   }
 
   try {
@@ -18,24 +18,24 @@ function normalizePickupLogMessage(payload: unknown) {
             message: value.message,
             name: value.name,
             stack: value.stack ?? null,
-          };
+          }
         }
 
-        return value;
+        return value
       },
-      2,
-    );
+      2
+    )
   } catch {
-    return String(payload);
+    return String(payload)
   }
 }
 
 export async function appendPickupLog(source: string, payload: unknown) {
-  const normalizedSource = source.trim();
-  const message = normalizePickupLogMessage(payload).trim();
+  const normalizedSource = source.trim()
+  const message = normalizePickupLogMessage(payload).trim()
 
   if (!normalizedSource || !message) {
-    return;
+    return
   }
 
   await appendStructuredLog({
@@ -44,26 +44,26 @@ export async function appendPickupLog(source: string, payload: unknown) {
     event: normalizedSource,
     source: normalizedSource,
     payload,
-  });
+  })
 }
 
 export function summarizePickupPublicState(
   state:
     | {
-        queue: { id: string; slug: string } | null;
+        queue: { id: string; slug: string } | null
         queues: Array<{
-          currentPlayers: number;
-          enabled: boolean;
-          id: string;
-          playerCount: number;
-          slug: string;
-        }>;
+          currentPlayers: number
+          enabled: boolean
+          id: string
+          playerCount: number
+          slug: string
+        }>
       }
     | null
-    | undefined,
+    | undefined
 ) {
   if (!state) {
-    return null;
+    return null
   }
 
   return {
@@ -76,33 +76,33 @@ export function summarizePickupPublicState(
       playerCount: queue.playerCount,
       slug: queue.slug,
     })),
-  };
+  }
 }
 
 export function summarizePickupPlayerState(
   state:
     | {
-        rating?: { displayRating: number } | null;
-        stage: string;
-        viewer: { id: string; steamId: string };
-        queue?: { joinedAt: string; queueId: string; queueSlug: string };
+        rating?: { displayRating: number } | null
+        stage: string
+        viewer: { id: string; steamId: string }
+        queue?: { joinedAt: string; queueId: string; queueSlug: string }
         match?: {
-          id: string;
-          queueId: string;
-          readyDeadlineAt: string | null;
-          status: string;
-          veto: { deadlineAt: string | null };
+          id: string
+          queueId: string
+          readyDeadlineAt: string | null
+          status: string
+          veto: { deadlineAt: string | null }
           teams: {
-            left: Array<{ id: string; readyState: string }>;
-            right: Array<{ id: string; readyState: string }>;
-          };
-        };
+            left: Array<{ id: string; readyState: string }>
+            right: Array<{ id: string; readyState: string }>
+          }
+        }
       }
     | null
-    | undefined,
+    | undefined
 ) {
   if (!state) {
-    return null;
+    return null
   }
 
   if (state.stage === "queue" && state.queue) {
@@ -113,16 +113,17 @@ export function summarizePickupPlayerState(
       stage: state.stage,
       viewerId: state.viewer.id,
       viewerSteamId: state.viewer.steamId,
-    };
+    }
   }
 
   if ("match" in state && state.match) {
-    const players = [...state.match.teams.left, ...state.match.teams.right];
+    const players = [...state.match.teams.left, ...state.match.teams.right]
 
     return {
       matchId: state.match.id,
       queueId: state.match.queueId,
-      readyCount: players.filter((player) => player.readyState === "ready").length,
+      readyCount: players.filter((player) => player.readyState === "ready")
+        .length,
       readyDeadlineAt: state.match.readyDeadlineAt,
       rating: state.rating?.displayRating ?? null,
       stage: state.stage,
@@ -130,7 +131,7 @@ export function summarizePickupPlayerState(
       vetoDeadlineAt: state.match.veto.deadlineAt,
       viewerId: state.viewer.id,
       viewerSteamId: state.viewer.steamId,
-    };
+    }
   }
 
   return {
@@ -138,5 +139,5 @@ export function summarizePickupPlayerState(
     stage: state.stage,
     viewerId: state.viewer.id,
     viewerSteamId: state.viewer.steamId,
-  };
+  }
 }

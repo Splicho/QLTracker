@@ -1,25 +1,25 @@
-import { Medal } from "@/components/icon";
+import { Medal } from "@/components/icon"
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/components/ui/empty";
-import type { PickupPlayerProfile } from "@/lib/pickup";
+} from "@/components/ui/empty"
+import type { PickupPlayerProfile } from "@/lib/pickup"
 
 function formatWinRate(value: number | null) {
   if (value == null) {
-    return "-";
+    return "-"
   }
 
-  return `${Math.round(value)}%`;
+  return `${Math.round(value)}%`
 }
 
 export function PlayerProfileStatsPane({
   profile,
 }: {
-  profile: PickupPlayerProfile;
+  profile: PickupPlayerProfile
 }) {
   return (
     <div className="min-h-0 flex-1 data-[state=inactive]:hidden">
@@ -30,7 +30,7 @@ export function PlayerProfileStatsPane({
       </div>
       {profile.ratings.length > 0 ? (
         <div className="divide-y divide-border">
-          <div className="grid grid-cols-[minmax(0,1.4fr)_96px_88px_72px_72px_88px] gap-4 border-b border-border px-4 py-3 text-[11px] font-medium uppercase text-muted-foreground">
+          <div className="grid grid-cols-[minmax(0,1.4fr)_96px_88px_72px_72px_88px] gap-4 border-b border-border px-4 py-3 text-[11px] font-medium text-muted-foreground uppercase">
             <span>Queue</span>
             <span>Rating</span>
             <span>Played</span>
@@ -93,5 +93,5 @@ export function PlayerProfileStatsPane({
         </div>
       )}
     </div>
-  );
+  )
 }

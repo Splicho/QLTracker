@@ -1,15 +1,15 @@
-import { Clock } from "@/components/icon";
-import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
-import { getMapEntry } from "@/lib/maps";
-import type { PickupProfileMatch } from "@/lib/pickup";
+import { Clock } from "@/components/icon"
+import { ArrowDownLeft, ArrowUpRight } from "lucide-react"
+import { getMapEntry } from "@/lib/maps"
+import type { PickupProfileMatch } from "@/lib/pickup"
 
 function formatMatchResult(score: string | null | undefined) {
-  return score?.trim() || "-";
+  return score?.trim() || "-"
 }
 
 function formatMatchDate(value: string | null) {
   if (!value) {
-    return "-";
+    return "-"
   }
 
   return new Intl.DateTimeFormat("en-GB", {
@@ -18,15 +18,15 @@ function formatMatchDate(value: string | null) {
     minute: "2-digit",
     month: "short",
     year: "numeric",
-  }).format(new Date(value));
+  }).format(new Date(value))
 }
 
 function formatRatingDelta(value: number | null) {
   if (value == null || value === 0) {
-    return "0";
+    return "0"
   }
 
-  return value > 0 ? `+${value}` : `${value}`;
+  return value > 0 ? `+${value}` : `${value}`
 }
 
 export function RecentMatchRow({
@@ -34,18 +34,18 @@ export function RecentMatchRow({
   onClick,
   trailingContent = "date",
 }: {
-  match: PickupProfileMatch;
-  onClick?: () => void;
-  trailingContent?: "date" | "rating-delta";
+  match: PickupProfileMatch
+  onClick?: () => void
+  trailingContent?: "date" | "rating-delta"
 }) {
-  const matchMap = getMapEntry(match.finalMapKey ?? "default");
-  const ratingDelta = match.ratingDelta ?? 0;
+  const matchMap = getMapEntry(match.finalMapKey ?? "default")
+  const ratingDelta = match.ratingDelta ?? 0
   const resultToneClassName =
     match.winnerTeam === "left"
       ? "text-blue-400"
       : match.winnerTeam === "right"
         ? "text-red-400"
-        : "text-muted-foreground";
+        : "text-muted-foreground"
   const content = (
     <>
       <div className="relative flex h-12 items-center overflow-hidden pl-4">
@@ -96,11 +96,13 @@ export function RecentMatchRow({
             ) : ratingDelta < 0 ? (
               <ArrowDownLeft className="size-3.5 shrink-0" />
             ) : null}
-            <span className="whitespace-nowrap">{formatRatingDelta(match.ratingDelta)}</span>
+            <span className="whitespace-nowrap">
+              {formatRatingDelta(match.ratingDelta)}
+            </span>
           </span>
         </div>
       ) : (
-        <div className="flex items-center justify-end gap-1.5 py-3 text-sm tabular-nums text-muted-foreground">
+        <div className="flex items-center justify-end gap-1.5 py-3 text-sm text-muted-foreground tabular-nums">
           <Clock className="size-3.5 shrink-0" />
           <span className="whitespace-nowrap tabular-nums">
             {formatMatchDate(match.completedAt)}
@@ -108,7 +110,7 @@ export function RecentMatchRow({
         </div>
       )}
     </>
-  );
+  )
 
   if (onClick) {
     return (
@@ -119,12 +121,12 @@ export function RecentMatchRow({
       >
         {content}
       </button>
-    );
+    )
   }
 
   return (
     <div className="grid w-full grid-cols-[96px_minmax(0,1fr)_180px] items-center gap-4 py-0 pr-4 text-left">
       {content}
     </div>
-  );
+  )
 }

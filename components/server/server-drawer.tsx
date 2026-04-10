@@ -1,5 +1,5 @@
-import { Fragment, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { Fragment, useMemo, useState } from "react"
+import { useQuery } from "@tanstack/react-query"
 import {
   type ColumnDef,
   flexRender,
@@ -7,30 +7,30 @@ import {
   getSortedRowModel,
   type SortingState,
   useReactTable,
-} from "@tanstack/react-table";
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
+} from "@tanstack/react-table"
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import {
   ArrowUpDown,
   ArrowUpRight,
   Eye,
   UserMinus,
   UserPlus,
-} from "lucide-react";
-import { format, formatDistanceToNowStrict, parseISO } from "date-fns";
-import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
-import { Lock, Medal, Play, SlashCircle, Unlock } from "@/components/icon";
-import { PlayerName } from "@/components/pickup/player-name";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+} from "lucide-react"
+import { format, formatDistanceToNowStrict, parseISO } from "date-fns"
+import { useTranslation } from "react-i18next"
+import { toast } from "sonner"
+import { Lock, Medal, Play, SlashCircle, Unlock } from "@/components/icon"
+import { PlayerName } from "@/components/pickup/player-name"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart";
-import { Drawer, DrawerContent } from "@/components/ui/drawer";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@/components/ui/chart"
+import { Drawer, DrawerContent } from "@/components/ui/drawer"
+import { Separator } from "@/components/ui/separator"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
   TableBody,
@@ -38,48 +38,48 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui/table"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useTrackedPlayers } from "@/hooks/use-tracked-players";
-import { getMapEntry } from "@/lib/maps";
-import { openExternalUrl } from "@/lib/open-url";
-import { stripQuakeColors } from "@/lib/quake";
+} from "@/components/ui/tooltip"
+import { useTrackedPlayers } from "@/hooks/use-tracked-players"
+import { getMapEntry } from "@/lib/maps"
+import { openExternalUrl } from "@/lib/open-url"
+import { stripQuakeColors } from "@/lib/quake"
 import {
   fetchRealtimeServerHistory,
   isRealtimeEnabled,
   type ServerHistoryPoint,
-} from "@/lib/realtime";
-import { getGameModeLabel } from "@/lib/server-utils";
+} from "@/lib/realtime"
+import { getGameModeLabel } from "@/lib/server-utils"
 import {
   fetchSteamServerPlayerRatings,
   fetchSteamServerPlayers,
   type ServerPlayerRating,
   type SteamServer,
-} from "@/lib/steam";
-import { formatDurationHoursMinutes } from "@/lib/time";
+} from "@/lib/steam"
+import { formatDurationHoursMinutes } from "@/lib/time"
 
 function normalizePlayerName(name: string) {
   return name
     .replace(/\^[0-9]/g, "")
     .trim()
-    .toLowerCase();
+    .toLowerCase()
 }
 
 function calculateAverage(values: Array<number | null | undefined>) {
-  const numbers = values.filter((value): value is number => value != null);
+  const numbers = values.filter((value): value is number => value != null)
 
   if (numbers.length === 0) {
-    return null;
+    return null
   }
 
   return Math.round(
     numbers.reduce((total, value) => total + value, 0) / numbers.length
-  );
+  )
 }
 
 function calculateHighestRatedPlayer(
@@ -87,24 +87,24 @@ function calculateHighestRatedPlayer(
   ratingKey: "qelo" | "trueskill"
 ) {
   return players.reduce<ServerPlayerRating | null>((highest, player) => {
-    const rating = player[ratingKey];
+    const rating = player[ratingKey]
 
     if (rating == null) {
-      return highest;
+      return highest
     }
 
     if (highest == null) {
-      return player;
+      return player
     }
 
     return rating > (highest[ratingKey] ?? Number.NEGATIVE_INFINITY)
       ? player
-      : highest;
-  }, null);
+      : highest
+  }, null)
 }
 
 function getQlStatsPlayerProfileUrl(steamId: string) {
-  return `https://qlstats.net/player/${steamId}`;
+  return `https://qlstats.net/player/${steamId}`
 }
 
 const playerTeamSectionMeta = {
@@ -132,71 +132,71 @@ const playerTeamSectionMeta = {
     labelKey: "serverList.drawer.teams.unassigned",
     toneClassName: "text-muted-foreground",
   },
-} as const;
+} as const
 
-type PlayerTeamSectionKey = keyof typeof playerTeamSectionMeta;
+type PlayerTeamSectionKey = keyof typeof playerTeamSectionMeta
 
 type DrawerPlayer = SteamServer["players_info"][number] & {
-  rating: ServerPlayerRating | null;
-};
+  rating: ServerPlayerRating | null
+}
 
 function getPlayerTeamSectionKey(
   team: number | null | undefined,
   hasRedBlueTeams: boolean
 ): PlayerTeamSectionKey {
   if (team === 1) {
-    return "red";
+    return "red"
   }
 
   if (team === 2) {
-    return "blue";
+    return "blue"
   }
 
   if (team === 3) {
-    return "spectators";
+    return "spectators"
   }
 
   if (team === 0) {
-    return hasRedBlueTeams ? "free" : "players";
+    return hasRedBlueTeams ? "free" : "players"
   }
 
-  return "unassigned";
+  return "unassigned"
 }
 
 function ServerAverageRatingBadges({
   serverAddress,
 }: {
-  serverAddress: string;
+  serverAddress: string
 }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation()
   const ratingsQuery = useQuery({
     queryKey: ["steam", "server", "player-ratings", serverAddress],
     queryFn: () => fetchSteamServerPlayerRatings(serverAddress),
     staleTime: 10_000,
-  });
-  const ratings = ratingsQuery.data ?? [];
+  })
+  const ratings = useMemo(() => ratingsQuery.data ?? [], [ratingsQuery.data])
 
   const averageQelo = useMemo(
     () => calculateAverage(ratings.map((player) => player.qelo)),
     [ratings]
-  );
+  )
   const averageTrueskill = useMemo(
     () => calculateAverage(ratings.map((player) => player.trueskill)),
     [ratings]
-  );
+  )
   const highestQeloPlayer = useMemo(
     () => calculateHighestRatedPlayer(ratings, "qelo"),
     [ratings]
-  );
+  )
   const highestTrueskillPlayer = useMemo(
     () => calculateHighestRatedPlayer(ratings, "trueskill"),
     [ratings]
-  );
+  )
   const isPending =
     ratingsQuery.isPending ||
-    (ratingsQuery.fetchStatus === "fetching" && !ratingsQuery.data);
+    (ratingsQuery.fetchStatus === "fetching" && !ratingsQuery.data)
   const badgeClassName =
-    "rounded-md pl-2 pr-1 py-1 text-[11px] font-medium tracking-[0.01em]";
+    "rounded-md pl-2 pr-1 py-1 text-[11px] font-medium tracking-[0.01em]"
 
   if (isPending) {
     return (
@@ -207,7 +207,7 @@ function ServerAverageRatingBadges({
         <Skeleton className="h-7 w-36 rounded-md" />
         <Skeleton className="h-7 w-36 rounded-md" />
       </div>
-    );
+    )
   }
 
   return (
@@ -292,27 +292,27 @@ function ServerAverageRatingBadges({
         </TooltipContent>
       </Tooltip>
     </div>
-  );
+  )
 }
 
 function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
-  const { t } = useTranslation();
-  const { isTracked, trackPlayer, untrackPlayer } = useTrackedPlayers();
+  const { t } = useTranslation()
+  const { isTracked, trackPlayer, untrackPlayer } = useTrackedPlayers()
   const [sorting, setSorting] = useState<SortingState>([
     { id: "points", desc: true },
-  ]);
+  ])
   const playersQuery = useQuery({
     queryKey: ["steam", "server", "players", serverAddress],
     queryFn: () => fetchSteamServerPlayers(serverAddress),
     staleTime: 10_000,
-  });
+  })
   const ratingsQuery = useQuery({
     queryKey: ["steam", "server", "player-ratings", serverAddress],
     queryFn: () => fetchSteamServerPlayerRatings(serverAddress),
     staleTime: 10_000,
-  });
+  })
 
-  const players = playersQuery.data ?? [];
+  const players = useMemo(() => playersQuery.data ?? [], [playersQuery.data])
   const playerRatingsByName = useMemo<Record<string, ServerPlayerRating>>(
     () =>
       Object.fromEntries(
@@ -322,7 +322,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
         ])
       ),
     [ratingsQuery.data]
-  );
+  )
   const mergedPlayers = useMemo(
     () =>
       players.map((player) => ({
@@ -330,45 +330,45 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
         rating: playerRatingsByName[normalizePlayerName(player.name)] ?? null,
       })),
     [playerRatingsByName, players]
-  );
+  )
   const topRatedPlayerNames = useMemo(() => {
-    let highestQelo = Number.NEGATIVE_INFINITY;
-    let highestTrueskill = Number.NEGATIVE_INFINITY;
+    let highestQelo = Number.NEGATIVE_INFINITY
+    let highestTrueskill = Number.NEGATIVE_INFINITY
 
     for (const player of mergedPlayers) {
-      const qelo = player.rating?.qelo ?? Number.NEGATIVE_INFINITY;
-      const trueskill = player.rating?.trueskill ?? Number.NEGATIVE_INFINITY;
+      const qelo = player.rating?.qelo ?? Number.NEGATIVE_INFINITY
+      const trueskill = player.rating?.trueskill ?? Number.NEGATIVE_INFINITY
 
       if (qelo > highestQelo) {
-        highestQelo = qelo;
+        highestQelo = qelo
       }
       if (trueskill > highestTrueskill) {
-        highestTrueskill = trueskill;
+        highestTrueskill = trueskill
       }
     }
 
-    const names = new Set<string>();
+    const names = new Set<string>()
 
     for (const player of mergedPlayers) {
       if (player.rating?.qelo != null && player.rating.qelo === highestQelo) {
-        names.add(normalizePlayerName(player.name));
+        names.add(normalizePlayerName(player.name))
       }
 
       if (
         player.rating?.trueskill != null &&
         player.rating.trueskill === highestTrueskill
       ) {
-        names.add(normalizePlayerName(player.name));
+        names.add(normalizePlayerName(player.name))
       }
     }
 
-    return names;
-  }, [mergedPlayers]);
+    return names
+  }, [mergedPlayers])
   const playerPanelPending =
     playersQuery.isPending ||
     (playersQuery.fetchStatus === "fetching" && !playersQuery.data) ||
-    ratingsQuery.isPending;
-  const playerPanelFrameClass = "min-h-[20rem]";
+    ratingsQuery.isPending
+  const playerPanelFrameClass = "min-h-[20rem]"
 
   const columns = useMemo<ColumnDef<DrawerPlayer>[]>(
     () => [
@@ -378,7 +378,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
           <Button
             type="button"
             variant="ghost"
-            className="-ml-2 h-8 px-2.5 text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:bg-transparent"
+            className="-ml-2 h-8 px-2.5 text-[11px] tracking-[0.12em] text-muted-foreground uppercase hover:bg-transparent"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             {t("serverList.drawer.player")}
@@ -386,41 +386,47 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
           </Button>
         ),
         cell: ({ row }) => {
-          const steamId = row.original.rating?.steam_id;
+          const steamId = row.original.rating?.steam_id
           const isTopRated = topRatedPlayerNames.has(
             normalizePlayerName(row.original.name)
-          );
+          )
 
           if (!steamId) {
             return (
               <div className="flex min-w-0 items-center gap-1.5 truncate text-sm font-medium text-foreground">
                 <span className="truncate">
-                  <PlayerName fallbackClassName="truncate" personaName={row.original.name} />
+                  <PlayerName
+                    fallbackClassName="truncate"
+                    personaName={row.original.name}
+                  />
                 </span>
                 {isTopRated ? (
                   <Medal className="size-3.5 shrink-0 text-amber-400" />
                 ) : null}
               </div>
-            );
+            )
           }
 
           return (
             <button
               type="button"
               onClick={() => {
-                openExternalUrl(getQlStatsPlayerProfileUrl(steamId));
+                openExternalUrl(getQlStatsPlayerProfileUrl(steamId))
               }}
               className="group flex min-w-0 cursor-pointer items-center gap-1.5 text-left text-sm font-medium text-foreground transition-colors hover:text-primary"
             >
               <span className="truncate">
-                <PlayerName fallbackClassName="truncate" personaName={row.original.name} />
+                <PlayerName
+                  fallbackClassName="truncate"
+                  personaName={row.original.name}
+                />
               </span>
               {isTopRated ? (
                 <Medal className="size-3.5 shrink-0 text-amber-400" />
               ) : null}
               <ArrowUpRight className="size-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
             </button>
-          );
+          )
         },
       },
       {
@@ -430,7 +436,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
           <Button
             type="button"
             variant="ghost"
-            className="-ml-2 h-8 px-2.5 text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:bg-transparent"
+            className="-ml-2 h-8 px-2.5 text-[11px] tracking-[0.12em] text-muted-foreground uppercase hover:bg-transparent"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             {t("serverList.drawer.points")}
@@ -446,7 +452,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
           <Button
             type="button"
             variant="ghost"
-            className="-ml-2 h-8 px-2.5 text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:bg-transparent"
+            className="-ml-2 h-8 px-2.5 text-[11px] tracking-[0.12em] text-muted-foreground uppercase hover:bg-transparent"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             QElo
@@ -465,7 +471,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
           <Button
             type="button"
             variant="ghost"
-            className="-ml-2 h-8 px-2.5 text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:bg-transparent"
+            className="-ml-2 h-8 px-2.5 text-[11px] tracking-[0.12em] text-muted-foreground uppercase hover:bg-transparent"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             TSkill
@@ -484,7 +490,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
           <Button
             type="button"
             variant="ghost"
-            className="-ml-2 h-8 px-2.5 text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:bg-transparent"
+            className="-ml-2 h-8 px-2.5 text-[11px] tracking-[0.12em] text-muted-foreground uppercase hover:bg-transparent"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             {t("serverList.drawer.time")}
@@ -497,17 +503,17 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
       {
         id: "watch",
         header: () => (
-          <div className="text-right text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+          <div className="text-right text-[11px] tracking-[0.12em] text-muted-foreground uppercase">
             {t("serverList.drawer.watch")}
           </div>
         ),
         cell: ({ row }) => {
-          const steamId = row.original.rating?.steam_id;
+          const steamId = row.original.rating?.steam_id
           if (!steamId) {
-            return null;
+            return null
           }
 
-          const tracked = isTracked(steamId);
+          const tracked = isTracked(steamId)
           return (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -517,16 +523,16 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
                   size="icon"
                   className="ml-auto size-8"
                   onClick={() => {
-                    const playerName = stripQuakeColors(row.original.name);
+                    const playerName = stripQuakeColors(row.original.name)
                     if (tracked) {
                       if (untrackPlayer(steamId)) {
                         toast.success(
                           t("watchlist.toasts.untracked", {
                             player: playerName,
                           })
-                        );
+                        )
                       }
-                      return;
+                      return
                     }
 
                     if (trackPlayer(steamId, row.original.name)) {
@@ -534,7 +540,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
                         t("watchlist.toasts.tracked", {
                           player: playerName,
                         })
-                      );
+                      )
                     }
                   }}
                 >
@@ -551,12 +557,12 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
                   : t("serverList.drawer.trackPlayer")}
               </TooltipContent>
             </Tooltip>
-          );
+          )
         },
       },
     ],
     [isTracked, t, topRatedPlayerNames, trackPlayer, untrackPlayer]
-  );
+  )
 
   const table = useReactTable({
     data: mergedPlayers,
@@ -565,33 +571,33 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-  });
-  const sortedRows = table.getRowModel().rows;
+  })
+  const sortedRows = table.getRowModel().rows
   const hasKnownTeams = mergedPlayers.some(
     (player) => player.rating?.team != null
-  );
+  )
   const hasRedBlueTeams = mergedPlayers.some((player) => {
-    const team = player.rating?.team;
-    return team === 1 || team === 2;
-  });
+    const team = player.rating?.team
+    return team === 1 || team === 2
+  })
   const teamSections = useMemo(() => {
     if (!hasKnownTeams) {
-      return [];
+      return []
     }
 
-    const groupedRows = new Map<PlayerTeamSectionKey, typeof sortedRows>();
+    const groupedRows = new Map<PlayerTeamSectionKey, typeof sortedRows>()
     const sectionOrder: PlayerTeamSectionKey[] = hasRedBlueTeams
       ? ["red", "blue", "free", "spectators", "unassigned"]
-      : ["players", "spectators", "unassigned"];
+      : ["players", "spectators", "unassigned"]
 
     for (const row of sortedRows) {
       const sectionKey = getPlayerTeamSectionKey(
         row.original.rating?.team,
         hasRedBlueTeams
-      );
-      const existingRows = groupedRows.get(sectionKey) ?? [];
-      existingRows.push(row);
-      groupedRows.set(sectionKey, existingRows);
+      )
+      const existingRows = groupedRows.get(sectionKey) ?? []
+      existingRows.push(row)
+      groupedRows.set(sectionKey, existingRows)
     }
 
     return sectionOrder
@@ -600,14 +606,14 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
         key: sectionKey,
         rows: groupedRows.get(sectionKey) ?? [],
       }))
-      .filter((section) => section.rows.length > 0);
-  }, [hasKnownTeams, hasRedBlueTeams, sortedRows]);
-  const shouldRenderTeamSections = teamSections.length > 1;
+      .filter((section) => section.rows.length > 0)
+  }, [hasKnownTeams, hasRedBlueTeams, sortedRows])
+  const shouldRenderTeamSections = teamSections.length > 1
 
   if (playerPanelPending) {
     return (
       <div className={`flex flex-col gap-2 ${playerPanelFrameClass}`}>
-        <div className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+        <div className="text-xs tracking-[0.12em] text-muted-foreground uppercase">
           {t("serverList.drawer.playersHeading")}
         </div>
         <div className="overflow-hidden rounded-lg border border-border">
@@ -654,7 +660,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
           </Table>
         </div>
       </div>
-    );
+    )
   }
 
   if (playersQuery.isError) {
@@ -662,7 +668,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
       <div className="text-sm text-muted-foreground">
         {t("serverList.drawer.lookupFailed")}
       </div>
-    );
+    )
   }
 
   if (mergedPlayers.length === 0) {
@@ -670,12 +676,12 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
       <div className="text-sm text-muted-foreground">
         {t("serverList.drawer.noPlayerData")}
       </div>
-    );
+    )
   }
 
   return (
     <div className={`flex flex-col gap-2 ${playerPanelFrameClass}`}>
-      <div className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+      <div className="text-xs tracking-[0.12em] text-muted-foreground uppercase">
         {t("serverList.drawer.playersHeading")}
       </div>
       <div className="overflow-hidden rounded-lg border border-border">
@@ -706,7 +712,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
                     <TableRow className="border-b border-border bg-muted/10 hover:bg-muted/10">
                       <TableCell
                         colSpan={columns.length}
-                        className={`px-3 py-2 text-[11px] font-medium uppercase tracking-[0.12em] ${section.toneClassName}`}
+                        className={`px-3 py-2 text-[11px] font-medium tracking-[0.12em] uppercase ${section.toneClassName}`}
                       >
                         <span className="inline-flex items-center gap-1.5">
                           <span>{t(section.labelKey)}</span>
@@ -758,57 +764,51 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
         </Table>
       </div>
     </div>
-  );
+  )
 }
 
-function HistoryMetric({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function HistoryMetric({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-md border border-border/60 bg-background/40 p-3">
-      <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+      <div className="text-[11px] tracking-[0.12em] text-muted-foreground uppercase">
         {label}
       </div>
       <div className="mt-1 text-sm font-medium text-foreground">{value}</div>
     </div>
-  );
+  )
 }
 
 function formatHistoryTick(timestamp: string) {
-  const parsed = parseISO(timestamp);
-  return Number.isNaN(parsed.getTime()) ? timestamp : format(parsed, "EEE");
+  const parsed = parseISO(timestamp)
+  return Number.isNaN(parsed.getTime()) ? timestamp : format(parsed, "EEE")
 }
 
 function formatHistoryLabel(timestamp: string) {
-  const parsed = parseISO(timestamp);
+  const parsed = parseISO(timestamp)
   return Number.isNaN(parsed.getTime())
     ? timestamp
-    : format(parsed, "MMM d, HH:mm");
+    : format(parsed, "MMM d, HH:mm")
 }
 
 function ServerHistoryCard({ serverAddress }: { serverAddress: string }) {
-  const { t } = useTranslation();
-  const realtimeAvailable = isRealtimeEnabled();
+  const { t } = useTranslation()
+  const realtimeAvailable = isRealtimeEnabled()
   const historyQuery = useQuery({
     queryKey: ["realtime", "server-history", serverAddress, "7d", "15m"],
     queryFn: () => fetchRealtimeServerHistory(serverAddress, "7d", "15m"),
     enabled: realtimeAvailable,
     staleTime: 60_000,
-  });
-  const history = historyQuery.data;
-  const timeline = history?.timeline ?? [];
+  })
+  const history = historyQuery.data
+  const timeline = useMemo(() => history?.timeline ?? [], [history?.timeline])
 
   const summary = useMemo(() => {
     if (history?.summary) {
-      return history.summary;
+      return history.summary
     }
 
     if (timeline.length === 0) {
-      return null;
+      return null
     }
 
     return {
@@ -816,27 +816,27 @@ function ServerHistoryCard({ serverAddress }: { serverAddress: string }) {
       peakPlayers: Math.max(...timeline.map((point) => point.players), 0),
       populatedSampleRatio:
         timeline.filter((point) => point.players > 0).length / timeline.length,
-    };
-  }, [history?.summary, timeline]);
+    }
+  }, [history, timeline])
   const chartData = useMemo(
     () =>
       timeline.map((point: ServerHistoryPoint) => ({
         ...point,
       })),
     [timeline]
-  );
+  )
 
   if (!realtimeAvailable) {
     return (
       <div className="rounded-lg border border-border p-4">
-        <div className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+        <div className="text-xs tracking-[0.12em] text-muted-foreground uppercase">
           {t("serverList.drawer.historyTitle")}
         </div>
         <p className="mt-2 text-sm text-muted-foreground">
           {t("serverList.drawer.historyUnavailable")}
         </p>
       </div>
-    );
+    )
   }
 
   if (
@@ -845,7 +845,7 @@ function ServerHistoryCard({ serverAddress }: { serverAddress: string }) {
   ) {
     return (
       <div className="rounded-lg border border-border p-4">
-        <div className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+        <div className="text-xs tracking-[0.12em] text-muted-foreground uppercase">
           {t("serverList.drawer.historyTitle")}
         </div>
         <div className="mt-3 grid gap-3 sm:grid-cols-3">
@@ -855,48 +855,48 @@ function ServerHistoryCard({ serverAddress }: { serverAddress: string }) {
         </div>
         <Skeleton className="mt-4 h-52 rounded-lg" />
       </div>
-    );
+    )
   }
 
   if (historyQuery.isError) {
     return (
       <div className="rounded-lg border border-border p-4">
-        <div className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+        <div className="text-xs tracking-[0.12em] text-muted-foreground uppercase">
           {t("serverList.drawer.historyTitle")}
         </div>
         <p className="mt-2 text-sm text-muted-foreground">
           {t("serverList.drawer.historyUnavailable")}
         </p>
       </div>
-    );
+    )
   }
 
   if (!summary || chartData.length === 0) {
     return (
       <div className="rounded-lg border border-border p-4">
-        <div className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+        <div className="text-xs tracking-[0.12em] text-muted-foreground uppercase">
           {t("serverList.drawer.historyTitle")}
         </div>
         <p className="mt-2 text-sm text-muted-foreground">
           {t("serverList.drawer.historyEmpty")}
         </p>
       </div>
-    );
+    )
   }
 
   const lastSeenLabel = summary.lastSeenAt
     ? formatDistanceToNowStrict(parseISO(summary.lastSeenAt), {
         addSuffix: true,
       })
-    : t("serverList.pingUnavailable");
+    : t("serverList.pingUnavailable")
   const populatedPercentage = `${Math.round(
     summary.populatedSampleRatio * 100
-  )}%`;
+  )}%`
 
   return (
     <div className="rounded-lg border border-border p-4">
       <div className="flex items-center justify-between gap-3">
-        <div className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+        <div className="text-xs tracking-[0.12em] text-muted-foreground uppercase">
           {t("serverList.drawer.historyTitle")}
         </div>
         <Badge variant="outline" className="rounded-md">
@@ -967,7 +967,7 @@ function ServerHistoryCard({ serverAddress }: { serverAddress: string }) {
                   typeof label === "string" ? formatHistoryLabel(label) : ""
                 }
                 formatter={(value, _name, item) => {
-                  const payload = item.payload as ServerHistoryPoint;
+                  const payload = item.payload as ServerHistoryPoint
                   return (
                     <div className="flex min-w-40 flex-col gap-1">
                       <div className="flex items-center justify-between gap-3">
@@ -996,7 +996,7 @@ function ServerHistoryCard({ serverAddress }: { serverAddress: string }) {
                         </span>
                       </div>
                     </div>
-                  );
+                  )
                 }}
               />
             }
@@ -1011,18 +1011,18 @@ function ServerHistoryCard({ serverAddress }: { serverAddress: string }) {
         </AreaChart>
       </ChartContainer>
     </div>
-  );
+  )
 }
 
 type ServerDrawerProps = {
-  server: SteamServer | null;
-  open: boolean;
-  requiresPassword: boolean;
-  hasSavedPassword: boolean;
-  canJoin?: boolean;
-  onOpenChange: (open: boolean) => void;
-  onJoin: (server: SteamServer) => void;
-};
+  server: SteamServer | null
+  open: boolean
+  requiresPassword: boolean
+  hasSavedPassword: boolean
+  canJoin?: boolean
+  onOpenChange: (open: boolean) => void
+  onJoin: (server: SteamServer) => void
+}
 
 export function ServerDrawer({
   server,
@@ -1033,8 +1033,8 @@ export function ServerDrawer({
   onOpenChange,
   onJoin,
 }: ServerDrawerProps) {
-  const { t } = useTranslation();
-  const selectedMap = server ? getMapEntry(server.map) : null;
+  const { t } = useTranslation()
+  const selectedMap = server ? getMapEntry(server.map) : null
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -1064,13 +1064,13 @@ export function ServerDrawer({
                   </div>
                 ) : null}
                 <div className="relative z-10 h-40">
-                  <div className="pointer-events-none absolute inset-x-0 top-11 text-center text-[11px] uppercase tracking-[0.14em] text-muted-foreground/80">
+                  <div className="pointer-events-none absolute inset-x-0 top-11 text-center text-[11px] tracking-[0.14em] text-muted-foreground/80 uppercase">
                     {selectedMap?.name ?? server.map}
                   </div>
                   <div className="absolute inset-x-5 bottom-5 flex items-end justify-between gap-4">
                     <div className="min-w-0 flex-1">
                       <div className="flex min-w-0 items-center gap-2">
-                        <div className="truncate text-left text-lg font-semibold leading-tight text-foreground drop-shadow-[0_1px_10px_rgba(0,0,0,0.55)]">
+                        <div className="truncate text-left text-lg leading-tight font-semibold text-foreground drop-shadow-[0_1px_10px_rgba(0,0,0,0.55)]">
                           {stripQuakeColors(server.name)}
                         </div>
                         {requiresPassword ? (
@@ -1121,5 +1121,5 @@ export function ServerDrawer({
         </DrawerContent>
       </TooltipProvider>
     </Drawer>
-  );
+  )
 }

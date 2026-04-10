@@ -1,10 +1,10 @@
-import type { PickupLeaderboards } from "@/lib/pickup";
-import { useEffect, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AnimatePresence, motion } from "framer-motion";
-import { Trophy } from "lucide-react";
-import { PlayerName } from "@/components/pickup/player-name";
-import { Skeleton } from "@/components/ui/skeleton";
+import type { PickupLeaderboards } from "@/lib/pickup"
+import { useState } from "react"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { AnimatePresence, motion } from "framer-motion"
+import { Trophy } from "lucide-react"
+import { PlayerName } from "@/components/pickup/player-name"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
   TableBody,
@@ -12,32 +12,32 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from "@/components/ui/table"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   fetchPickupLeaderboards,
   fetchPickupPlayerProfile,
   isPickupApiConfigured,
   type PickupLeaderboardQueue,
-} from "@/lib/pickup";
+} from "@/lib/pickup"
 function getTrophyTone(rank: number) {
   if (rank === 1) {
-    return "text-amber-400";
+    return "text-amber-400"
   }
 
   if (rank === 2) {
-    return "text-zinc-300";
+    return "text-zinc-300"
   }
 
   if (rank === 3) {
-    return "text-orange-500";
+    return "text-orange-500"
   }
 
-  return "text-muted-foreground";
+  return "text-muted-foreground"
 }
 
 function formatWinRate(value: number | null) {
-  return value == null ? "-" : `${value}%`;
+  return value == null ? "-" : `${value}%`
 }
 
 const leaderboardLayoutTransition = {
@@ -45,7 +45,7 @@ const leaderboardLayoutTransition = {
     duration: 0.3,
     ease: [0.4, 0, 0.2, 1] as const,
   },
-};
+}
 
 const leaderboardRowTransition = {
   layout: {
@@ -64,16 +64,16 @@ const leaderboardRowTransition = {
     duration: 0.2,
     ease: [0.4, 0, 0.2, 1] as const,
   },
-};
+}
 
 function LeaderboardTable({
   onOpenPlayerProfile,
   onPrefetchPlayerProfile,
   queue,
 }: {
-  onOpenPlayerProfile: (playerId: string) => void;
-  onPrefetchPlayerProfile: (playerId: string) => void;
-  queue: PickupLeaderboardQueue;
+  onOpenPlayerProfile: (playerId: string) => void
+  onPrefetchPlayerProfile: (playerId: string) => void
+  queue: PickupLeaderboardQueue
 }) {
   if (queue.entries.length === 0) {
     return (
@@ -88,35 +88,35 @@ function LeaderboardTable({
           </p>
         </div>
       </div>
-    );
+    )
   }
 
   return (
     <Table containerClassName="overflow-x-clip overflow-y-visible">
       <TableHeader>
         <TableRow className="border-b border-border hover:bg-transparent">
-          <TableHead className="h-10 px-4 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+          <TableHead className="h-10 px-4 text-xs tracking-[0.12em] text-muted-foreground uppercase">
             Rank
           </TableHead>
-          <TableHead className="h-10 px-4 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+          <TableHead className="h-10 px-4 text-xs tracking-[0.12em] text-muted-foreground uppercase">
             Player
           </TableHead>
-          <TableHead className="h-10 px-4 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+          <TableHead className="h-10 px-4 text-xs tracking-[0.12em] text-muted-foreground uppercase">
             Rating
           </TableHead>
-          <TableHead className="h-10 px-4 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+          <TableHead className="h-10 px-4 text-xs tracking-[0.12em] text-muted-foreground uppercase">
             Played
           </TableHead>
-          <TableHead className="h-10 px-4 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+          <TableHead className="h-10 px-4 text-xs tracking-[0.12em] text-muted-foreground uppercase">
             W
           </TableHead>
-          <TableHead className="h-10 px-4 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+          <TableHead className="h-10 px-4 text-xs tracking-[0.12em] text-muted-foreground uppercase">
             L
           </TableHead>
-          <TableHead className="h-10 px-4 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+          <TableHead className="h-10 px-4 text-xs tracking-[0.12em] text-muted-foreground uppercase">
             Win Rate
           </TableHead>
-          <TableHead className="h-10 px-4 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+          <TableHead className="h-10 px-4 text-xs tracking-[0.12em] text-muted-foreground uppercase">
             Season
           </TableHead>
         </TableRow>
@@ -189,7 +189,7 @@ function LeaderboardTable({
         </AnimatePresence>
       </motion.tbody>
     </Table>
-  );
+  )
 }
 
 function LeaderboardLoading() {
@@ -208,7 +208,7 @@ function LeaderboardLoading() {
             {Array.from({ length: 8 }).map((_, index) => (
               <TableHead
                 key={`leaderboard-loading-head-${index}`}
-                className="h-10 px-4 text-xs uppercase tracking-[0.12em] text-muted-foreground"
+                className="h-10 px-4 text-xs tracking-[0.12em] text-muted-foreground uppercase"
               >
                 <Skeleton className="h-3 w-16 rounded-sm" />
               </TableHead>
@@ -250,7 +250,7 @@ function LeaderboardLoading() {
         </TableBody>
       </Table>
     </div>
-  );
+  )
 }
 
 export function LeaderboardPage({
@@ -258,12 +258,12 @@ export function LeaderboardPage({
   initialQueueId = null,
   onOpenPlayerProfile,
 }: {
-  initialData?: PickupLeaderboards;
-  initialQueueId?: string | null;
-  onOpenPlayerProfile: (playerId: string) => void;
+  initialData?: PickupLeaderboards
+  initialQueueId?: string | null
+  onOpenPlayerProfile: (playerId: string) => void
 }) {
-  const queryClient = useQueryClient();
-  const [preferredQueueId, setPreferredQueueId] = useState<string | null>(null);
+  const queryClient = useQueryClient()
+  const [preferredQueueId, setPreferredQueueId] = useState<string | null>(null)
   const leaderboardsQuery = useQuery({
     queryKey: ["pickup", "leaderboards"],
     queryFn: fetchPickupLeaderboards,
@@ -271,30 +271,33 @@ export function LeaderboardPage({
     initialData,
     staleTime: 30_000,
     refetchInterval: 60_000,
-  });
+  })
 
-  const queues = leaderboardsQuery.data?.queues ?? [];
-  const selectedQueueId = queues.some((queue) => queue.queue.id === preferredQueueId)
+  const queues = leaderboardsQuery.data?.queues ?? []
+  const selectedQueueId = queues.some(
+    (queue) => queue.queue.id === preferredQueueId
+  )
     ? preferredQueueId
-    : initialQueueId && queues.some((queue) => queue.queue.id === initialQueueId)
+    : initialQueueId &&
+        queues.some((queue) => queue.queue.id === initialQueueId)
       ? initialQueueId
-      : queues[0]?.queue.id ?? null;
+      : (queues[0]?.queue.id ?? null)
   const selectedQueue =
     queues.find((queue) => queue.queue.id === selectedQueueId) ??
     queues[0] ??
-    null;
-  const activeQueueId = selectedQueue?.queue.id ?? "";
+    null
+  const activeQueueId = selectedQueue?.queue.id ?? ""
   const prefetchPlayerProfile = (playerId: string) => {
     if (!isPickupApiConfigured()) {
-      return;
+      return
     }
 
     void queryClient.prefetchQuery({
       queryKey: ["pickup", "player-profile", playerId],
       queryFn: () => fetchPickupPlayerProfile(playerId),
       staleTime: 30_000,
-    });
-  };
+    })
+  }
 
   return (
     <section className="flex min-h-0 flex-1 flex-col overflow-x-clip">
@@ -373,5 +376,5 @@ export function LeaderboardPage({
         </Tabs>
       )}
     </section>
-  );
+  )
 }

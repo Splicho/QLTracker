@@ -1,8 +1,8 @@
-import type { KeyboardEvent } from "react";
-import { stripQuakeColors } from "@/lib/quake";
-import type { SteamServer } from "@/lib/steam";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import type { KeyboardEvent } from "react"
+import { stripQuakeColors } from "@/lib/quake"
+import type { SteamServer } from "@/lib/steam"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Dialog,
   DialogContent,
@@ -10,10 +10,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useTranslation } from "react-i18next";
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { useTranslation } from "react-i18next"
 
 export function ServerPasswordDialog({
   open,
@@ -25,24 +25,24 @@ export function ServerPasswordDialog({
   onRememberPasswordChange,
   onSubmit,
 }: {
-  open: boolean;
-  server: SteamServer | null;
-  password: string;
-  rememberPassword: boolean;
-  onOpenChange: (open: boolean) => void;
-  onPasswordChange: (value: string) => void;
-  onRememberPasswordChange: (value: boolean) => void;
-  onSubmit: () => void;
+  open: boolean
+  server: SteamServer | null
+  password: string
+  rememberPassword: boolean
+  onOpenChange: (open: boolean) => void
+  onPasswordChange: (value: string) => void
+  onRememberPasswordChange: (value: boolean) => void
+  onSubmit: () => void
 }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation()
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key !== "Enter" || !server || !password.trim()) {
-      return;
+      return
     }
 
-    onSubmit();
-  };
+    onSubmit()
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -78,7 +78,7 @@ export function ServerPasswordDialog({
           />
           <Label
             htmlFor="remember-server-password"
-            className="cursor-pointer text-sm font-normal leading-snug text-muted-foreground"
+            className="cursor-pointer text-sm leading-snug font-normal text-muted-foreground"
           >
             {t("serverList.passwordDialog.remember")}
           </Label>
@@ -95,5 +95,5 @@ export function ServerPasswordDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

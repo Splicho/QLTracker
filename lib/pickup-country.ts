@@ -3,35 +3,36 @@ const countryDisplayNames =
     ? new Intl.DisplayNames(["en"], {
         type: "region",
       })
-    : null;
+    : null
 
 function normalizeCountryCode(value: string | null | undefined) {
   if (!value) {
-    return null;
+    return null
   }
 
-  const normalizedValue = value.trim().toLowerCase();
-  return /^[a-z]{2}$/.test(normalizedValue) ? normalizedValue : null;
+  const normalizedValue = value.trim().toLowerCase()
+  return /^[a-z]{2}$/.test(normalizedValue) ? normalizedValue : null
 }
 
 export function getPickupCountryCode(value: string | null | undefined) {
-  return normalizeCountryCode(value);
+  return normalizeCountryCode(value)
 }
 
 export function getPickupCountryFlagSrc(value: string | null | undefined) {
-  const countryCode = normalizeCountryCode(value);
-  return countryCode ? `/images/flags/${countryCode}.png` : null;
+  const countryCode = normalizeCountryCode(value)
+  return countryCode ? `/images/flags/${countryCode}.png` : null
 }
 
 export function getPickupCountryName(value: string | null | undefined) {
-  const countryCode = normalizeCountryCode(value);
+  const countryCode = normalizeCountryCode(value)
   if (!countryCode) {
-    return null;
+    return null
   }
 
   return (
-    countryDisplayNames?.of(countryCode.toUpperCase()) ?? countryCode.toUpperCase()
-  );
+    countryDisplayNames?.of(countryCode.toUpperCase()) ??
+    countryCode.toUpperCase()
+  )
 }
 
 export function getPickupCountryOptions() {
@@ -161,13 +162,13 @@ export function getPickupCountryOptions() {
     "za",
   ]
     .sort((left, right) => {
-      const leftName = getPickupCountryName(left) ?? left;
-      const rightName = getPickupCountryName(right) ?? right;
-      return leftName.localeCompare(rightName);
+      const leftName = getPickupCountryName(left) ?? left
+      const rightName = getPickupCountryName(right) ?? right
+      return leftName.localeCompare(rightName)
     })
     .map((code) => ({
       code: code.toUpperCase(),
       flagSrc: getPickupCountryFlagSrc(code),
       label: getPickupCountryName(code) ?? code,
-    }));
+    }))
 }

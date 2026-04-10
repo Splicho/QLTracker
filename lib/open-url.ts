@@ -1,15 +1,15 @@
 export function openExternalUrl(url: string) {
   if (typeof window === "undefined") {
-    return;
+    return
   }
 
-  window.open(url, "_blank", "noopener,noreferrer");
+  window.open(url, "_blank", "noopener,noreferrer")
 }
 
 export function navigateToUrl(url: string) {
   if (typeof window === "undefined") {
-    return;
+    return
   }
 
-  window.location.assign(url);
+  window.location.assign(url)
 }

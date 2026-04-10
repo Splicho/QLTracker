@@ -1,32 +1,34 @@
 import {
   createDefaultServerFilters,
   type ServerFiltersValue,
-} from "@/lib/server-filters";
+} from "@/lib/server-filters"
 
-export const SERVER_FILTERS_STORAGE_KEY = "qltracker-server-filters";
+export const SERVER_FILTERS_STORAGE_KEY = "qltracker-server-filters"
 
 export function parseStoredServerFilters(rawValue: string): ServerFiltersValue {
-  const defaults = createDefaultServerFilters();
+  const defaults = createDefaultServerFilters()
 
   try {
     const parsed = JSON.parse(rawValue) as
       | (Partial<ServerFiltersValue> & {
-          hideEmpty?: boolean;
-          hideFull?: boolean;
+          hideEmpty?: boolean
+          hideFull?: boolean
         })
-      | null;
+      | null
 
     if (!parsed || typeof parsed !== "object") {
-      return defaults;
+      return defaults
     }
 
     const ratingRange = Array.isArray(parsed.ratingRange)
       ? parsed.ratingRange
-      : null;
+      : null
 
     return {
-      search: typeof parsed.search === "string" ? parsed.search : defaults.search,
-      region: typeof parsed.region === "string" ? parsed.region : defaults.region,
+      search:
+        typeof parsed.search === "string" ? parsed.search : defaults.search,
+      region:
+        typeof parsed.region === "string" ? parsed.region : defaults.region,
       visibility:
         parsed.visibility === "all" ||
         parsed.visibility === "public" ||
@@ -73,12 +75,12 @@ export function parseStoredServerFilters(rawValue: string): ServerFiltersValue {
         typeof parsed.showFavorites === "boolean"
           ? parsed.showFavorites
           : defaults.showFavorites,
-    };
+    }
   } catch {
-    return defaults;
+    return defaults
   }
 }
 
 export function serializeServerFilters(filters: ServerFiltersValue) {
-  return JSON.stringify(filters);
+  return JSON.stringify(filters)
 }

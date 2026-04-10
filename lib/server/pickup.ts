@@ -6,21 +6,20 @@ import type {
   PickupMatchPlayer,
   PickupMatchStatsSummary,
   PickupPlayer,
-  PickupPlayerMatchStat,
   PickupPlayerSeasonRating,
   PickupPlayerWeaponStat,
   PickupQueue,
   PickupSettings,
   PickupSeason,
-} from "@prisma/client";
+} from "@prisma/client"
 
-import { getNotificationEnv } from "@/lib/server/env";
-import { routeError } from "@/lib/server/errors";
-import { getPrisma } from "@/lib/server/prisma";
-import { isPickupAdminSteamId } from "@/lib/server/pickup-auth";
-import type { PickupMatchState, PickupProfileMatch } from "@/lib/pickup";
+import { getNotificationEnv } from "@/lib/server/env"
+import { routeError } from "@/lib/server/errors"
+import { getPrisma } from "@/lib/server/prisma"
+import { isPickupAdminSteamId } from "@/lib/server/pickup-auth"
+import type { PickupMatchState, PickupProfileMatch } from "@/lib/pickup"
 
-export const DEFAULT_PICKUP_QUEUE_SLUG = "4v4-ca";
+export const DEFAULT_PICKUP_QUEUE_SLUG = "4v4-ca"
 
 const DEFAULT_PICKUP_QUEUE = {
   slug: DEFAULT_PICKUP_QUEUE_SLUG,
@@ -29,7 +28,7 @@ const DEFAULT_PICKUP_QUEUE = {
   teamSize: 4,
   playerCount: 8,
   enabled: true,
-};
+}
 
 const DEFAULT_PICKUP_SETTINGS = {
   id: "default",
@@ -43,248 +42,248 @@ const DEFAULT_PICKUP_SETTINGS = {
   r2PublicBaseUrl: null,
   r2AccessKeyId: null,
   r2SecretAccessKey: null,
-};
+}
 
 export type PickupPlayerDto = {
-  avatarUrl: string | null;
-  coverImageUrl: string | null;
-  countryCode: string | null;
-  customAvatarUrl: string | null;
-  id: string;
-  isAdmin: boolean;
-  personaName: string;
-  profileUrl: string | null;
-  steamId: string;
-  steamAvatarUrl: string | null;
-};
+  avatarUrl: string | null
+  coverImageUrl: string | null
+  countryCode: string | null
+  customAvatarUrl: string | null
+  id: string
+  isAdmin: boolean
+  personaName: string
+  profileUrl: string | null
+  steamId: string
+  steamAvatarUrl: string | null
+}
 
 export type PickupQueueDto = {
-  description: string | null;
-  enabled: boolean;
-  id: string;
-  name: string;
-  playerCount: number;
-  slug: string;
-  teamSize: number;
-};
+  description: string | null
+  enabled: boolean
+  id: string
+  name: string
+  playerCount: number
+  slug: string
+  teamSize: number
+}
 
 export type PickupSettingsDto = {
-  hasCallbackSecret: boolean;
-  hasProvisionAuthToken: boolean;
-  hasR2AccessKeyId: boolean;
-  hasR2SecretAccessKey: boolean;
-  provisionApiUrl: string | null;
-  readyCheckDurationSeconds: number;
-  r2AccountId: string | null;
-  r2BucketName: string | null;
-  r2PublicBaseUrl: string | null;
-  vetoTurnDurationSeconds: number;
-};
+  hasCallbackSecret: boolean
+  hasProvisionAuthToken: boolean
+  hasR2AccessKeyId: boolean
+  hasR2SecretAccessKey: boolean
+  provisionApiUrl: string | null
+  readyCheckDurationSeconds: number
+  r2AccountId: string | null
+  r2BucketName: string | null
+  r2PublicBaseUrl: string | null
+  vetoTurnDurationSeconds: number
+}
 
 export type PickupSeasonDto = {
-  durationPreset: PickupSeason["durationPreset"];
-  endsAt: string;
-  id: string;
-  name: string;
-  startsAt: string;
-  status: PickupSeason["status"];
-};
+  durationPreset: PickupSeason["durationPreset"]
+  endsAt: string
+  id: string
+  name: string
+  startsAt: string
+  status: PickupSeason["status"]
+}
 
 export type PickupMapPoolDto = {
-  active: boolean;
-  id: string;
-  label: string;
-  mapKey: string;
-  sortOrder: number;
-};
+  active: boolean
+  id: string
+  label: string
+  mapKey: string
+  sortOrder: number
+}
 
 export type PickupRatingDto = {
-  displayRating: number;
-  gamesPlayed: number;
-  losses: number;
-  mu: number;
-  sigma: number;
-  wins: number;
-};
+  displayRating: number
+  gamesPlayed: number
+  losses: number
+  mu: number
+  sigma: number
+  wins: number
+}
 
 export type PickupActiveRatingDto = PickupRatingDto & {
-  queueId: string;
-  queueName: string;
-  queueSlug: string;
-  seasonId: string;
-  seasonName: string;
-};
+  queueId: string
+  queueName: string
+  queueSlug: string
+  seasonId: string
+  seasonName: string
+}
 
 export type PickupMeDto = {
-  player: PickupPlayerDto;
-  rating: PickupRatingDto | null;
-  ratings: PickupActiveRatingDto[];
-};
+  player: PickupPlayerDto
+  rating: PickupRatingDto | null
+  ratings: PickupActiveRatingDto[]
+}
 
 export type PickupLeaderboardEntryDto = {
-  gamesPlayed: number;
-  losses: number;
-  player: PickupPlayerDto;
-  rank: number;
-  rating: number;
-  winRate: number | null;
-  wins: number;
-};
+  gamesPlayed: number
+  losses: number
+  player: PickupPlayerDto
+  rank: number
+  rating: number
+  winRate: number | null
+  wins: number
+}
 
 export type PickupLeaderboardQueueDto = {
-  entries: PickupLeaderboardEntryDto[];
-  queue: PickupQueueDto;
-  season: PickupSeasonDto;
-};
+  entries: PickupLeaderboardEntryDto[]
+  queue: PickupQueueDto
+  season: PickupSeasonDto
+}
 
 export type PickupLeaderboardsDto = {
-  queues: PickupLeaderboardQueueDto[];
-};
+  queues: PickupLeaderboardQueueDto[]
+}
 
 export type PickupProfileStatsDto = {
   combat: {
-    deaths: number;
-    kd: number | null;
-    kills: number;
-  };
-  losses: number;
-  totalMatches: number;
-  winRate: number | null;
-  wins: number;
-};
+    deaths: number
+    kd: number | null
+    kills: number
+  }
+  losses: number
+  totalMatches: number
+  winRate: number | null
+  wins: number
+}
 
 export type PickupProfileMatchDto = {
-  completedAt: string | null;
-  finalMapKey: string | null;
-  finalScore: string | null;
-  id: string;
-  queue: PickupQueueDto;
-  ratingAfter: number | null;
-  ratingBefore: number;
-  ratingDelta: number | null;
-  result: "win" | "loss" | null;
-  season: PickupSeasonDto;
-  team: PickupMatchPlayer["team"];
-  winnerTeam: PickupMatch["winnerTeam"];
-};
+  completedAt: string | null
+  finalMapKey: string | null
+  finalScore: string | null
+  id: string
+  queue: PickupQueueDto
+  ratingAfter: number | null
+  ratingBefore: number
+  ratingDelta: number | null
+  result: "win" | "loss" | null
+  season: PickupSeasonDto
+  team: PickupMatchPlayer["team"]
+  winnerTeam: PickupMatch["winnerTeam"]
+}
 
 export type PickupPlayerProfileDto = {
-  player: PickupPlayerDto;
-  ratings: PickupActiveRatingDto[];
-  recentMatches: PickupProfileMatchDto[];
-  stats: PickupProfileStatsDto;
-};
+  player: PickupPlayerDto
+  ratings: PickupActiveRatingDto[]
+  recentMatches: PickupProfileMatchDto[]
+  stats: PickupProfileStatsDto
+}
 
 export type PickupMatchWeaponStatDto = {
-  accuracy: number | null;
-  damage: number | null;
-  deaths: number | null;
-  hits: number | null;
-  kills: number | null;
-  shots: number | null;
-  timeSeconds: number | null;
-  weapon: string;
-};
+  accuracy: number | null
+  damage: number | null
+  deaths: number | null
+  hits: number | null
+  kills: number | null
+  shots: number | null
+  timeSeconds: number | null
+  weapon: string
+}
 
 export type PickupMatchPlayerStatsDto = {
-  accuracy: number | null;
-  damageGiven: number | null;
-  damageTaken: number | null;
-  deaths: number | null;
-  displayAfter: number | null;
-  displayBefore: number;
-  kills: number | null;
-  medals: Record<string, unknown> | null;
-  ping: number | null;
-  player: PickupPlayerDto;
-  result: "win" | "loss" | null;
-  score: number | null;
-  team: PickupMatchPlayer["team"];
-  timeSeconds: number | null;
-  weaponStats: PickupMatchWeaponStatDto[];
-};
+  accuracy: number | null
+  damageGiven: number | null
+  damageTaken: number | null
+  deaths: number | null
+  displayAfter: number | null
+  displayBefore: number
+  kills: number | null
+  medals: Record<string, unknown> | null
+  ping: number | null
+  player: PickupPlayerDto
+  result: "win" | "loss" | null
+  score: number | null
+  team: PickupMatchPlayer["team"]
+  timeSeconds: number | null
+  weaponStats: PickupMatchWeaponStatDto[]
+}
 
 export type PickupMatchKillEventDto = {
-  eventIndex: number;
-  killerName: string | null;
-  killerPlayerId: string | null;
-  mod: string | null;
-  occurredAt: string | null;
-  suicide: boolean;
-  teamKill: boolean;
-  victimName: string | null;
-  victimPlayerId: string | null;
-  weapon: string | null;
-};
+  eventIndex: number
+  killerName: string | null
+  killerPlayerId: string | null
+  mod: string | null
+  occurredAt: string | null
+  suicide: boolean
+  teamKill: boolean
+  victimName: string | null
+  victimPlayerId: string | null
+  weapon: string | null
+}
 
 export type PickupMatchDetailDto = {
-  kills: PickupMatchKillEventDto[];
+  kills: PickupMatchKillEventDto[]
   match: {
-    completedAt: string | null;
-    finalMapKey: string | null;
-    finalScore: string | null;
-    id: string;
-    liveStartedAt: string | null;
-    queue: PickupQueueDto;
-    season: PickupSeasonDto;
-    status: PickupMatch["status"];
-    winnerTeam: PickupMatch["winnerTeam"];
-  };
+    completedAt: string | null
+    finalMapKey: string | null
+    finalScore: string | null
+    id: string
+    liveStartedAt: string | null
+    queue: PickupQueueDto
+    season: PickupSeasonDto
+    status: PickupMatch["status"]
+    winnerTeam: PickupMatch["winnerTeam"]
+  }
   rawEvents: Array<{
-    createdAt: string;
-    eventAt: string | null;
-    eventIndex: number;
-    eventType: string;
-    payload: Record<string, unknown>;
-    source: string;
-  }>;
+    createdAt: string
+    eventAt: string | null
+    eventIndex: number
+    eventType: string
+    payload: Record<string, unknown>
+    source: string
+  }>
   statsSummary: {
-    blueRounds: number | null;
-    endedAt: string | null;
-    factory: string | null;
-    gameType: string | null;
-    mapKey: string | null;
-    matchDurationSeconds: number | null;
-    redRounds: number | null;
-    roundsPlayed: number | null;
-    startedAt: string | null;
-  } | null;
+    blueRounds: number | null
+    endedAt: string | null
+    factory: string | null
+    gameType: string | null
+    mapKey: string | null
+    matchDurationSeconds: number | null
+    redRounds: number | null
+    roundsPlayed: number | null
+    startedAt: string | null
+  } | null
   teams: {
-    left: PickupMatchPlayerStatsDto[];
-    right: PickupMatchPlayerStatsDto[];
-  };
-};
+    left: PickupMatchPlayerStatsDto[]
+    right: PickupMatchPlayerStatsDto[]
+  }
+}
 
 export type PickupLandingDataDto = {
-  liveMatches: PickupMatchState[];
-  recentMatches: PickupProfileMatch[];
-};
+  liveMatches: PickupMatchState[]
+  recentMatches: PickupProfileMatch[]
+}
 
 export type PickupAdminQueueOverviewDto = {
-  activeSeason: PickupSeasonDto | null;
-  maps: PickupMapPoolDto[];
-  queue: PickupQueueDto;
-  seasons: PickupSeasonDto[];
-};
+  activeSeason: PickupSeasonDto | null
+  maps: PickupMapPoolDto[]
+  queue: PickupQueueDto
+  seasons: PickupSeasonDto[]
+}
 
 export type PickupAdminOverviewDto = {
-  queues: PickupAdminQueueOverviewDto[];
-  viewer: PickupPlayerDto;
-};
+  queues: PickupAdminQueueOverviewDto[]
+  viewer: PickupPlayerDto
+}
 
 export type PickupAdminSettingsDto = {
-  settings: PickupSettingsDto;
-  viewer: PickupPlayerDto;
-};
+  settings: PickupSettingsDto
+  viewer: PickupPlayerDto
+}
 
 function getPickupAvatarUrl(player: PickupPlayer) {
-  return player.customAvatarUrl ?? player.avatarUrl ?? null;
+  return player.customAvatarUrl ?? player.avatarUrl ?? null
 }
 
 function getPickupWinRate(wins: number, totalMatches: number) {
   return totalMatches > 0
     ? Number(((wins / totalMatches) * 100).toFixed(1))
-    : null;
+    : null
 }
 
 function escapeHtml(value: string) {
@@ -293,45 +292,45 @@ function escapeHtml(value: string) {
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+    .replaceAll("'", "&#039;")
 }
 
 function buildSteamReturnUrl(oauthState: string) {
-  const env = getNotificationEnv();
-  return `${env.PUBLIC_BASE_URL.replace(/\/$/, "")}/auth/steam/callback?pickup_state=${encodeURIComponent(oauthState)}`;
+  const env = getNotificationEnv()
+  return `${env.PUBLIC_BASE_URL.replace(/\/$/, "")}/auth/steam/callback?pickup_state=${encodeURIComponent(oauthState)}`
 }
 
 export function buildPickupSteamAuthorizeUrl(oauthState: string) {
-  const env = getNotificationEnv();
-  const url = new URL("https://steamcommunity.com/openid/login");
-  const returnTo = buildSteamReturnUrl(oauthState);
+  const env = getNotificationEnv()
+  const url = new URL("https://steamcommunity.com/openid/login")
+  const returnTo = buildSteamReturnUrl(oauthState)
 
-  url.searchParams.set("openid.ns", "http://specs.openid.net/auth/2.0");
-  url.searchParams.set("openid.mode", "checkid_setup");
+  url.searchParams.set("openid.ns", "http://specs.openid.net/auth/2.0")
+  url.searchParams.set("openid.mode", "checkid_setup")
   url.searchParams.set(
     "openid.identity",
-    "http://specs.openid.net/auth/2.0/identifier_select",
-  );
+    "http://specs.openid.net/auth/2.0/identifier_select"
+  )
   url.searchParams.set(
     "openid.claimed_id",
-    "http://specs.openid.net/auth/2.0/identifier_select",
-  );
-  url.searchParams.set("openid.return_to", returnTo);
-  url.searchParams.set("openid.realm", env.PUBLIC_BASE_URL.replace(/\/$/, ""));
+    "http://specs.openid.net/auth/2.0/identifier_select"
+  )
+  url.searchParams.set("openid.return_to", returnTo)
+  url.searchParams.set("openid.realm", env.PUBLIC_BASE_URL.replace(/\/$/, ""))
 
-  return url.toString();
+  return url.toString()
 }
 
 export async function validatePickupSteamCallback(url: URL) {
-  const params = new URLSearchParams(url.searchParams);
-  const claimedId = params.get("openid.claimed_id");
-  const signedParams = params.get("openid.signed");
+  const params = new URLSearchParams(url.searchParams)
+  const claimedId = params.get("openid.claimed_id")
+  const signedParams = params.get("openid.signed")
 
   if (!claimedId || !signedParams) {
-    routeError(400, "Steam did not return a valid identity.");
+    routeError(400, "Steam did not return a valid identity.")
   }
 
-  params.set("openid.mode", "check_authentication");
+  params.set("openid.mode", "check_authentication")
 
   const response = await fetch("https://steamcommunity.com/openid/login", {
     method: "POST",
@@ -339,55 +338,59 @@ export async function validatePickupSteamCallback(url: URL) {
       "Content-Type": "application/x-www-form-urlencoded",
     },
     body: params,
-  });
+  })
 
   if (!response.ok) {
-    throw new Error(`Steam OpenID validation failed with HTTP ${response.status}.`);
+    throw new Error(
+      `Steam OpenID validation failed with HTTP ${response.status}.`
+    )
   }
 
-  const payload = await response.text();
+  const payload = await response.text()
   if (!payload.includes("is_valid:true")) {
-    routeError(401, "Steam identity could not be verified.");
+    routeError(401, "Steam identity could not be verified.")
   }
 
-  return extractSteamIdFromClaimedId(claimedId);
+  return extractSteamIdFromClaimedId(claimedId)
 }
 
 function extractSteamIdFromClaimedId(claimedId: string) {
-  const idMatch = claimedId.match(/\/openid\/id\/(\d+)$/);
+  const idMatch = claimedId.match(/\/openid\/id\/(\d+)$/)
   if (!idMatch) {
-    routeError(400, "Steam did not return a valid SteamID.");
+    routeError(400, "Steam did not return a valid SteamID.")
   }
 
-  return idMatch[1];
+  return idMatch[1]
 }
 
 export async function fetchSteamProfile(steamId: string) {
-  const env = getNotificationEnv();
-  const url = new URL("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/");
+  const env = getNotificationEnv()
+  const url = new URL(
+    "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/"
+  )
 
-  url.searchParams.set("key", env.STEAM_API_KEY);
-  url.searchParams.set("steamids", steamId);
+  url.searchParams.set("key", env.STEAM_API_KEY)
+  url.searchParams.set("steamids", steamId)
 
-  const response = await fetch(url);
+  const response = await fetch(url)
   if (!response.ok) {
-    throw new Error(`Steam profile lookup failed with HTTP ${response.status}.`);
+    throw new Error(`Steam profile lookup failed with HTTP ${response.status}.`)
   }
 
   const payload = (await response.json()) as {
     response?: {
       players?: Array<{
-        avatarfull?: string;
-        personaname?: string;
-        profileurl?: string;
-        steamid?: string;
-      }>;
-    };
-  };
-  const player = payload.response?.players?.[0];
+        avatarfull?: string
+        personaname?: string
+        profileurl?: string
+        steamid?: string
+      }>
+    }
+  }
+  const player = payload.response?.players?.[0]
 
   if (!player?.steamid) {
-    routeError(404, "Steam profile could not be loaded.");
+    routeError(404, "Steam profile could not be loaded.")
   }
 
   return {
@@ -395,12 +398,12 @@ export async function fetchSteamProfile(steamId: string) {
     personaName: player.personaname?.trim() || player.steamid,
     profileUrl: player.profileurl ?? null,
     steamId: player.steamid,
-  };
+  }
 }
 
 export async function upsertPickupPlayer(steamId: string) {
-  const prisma = getPrisma();
-  const profile = await fetchSteamProfile(steamId);
+  const prisma = getPrisma()
+  const profile = await fetchSteamProfile(steamId)
 
   return prisma.pickupPlayer.upsert({
     where: {
@@ -419,20 +422,20 @@ export async function upsertPickupPlayer(steamId: string) {
       profileUrl: profile.profileUrl,
       steamId: profile.steamId,
     },
-  });
+  })
 }
 
 export async function refreshPickupPlayerIfStale(
   player: PickupPlayer,
-  maxAgeMs: number,
+  maxAgeMs: number
 ) {
-  const ageMs = Date.now() - player.updatedAt.getTime();
+  const ageMs = Date.now() - player.updatedAt.getTime()
   if (ageMs < maxAgeMs) {
-    return player;
+    return player
   }
 
   try {
-    const profile = await fetchSteamProfile(player.steamId);
+    const profile = await fetchSteamProfile(player.steamId)
     return await getPrisma().pickupPlayer.update({
       where: {
         id: player.id,
@@ -442,13 +445,13 @@ export async function refreshPickupPlayerIfStale(
         personaName: profile.personaName,
         profileUrl: profile.profileUrl,
       },
-    });
+    })
   } catch (error) {
     console.error(
       `Failed to refresh pickup Steam profile for ${player.steamId}:`,
-      error,
-    );
-    return player;
+      error
+    )
+    return player
   }
 }
 
@@ -464,7 +467,7 @@ export function toPickupPlayerDto(player: PickupPlayer): PickupPlayerDto {
     profileUrl: player.profileUrl ?? null,
     steamId: player.steamId,
     steamAvatarUrl: player.avatarUrl ?? null,
-  };
+  }
 }
 
 export function toPickupQueueDto(queue: PickupQueue): PickupQueueDto {
@@ -476,10 +479,12 @@ export function toPickupQueueDto(queue: PickupQueue): PickupQueueDto {
     playerCount: queue.playerCount,
     slug: queue.slug,
     teamSize: queue.teamSize,
-  };
+  }
 }
 
-export function toPickupSettingsDto(settings: PickupSettings): PickupSettingsDto {
+export function toPickupSettingsDto(
+  settings: PickupSettings
+): PickupSettingsDto {
   return {
     hasCallbackSecret: Boolean(settings.callbackSecret),
     hasProvisionAuthToken: Boolean(settings.provisionAuthToken),
@@ -491,7 +496,7 @@ export function toPickupSettingsDto(settings: PickupSettings): PickupSettingsDto
     r2BucketName: settings.r2BucketName ?? null,
     r2PublicBaseUrl: settings.r2PublicBaseUrl ?? null,
     vetoTurnDurationSeconds: settings.vetoTurnDurationSeconds,
-  };
+  }
 }
 
 export function toPickupSeasonDto(season: PickupSeason): PickupSeasonDto {
@@ -502,7 +507,7 @@ export function toPickupSeasonDto(season: PickupSeason): PickupSeasonDto {
     name: season.name,
     startsAt: season.startsAt.toISOString(),
     status: season.status,
-  };
+  }
 }
 
 export function toPickupMapPoolDto(map: PickupMapPool): PickupMapPoolDto {
@@ -512,10 +517,12 @@ export function toPickupMapPoolDto(map: PickupMapPool): PickupMapPoolDto {
     label: map.label,
     mapKey: map.mapKey,
     sortOrder: map.sortOrder,
-  };
+  }
 }
 
-export function toPickupRatingDto(rating: PickupPlayerSeasonRating): PickupRatingDto {
+export function toPickupRatingDto(
+  rating: PickupPlayerSeasonRating
+): PickupRatingDto {
   return {
     displayRating: rating.displayRating,
     gamesPlayed: rating.gamesPlayed,
@@ -523,11 +530,11 @@ export function toPickupRatingDto(rating: PickupPlayerSeasonRating): PickupRatin
     mu: rating.mu,
     sigma: rating.sigma,
     wins: rating.wins,
-  };
+  }
 }
 
 function toPickupMatchWeaponStatDto(
-  stat: PickupPlayerWeaponStat,
+  stat: PickupPlayerWeaponStat
 ): PickupMatchWeaponStatDto {
   return {
     accuracy: stat.accuracy ?? null,
@@ -538,11 +545,11 @@ function toPickupMatchWeaponStatDto(
     shots: stat.shots ?? null,
     timeSeconds: stat.timeSeconds ?? null,
     weapon: stat.weapon,
-  };
+  }
 }
 
 function toPickupMatchKillEventDto(
-  event: PickupKillEvent,
+  event: PickupKillEvent
 ): PickupMatchKillEventDto {
   return {
     eventIndex: event.eventIndex,
@@ -555,14 +562,12 @@ function toPickupMatchKillEventDto(
     victimName: event.victimName ?? null,
     victimPlayerId: event.victimPlayerId ?? null,
     weapon: event.weapon ?? null,
-  };
+  }
 }
 
-function toPickupMatchStatsSummaryDto(
-  summary: PickupMatchStatsSummary | null,
-) {
+function toPickupMatchStatsSummaryDto(summary: PickupMatchStatsSummary | null) {
   if (!summary) {
-    return null;
+    return null
   }
 
   return {
@@ -575,7 +580,7 @@ function toPickupMatchStatsSummaryDto(
     redRounds: summary.redRounds ?? null,
     roundsPlayed: summary.roundsPlayed ?? null,
     startedAt: summary.startedAt?.toISOString() ?? null,
-  };
+  }
 }
 
 function toPickupRawEventDto(event: PickupMatchEventRaw) {
@@ -586,35 +591,33 @@ function toPickupRawEventDto(event: PickupMatchEventRaw) {
     eventType: event.eventType,
     payload: (event.payload as Record<string, unknown>) ?? {},
     source: event.source,
-  };
+  }
 }
 
 function parseStringArray(value: unknown): string[] {
   return Array.isArray(value)
     ? value.filter((entry): entry is string => typeof entry === "string")
-    : [];
+    : []
 }
 
-function parseVetoTurns(
-  value: unknown,
-): PickupMatchState["veto"]["turns"] {
+function parseVetoTurns(value: unknown): PickupMatchState["veto"]["turns"] {
   if (!Array.isArray(value)) {
-    return [];
+    return []
   }
 
   return value.flatMap((entry) => {
     if (!entry || typeof entry !== "object") {
-      return [];
+      return []
     }
 
-    const turn = entry as Record<string, unknown>;
+    const turn = entry as Record<string, unknown>
     if (
       typeof turn.captainPlayerId !== "string" ||
       typeof turn.mapKey !== "string" ||
       typeof turn.order !== "number" ||
       (turn.reason !== "captain" && turn.reason !== "timeout")
     ) {
-      return [];
+      return []
     }
 
     return [
@@ -624,12 +627,12 @@ function parseVetoTurns(
         order: turn.order,
         reason: turn.reason,
       },
-    ];
-  });
+    ]
+  })
 }
 
 function toPickupMatchPlayerCard(
-  membership: PickupMatchPlayer & { player: PickupPlayer },
+  membership: PickupMatchPlayer & { player: PickupPlayer }
 ): PickupMatchState["teams"]["left"][number] {
   return {
     avatarUrl: getPickupAvatarUrl(membership.player),
@@ -646,27 +649,29 @@ function toPickupMatchPlayerCard(
     steamId: membership.player.steamId,
     team: membership.team,
     won: membership.won ?? null,
-  };
+  }
 }
 
 function toPickupLandingMatchState(
   match: PickupMatch & {
-    players: Array<PickupMatchPlayer & { player: PickupPlayer }>;
-  },
+    players: Array<PickupMatchPlayer & { player: PickupPlayer }>
+  }
 ): PickupMatchState {
   const vetoState =
-    match.vetoState && typeof match.vetoState === "object" && !Array.isArray(match.vetoState)
+    match.vetoState &&
+    typeof match.vetoState === "object" &&
+    !Array.isArray(match.vetoState)
       ? (match.vetoState as Record<string, unknown>)
-      : null;
+      : null
   const balanceSummary =
     match.balanceSummary &&
     typeof match.balanceSummary === "object" &&
     !Array.isArray(match.balanceSummary)
       ? (match.balanceSummary as PickupMatchState["balanceSummary"])
-      : null;
+      : null
   const players = [...match.players].sort(
-    (left, right) => left.joinedAt.getTime() - right.joinedAt.getTime(),
-  );
+    (left, right) => left.joinedAt.getTime() - right.joinedAt.getTime()
+  )
 
   return {
     balanceSummary,
@@ -711,15 +716,15 @@ function toPickupLandingMatchState(
       turns: parseVetoTurns(vetoState?.turns),
     },
     winnerTeam: match.winnerTeam ?? null,
-  };
+  }
 }
 
 export function toPickupActiveRatingDto(
   rating: PickupPlayerSeasonRating & {
     season: PickupSeason & {
-      queue: PickupQueue;
-    };
-  },
+      queue: PickupQueue
+    }
+  }
 ): PickupActiveRatingDto {
   return {
     ...toPickupRatingDto(rating),
@@ -728,11 +733,11 @@ export function toPickupActiveRatingDto(
     queueSlug: rating.season.queue.slug,
     seasonId: rating.season.id,
     seasonName: rating.season.name,
-  };
+  }
 }
 
 export function buildPickupAuthResultHtml(success: boolean, message: string) {
-  const escapedMessage = escapeHtml(message);
+  const escapedMessage = escapeHtml(message)
 
   return `<!doctype html>
 <html lang="en">
@@ -811,41 +816,41 @@ export function buildPickupAuthResultHtml(success: boolean, message: string) {
       <p class="hint">You can close this page and return to the launcher.</p>
     </main>
   </body>
-</html>`;
+</html>`
 }
 
 export async function ensurePickupBootstrapData() {
-  const prisma = getPrisma();
+  const prisma = getPrisma()
   await prisma.pickupSettings.upsert({
     where: {
       id: DEFAULT_PICKUP_SETTINGS.id,
     },
     update: {},
     create: DEFAULT_PICKUP_SETTINGS,
-  });
+  })
 
   let queue = await prisma.pickupQueue.findUnique({
     where: {
       slug: DEFAULT_PICKUP_QUEUE.slug,
     },
-  });
+  })
 
   if (!queue) {
     queue = await prisma.pickupQueue.create({
       data: DEFAULT_PICKUP_QUEUE,
-    });
+    })
   }
 
   const seasonCount = await prisma.pickupSeason.count({
     where: {
       queueId: queue.id,
     },
-  });
+  })
 
   if (seasonCount === 0) {
-    const startsAt = new Date();
-    const endsAt = new Date(startsAt);
-    endsAt.setMonth(endsAt.getMonth() + 1);
+    const startsAt = new Date()
+    const endsAt = new Date(startsAt)
+    endsAt.setMonth(endsAt.getMonth() + 1)
 
     await prisma.pickupSeason.create({
       data: {
@@ -856,26 +861,26 @@ export async function ensurePickupBootstrapData() {
         startsAt,
         status: "active",
       },
-    });
+    })
   }
 
-  return queue;
+  return queue
 }
 
 export async function getPickupSettings() {
-  await ensurePickupBootstrapData();
+  await ensurePickupBootstrapData()
   return getPrisma().pickupSettings.findUniqueOrThrow({
     where: {
       id: DEFAULT_PICKUP_SETTINGS.id,
     },
-  });
+  })
 }
 
 export async function getPickupAdminOverview(
-  viewer: PickupPlayer,
+  viewer: PickupPlayer
 ): Promise<PickupAdminOverviewDto> {
-  await ensurePickupBootstrapData();
-  const prisma = getPrisma();
+  await ensurePickupBootstrapData()
+  const prisma = getPrisma()
   const queues = await prisma.pickupQueue.findMany({
     include: {
       mapPool: {
@@ -886,32 +891,33 @@ export async function getPickupAdminOverview(
       },
     },
     orderBy: [{ createdAt: "asc" }, { name: "asc" }],
-  });
+  })
 
   return {
     queues: queues.map((queue) => {
-      const seasons = queue.seasons.map(toPickupSeasonDto);
+      const seasons = queue.seasons.map(toPickupSeasonDto)
 
       return {
-        activeSeason: seasons.find((season) => season.status === "active") ?? null,
+        activeSeason:
+          seasons.find((season) => season.status === "active") ?? null,
         maps: queue.mapPool.map(toPickupMapPoolDto),
         queue: toPickupQueueDto(queue),
         seasons,
-      };
+      }
     }),
     viewer: toPickupPlayerDto(viewer),
-  };
+  }
 }
 
 export async function getPickupAdminSettings(
-  viewer: PickupPlayer,
+  viewer: PickupPlayer
 ): Promise<PickupAdminSettingsDto> {
-  const settings = await getPickupSettings();
+  const settings = await getPickupSettings()
 
   return {
     settings: toPickupSettingsDto(settings),
     viewer: toPickupPlayerDto(viewer),
-  };
+  }
 }
 
 export async function getPickupActiveSeason(queueId: string) {
@@ -923,7 +929,7 @@ export async function getPickupActiveSeason(queueId: string) {
     orderBy: {
       startsAt: "desc",
     },
-  });
+  })
 }
 
 export async function getPreferredPickupPlayerRating(playerId: string) {
@@ -944,7 +950,7 @@ export async function getPreferredPickupPlayerRating(playerId: string) {
         },
       },
     ],
-  });
+  })
 }
 
 export async function getPickupPlayerActiveRatings(playerId: string) {
@@ -975,7 +981,7 @@ export async function getPickupPlayerActiveRatings(playerId: string) {
         },
       },
     ],
-  });
+  })
 }
 
 export async function getPickupPlayerByIdOrSteamId(playerIdOrSteamId: string) {
@@ -983,40 +989,40 @@ export async function getPickupPlayerByIdOrSteamId(playerIdOrSteamId: string) {
     where: {
       OR: [{ id: playerIdOrSteamId }, { steamId: playerIdOrSteamId }],
     },
-  });
+  })
 }
 
 export async function updatePickupPlayerProfileMedia(
   playerId: string,
   input: {
-    countryCode?: string | null;
-    customAvatarUrl?: string | null;
-    customCoverUrl?: string | null;
-  },
+    countryCode?: string | null
+    customAvatarUrl?: string | null
+    customCoverUrl?: string | null
+  }
 ) {
-  const prisma = getPrisma();
+  const prisma = getPrisma()
   const existingPlayer = await prisma.pickupPlayer.findUnique({
     where: {
       id: playerId,
     },
-  });
+  })
 
   if (!existingPlayer) {
-    routeError(404, "Pickup player could not be found.");
+    routeError(404, "Pickup player could not be found.")
   }
 
   const nextCustomAvatarUrl =
     input.customAvatarUrl === undefined
-      ? existingPlayer.customAvatarUrl ?? null
-      : input.customAvatarUrl;
+      ? (existingPlayer.customAvatarUrl ?? null)
+      : input.customAvatarUrl
   const nextCustomCoverUrl =
     input.customCoverUrl === undefined
-      ? existingPlayer.customCoverUrl ?? null
-      : input.customCoverUrl;
+      ? (existingPlayer.customCoverUrl ?? null)
+      : input.customCoverUrl
   const nextCountryCode =
     input.countryCode === undefined
-      ? existingPlayer.countryCode ?? null
-      : input.countryCode;
+      ? (existingPlayer.countryCode ?? null)
+      : input.countryCode
 
   return prisma.pickupPlayer.update({
     where: {
@@ -1027,89 +1033,89 @@ export async function updatePickupPlayerProfileMedia(
       customAvatarUrl: nextCustomAvatarUrl,
       customCoverUrl: nextCustomCoverUrl,
     },
-  });
+  })
 }
 
 export async function getPickupPlayerProfile(
-  playerIdOrSteamId: string,
+  playerIdOrSteamId: string
 ): Promise<PickupPlayerProfileDto> {
-  await ensurePickupBootstrapData();
+  await ensurePickupBootstrapData()
 
-  const player = await getPickupPlayerByIdOrSteamId(playerIdOrSteamId);
+  const player = await getPickupPlayerByIdOrSteamId(playerIdOrSteamId)
   if (!player) {
-    routeError(404, "Pickup player could not be found.");
+    routeError(404, "Pickup player could not be found.")
   }
 
-  const prisma = getPrisma();
+  const prisma = getPrisma()
   const [ratings, totalMatches, wins, losses, combatTotals, recentMatches] =
     await Promise.all([
-    getPickupPlayerActiveRatings(player.id),
-    prisma.pickupMatchPlayer.count({
-      where: {
-        playerId: player.id,
-        match: {
-          status: "completed",
-        },
-      },
-    }),
-    prisma.pickupMatchPlayer.count({
-      where: {
-        playerId: player.id,
-        won: true,
-        match: {
-          status: "completed",
-        },
-      },
-    }),
-    prisma.pickupMatchPlayer.count({
-      where: {
-        playerId: player.id,
-        won: false,
-        match: {
-          status: "completed",
-        },
-      },
-    }),
-    prisma.pickupPlayerMatchStat.aggregate({
-      _sum: {
-        deaths: true,
-        kills: true,
-      },
-      where: {
-        playerId: player.id,
-        match: {
-          status: "completed",
-        },
-      },
-    }),
-    prisma.pickupMatchPlayer.findMany({
-      where: {
-        playerId: player.id,
-        match: {
-          status: "completed",
-        },
-      },
-      include: {
-        match: {
-          include: {
-            queue: true,
-            season: true,
-          },
-        },
-      },
-      orderBy: [
-        {
+      getPickupPlayerActiveRatings(player.id),
+      prisma.pickupMatchPlayer.count({
+        where: {
+          playerId: player.id,
           match: {
-            completedAt: "desc",
+            status: "completed",
           },
         },
-        {
-          joinedAt: "desc",
+      }),
+      prisma.pickupMatchPlayer.count({
+        where: {
+          playerId: player.id,
+          won: true,
+          match: {
+            status: "completed",
+          },
         },
-      ],
-      take: 20,
-    }),
-  ]);
+      }),
+      prisma.pickupMatchPlayer.count({
+        where: {
+          playerId: player.id,
+          won: false,
+          match: {
+            status: "completed",
+          },
+        },
+      }),
+      prisma.pickupPlayerMatchStat.aggregate({
+        _sum: {
+          deaths: true,
+          kills: true,
+        },
+        where: {
+          playerId: player.id,
+          match: {
+            status: "completed",
+          },
+        },
+      }),
+      prisma.pickupMatchPlayer.findMany({
+        where: {
+          playerId: player.id,
+          match: {
+            status: "completed",
+          },
+        },
+        include: {
+          match: {
+            include: {
+              queue: true,
+              season: true,
+            },
+          },
+        },
+        orderBy: [
+          {
+            match: {
+              completedAt: "desc",
+            },
+          },
+          {
+            joinedAt: "desc",
+          },
+        ],
+        take: 20,
+      }),
+    ])
 
   return {
     player: toPickupPlayerDto(player),
@@ -1127,7 +1133,11 @@ export async function getPickupPlayerProfile(
           ? membership.displayAfter - membership.displayBefore
           : null,
       result:
-        membership.won === true ? "win" : membership.won === false ? "loss" : null,
+        membership.won === true
+          ? "win"
+          : membership.won === false
+            ? "loss"
+            : null,
       season: toPickupSeasonDto(membership.match.season),
       team: membership.team,
       winnerTeam: membership.match.winnerTeam ?? null,
@@ -1138,8 +1148,10 @@ export async function getPickupPlayerProfile(
         kd:
           (combatTotals._sum.deaths ?? 0) > 0
             ? Number(
-                ((combatTotals._sum.kills ?? 0) /
-                  (combatTotals._sum.deaths ?? 0)).toFixed(2),
+                (
+                  (combatTotals._sum.kills ?? 0) /
+                  (combatTotals._sum.deaths ?? 0)
+                ).toFixed(2)
               )
             : (combatTotals._sum.kills ?? 0) > 0
               ? Number((combatTotals._sum.kills ?? 0).toFixed(2))
@@ -1151,13 +1163,13 @@ export async function getPickupPlayerProfile(
       winRate: getPickupWinRate(wins, totalMatches),
       wins,
     },
-  };
+  }
 }
 
 export async function getPickupMatchDetail(
-  matchId: string,
+  matchId: string
 ): Promise<PickupMatchDetailDto> {
-  await ensurePickupBootstrapData();
+  await ensurePickupBootstrapData()
 
   const match = await getPrisma().pickupMatch.findUnique({
     where: {
@@ -1188,33 +1200,33 @@ export async function getPickupMatchDetail(
         orderBy: [{ weapon: "asc" }],
       },
     },
-  });
+  })
 
   if (!match) {
-    routeError(404, "Pickup match could not be found.");
+    routeError(404, "Pickup match could not be found.")
   }
 
   const playerStatsByPlayerId = new Map(
-    match.playerStats.map((stat) => [stat.playerId, stat]),
-  );
-  const weaponStatsByPlayerId = new Map<string, PickupPlayerWeaponStat[]>();
+    match.playerStats.map((stat) => [stat.playerId, stat])
+  )
+  const weaponStatsByPlayerId = new Map<string, PickupPlayerWeaponStat[]>()
   for (const stat of match.weaponStats) {
-    const existing = weaponStatsByPlayerId.get(stat.playerId) ?? [];
-    existing.push(stat);
-    weaponStatsByPlayerId.set(stat.playerId, existing);
+    const existing = weaponStatsByPlayerId.get(stat.playerId) ?? []
+    existing.push(stat)
+    weaponStatsByPlayerId.set(stat.playerId, existing)
   }
 
   const teams = {
     left: [] as PickupMatchPlayerStatsDto[],
     right: [] as PickupMatchPlayerStatsDto[],
-  };
+  }
 
   for (const membership of match.players) {
     if (membership.team !== "left" && membership.team !== "right") {
-      continue;
+      continue
     }
 
-    const stat = playerStatsByPlayerId.get(membership.playerId);
+    const stat = playerStatsByPlayerId.get(membership.playerId)
     teams[membership.team].push({
       accuracy: stat?.accuracy ?? null,
       damageGiven: stat?.damageGiven ?? null,
@@ -1239,9 +1251,9 @@ export async function getPickupMatchDetail(
       team: membership.team,
       timeSeconds: stat?.timeSeconds ?? null,
       weaponStats: (weaponStatsByPlayerId.get(membership.playerId) ?? []).map(
-        toPickupMatchWeaponStatDto,
+        toPickupMatchWeaponStatDto
       ),
-    });
+    })
   }
 
   return {
@@ -1260,11 +1272,11 @@ export async function getPickupMatchDetail(
     rawEvents: match.rawEvents.map(toPickupRawEventDto),
     statsSummary: toPickupMatchStatsSummaryDto(match.statsSummary),
     teams,
-  };
+  }
 }
 
 export async function getPickupLeaderboards(): Promise<PickupLeaderboardsDto> {
-  await ensurePickupBootstrapData();
+  await ensurePickupBootstrapData()
 
   const queues = await getPrisma().pickupQueue.findMany({
     where: {
@@ -1301,13 +1313,13 @@ export async function getPickupLeaderboards(): Promise<PickupLeaderboardsDto> {
       },
     },
     orderBy: [{ createdAt: "asc" }, { name: "asc" }],
-  });
+  })
 
   return {
     queues: queues.flatMap((queue) => {
-      const activeSeason = queue.seasons[0];
+      const activeSeason = queue.seasons[0]
       if (!activeSeason) {
-        return [];
+        return []
       }
 
       return [
@@ -1324,15 +1336,15 @@ export async function getPickupLeaderboards(): Promise<PickupLeaderboardsDto> {
           queue: toPickupQueueDto(queue),
           season: toPickupSeasonDto(activeSeason),
         } satisfies PickupLeaderboardQueueDto,
-      ];
+      ]
     }),
-  };
+  }
 }
 
 export async function getPickupLandingData(): Promise<PickupLandingDataDto> {
-  await ensurePickupBootstrapData();
+  await ensurePickupBootstrapData()
 
-  const prisma = getPrisma();
+  const prisma = getPrisma()
   const [liveMatches, recentMatches] = await Promise.all([
     prisma.pickupMatch.findMany({
       where: {
@@ -1378,7 +1390,7 @@ export async function getPickupLandingData(): Promise<PickupLandingDataDto> {
       ],
       take: 12,
     }),
-  ]);
+  ])
 
   return {
     liveMatches: liveMatches.map(toPickupLandingMatchState),
@@ -1396,7 +1408,7 @@ export async function getPickupLandingData(): Promise<PickupLandingDataDto> {
       team: null,
       winnerTeam: match.winnerTeam ?? null,
     })),
-  };
+  }
 }
 
 export function buildPickupMatchSummary(match: PickupMatch) {
@@ -1413,5 +1425,5 @@ export function buildPickupMatchSummary(match: PickupMatch) {
     vetoDeadlineAt: match.vetoDeadlineAt?.toISOString() ?? null,
     vetoState: match.vetoState,
     winnerTeam: match.winnerTeam ?? null,
-  };
+  }
 }

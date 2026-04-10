@@ -1,13 +1,14 @@
 import {
   Fragment,
+  useCallback,
   useDeferredValue,
   useEffect,
   useMemo,
   useState,
-} from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+} from "react"
+import { AnimatePresence, motion } from "framer-motion"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
 import {
   type ColumnDef,
   flexRender,
@@ -17,15 +18,8 @@ import {
   type PaginationState,
   type SortingState,
   useReactTable,
-} from "@tanstack/react-table";
-import {
-  ArrowUpDown,
-  ArrowUpRight,
-  Copy,
-  Eye,
-  Pencil,
-  RefreshCw,
-} from "lucide-react";
+} from "@tanstack/react-table"
+import { ArrowUpDown, ArrowUpRight, Eye, Pencil, RefreshCw } from "lucide-react"
 import {
   HeartCrossed,
   HeartFilled,
@@ -35,31 +29,28 @@ import {
   Play,
   SlashCircle,
   Unlock,
-} from "@/components/icon";
-import { PlayerName } from "@/components/pickup/player-name";
-import { useFavorites } from "@/hooks/use-favorites";
-import { useServerPasswords } from "@/hooks/use-server-passwords";
-import type { ServerInteractionContext } from "@/hooks/use-server-interactions";
-import {
-  getCountryFlagSrc,
-  getRegionFromCountryCode,
-} from "@/lib/countries";
-import { getMapEntry } from "@/lib/maps";
-import { openExternalUrl } from "@/lib/open-url";
-import { fetchRealtimeServerHistory, isRealtimeEnabled } from "@/lib/realtime";
+} from "@/components/icon"
+import { PlayerName } from "@/components/pickup/player-name"
+import { useFavorites } from "@/hooks/use-favorites"
+import { useServerPasswords } from "@/hooks/use-server-passwords"
+import type { ServerInteractionContext } from "@/hooks/use-server-interactions"
+import { getCountryFlagSrc, getRegionFromCountryCode } from "@/lib/countries"
+import { getMapEntry } from "@/lib/maps"
+import { openExternalUrl } from "@/lib/open-url"
+import { fetchRealtimeServerHistory, isRealtimeEnabled } from "@/lib/realtime"
 import {
   fetchSteamServerPlayerRatings,
   fetchSteamServerPlayers,
   type ServerPlayerRating,
   type SteamServer,
-} from "@/lib/steam";
-import { formatDurationHoursMinutes } from "@/lib/time";
+} from "@/lib/steam"
+import { formatDurationHoursMinutes } from "@/lib/time"
 import {
   RATING_FILTER_MAX,
   RATING_FILTER_MIN,
   type ServerFiltersValue,
-} from "@/lib/server-filters";
-import { ServerFavoriteDialog } from "@/components/server/server-favorite-dialog";
+} from "@/lib/server-filters"
+import { ServerFavoriteDialog } from "@/components/server/server-favorite-dialog"
 import {
   Pagination,
   PaginationContent,
@@ -68,7 +59,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
+} from "@/components/ui/pagination"
 import {
   Table,
   TableBody,
@@ -76,17 +67,17 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useTranslation } from "react-i18next";
+} from "@/components/ui/tooltip"
+import { useTranslation } from "react-i18next"
 
 const regionLabels: Record<string, string> = {
   eu: "EU",
@@ -94,7 +85,7 @@ const regionLabels: Record<string, string> = {
   sa: "SA",
   za: "ZA",
   apac: "APAC",
-};
+}
 
 const steamRegionMap: Record<number, keyof typeof regionLabels> = {
   0: "na",
@@ -103,7 +94,7 @@ const steamRegionMap: Record<number, keyof typeof regionLabels> = {
   3: "eu",
   5: "za",
   7: "apac",
-};
+}
 
 const modeLabelKeys: Record<string, string> = {
   ca: "filters.modes.ca",
@@ -119,7 +110,7 @@ const modeLabelKeys: Record<string, string> = {
   rr: "filters.modes.rr",
   td: "filters.modes.tdm",
   "1f": "filters.modes.ctf",
-};
+}
 
 const serverListLayoutTransition = {
   layout: {
@@ -128,7 +119,7 @@ const serverListLayoutTransition = {
     damping: 34,
     mass: 0.82,
   },
-};
+}
 
 const serverListRowTransition = {
   layout: {
@@ -137,7 +128,7 @@ const serverListRowTransition = {
     damping: 34,
     mass: 0.82,
   },
-};
+}
 
 function sortServersForPage(
   servers: SteamServer[],
@@ -145,72 +136,72 @@ function sortServersForPage(
   modesByAddr: Record<string, string | null>
 ) {
   if (sorting.length === 0) {
-    return servers;
+    return servers
   }
 
-  const [{ id, desc }] = sorting;
-  const direction = desc ? -1 : 1;
+  const [{ id, desc }] = sorting
+  const direction = desc ? -1 : 1
 
-  const sorted = [...servers];
+  const sorted = [...servers]
   sorted.sort((left, right) => {
-    const leftMode = modesByAddr[left.addr] ?? normalizeGameMode(left) ?? "";
-    const rightMode = modesByAddr[right.addr] ?? normalizeGameMode(right) ?? "";
-    let value = 0;
+    const leftMode = modesByAddr[left.addr] ?? normalizeGameMode(left) ?? ""
+    const rightMode = modesByAddr[right.addr] ?? normalizeGameMode(right) ?? ""
+    let value = 0
 
     switch (id) {
       case "name":
-        value = left.name.localeCompare(right.name);
-        break;
+        value = left.name.localeCompare(right.name)
+        break
       case "mode":
-        value = leftMode.localeCompare(rightMode);
-        break;
+        value = leftMode.localeCompare(rightMode)
+        break
       case "map":
-        value = left.map.localeCompare(right.map);
-        break;
+        value = left.map.localeCompare(right.map)
+        break
       case "players":
-        value = left.players - right.players;
-        break;
+        value = left.players - right.players
+        break
       default:
-        value = 0;
+        value = 0
     }
 
     if (value !== 0) {
-      return value * direction;
+      return value * direction
     }
 
-    return left.name.localeCompare(right.name);
-  });
+    return left.name.localeCompare(right.name)
+  })
 
-  return sorted;
+  return sorted
 }
 
 type ServerListProps = {
-  servers: SteamServer[];
-  filters: ServerFiltersValue;
-  isLoading?: boolean;
-  isRefreshing?: boolean;
-  onRefresh?: () => void;
-  error?: string | null;
-  actionMode?: "add" | "edit";
-  favoriteListId?: string | null;
-  onOpenServer?: (context: ServerInteractionContext) => void;
-  onJoinServer?: (context: ServerInteractionContext) => void;
-};
+  servers: SteamServer[]
+  filters: ServerFiltersValue
+  isLoading?: boolean
+  isRefreshing?: boolean
+  onRefresh?: () => void
+  error?: string | null
+  actionMode?: "add" | "edit"
+  favoriteListId?: string | null
+  onOpenServer?: (context: ServerInteractionContext) => void
+  onJoinServer?: (context: ServerInteractionContext) => void
+}
 
 function normalizeSteamServerRegion(server: SteamServer) {
-  return server.region != null ? (steamRegionMap[server.region] ?? null) : null;
+  return server.region != null ? (steamRegionMap[server.region] ?? null) : null
 }
 
 function resolveServerRegion(server: SteamServer) {
   return (
     getRegionFromCountryCode(server.country_code) ??
     normalizeSteamServerRegion(server)
-  );
+  )
 }
 
 function normalizeGameMode(server: SteamServer) {
   if (server.game_mode?.trim()) {
-    return server.game_mode.trim().toLowerCase();
+    return server.game_mode.trim().toLowerCase()
   }
 
   const knownModes: Record<string, string> = {
@@ -234,27 +225,27 @@ function normalizeGameMode(server: SteamServer) {
     race: "race",
     rr: "rr",
     redrover: "rr",
-  };
+  }
 
   const keywordParts =
     server.keywords
       ?.split(",")
       .map((part) => part.trim().toLowerCase())
-      .filter(Boolean) ?? [];
+      .filter(Boolean) ?? []
 
   for (const part of keywordParts) {
     if (part.startsWith("g_")) {
-      const normalized = part.replace(/^g_/, "");
-      return knownModes[normalized] ?? normalized;
+      const normalized = part.replace(/^g_/, "")
+      return knownModes[normalized] ?? normalized
     }
 
-    const compact = part.replace(/[\s_-]+/g, "");
+    const compact = part.replace(/[\s_-]+/g, "")
     if (compact in knownModes) {
-      return knownModes[compact];
+      return knownModes[compact]
     }
   }
 
-  return null;
+  return null
 }
 
 function getGameModeLabel(
@@ -262,39 +253,39 @@ function getGameModeLabel(
   t: (key: string) => string
 ) {
   if (!gameMode) {
-    return null;
+    return null
   }
 
-  const normalizedMode = gameMode.trim().toLowerCase();
-  const key = modeLabelKeys[normalizedMode];
+  const normalizedMode = gameMode.trim().toLowerCase()
+  const key = modeLabelKeys[normalizedMode]
 
-  return key ? t(key) : normalizedMode.toUpperCase();
+  return key ? t(key) : normalizedMode.toUpperCase()
 }
 
 function normalizeTags(server: SteamServer) {
   return (server.keywords ?? "")
     .split(",")
     .map((tag) => tag.trim().toLowerCase())
-    .filter(Boolean);
+    .filter(Boolean)
 }
 
 function normalizePlayerName(name: string) {
   return name
     .replace(/\^[0-9]/g, "")
     .trim()
-    .toLowerCase();
+    .toLowerCase()
 }
 
 function calculateAverage(values: Array<number | null | undefined>) {
-  const numbers = values.filter((value): value is number => value != null);
+  const numbers = values.filter((value): value is number => value != null)
 
   if (numbers.length === 0) {
-    return null;
+    return null
   }
 
   return Math.round(
     numbers.reduce((total, value) => total + value, 0) / numbers.length
-  );
+  )
 }
 
 function calculateHighestRatedPlayer(
@@ -302,24 +293,24 @@ function calculateHighestRatedPlayer(
   ratingKey: "qelo" | "trueskill"
 ) {
   return players.reduce<ServerPlayerRating | null>((highest, player) => {
-    const rating = player[ratingKey];
+    const rating = player[ratingKey]
 
     if (rating == null) {
-      return highest;
+      return highest
     }
 
     if (highest == null) {
-      return player;
+      return player
     }
 
     return rating > (highest[ratingKey] ?? Number.NEGATIVE_INFINITY)
       ? player
-      : highest;
-  }, null);
+      : highest
+  }, null)
 }
 
 function getQlStatsPlayerProfileUrl(steamId: string) {
-  return `https://qlstats.net/player/${steamId}`;
+  return `https://qlstats.net/player/${steamId}`
 }
 
 const playerTeamSectionMeta = {
@@ -347,71 +338,71 @@ const playerTeamSectionMeta = {
     labelKey: "serverList.drawer.teams.unassigned",
     toneClassName: "text-muted-foreground",
   },
-} as const;
+} as const
 
-type PlayerTeamSectionKey = keyof typeof playerTeamSectionMeta;
+type PlayerTeamSectionKey = keyof typeof playerTeamSectionMeta
 
 type DrawerPlayer = SteamServer["players_info"][number] & {
-  rating: ServerPlayerRating | null;
-};
+  rating: ServerPlayerRating | null
+}
 
 function getPlayerTeamSectionKey(
   team: number | null | undefined,
   hasRedBlueTeams: boolean
 ): PlayerTeamSectionKey {
   if (team === 1) {
-    return "red";
+    return "red"
   }
 
   if (team === 2) {
-    return "blue";
+    return "blue"
   }
 
   if (team === 3) {
-    return "spectators";
+    return "spectators"
   }
 
   if (team === 0) {
-    return hasRedBlueTeams ? "free" : "players";
+    return hasRedBlueTeams ? "free" : "players"
   }
 
-  return "unassigned";
+  return "unassigned"
 }
 
 function ServerAverageRatingBadges({
   serverAddress,
 }: {
-  serverAddress: string;
+  serverAddress: string
 }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation()
   const ratingsQuery = useQuery({
     queryKey: ["steam", "server", "player-ratings", serverAddress],
     queryFn: () => fetchSteamServerPlayerRatings(serverAddress),
     staleTime: 30_000,
-  });
-  const ratings = ratingsQuery.data ?? [];
+  })
+  const ratings = useMemo(() => ratingsQuery.data ?? [], [ratingsQuery.data])
 
   const averageQelo = useMemo(
     () => calculateAverage(ratings.map((player) => player.qelo)),
     [ratings]
-  );
+  )
   const averageTrueskill = useMemo(
     () => calculateAverage(ratings.map((player) => player.trueskill)),
     [ratings]
-  );
+  )
   const highestQeloPlayer = useMemo(
     () => calculateHighestRatedPlayer(ratings, "qelo"),
     [ratings]
-  );
+  )
   const highestTrueskillPlayer = useMemo(
     () => calculateHighestRatedPlayer(ratings, "trueskill"),
     [ratings]
-  );
+  )
   const isPending =
     ratingsQuery.isPending ||
-    (ratingsQuery.fetchStatus === "fetching" && !ratingsQuery.data);
+    (ratingsQuery.fetchStatus === "fetching" && !ratingsQuery.data)
   const badgeClassName =
-    "rounded-md pl-2 pr-1 py-1 text-[11px] font-medium tracking-[0.01em]";
+    "rounded-md pl-2 pr-1 py-1 text-[11px] font-medium tracking-[0.01em]"
 
   if (isPending) {
     return (
@@ -422,7 +413,7 @@ function ServerAverageRatingBadges({
         <Skeleton className="h-7 w-36 rounded-md" />
         <Skeleton className="h-7 w-36 rounded-md" />
       </div>
-    );
+    )
   }
 
   return (
@@ -507,26 +498,26 @@ function ServerAverageRatingBadges({
         </TooltipContent>
       </Tooltip>
     </div>
-  );
+  )
 }
 
 function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation()
   const [sorting, setSorting] = useState<SortingState>([
     { id: "points", desc: true },
-  ]);
+  ])
   const playersQuery = useQuery({
     queryKey: ["steam", "server", "players", serverAddress],
     queryFn: () => fetchSteamServerPlayers(serverAddress),
     staleTime: 30_000,
-  });
+  })
   const ratingsQuery = useQuery({
     queryKey: ["steam", "server", "player-ratings", serverAddress],
     queryFn: () => fetchSteamServerPlayerRatings(serverAddress),
     staleTime: 30_000,
-  });
+  })
 
-  const players = playersQuery.data ?? [];
+  const players = useMemo(() => playersQuery.data ?? [], [playersQuery.data])
   const playerRatingsByName = useMemo<Record<string, ServerPlayerRating>>(
     () =>
       Object.fromEntries(
@@ -536,7 +527,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
         ])
       ),
     [ratingsQuery.data]
-  );
+  )
   const mergedPlayers = useMemo(
     () =>
       players.map((player) => ({
@@ -544,45 +535,45 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
         rating: playerRatingsByName[normalizePlayerName(player.name)] ?? null,
       })),
     [playerRatingsByName, players]
-  );
+  )
   const topRatedPlayerNames = useMemo(() => {
-    let highestQelo = Number.NEGATIVE_INFINITY;
-    let highestTrueskill = Number.NEGATIVE_INFINITY;
+    let highestQelo = Number.NEGATIVE_INFINITY
+    let highestTrueskill = Number.NEGATIVE_INFINITY
 
     for (const player of mergedPlayers) {
-      const qelo = player.rating?.qelo ?? Number.NEGATIVE_INFINITY;
-      const trueskill = player.rating?.trueskill ?? Number.NEGATIVE_INFINITY;
+      const qelo = player.rating?.qelo ?? Number.NEGATIVE_INFINITY
+      const trueskill = player.rating?.trueskill ?? Number.NEGATIVE_INFINITY
 
       if (qelo > highestQelo) {
-        highestQelo = qelo;
+        highestQelo = qelo
       }
       if (trueskill > highestTrueskill) {
-        highestTrueskill = trueskill;
+        highestTrueskill = trueskill
       }
     }
 
-    const names = new Set<string>();
+    const names = new Set<string>()
 
     for (const player of mergedPlayers) {
       if (player.rating?.qelo != null && player.rating.qelo === highestQelo) {
-        names.add(normalizePlayerName(player.name));
+        names.add(normalizePlayerName(player.name))
       }
 
       if (
         player.rating?.trueskill != null &&
         player.rating.trueskill === highestTrueskill
       ) {
-        names.add(normalizePlayerName(player.name));
+        names.add(normalizePlayerName(player.name))
       }
     }
 
-    return names;
-  }, [mergedPlayers]);
+    return names
+  }, [mergedPlayers])
   const playerPanelPending =
     playersQuery.isPending ||
     (playersQuery.fetchStatus === "fetching" && !playersQuery.data) ||
-    ratingsQuery.isPending;
-  const playerPanelFrameClass = "min-h-[20rem]";
+    ratingsQuery.isPending
+  const playerPanelFrameClass = "min-h-[20rem]"
 
   const columns = useMemo<ColumnDef<DrawerPlayer>[]>(
     () => [
@@ -592,7 +583,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
           <Button
             type="button"
             variant="ghost"
-            className="-ml-2 h-8 px-2.5 text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:bg-transparent"
+            className="-ml-2 h-8 px-2.5 text-[11px] tracking-[0.12em] text-muted-foreground uppercase hover:bg-transparent"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             {t("serverList.drawer.player")}
@@ -600,41 +591,47 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
           </Button>
         ),
         cell: ({ row }) => {
-          const steamId = row.original.rating?.steam_id;
+          const steamId = row.original.rating?.steam_id
           const isTopRated = topRatedPlayerNames.has(
             normalizePlayerName(row.original.name)
-          );
+          )
 
           if (!steamId) {
             return (
               <div className="flex min-w-0 items-center gap-1.5 truncate text-sm font-medium text-foreground">
                 <span className="truncate">
-                  <PlayerName fallbackClassName="truncate" personaName={row.original.name} />
+                  <PlayerName
+                    fallbackClassName="truncate"
+                    personaName={row.original.name}
+                  />
                 </span>
                 {isTopRated ? (
                   <Medal className="size-3.5 shrink-0 text-amber-400" />
                 ) : null}
               </div>
-            );
+            )
           }
 
           return (
             <button
               type="button"
               onClick={() => {
-                openExternalUrl(getQlStatsPlayerProfileUrl(steamId));
+                openExternalUrl(getQlStatsPlayerProfileUrl(steamId))
               }}
               className="group flex min-w-0 cursor-pointer items-center gap-1.5 text-left text-sm font-medium text-foreground transition-colors hover:text-primary"
             >
               <span className="truncate">
-                <PlayerName fallbackClassName="truncate" personaName={row.original.name} />
+                <PlayerName
+                  fallbackClassName="truncate"
+                  personaName={row.original.name}
+                />
               </span>
               {isTopRated ? (
                 <Medal className="size-3.5 shrink-0 text-amber-400" />
               ) : null}
               <ArrowUpRight className="size-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
             </button>
-          );
+          )
         },
       },
       {
@@ -644,7 +641,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
           <Button
             type="button"
             variant="ghost"
-            className="-ml-2 h-8 px-2.5 text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:bg-transparent"
+            className="-ml-2 h-8 px-2.5 text-[11px] tracking-[0.12em] text-muted-foreground uppercase hover:bg-transparent"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             {t("serverList.drawer.points")}
@@ -660,7 +657,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
           <Button
             type="button"
             variant="ghost"
-            className="-ml-2 h-8 px-2.5 text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:bg-transparent"
+            className="-ml-2 h-8 px-2.5 text-[11px] tracking-[0.12em] text-muted-foreground uppercase hover:bg-transparent"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             QElo
@@ -679,7 +676,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
           <Button
             type="button"
             variant="ghost"
-            className="-ml-2 h-8 px-2.5 text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:bg-transparent"
+            className="-ml-2 h-8 px-2.5 text-[11px] tracking-[0.12em] text-muted-foreground uppercase hover:bg-transparent"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             TSkill
@@ -698,7 +695,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
           <Button
             type="button"
             variant="ghost"
-            className="-ml-2 h-8 px-2.5 text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:bg-transparent"
+            className="-ml-2 h-8 px-2.5 text-[11px] tracking-[0.12em] text-muted-foreground uppercase hover:bg-transparent"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             {t("serverList.drawer.time")}
@@ -709,8 +706,8 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
           formatDurationHoursMinutes(row.original.duration_seconds),
       },
     ],
-    [topRatedPlayerNames]
-  );
+    [t, topRatedPlayerNames]
+  )
 
   const table = useReactTable({
     data: mergedPlayers,
@@ -719,33 +716,33 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-  });
-  const sortedRows = table.getRowModel().rows;
+  })
+  const sortedRows = table.getRowModel().rows
   const hasKnownTeams = mergedPlayers.some(
     (player) => player.rating?.team != null
-  );
+  )
   const hasRedBlueTeams = mergedPlayers.some((player) => {
-    const team = player.rating?.team;
-    return team === 1 || team === 2;
-  });
+    const team = player.rating?.team
+    return team === 1 || team === 2
+  })
   const teamSections = useMemo(() => {
     if (!hasKnownTeams) {
-      return [];
+      return []
     }
 
-    const groupedRows = new Map<PlayerTeamSectionKey, typeof sortedRows>();
+    const groupedRows = new Map<PlayerTeamSectionKey, typeof sortedRows>()
     const sectionOrder: PlayerTeamSectionKey[] = hasRedBlueTeams
       ? ["red", "blue", "free", "spectators", "unassigned"]
-      : ["players", "spectators", "unassigned"];
+      : ["players", "spectators", "unassigned"]
 
     for (const row of sortedRows) {
       const sectionKey = getPlayerTeamSectionKey(
         row.original.rating?.team,
         hasRedBlueTeams
-      );
-      const existingRows = groupedRows.get(sectionKey) ?? [];
-      existingRows.push(row);
-      groupedRows.set(sectionKey, existingRows);
+      )
+      const existingRows = groupedRows.get(sectionKey) ?? []
+      existingRows.push(row)
+      groupedRows.set(sectionKey, existingRows)
     }
 
     return sectionOrder
@@ -754,14 +751,14 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
         key: sectionKey,
         rows: groupedRows.get(sectionKey) ?? [],
       }))
-      .filter((section) => section.rows.length > 0);
-  }, [hasKnownTeams, hasRedBlueTeams, sortedRows]);
-  const shouldRenderTeamSections = teamSections.length > 1;
+      .filter((section) => section.rows.length > 0)
+  }, [hasKnownTeams, hasRedBlueTeams, sortedRows])
+  const shouldRenderTeamSections = teamSections.length > 1
 
   if (playerPanelPending) {
     return (
       <div className={`flex flex-col gap-2 ${playerPanelFrameClass}`}>
-        <div className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+        <div className="text-xs tracking-[0.12em] text-muted-foreground uppercase">
           {t("serverList.drawer.playersHeading")}
         </div>
         <div className="overflow-hidden rounded-lg border border-border">
@@ -812,7 +809,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
           </Table>
         </div>
       </div>
-    );
+    )
   }
 
   if (playersQuery.isError) {
@@ -820,7 +817,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
       <div className="text-sm text-muted-foreground">
         {t("serverList.drawer.lookupFailed")}
       </div>
-    );
+    )
   }
 
   if (mergedPlayers.length === 0) {
@@ -828,12 +825,12 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
       <div className="text-sm text-muted-foreground">
         {t("serverList.drawer.noPlayerData")}
       </div>
-    );
+    )
   }
 
   return (
     <div className={`flex flex-col gap-2 ${playerPanelFrameClass}`}>
-      <div className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
+      <div className="text-xs tracking-[0.12em] text-muted-foreground uppercase">
         {t("serverList.drawer.playersHeading")}
       </div>
       <div className="overflow-hidden rounded-lg border border-border">
@@ -864,7 +861,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
                     <TableRow className="border-b border-border bg-muted/10 hover:bg-muted/10">
                       <TableCell
                         colSpan={columns.length}
-                        className={`px-3 py-2 text-[11px] font-medium uppercase tracking-[0.12em] ${section.toneClassName}`}
+                        className={`px-3 py-2 text-[11px] font-medium tracking-[0.12em] uppercase ${section.toneClassName}`}
                       >
                         <span className="inline-flex items-center gap-1.5">
                           <span>{t(section.labelKey)}</span>
@@ -916,14 +913,14 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
         </Table>
       </div>
     </div>
-  );
+  )
 }
 
 const legacyServerDrawerReferences = {
   ServerAverageRatingBadges,
   QlStatsPlayersPanel,
-};
-void legacyServerDrawerReferences;
+}
+void legacyServerDrawerReferences
 
 export function ServerList({
   servers,
@@ -937,67 +934,65 @@ export function ServerList({
   onOpenServer,
   onJoinServer,
 }: ServerListProps) {
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
   const {
     state: favoritesState,
     addServerToList,
     moveServerToList,
     removeServer,
     removeServerFromList,
-  } = useFavorites();
-  const { t } = useTranslation();
-  const { getPassword } = useServerPasswords();
-  const realtimeAvailable = isRealtimeEnabled();
-  const [favoriteServer, setFavoriteServer] = useState<SteamServer | null>(
-    null
-  );
+  } = useFavorites()
+  const { t } = useTranslation()
+  const { getPassword } = useServerPasswords()
+  const realtimeAvailable = isRealtimeEnabled()
+  const [favoriteServer, setFavoriteServer] = useState<SteamServer | null>(null)
   const [favoriteDialogAction, setFavoriteDialogAction] = useState<
     "save" | "remove" | null
-  >(null);
-  const [targetFavoriteListId, setTargetFavoriteListId] = useState<string>("");
+  >(null)
+  const [targetFavoriteListId, setTargetFavoriteListId] = useState<string>("")
   const [sorting, setSorting] = useState<SortingState>([
     { id: "players", desc: true },
-  ]);
+  ])
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 25,
-  });
-  const deferredSearch = useDeferredValue(filters.search);
+  })
+  const deferredSearch = useDeferredValue(filters.search)
   const favoriteAddresses = useMemo(
     () => new Set(favoritesState.servers.map((server) => server.addr)),
     [favoritesState.servers]
-  );
+  )
 
   const staticFilteredServers = useMemo(() => {
-    const search = deferredSearch.trim().toLowerCase();
-    const tagQuery = filters.tags.map((tag) => tag.toLowerCase());
+    const search = deferredSearch.trim().toLowerCase()
+    const tagQuery = filters.tags.map((tag) => tag.toLowerCase())
 
     return servers.filter((server) => {
-      const gameMode = normalizeGameMode(server);
-      const tags = normalizeTags(server);
+      const gameMode = normalizeGameMode(server)
+      const tags = normalizeTags(server)
 
       if (search && !server.name.toLowerCase().includes(search)) {
-        return false;
+        return false
       }
 
       if (filters.gameMode !== "all" && gameMode !== filters.gameMode) {
-        return false;
+        return false
       }
 
       if (filters.maps.length > 0 && !filters.maps.includes(server.map)) {
-        return false;
+        return false
       }
 
       if (filters.showFull && !filters.showEmpty && server.players === 0) {
-        return false;
+        return false
       }
 
       if (filters.showEmpty && !filters.showFull && server.players > 0) {
-        return false;
+        return false
       }
 
       if (filters.showFavorites && !favoriteAddresses.has(server.addr)) {
-        return false;
+        return false
       }
 
       if (
@@ -1006,11 +1001,11 @@ export function ServerList({
           tags.some((serverTag) => serverTag.includes(tag))
         )
       ) {
-        return false;
+        return false
       }
 
-      return true;
-    });
+      return true
+    })
   }, [
     deferredSearch,
     filters.gameMode,
@@ -1021,68 +1016,68 @@ export function ServerList({
     filters.tags,
     favoriteAddresses,
     servers,
-  ]);
+  ])
 
   const regionFilteredServers = useMemo(() => {
     if (filters.region === "all") {
-      return staticFilteredServers;
+      return staticFilteredServers
     }
 
     return staticFilteredServers.filter((server) => {
-      const region = resolveServerRegion(server);
-      return region === filters.region;
-    });
-  }, [filters.region, staticFilteredServers]);
+      const region = resolveServerRegion(server)
+      return region === filters.region
+    })
+  }, [filters.region, staticFilteredServers])
   const visibilityFilteredServers = useMemo(() => {
     if (filters.visibility === "all") {
-      return regionFilteredServers;
+      return regionFilteredServers
     }
 
     return regionFilteredServers.filter((server) => {
-      const requiresPassword = server.requires_password;
+      const requiresPassword = server.requires_password
 
       if (filters.visibility === "private") {
-        return requiresPassword === true;
+        return requiresPassword === true
       }
 
-      return requiresPassword === false;
-    });
-  }, [filters.visibility, regionFilteredServers]);
+      return requiresPassword === false
+    })
+  }, [filters.visibility, regionFilteredServers])
 
   const ratingFilterActive =
     filters.ratingRange[0] !== RATING_FILTER_MIN ||
-    filters.ratingRange[1] !== RATING_FILTER_MAX;
+    filters.ratingRange[1] !== RATING_FILTER_MAX
   const filteredServers = useMemo(() => {
     if (!ratingFilterActive) {
-      return visibilityFilteredServers;
+      return visibilityFilteredServers
     }
 
-    const [minRating, maxRating] = filters.ratingRange;
+    const [minRating, maxRating] = filters.ratingRange
 
     return visibilityFilteredServers.filter((server) => {
       const ratingValue =
         filters.ratingSystem === "trueskill"
           ? server.avg_trueskill
-          : server.avg_qelo;
+          : server.avg_qelo
 
       return (
         ratingValue != null &&
         ratingValue >= minRating &&
         ratingValue <= maxRating
-      );
-    });
+      )
+    })
   }, [
     filters.ratingRange,
     filters.ratingSystem,
     ratingFilterActive,
     visibilityFilteredServers,
-  ]);
+  ])
 
   useEffect(() => {
     setPagination((current) =>
       current.pageIndex === 0 ? current : { ...current, pageIndex: 0 }
-    );
-  }, [filteredServers.length]);
+    )
+  }, [filteredServers.length])
 
   const resolvedRequiresPasswordByAddr = useMemo(
     () =>
@@ -1092,56 +1087,54 @@ export function ServerList({
         )
       ),
     [servers]
-  );
+  )
   const resolvedModesByAddr = useMemo(
     () =>
       Object.fromEntries(
-        servers.map((server) => [server.addr, normalizeGameMode(server)] as const)
+        servers.map(
+          (server) => [server.addr, normalizeGameMode(server)] as const
+        )
       ),
     [servers]
-  );
+  )
   const sortedServers = useMemo(
-    () =>
-      sortServersForPage(
-        filteredServers,
-        sorting,
-        resolvedModesByAddr
-      ),
+    () => sortServersForPage(filteredServers, sorting, resolvedModesByAddr),
     [filteredServers, resolvedModesByAddr, sorting]
-  );
-  const createServerInteractionContext = (
-    server: SteamServer
-  ): ServerInteractionContext => ({
-    server,
-    modeLabel: getGameModeLabel(
-      resolvedModesByAddr[server.addr] ?? normalizeGameMode(server),
-      t
-    ),
-    canJoin: true,
-    requiresPassword: resolvedRequiresPasswordByAddr[server.addr] === true,
-  });
+  )
+  const createServerInteractionContext = useCallback(
+    (server: SteamServer): ServerInteractionContext => ({
+      server,
+      modeLabel: getGameModeLabel(
+        resolvedModesByAddr[server.addr] ?? normalizeGameMode(server),
+        t
+      ),
+      canJoin: true,
+      requiresPassword: resolvedRequiresPasswordByAddr[server.addr] === true,
+    }),
+    [resolvedModesByAddr, resolvedRequiresPasswordByAddr, t]
+  )
   const prefetchServerDrawerData = (serverAddress: string) => {
     void queryClient.prefetchQuery({
       queryKey: ["steam", "server", "players", serverAddress],
       queryFn: () => fetchSteamServerPlayers(serverAddress),
       staleTime: 10_000,
-    });
+    })
     void queryClient.prefetchQuery({
       queryKey: ["steam", "server", "player-ratings", serverAddress],
       queryFn: () => fetchSteamServerPlayerRatings(serverAddress),
       staleTime: 10_000,
-    });
+    })
 
     if (!realtimeAvailable) {
-      return;
+      return
     }
 
     void queryClient.prefetchQuery({
       queryKey: ["realtime", "server-history", serverAddress, "7d", "15m"],
       queryFn: () => fetchRealtimeServerHistory(serverAddress, "7d", "15m"),
       staleTime: 60_000,
-    });
-  };
+    })
+  }
 
   const columns = useMemo<ColumnDef<SteamServer>[]>(
     () => [
@@ -1151,7 +1144,7 @@ export function ServerList({
           <Button
             type="button"
             variant="ghost"
-            className="-ml-2 h-8 px-2.5 text-xs uppercase tracking-[0.12em] text-muted-foreground hover:bg-transparent"
+            className="-ml-2 h-8 px-2.5 text-xs tracking-[0.12em] text-muted-foreground uppercase hover:bg-transparent"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             {t("serverList.table.server")}
@@ -1159,10 +1152,10 @@ export function ServerList({
           </Button>
         ),
         cell: ({ row }) => {
-          const map = getMapEntry(row.original.map);
+          const map = getMapEntry(row.original.map)
           const requiresPassword =
-            resolvedRequiresPasswordByAddr[row.original.addr] === true;
-          const hasSavedPassword = Boolean(getPassword(row.original.addr));
+            resolvedRequiresPasswordByAddr[row.original.addr] === true
+          const hasSavedPassword = Boolean(getPassword(row.original.addr))
 
           return (
             <div className="relative h-11 min-w-0 overflow-hidden">
@@ -1185,7 +1178,10 @@ export function ServerList({
               <div className="relative z-10 flex h-full min-w-0 items-center px-3 text-sm font-medium text-foreground">
                 <div className="flex min-w-0 items-center gap-2">
                   <div className="min-w-0 truncate">
-                    <PlayerName fallbackClassName="truncate" personaName={row.original.name} />
+                    <PlayerName
+                      fallbackClassName="truncate"
+                      personaName={row.original.name}
+                    />
                   </div>
                   {requiresPassword ? (
                     <Tooltip>
@@ -1211,30 +1207,29 @@ export function ServerList({
                 </div>
               </div>
             </div>
-          );
+          )
         },
       },
       {
         id: "country",
-        accessorFn: (row) =>
-          row.country_name ?? resolveServerRegion(row) ?? "",
+        accessorFn: (row) => row.country_name ?? resolveServerRegion(row) ?? "",
         header: () => (
-          <div className="px-0.5 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+          <div className="px-0.5 text-xs tracking-[0.12em] text-muted-foreground uppercase">
             {t("serverList.table.location")}
           </div>
         ),
         cell: ({ row }) => {
-          const flagSrc = getCountryFlagSrc(row.original.country_code);
+          const flagSrc = getCountryFlagSrc(row.original.country_code)
 
           if (!row.original.country_name || !flagSrc) {
-            const region = resolveServerRegion(row.original);
+            const region = resolveServerRegion(row.original)
             return (
               <span className="text-sm text-muted-foreground">
                 {region
                   ? regionLabels[region]
                   : t("serverList.locationUnknown")}
               </span>
-            );
+            )
           }
 
           return (
@@ -1247,7 +1242,7 @@ export function ServerList({
               title={row.original.country_name}
               className="h-4 w-4 rounded-full object-cover"
             />
-          );
+          )
         },
       },
       {
@@ -1257,7 +1252,7 @@ export function ServerList({
           <Button
             type="button"
             variant="ghost"
-            className="-ml-2 h-8 px-2.5 text-xs uppercase tracking-[0.12em] text-muted-foreground hover:bg-transparent"
+            className="-ml-2 h-8 px-2.5 text-xs tracking-[0.12em] text-muted-foreground uppercase hover:bg-transparent"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             {t("serverList.table.mode")}
@@ -1265,12 +1260,14 @@ export function ServerList({
           </Button>
         ),
         cell: ({ row }) => {
-          const mode = resolvedModesByAddr[row.original.addr] ?? normalizeGameMode(row.original);
+          const mode =
+            resolvedModesByAddr[row.original.addr] ??
+            normalizeGameMode(row.original)
           return mode
             ? modeLabelKeys[mode]
               ? t(modeLabelKeys[mode])
               : mode.toUpperCase()
-            : t("serverList.modeUnknown");
+            : t("serverList.modeUnknown")
         },
       },
       {
@@ -1280,7 +1277,7 @@ export function ServerList({
           <Button
             type="button"
             variant="ghost"
-            className="-ml-2 h-8 px-2.5 text-xs uppercase tracking-[0.12em] text-muted-foreground hover:bg-transparent"
+            className="-ml-2 h-8 px-2.5 text-xs tracking-[0.12em] text-muted-foreground uppercase hover:bg-transparent"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             {t("serverList.table.players")}
@@ -1293,12 +1290,12 @@ export function ServerList({
       {
         id: "actions",
         header: () => (
-          <div className="text-right text-xs uppercase tracking-[0.12em] text-muted-foreground">
+          <div className="text-right text-xs tracking-[0.12em] text-muted-foreground uppercase">
             {t("serverList.table.actions")}
           </div>
         ),
         cell: ({ row }) => {
-          const isFavorited = favoriteAddresses.has(row.original.addr);
+          const isFavorited = favoriteAddresses.has(row.original.addr)
 
           return (
             <div className="flex justify-end gap-2">
@@ -1310,20 +1307,20 @@ export function ServerList({
                     variant="outline"
                     className="group relative size-8"
                     onClick={(event) => {
-                      event.stopPropagation();
+                      event.stopPropagation()
                       if (actionMode === "add" && isFavorited) {
-                        removeServer(row.original.addr);
+                        removeServer(row.original.addr)
                         toast.success(
                           t("serverList.toasts.removedFromFavorites")
-                        );
-                        return;
+                        )
+                        return
                       }
                       setTargetFavoriteListId(
                         actionMode === "edit"
                           ? (favoriteListId ?? "")
                           : (favoritesState.lists[0]?.id ?? "")
-                      );
-                      setFavoriteServer(row.original);
+                      )
+                      setFavoriteServer(row.original)
                     }}
                   >
                     {actionMode === "edit" ? (
@@ -1351,33 +1348,31 @@ export function ServerList({
                 size="icon"
                 className="size-8 bg-success text-success-foreground hover:bg-success-hover"
                 onClick={(event) => {
-                  event.stopPropagation();
-                  onJoinServer?.(createServerInteractionContext(row.original));
+                  event.stopPropagation()
+                  onJoinServer?.(createServerInteractionContext(row.original))
                 }}
               >
                 <Play className="size-4" />
               </Button>
             </div>
-          );
+          )
         },
       },
     ],
-      [
-        resolvedModesByAddr,
-        resolvedRequiresPasswordByAddr,
-        getPassword,
-        actionMode,
+    [
+      resolvedModesByAddr,
+      resolvedRequiresPasswordByAddr,
+      getPassword,
+      actionMode,
       favoriteAddresses,
       favoriteListId,
       favoritesState.lists,
       onJoinServer,
       removeServer,
-      realtimeAvailable,
       t,
       createServerInteractionContext,
-      queryClient,
     ]
-  );
+  )
 
   const table = useReactTable({
     data: sortedServers,
@@ -1389,21 +1384,19 @@ export function ServerList({
     autoResetPageIndex: false,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-  });
-  const pageCount = table.getPageCount();
-  const currentPage = table.getState().pagination.pageIndex + 1;
+  })
+  const pageCount = table.getPageCount()
+  const currentPage = table.getState().pagination.pageIndex + 1
   const visiblePageNumbers = Array.from(
     { length: pageCount },
     (_, index) => index + 1
   ).filter((page) => {
     if (pageCount <= 7) {
-      return true;
+      return true
     }
 
-    return (
-      page === 1 || page === pageCount || Math.abs(page - currentPage) <= 1
-    );
-  });
+    return page === 1 || page === pageCount || Math.abs(page - currentPage) <= 1
+  })
   return (
     <>
       <section className="flex min-h-0 flex-1 flex-col overflow-x-clip">
@@ -1432,7 +1425,7 @@ export function ServerList({
                   {headerGroup.headers.map((header) => (
                     <TableHead
                       key={header.id}
-                      className={`sticky top-14 z-20 bg-background h-9 px-3 text-xs uppercase tracking-[0.12em] text-muted-foreground ${
+                      className={`sticky top-14 z-20 h-9 bg-background px-3 text-xs tracking-[0.12em] text-muted-foreground uppercase ${
                         header.column.id === "actions" ? "text-right" : ""
                       }`}
                     >
@@ -1505,15 +1498,15 @@ export function ServerList({
                       transition={serverListRowTransition}
                       className="h-11 cursor-pointer border-b border-border transition-colors duration-150 hover:bg-muted/35"
                       onFocus={() => {
-                        prefetchServerDrawerData(row.original.addr);
+                        prefetchServerDrawerData(row.original.addr)
                       }}
                       onMouseEnter={() => {
-                        prefetchServerDrawerData(row.original.addr);
+                        prefetchServerDrawerData(row.original.addr)
                       }}
                       onClick={() => {
                         onOpenServer?.(
                           createServerInteractionContext(row.original)
-                        );
+                        )
                       }}
                     >
                       {row.getVisibleCells().map((cell) => (
@@ -1575,7 +1568,7 @@ export function ServerList({
                   <PaginationItem>
                     <PaginationPrevious
                       onClick={() => {
-                        table.previousPage();
+                        table.previousPage()
                       }}
                       className={
                         !table.getCanPreviousPage()
@@ -1585,9 +1578,9 @@ export function ServerList({
                     />
                   </PaginationItem>
                   {visiblePageNumbers.map((page, index) => {
-                    const previousPage = visiblePageNumbers[index - 1];
+                    const previousPage = visiblePageNumbers[index - 1]
                     const needsEllipsis =
-                      previousPage != null && page - previousPage > 1;
+                      previousPage != null && page - previousPage > 1
 
                     return (
                       <Fragment key={`page-fragment-${page}`}>
@@ -1600,19 +1593,19 @@ export function ServerList({
                           <PaginationLink
                             isActive={page === currentPage}
                             onClick={() => {
-                              table.setPageIndex(page - 1);
+                              table.setPageIndex(page - 1)
                             }}
                           >
                             {page}
                           </PaginationLink>
                         </PaginationItem>
                       </Fragment>
-                    );
+                    )
                   })}
                   <PaginationItem>
                     <PaginationNext
                       onClick={() => {
-                        table.nextPage();
+                        table.nextPage()
                       }}
                       className={
                         !table.getCanNextPage()
@@ -1638,41 +1631,41 @@ export function ServerList({
         pendingAction={favoriteDialogAction}
         onOpenChange={(open) => {
           if (!open) {
-            setFavoriteServer(null);
-            setTargetFavoriteListId("");
-            setFavoriteDialogAction(null);
+            setFavoriteServer(null)
+            setTargetFavoriteListId("")
+            setFavoriteDialogAction(null)
           }
         }}
         onTargetListChange={setTargetFavoriteListId}
         onRemove={() => {
           if (!favoriteServer || !favoriteListId) {
-            return;
+            return
           }
 
-          setFavoriteDialogAction("remove");
+          setFavoriteDialogAction("remove")
           try {
-            removeServerFromList(favoriteServer.addr, favoriteListId);
-            toast.success(t("serverList.toasts.removedFromFavorites"));
-            setFavoriteServer(null);
-            setTargetFavoriteListId("");
+            removeServerFromList(favoriteServer.addr, favoriteListId)
+            toast.success(t("serverList.toasts.removedFromFavorites"))
+            setFavoriteServer(null)
+            setTargetFavoriteListId("")
           } finally {
-            setFavoriteDialogAction(null);
+            setFavoriteDialogAction(null)
           }
         }}
         onSave={() => {
           if (!favoriteServer || !targetFavoriteListId) {
-            return;
+            return
           }
 
-          setFavoriteDialogAction("save");
+          setFavoriteDialogAction("save")
           try {
             if (actionMode === "edit" && favoriteListId) {
               moveServerToList(
                 favoriteServer.addr,
                 favoriteListId,
                 targetFavoriteListId
-              );
-              toast.success(t("serverList.toasts.favoriteUpdated"));
+              )
+              toast.success(t("serverList.toasts.favoriteUpdated"))
             } else {
               addServerToList(
                 {
@@ -1681,17 +1674,17 @@ export function ServerList({
                   map: favoriteServer.map,
                 },
                 targetFavoriteListId
-              );
-              toast.success(t("serverList.toasts.addedToFavorites"));
+              )
+              toast.success(t("serverList.toasts.addedToFavorites"))
             }
 
-            setFavoriteServer(null);
-            setTargetFavoriteListId("");
+            setFavoriteServer(null)
+            setTargetFavoriteListId("")
           } finally {
-            setFavoriteDialogAction(null);
+            setFavoriteDialogAction(null)
           }
         }}
       />
     </>
-  );
+  )
 }

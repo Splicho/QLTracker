@@ -1,16 +1,16 @@
-import { ArrowRight } from "lucide-react";
-import { motion } from "framer-motion";
-import { Steam } from "@/components/icon";
-import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react"
+import { motion } from "framer-motion"
+import { Steam } from "@/components/icon"
+import { Button } from "@/components/ui/button"
 
 export function PickupAuthGate({
   isLinking,
   onContinueAsGuest,
   onConnectWithSteam,
 }: {
-  isLinking: boolean;
-  onContinueAsGuest: () => void;
-  onConnectWithSteam: () => void;
+  isLinking: boolean
+  onContinueAsGuest: () => void
+  onConnectWithSteam: () => void
 }) {
   return (
     <main className="min-h-screen bg-gradient-to-t from-background via-background to-[#1C1A1A] text-foreground">
@@ -22,7 +22,11 @@ export function PickupAuthGate({
           transition={{ duration: 0.4, ease: "easeOut" }}
         >
           <div className="flex flex-col gap-6 text-center">
-            <img alt="QLTracker" className="mx-auto size-20 rounded-3xl" src="/images/appicon.png" />
+            <img
+              alt="QLTracker"
+              className="mx-auto size-20 rounded-3xl"
+              src="/images/appicon.png"
+            />
           </div>
 
           <div className="mt-10 flex flex-col gap-3">
@@ -46,5 +50,5 @@ export function PickupAuthGate({
         </motion.div>
       </section>
     </main>
-  );
+  )
 }

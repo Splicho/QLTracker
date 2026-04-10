@@ -1,16 +1,16 @@
-import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Medal } from "@/components/icon";
-import { PlayerAvatar } from "@/components/pickup/player-avatar";
-import { PlayerName } from "@/components/pickup/player-name";
-import { getMapEntry } from "@/lib/maps";
+import { useEffect } from "react"
+import { useQuery } from "@tanstack/react-query"
+import { Medal } from "@/components/icon"
+import { PlayerAvatar } from "@/components/pickup/player-avatar"
+import { PlayerName } from "@/components/pickup/player-name"
+import { getMapEntry } from "@/lib/maps"
 import {
   fetchPickupMatchDetail,
   isPickupApiConfigured,
   type PickupMatchDetail,
-} from "@/lib/pickup";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@/lib/pickup"
+import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
 
 function LoadingState() {
   return (
@@ -21,7 +21,7 @@ function LoadingState() {
         <Skeleton className="h-80 rounded-xl" />
       </div>
     </section>
-  );
+  )
 }
 
 function TeamColumn({
@@ -30,18 +30,18 @@ function TeamColumn({
   toneClassName,
 }: {
   players: Array<{
-    displayAfter: number | null;
-    displayBefore: number;
-    kills: number | null;
+    displayAfter: number | null
+    displayBefore: number
+    kills: number | null
     player: {
-      avatarUrl: string | null;
-      countryCode?: string | null;
-      id: string;
-      personaName: string;
-    };
-  }>;
-  title: string;
-  toneClassName: string;
+      avatarUrl: string | null
+      countryCode?: string | null
+      id: string
+      personaName: string
+    }
+  }>
+  title: string
+  toneClassName: string
 }) {
   return (
     <div className="space-y-2">
@@ -81,7 +81,7 @@ function TeamColumn({
         ))}
       </div>
     </div>
-  );
+  )
 }
 
 export function PickupMatchPage({
@@ -89,9 +89,9 @@ export function PickupMatchPage({
   matchId,
   onMatchTitleChange,
 }: {
-  initialData?: PickupMatchDetail;
-  matchId: string | null;
-  onMatchTitleChange?: (title: string | null) => void;
+  initialData?: PickupMatchDetail
+  matchId: string | null
+  onMatchTitleChange?: (title: string | null) => void
 }) {
   const matchQuery = useQuery({
     queryKey: ["pickup", "match", matchId],
@@ -100,39 +100,44 @@ export function PickupMatchPage({
     initialData,
     staleTime: 15_000,
     refetchInterval: 15_000,
-  });
+  })
 
   useEffect(() => {
-    const title = matchQuery.data?.match.queue.name ?? null;
-    onMatchTitleChange?.(title);
+    const title = matchQuery.data?.match.queue.name ?? null
+    onMatchTitleChange?.(title)
 
     return () => {
-      onMatchTitleChange?.(null);
-    };
-  }, [matchQuery.data?.match.queue.name, onMatchTitleChange]);
+      onMatchTitleChange?.(null)
+    }
+  }, [matchQuery.data?.match.queue.name, onMatchTitleChange])
 
   if (matchQuery.isPending) {
-    return <LoadingState />;
+    return <LoadingState />
   }
 
   if (!isPickupApiConfigured()) {
     return (
       <div className="flex min-h-0 flex-1 items-center justify-center px-6 text-center">
         <div className="space-y-2">
-          <p className="text-base font-medium text-foreground">Match page unavailable</p>
+          <p className="text-base font-medium text-foreground">
+            Match page unavailable
+          </p>
           <p className="text-sm text-muted-foreground">
-            Set <code className="font-mono">VITE_PICKUP_API_URL</code> to load match details.
+            Set <code className="font-mono">VITE_PICKUP_API_URL</code> to load
+            match details.
           </p>
         </div>
       </div>
-    );
+    )
   }
 
   if (matchQuery.isError || !matchQuery.data) {
     return (
       <div className="flex min-h-0 flex-1 items-center justify-center px-6 text-center">
         <div className="space-y-2">
-          <p className="text-base font-medium text-foreground">Match could not be loaded</p>
+          <p className="text-base font-medium text-foreground">
+            Match could not be loaded
+          </p>
           <p className="text-sm text-muted-foreground">
             {matchQuery.error instanceof Error
               ? matchQuery.error.message
@@ -140,14 +145,18 @@ export function PickupMatchPage({
           </p>
         </div>
       </div>
-    );
+    )
   }
 
-  const detail = matchQuery.data;
-  const map = getMapEntry(detail.match.finalMapKey ?? detail.statsSummary?.mapKey ?? "default");
-  const score = detail.match.finalScore ?? (detail.statsSummary
-    ? `${detail.statsSummary.blueRounds ?? 0} - ${detail.statsSummary.redRounds ?? 0}`
-    : "In progress");
+  const detail = matchQuery.data
+  const map = getMapEntry(
+    detail.match.finalMapKey ?? detail.statsSummary?.mapKey ?? "default"
+  )
+  const score =
+    detail.match.finalScore ??
+    (detail.statsSummary
+      ? `${detail.statsSummary.blueRounds ?? 0} - ${detail.statsSummary.redRounds ?? 0}`
+      : "In progress")
 
   return (
     <section className="flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -165,7 +174,9 @@ export function PickupMatchPage({
         <div className="relative flex min-h-48 flex-col justify-end gap-4 px-6 py-6">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-sm text-muted-foreground">{detail.match.season.name}</p>
+              <p className="text-sm text-muted-foreground">
+                {detail.match.season.name}
+              </p>
               <h1 className="text-2xl font-semibold text-foreground">
                 {detail.match.queue.name}
               </h1>
@@ -193,5 +204,5 @@ export function PickupMatchPage({
         />
       </div>
     </section>
-  );
+  )
 }

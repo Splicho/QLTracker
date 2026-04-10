@@ -1,32 +1,32 @@
 type StructuredLogPayload = {
-  category: string;
-  event: string;
-  level: "debug" | "info" | "warn" | "error";
-  payload: unknown;
-  source: string;
-};
+  category: string
+  event: string
+  level: "debug" | "info" | "warn" | "error"
+  payload: unknown
+  source: string
+}
 
 export function inferLogLevel(source: string): StructuredLogPayload["level"] {
-  const normalizedSource = source.toLowerCase();
+  const normalizedSource = source.toLowerCase()
   if (normalizedSource.includes("error")) {
-    return "error";
+    return "error"
   }
 
   if (normalizedSource.includes("warn")) {
-    return "warn";
+    return "warn"
   }
 
-  return "info";
+  return "info"
 }
 
 export async function appendStructuredLog(entry: StructuredLogPayload) {
   if (process.env.NODE_ENV === "production") {
-    return;
+    return
   }
 
   if (entry.level !== "error") {
-    return;
+    return
   }
 
-  console.error(`[${entry.category}] ${entry.event}`, entry.payload);
+  console.error(`[${entry.category}] ${entry.event}`, entry.payload)
 }

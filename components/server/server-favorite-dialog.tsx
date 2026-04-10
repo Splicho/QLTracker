@@ -1,7 +1,7 @@
-import { Spinner } from "@/components/icon";
-import { QuakeText } from "@/lib/quake";
-import type { SteamServer } from "@/lib/steam";
-import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/icon"
+import { QuakeText } from "@/lib/quake"
+import type { SteamServer } from "@/lib/steam"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -9,20 +9,20 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useTranslation } from "react-i18next";
+} from "@/components/ui/select"
+import { useTranslation } from "react-i18next"
 
 type FavoriteListOption = {
-  id: string;
-  name: string;
-};
+  id: string
+  name: string
+}
 
 export function ServerFavoriteDialog({
   open,
@@ -37,19 +37,19 @@ export function ServerFavoriteDialog({
   onRemove,
   onSave,
 }: {
-  open: boolean;
-  server: SteamServer | null;
-  actionMode: "add" | "edit";
-  favoriteListId: string | null;
-  lists: FavoriteListOption[];
-  targetListId: string;
-  pendingAction: "save" | "remove" | null;
-  onOpenChange: (open: boolean) => void;
-  onTargetListChange: (value: string) => void;
-  onRemove: () => void;
-  onSave: () => void;
+  open: boolean
+  server: SteamServer | null
+  actionMode: "add" | "edit"
+  favoriteListId: string | null
+  lists: FavoriteListOption[]
+  targetListId: string
+  pendingAction: "save" | "remove" | null
+  onOpenChange: (open: boolean) => void
+  onTargetListChange: (value: string) => void
+  onRemove: () => void
+  onSave: () => void
 }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation()
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -137,5 +137,5 @@ export function ServerFavoriteDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

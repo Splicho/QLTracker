@@ -1,15 +1,15 @@
-import { useMemo, useState } from "react";
-import { Trash2 } from "lucide-react";
-import { toast } from "sonner";
+import { useMemo, useState } from "react"
+import { Trash2 } from "lucide-react"
+import { toast } from "sonner"
 import {
   createDefaultServerFilters,
   type ServerFiltersValue,
-} from "@/lib/server-filters";
-import { GameController } from "@/components/icon";
-import { useFavorites } from "@/hooks/use-favorites";
-import { ServerList } from "@/components/server/server-list";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+} from "@/lib/server-filters"
+import { GameController } from "@/components/icon"
+import { useFavorites } from "@/hooks/use-favorites"
+import { ServerList } from "@/components/server/server-list"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,7 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogMedia,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "@/components/ui/alert-dialog"
 import {
   Dialog,
   DialogContent,
@@ -29,18 +29,18 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import type { ServerInteractionContext } from "@/hooks/use-server-interactions";
-import type { SteamServer } from "@/lib/steam";
-import { useTranslation } from "react-i18next";
+} from "@/components/ui/tooltip"
+import type { ServerInteractionContext } from "@/hooks/use-server-interactions"
+import type { SteamServer } from "@/lib/steam"
+import { useTranslation } from "react-i18next"
 
-const emptyFilters: ServerFiltersValue = createDefaultServerFilters();
+const emptyFilters: ServerFiltersValue = createDefaultServerFilters()
 
 export function FavoritesPage({
   servers,
@@ -51,26 +51,26 @@ export function FavoritesPage({
   onOpenServer,
   onJoinServer,
 }: {
-  servers: SteamServer[];
-  isLoading?: boolean;
-  isRefreshing?: boolean;
-  error?: string | null;
-  onRefresh: () => void;
-  onOpenServer: (context: ServerInteractionContext) => void;
-  onJoinServer: (context: ServerInteractionContext) => void;
+  servers: SteamServer[]
+  isLoading?: boolean
+  isRefreshing?: boolean
+  error?: string | null
+  onRefresh: () => void
+  onOpenServer: (context: ServerInteractionContext) => void
+  onJoinServer: (context: ServerInteractionContext) => void
 }) {
-  const { t } = useTranslation();
-  const { state, createList, deleteList } = useFavorites();
-  const [preferredListId, setPreferredListId] = useState<string | null>(null);
-  const [listName, setListName] = useState("");
-  const [createListOpen, setCreateListOpen] = useState(false);
-  const [deleteListOpen, setDeleteListOpen] = useState(false);
+  const { t } = useTranslation()
+  const { state, createList, deleteList } = useFavorites()
+  const [preferredListId, setPreferredListId] = useState<string | null>(null)
+  const [listName, setListName] = useState("")
+  const [createListOpen, setCreateListOpen] = useState(false)
+  const [deleteListOpen, setDeleteListOpen] = useState(false)
   const selectedListId = state.lists.some((list) => list.id === preferredListId)
     ? preferredListId
-    : state.lists[0]?.id ?? null;
+    : (state.lists[0]?.id ?? null)
 
   const selectedList =
-    state.lists.find((list) => list.id === selectedListId) ?? null;
+    state.lists.find((list) => list.id === selectedListId) ?? null
 
   const favoriteAddresses = useMemo(
     () =>
@@ -80,26 +80,26 @@ export function FavoritesPage({
         )
         .map((server) => server.addr),
     [selectedList, state.servers]
-  );
+  )
   const serversForSelectedList = useMemo(
     () => servers.filter((server) => favoriteAddresses.includes(server.addr)),
     [favoriteAddresses, servers]
-  );
+  )
   const playerCountsByList = useMemo(() => {
-    const serverMap = new Map(servers.map((server) => [server.addr, server]));
+    const serverMap = new Map(servers.map((server) => [server.addr, server]))
 
     return Object.fromEntries(
       state.lists.map((list) => {
         const totalPlayers = state.servers
           .filter((server) => server.listIds.includes(list.id))
           .reduce((sum, favoriteServer) => {
-            return sum + (serverMap.get(favoriteServer.addr)?.players ?? 0);
-          }, 0);
+            return sum + (serverMap.get(favoriteServer.addr)?.players ?? 0)
+          }, 0)
 
-        return [list.id, totalPlayers];
+        return [list.id, totalPlayers]
       })
-    ) as Record<string, number>;
-  }, [servers, state.lists, state.servers]);
+    ) as Record<string, number>
+  }, [servers, state.lists, state.servers])
 
   return (
     <section className="flex min-h-0 flex-1 flex-col px-4 py-4">
@@ -124,14 +124,14 @@ export function FavoritesPage({
                 onChange={(event) => setListName(event.target.value)}
                 onKeyDown={(event) => {
                   if (event.key === "Enter") {
-                    event.preventDefault();
+                    event.preventDefault()
                     if (!listName.trim()) {
-                      return;
+                      return
                     }
 
-                    createList(listName);
-                    setListName("");
-                    setCreateListOpen(false);
+                    createList(listName)
+                    setListName("")
+                    setCreateListOpen(false)
                   }
                 }}
                 placeholder={t("favorites.listNamePlaceholder")}
@@ -142,12 +142,12 @@ export function FavoritesPage({
                   type="button"
                   onClick={() => {
                     if (!listName.trim()) {
-                      return;
+                      return
                     }
 
-                    createList(listName);
-                    setListName("");
-                    setCreateListOpen(false);
+                    createList(listName)
+                    setListName("")
+                    setCreateListOpen(false)
                   }}
                 >
                   {t("favorites.createList")}
@@ -161,7 +161,7 @@ export function FavoritesPage({
                 key={list.id}
                 type="button"
                 onClick={() => setPreferredListId(list.id)}
-                className={`flex min-w-fit cursor-pointer items-center justify-between gap-2 rounded-md pl-2.5 pr-2 py-1.5 text-left text-sm whitespace-nowrap ${
+                className={`flex min-w-fit cursor-pointer items-center justify-between gap-2 rounded-md py-1.5 pr-2 pl-2.5 text-left text-sm whitespace-nowrap ${
                   selectedList?.id === list.id
                     ? "bg-accent text-accent-foreground"
                     : "text-foreground hover:bg-accent/50"
@@ -213,7 +213,7 @@ export function FavoritesPage({
                       size="icon"
                       variant="outline"
                       onClick={() => {
-                        setDeleteListOpen(true);
+                        setDeleteListOpen(true)
                       }}
                     >
                       <Trash2 className="size-4" />
@@ -244,20 +244,17 @@ export function FavoritesPage({
                     <AlertDialogAction
                       variant="destructive"
                       onClick={() => {
-                        if (
-                          selectedList &&
-                          deleteList(selectedList.id)
-                        ) {
-                          setDeleteListOpen(false);
+                        if (selectedList && deleteList(selectedList.id)) {
+                          setDeleteListOpen(false)
                           toast.success(
                             t("favorites.toasts.listDeleted", {
                               list: selectedList.name,
                             })
-                          );
-                          return;
+                          )
+                          return
                         }
 
-                        setDeleteListOpen(false);
+                        setDeleteListOpen(false)
                       }}
                     >
                       {t("favorites.deleteList")}
@@ -299,5 +296,5 @@ export function FavoritesPage({
         </div>
       </div>
     </section>
-  );
+  )
 }

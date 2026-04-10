@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
-import { z } from "zod";
+import { NextResponse } from "next/server"
+import { z } from "zod"
 
-import { handleRouteError } from "@/lib/server/errors";
-import { requirePickupAdminSession } from "@/lib/server/pickup-auth";
-import { toPickupQueueDto } from "@/lib/server/pickup";
-import { getPrisma } from "@/lib/server/prisma";
+import { handleRouteError } from "@/lib/server/errors"
+import { requirePickupAdminSession } from "@/lib/server/pickup-auth"
+import { toPickupQueueDto } from "@/lib/server/pickup"
+import { getPrisma } from "@/lib/server/prisma"
 
 const bodySchema = z
   .object({
@@ -21,13 +21,13 @@ const bodySchema = z
         code: z.ZodIssueCode.custom,
         message: "Player count must be exactly double the team size.",
         path: ["playerCount"],
-      });
+      })
     }
-  });
+  })
 
 function normalizeOptional(value: string | null | undefined) {
-  const trimmed = value?.trim();
-  return trimmed ? trimmed : null;
+  const trimmed = value?.trim()
+  return trimmed ? trimmed : null
 }
 
 function normalizeSlug(value: string) {
@@ -36,20 +36,20 @@ function normalizeSlug(value: string) {
     .trim()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
-    .slice(0, 120);
+    .slice(0, 120)
 }
 
-export const runtime = "nodejs";
+export const runtime = "nodejs"
 
 export async function POST(request: Request) {
   try {
-    await requirePickupAdminSession(request);
-    const body = bodySchema.parse(await request.json());
-    const prisma = getPrisma();
-    const slug = normalizeSlug(body.slug ?? body.name);
+    await requirePickupAdminSession(request)
+    const body = bodySchema.parse(await request.json())
+    const prisma = getPrisma()
+    const slug = normalizeSlug(body.slug ?? body.name)
 
     if (!slug) {
-      throw new Error("Queue slug could not be generated.");
+      throw new Error("Queue slug could not be generated.")
     }
 
     const queue = await prisma.pickupQueue.create({
@@ -61,12 +61,12 @@ export async function POST(request: Request) {
         slug,
         teamSize: body.teamSize,
       },
-    });
+    })
 
     return NextResponse.json({
       queue: toPickupQueueDto(queue),
-    });
+    })
   } catch (error) {
-    return handleRouteError(error, "Pickup queue could not be created.");
+    return handleRouteError(error, "Pickup queue could not be created.")
   }
 }

@@ -1,20 +1,20 @@
-"use client";
+"use client"
 
-import { useRouter } from "next/navigation";
-import { LeaderboardPage } from "@/components/pages/leaderboard-page";
-import type { PickupLeaderboards } from "@/lib/pickup";
+import { useRouter } from "next/navigation"
+import { LeaderboardPage } from "@/components/pages/leaderboard-page"
+import type { PickupLeaderboards } from "@/lib/pickup"
 
 export function LeaderboardsPageClient({
   initialData,
 }: {
-  initialData: PickupLeaderboards;
+  initialData: PickupLeaderboards
 }) {
-  const router = useRouter();
+  const router = useRouter()
 
   return (
     <LeaderboardPage
       initialData={initialData}
       onOpenPlayerProfile={(playerId) => router.push(`/players/${playerId}`)}
     />
-  );
+  )
 }

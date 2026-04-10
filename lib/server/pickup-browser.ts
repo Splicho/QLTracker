@@ -4,60 +4,71 @@ import type {
   PickupPublicState,
   PickupRating,
   PickupSeasonalRating,
-} from "@/lib/pickup";
-import { getPreferredPickupPlayerRating, getPickupPlayerActiveRatings, toPickupActiveRatingDto, toPickupPlayerDto, toPickupRatingDto } from "@/lib/server/pickup";
-import { getPickupBrowserSession } from "@/lib/server/pickup-auth";
+} from "@/lib/pickup"
+import {
+  getPreferredPickupPlayerRating,
+  getPickupPlayerActiveRatings,
+  toPickupActiveRatingDto,
+  toPickupPlayerDto,
+  toPickupRatingDto,
+} from "@/lib/server/pickup"
+import { getPickupBrowserSession } from "@/lib/server/pickup-auth"
 
 export type InitialPickupBrowserState = {
-  player: PickupPlayerDto | null;
-  playerState: PickupPlayerState | null;
-  publicState: PickupPublicState | null;
-  rating: PickupRating | null;
-  ratings: PickupSeasonalRating[];
-  sessionToken: string;
-};
+  player: PickupPlayerDto | null
+  playerState: PickupPlayerState | null
+  publicState: PickupPublicState | null
+  rating: PickupRating | null
+  ratings: PickupSeasonalRating[]
+  sessionToken: string
+}
 
 async function fetchRealtimeJson<T>(
   path: string,
-  init?: RequestInit,
+  init?: RequestInit
 ): Promise<T | null> {
-  const realtimeUrl = process.env.NEXT_PUBLIC_REALTIME_URL?.trim().replace(/\/+$/, "");
+  const realtimeUrl = process.env.NEXT_PUBLIC_REALTIME_URL?.trim().replace(
+    /\/+$/,
+    ""
+  )
   if (!realtimeUrl) {
-    return null;
+    return null
   }
 
   const response = await fetch(`${realtimeUrl}${path}`, {
     cache: "no-store",
     ...init,
-  });
+  })
 
   if (!response.ok) {
-    return null;
+    return null
   }
 
-  return (await response.json()) as T;
+  return (await response.json()) as T
 }
 
 export async function getInitialPickupBrowserState(options?: {
-  includePublicStateForGuests?: boolean;
+  includePublicStateForGuests?: boolean
 }): Promise<InitialPickupBrowserState> {
-  const session = await getPickupBrowserSession();
+  const session = await getPickupBrowserSession()
   const shouldFetchPublicState =
-    session !== null || options?.includePublicStateForGuests === true;
+    session !== null || options?.includePublicStateForGuests === true
 
   if (!session) {
     return {
       player: null,
       playerState: null,
       publicState: shouldFetchPublicState
-        ? ((await fetchRealtimeJson<{ ok: boolean; state?: PickupPublicState }>(
-            "/api/pickup/public-state",
-          ))?.state ?? null)
+        ? ((
+            await fetchRealtimeJson<{ ok: boolean; state?: PickupPublicState }>(
+              "/api/pickup/public-state"
+            )
+          )?.state ?? null)
         : null,
       rating: null,
       ratings: [],
       sessionToken: "",
-    };
+    }
   }
 
   const [preferredRating, ratings, publicStatePayload, playerStatePayload] =
@@ -65,7 +76,7 @@ export async function getInitialPickupBrowserState(options?: {
       getPreferredPickupPlayerRating(session.player.id),
       getPickupPlayerActiveRatings(session.player.id),
       fetchRealtimeJson<{ ok: boolean; state?: PickupPublicState }>(
-        "/api/pickup/public-state",
+        "/api/pickup/public-state"
       ),
       fetchRealtimeJson<{ ok: boolean; state?: PickupPlayerState }>(
         "/api/pickup/me/state",
@@ -73,9 +84,9 @@ export async function getInitialPickupBrowserState(options?: {
           headers: {
             Authorization: `Bearer ${session.token}`,
           },
-        },
+        }
       ),
-    ]);
+    ])
 
   return {
     player: toPickupPlayerDto(session.player),
@@ -84,5 +95,5 @@ export async function getInitialPickupBrowserState(options?: {
     rating: preferredRating ? toPickupRatingDto(preferredRating) : null,
     ratings: ratings.map(toPickupActiveRatingDto),
     sessionToken: session.token,
-  };
+  }
 }

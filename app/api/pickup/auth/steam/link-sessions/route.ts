@@ -1,34 +1,40 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from "next/server"
 
-import { handleRouteError } from "@/lib/server/errors";
-import { createPickupOauthState, getPickupLinkSessionExpiry } from "@/lib/server/pickup-auth";
-import { buildPickupSteamAuthorizeUrl, ensurePickupBootstrapData } from "@/lib/server/pickup";
-import { getPrisma } from "@/lib/server/prisma";
+import { handleRouteError } from "@/lib/server/errors"
+import {
+  createPickupOauthState,
+  getPickupLinkSessionExpiry,
+} from "@/lib/server/pickup-auth"
+import {
+  buildPickupSteamAuthorizeUrl,
+  ensurePickupBootstrapData,
+} from "@/lib/server/pickup"
+import { getPrisma } from "@/lib/server/prisma"
 
-export const runtime = "nodejs";
+export const runtime = "nodejs"
 
 function getLauncherRedirectPath(request: Request) {
-  const referer = request.headers.get("referer");
+  const referer = request.headers.get("referer")
 
   if (!referer) {
-    return "/pickup";
+    return "/pickup"
   }
 
   try {
-    const refererUrl = new URL(referer);
+    const refererUrl = new URL(referer)
 
-    return `${refererUrl.pathname}${refererUrl.search}`;
+    return `${refererUrl.pathname}${refererUrl.search}`
   } catch {
-    return "/pickup";
+    return "/pickup"
   }
 }
 
 export async function POST(request: Request) {
   try {
-    await ensurePickupBootstrapData();
+    await ensurePickupBootstrapData()
 
-    const prisma = getPrisma();
-    const oauthState = createPickupOauthState();
+    const prisma = getPrisma()
+    const oauthState = createPickupOauthState()
     const linkSession = await prisma.pickupLinkSession.create({
       data: {
         expiresAt: getPickupLinkSessionExpiry(),
@@ -36,14 +42,17 @@ export async function POST(request: Request) {
         oauthState,
         redirectPath: getLauncherRedirectPath(request),
       },
-    });
+    })
 
     return NextResponse.json({
       authorizeUrl: buildPickupSteamAuthorizeUrl(oauthState),
       expiresAt: linkSession.expiresAt.toISOString(),
       id: linkSession.id,
-    });
+    })
   } catch (error) {
-    return handleRouteError(error, "Pickup sign-in is not configured correctly.");
+    return handleRouteError(
+      error,
+      "Pickup sign-in is not configured correctly."
+    )
   }
 }

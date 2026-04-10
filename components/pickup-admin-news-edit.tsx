@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useRef, useState } from "react"
 
 import {
   ActionButton,
@@ -10,35 +10,31 @@ import {
   FieldDateTimePicker,
   FieldInput,
   FieldSelect,
-} from "@/components/pickup-admin-fields";
-import { NewsRichEditor } from "@/components/news-rich-editor";
-import {
-  Button,
-  Spinner,
-  toast,
-} from "@/components/pickup-admin-ui";
-import { requestJson } from "@/lib/client/request-json";
-import type { NewsArticleDto } from "@/lib/server/news";
+} from "@/components/pickup-admin-fields"
+import { NewsRichEditor } from "@/components/news-editor/plate-news-editor"
+import { Button, Spinner, toast } from "@/components/pickup-admin-ui"
+import { requestJson } from "@/lib/client/request-json"
+import type { NewsArticleDto } from "@/lib/server/news"
 
 type PendingAction =
   | "delete"
   | "save"
   | "uploadContentImage"
   | "uploadCoverImage"
-  | null;
+  | null
 
 const categoryOptions = [
   { label: "Launcher", value: "launcher" },
   { label: "Pickup", value: "pickup" },
   { label: "Infrastructure", value: "infrastructure" },
   { label: "Community", value: "community" },
-] as const;
+] as const
 
 function toDateTimeLocal(value: string) {
-  const date = new Date(value);
-  const offsetMinutes = date.getTimezoneOffset();
-  const localDate = new Date(date.getTime() - offsetMinutes * 60_000);
-  return localDate.toISOString().slice(0, 16);
+  const date = new Date(value)
+  const offsetMinutes = date.getTimezoneOffset()
+  const localDate = new Date(date.getTime() - offsetMinutes * 60_000)
+  return localDate.toISOString().slice(0, 16)
 }
 
 function createInitialForm(article: NewsArticleDto) {
@@ -48,69 +44,67 @@ function createInitialForm(article: NewsArticleDto) {
     coverImageUrl: article.coverImageUrl ?? "",
     publishedAt: toDateTimeLocal(article.publishedAt),
     title: article.title,
-  };
+  }
 }
 
-export function PickupAdminNewsEdit({
-  article,
-}: {
-  article: NewsArticleDto;
-}) {
-  const router = useRouter();
-  const [form, setForm] = useState(createInitialForm(article));
-  const [pendingAction, setPendingAction] = useState<PendingAction>(null);
-  const coverInputRef = useRef<HTMLInputElement | null>(null);
+export function PickupAdminNewsEdit({ article }: { article: NewsArticleDto }) {
+  const router = useRouter()
+  const [form, setForm] = useState(createInitialForm(article))
+  const [pendingAction, setPendingAction] = useState<PendingAction>(null)
+  const coverInputRef = useRef<HTMLInputElement | null>(null)
 
   const uploadImage = async (file: File, kind: "content" | "cover") => {
     if (form.title.trim().length === 0) {
-      toast.danger("Add the article title first.");
-      return null;
+      toast.danger("Add the article title first.")
+      return null
     }
 
-    setPendingAction(kind === "cover" ? "uploadCoverImage" : "uploadContentImage");
+    setPendingAction(
+      kind === "cover" ? "uploadCoverImage" : "uploadContentImage"
+    )
 
     try {
-      const payload = new FormData();
-      payload.set("file", file);
-      payload.set("kind", kind);
-      payload.set("title", form.title.trim());
+      const payload = new FormData()
+      payload.set("file", file)
+      payload.set("kind", kind)
+      payload.set("title", form.title.trim())
 
       const response = await fetch("/api/pickup/admin/news/upload", {
         method: "POST",
         body: payload,
-      });
+      })
 
-      const body = (await response.json()) as { message?: string; url?: string };
+      const body = (await response.json()) as { message?: string; url?: string }
       if (!response.ok || !body.url) {
-        throw new Error(body.message ?? "Upload failed.");
+        throw new Error(body.message ?? "Upload failed.")
       }
 
       if (kind === "cover") {
         setForm((current) => ({
           ...current,
           coverImageUrl: body.url ?? "",
-        }));
-        toast.success("Cover image uploaded.");
+        }))
+        toast.success("Cover image uploaded.")
       } else {
-        toast.success("Content image uploaded.");
+        toast.success("Content image uploaded.")
       }
 
-      return body.url ?? null;
+      return body.url ?? null
     } catch (error) {
       toast.danger("Image upload failed.", {
         description: error instanceof Error ? error.message : "Request failed.",
-      });
-      return null;
+      })
+      return null
     } finally {
-      setPendingAction(null);
+      setPendingAction(null)
       if (coverInputRef.current) {
-        coverInputRef.current.value = "";
+        coverInputRef.current.value = ""
       }
     }
-  };
+  }
 
   const saveArticle = async () => {
-    setPendingAction("save");
+    setPendingAction("save")
 
     try {
       const payload = await requestJson<{ article: NewsArticleDto }>(
@@ -122,58 +116,60 @@ export function PickupAdminNewsEdit({
             publishedAt: new Date(form.publishedAt).toISOString(),
           }),
           method: "PATCH",
-        },
-      );
+        }
+      )
 
-      setForm(createInitialForm(payload.article));
-      toast.success("Article updated.");
+      setForm(createInitialForm(payload.article))
+      toast.success("Article updated.")
     } catch (error) {
       toast.danger("Article update failed.", {
         description: error instanceof Error ? error.message : "Request failed.",
-      });
+      })
     } finally {
-      setPendingAction(null);
+      setPendingAction(null)
     }
-  };
+  }
 
   const deleteArticle = async () => {
     if (typeof window !== "undefined") {
       const confirmed = window.confirm(
-        "Delete this article and remove its uploaded images from Cloudflare R2?",
-      );
+        "Delete this article and remove its uploaded images from Cloudflare R2?"
+      )
 
       if (!confirmed) {
-        return;
+        return
       }
     }
 
-    setPendingAction("delete");
+    setPendingAction("delete")
 
     try {
       await requestJson<{ deletedArticleId: string }>(
         `/api/pickup/admin/news/${article.id}`,
         {
           method: "DELETE",
-        },
-      );
+        }
+      )
 
-      toast.success("Article deleted.");
-      router.push("/admin/news");
-      router.refresh();
+      toast.success("Article deleted.")
+      router.push("/admin/news")
+      router.refresh()
     } catch (error) {
       toast.danger("Article deletion failed.", {
         description: error instanceof Error ? error.message : "Request failed.",
-      });
+      })
     } finally {
-      setPendingAction(null);
+      setPendingAction(null)
     }
-  };
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-6 py-10 text-white">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
-          <p className="text-xs uppercase tracking-[0.24em] text-white/35">News</p>
+          <p className="text-xs tracking-[0.24em] text-white/35 uppercase">
+            News
+          </p>
           <h1 className="text-3xl font-medium tracking-tight">Edit Article</h1>
           <p className="text-sm text-white/60">
             Update title, publish date, cover image, and article content.
@@ -193,7 +189,9 @@ export function PickupAdminNewsEdit({
             <FieldInput
               disabled={pendingAction !== null}
               value={form.title}
-              onChange={(value) => setForm((current) => ({ ...current, title: value }))}
+              onChange={(value) =>
+                setForm((current) => ({ ...current, title: value }))
+              }
             />
           </Field>
 
@@ -218,7 +216,9 @@ export function PickupAdminNewsEdit({
             <FieldDateTimePicker
               disabled={pendingAction !== null}
               value={form.publishedAt}
-              onChange={(value) => setForm((current) => ({ ...current, publishedAt: value }))}
+              onChange={(value) =>
+                setForm((current) => ({ ...current, publishedAt: value }))
+              }
             />
           </Field>
 
@@ -234,12 +234,12 @@ export function PickupAdminNewsEdit({
                 className="hidden"
                 type="file"
                 onChange={(event) => {
-                  const file = event.target.files?.[0];
+                  const file = event.target.files?.[0]
                   if (!file) {
-                    return;
+                    return
                   }
 
-                  void uploadImage(file, "cover");
+                  void uploadImage(file, "cover")
                 }}
               />
               <Button
@@ -286,7 +286,7 @@ export function PickupAdminNewsEdit({
               disabled={pendingAction !== null}
               isUploadingImage={pendingAction === "uploadContentImage"}
               markdown={form.content}
-              minHeightClassName="min-h-[24rem]"
+              minHeightClassName="h-[24rem]"
               onMarkdownChange={(content) =>
                 setForm((current) => ({
                   ...current,
@@ -338,5 +338,5 @@ export function PickupAdminNewsEdit({
         </div>
       </section>
     </div>
-  );
+  )
 }

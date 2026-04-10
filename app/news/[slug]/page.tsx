@@ -1,30 +1,33 @@
-import type { Metadata } from "next";
-import Script from "next/script";
-import { dehydrate, QueryClient } from "@tanstack/react-query";
-import { notFound } from "next/navigation";
+import type { Metadata } from "next"
+import Script from "next/script"
+import { notFound } from "next/navigation"
 
-import { NewsArticlePage } from "@/components/news-public";
-import { newsQueryKeys } from "@/lib/news-query";
-import { toNewsArticleDto } from "@/lib/server/news";
-import { getPublicNewsArticle } from "@/lib/server/public-seo";
-import { createArticleMetadata, createPageMetadata, resolveAbsoluteUrl, siteConfig } from "@/lib/seo";
+import { NewsArticlePage } from "@/components/news-public"
+import { toNewsArticleDto } from "@/lib/server/news"
+import { getPublicNewsArticle } from "@/lib/server/public-seo"
+import {
+  createArticleMetadata,
+  createPageMetadata,
+  resolveAbsoluteUrl,
+  siteConfig,
+} from "@/lib/seo"
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic"
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string }>
 }): Promise<Metadata> {
-  const { slug } = await params;
-  const article = await getPublicNewsArticle(slug);
+  const { slug } = await params
+  const article = await getPublicNewsArticle(slug)
 
   if (!article) {
     return createPageMetadata({
       title: "News",
       path: `/news/${slug}`,
       description: "QLTracker news article.",
-    });
+    })
   }
 
   return createArticleMetadata({
@@ -33,25 +36,26 @@ export async function generateMetadata({
     description: article.excerpt,
     imageUrl: `/news/${article.slug}/opengraph-image`,
     publishedAt: article.publishedAt.toISOString(),
-  });
+  })
 }
 
 export default async function NewsSlugPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string }>
 }) {
-  const { slug } = await params;
-  const article = await getPublicNewsArticle(slug);
+  const { slug } = await params
+  const article = await getPublicNewsArticle(slug)
 
   if (!article) {
-    notFound();
+    notFound()
   }
 
-  const queryClient = new QueryClient();
-  queryClient.setQueryData(newsQueryKeys.article(slug), toNewsArticleDto(article));
-  const articleUrl = resolveAbsoluteUrl(`/news/${article.slug}`);
-  const imageUrl = resolveAbsoluteUrl(article.coverImageUrl ?? siteConfig.ogImage.url);
+  const initialArticle = toNewsArticleDto(article)
+  const articleUrl = resolveAbsoluteUrl(`/news/${article.slug}`)
+  const imageUrl = resolveAbsoluteUrl(
+    article.coverImageUrl ?? siteConfig.ogImage.url
+  )
   const articleJsonLd = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
@@ -76,7 +80,7 @@ export default async function NewsSlugPage({
     },
     mainEntityOfPage: articleUrl,
     url: articleUrl,
-  };
+  }
 
   return (
     <section className="flex min-h-0 flex-1 flex-col overflow-auto px-4 py-4">
@@ -86,7 +90,7 @@ export default async function NewsSlugPage({
       >
         {JSON.stringify(articleJsonLd)}
       </Script>
-      <NewsArticlePage slug={slug} state={dehydrate(queryClient)} />
+      <NewsArticlePage initialArticle={initialArticle} slug={slug} />
     </section>
-  );
+  )
 }

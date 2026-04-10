@@ -2,30 +2,30 @@ import {
   parseFavoritesState,
   type FavoritesState,
   serializeFavoritesState,
-} from "@/lib/favorites";
+} from "@/lib/favorites"
 import {
   parseTrackedPlayers,
   serializeTrackedPlayers,
   type TrackedPlayer,
-} from "@/lib/tracked-players";
+} from "@/lib/tracked-players"
 
-const DATA_EXPORT_FORMAT = "qltracker-data-export";
-const DATA_EXPORT_VERSION = 1;
+const DATA_EXPORT_FORMAT = "qltracker-data-export"
+const DATA_EXPORT_VERSION = 1
 
 export type QLTrackerDataExport = {
-  format: typeof DATA_EXPORT_FORMAT;
-  version: typeof DATA_EXPORT_VERSION;
-  exportedAt: string;
-  favorites: FavoritesState;
-  trackedPlayers: TrackedPlayer[];
-};
+  format: typeof DATA_EXPORT_FORMAT
+  version: typeof DATA_EXPORT_VERSION
+  exportedAt: string
+  favorites: FavoritesState
+  trackedPlayers: TrackedPlayer[]
+}
 
 export function createQLTrackerDataExport({
   favorites,
   trackedPlayers,
 }: {
-  favorites: FavoritesState;
-  trackedPlayers: TrackedPlayer[];
+  favorites: FavoritesState
+  trackedPlayers: TrackedPlayer[]
 }): QLTrackerDataExport {
   return {
     format: DATA_EXPORT_FORMAT,
@@ -33,7 +33,7 @@ export function createQLTrackerDataExport({
     exportedAt: new Date().toISOString(),
     favorites,
     trackedPlayers,
-  };
+  }
 }
 
 export function serializeQLTrackerDataExport(data: QLTrackerDataExport) {
@@ -45,19 +45,21 @@ export function serializeQLTrackerDataExport(data: QLTrackerDataExport) {
     },
     null,
     2
-  );
+  )
 }
 
-export function parseQLTrackerDataExport(rawValue: string): QLTrackerDataExport | null {
+export function parseQLTrackerDataExport(
+  rawValue: string
+): QLTrackerDataExport | null {
   try {
-    const parsed = JSON.parse(rawValue) as Partial<QLTrackerDataExport>;
+    const parsed = JSON.parse(rawValue) as Partial<QLTrackerDataExport>
     if (
       !parsed ||
       parsed.format !== DATA_EXPORT_FORMAT ||
       parsed.version !== DATA_EXPORT_VERSION ||
       typeof parsed.exportedAt !== "string"
     ) {
-      return null;
+      return null
     }
 
     return {
@@ -65,9 +67,11 @@ export function parseQLTrackerDataExport(rawValue: string): QLTrackerDataExport 
       version: DATA_EXPORT_VERSION,
       exportedAt: parsed.exportedAt,
       favorites: parseFavoritesState(JSON.stringify(parsed.favorites ?? {})),
-      trackedPlayers: parseTrackedPlayers(JSON.stringify(parsed.trackedPlayers ?? [])),
-    };
+      trackedPlayers: parseTrackedPlayers(
+        JSON.stringify(parsed.trackedPlayers ?? [])
+      ),
+    }
   } catch {
-    return null;
+    return null
   }
 }

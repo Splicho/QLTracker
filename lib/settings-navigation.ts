@@ -1,14 +1,14 @@
-import type { ComponentType } from "react";
-import { Download, Flag, Languages } from "lucide-react";
+import type { ComponentType } from "react"
+import { Download, Flag, Languages } from "lucide-react"
 
-export type SettingsSectionId = "general" | "pickup-profile" | "import-data";
+export type SettingsSectionId = "general" | "pickup-profile" | "import-data"
 
 export type SettingsNavigationItem = {
-  description: string;
-  icon: ComponentType<{ className?: string }>;
-  id: SettingsSectionId;
-  title: string;
-};
+  description: string
+  icon: ComponentType<{ className?: string }>
+  id: SettingsSectionId
+  title: string
+}
 
 export const settingsNavigationItems: readonly SettingsNavigationItem[] = [
   {
@@ -30,4 +30,4 @@ export const settingsNavigationItems: readonly SettingsNavigationItem[] = [
     id: "import-data",
     title: "Import Data",
   },
-];
+]

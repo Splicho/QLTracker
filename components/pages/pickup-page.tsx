@@ -1,23 +1,20 @@
-import { useEffect, useRef, useState } from "react";
-import { Crown, LoaderCircle, MapPinned, ShieldCheck } from "lucide-react";
-import { Medal, Spinner, Steam } from "@/components/icon";
-import { PickupEmptyBackground } from "@/components/pickup/pickup-empty-background";
-import { PickupLiveMatches } from "@/components/pickup/pickup-live-matches";
-import { PlayerAvatar } from "@/components/pickup/player-avatar";
-import { PlayerName } from "@/components/pickup/player-name";
-import { PickupRecentMatches } from "@/components/pickup/pickup-recent-matches";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+import { useEffect, useRef, useState } from "react"
+import { Crown, LoaderCircle, MapPinned, ShieldCheck } from "lucide-react"
+import { Medal, Spinner, Steam } from "@/components/icon"
+import { PickupEmptyBackground } from "@/components/pickup/pickup-empty-background"
+import { PickupLiveMatches } from "@/components/pickup/pickup-live-matches"
+import { PlayerAvatar } from "@/components/pickup/player-avatar"
+import { PlayerName } from "@/components/pickup/player-name"
+import { PickupRecentMatches } from "@/components/pickup/pickup-recent-matches"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 import {
   Empty,
   EmptyContent,
@@ -25,19 +22,19 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/components/ui/empty";
+} from "@/components/ui/empty"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { getCountryFlagSrc } from "@/lib/countries";
-import { getMapEntry } from "@/lib/maps";
-import { navigateToUrl } from "@/lib/open-url";
-import type { PickupMockStage } from "@/lib/pickup-mock";
-import { stripQuakeColors } from "@/lib/quake";
-import { buildSteamConnectUrl } from "@/lib/server-utils";
+} from "@/components/ui/tooltip"
+import { getCountryFlagSrc } from "@/lib/countries"
+import { getMapEntry } from "@/lib/maps"
+import { navigateToUrl } from "@/lib/open-url"
+import type { PickupMockStage } from "@/lib/pickup-mock"
+import { stripQuakeColors } from "@/lib/quake"
+import { buildSteamConnectUrl } from "@/lib/server-utils"
 import type {
   PickupMatchState,
   PickupMatchPlayerCard,
@@ -46,65 +43,65 @@ import type {
   PickupProfileMatch,
   PickupPublicState,
   PickupQueueSummary,
-} from "@/lib/pickup";
+} from "@/lib/pickup"
 
-const fogHornSound = "/sounds/fog_horn.ogg";
-const tickSound = "/sounds/tick.wav";
-const readyCheckFogHornVolume = 0.15;
-const readyCheckTickVolume = 0.3;
+const fogHornSound = "/sounds/fog_horn.ogg"
+const tickSound = "/sounds/tick.wav"
+const readyCheckFogHornVolume = 0.15
+const readyCheckTickVolume = 0.3
 
 function playAudioClip(audio: HTMLAudioElement | null, volume: number) {
   if (!audio) {
-    return;
+    return
   }
 
-  audio.currentTime = 0;
-  audio.volume = volume;
+  audio.currentTime = 0
+  audio.volume = volume
   void audio.play().catch(() => {
     // Ignore autoplay failures.
-  });
+  })
 }
 
 function formatCountdown(deadlineAt: string | null, nowMs = Date.now()) {
   if (!deadlineAt) {
-    return "--:--";
+    return "--:--"
   }
 
-  const remainingMs = Math.max(0, new Date(deadlineAt).getTime() - nowMs);
-  const totalSeconds = Math.ceil(remainingMs / 1000);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
+  const remainingMs = Math.max(0, new Date(deadlineAt).getTime() - nowMs)
+  const totalSeconds = Math.ceil(remainingMs / 1000)
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
 
-  return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+  return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
 }
 
 function hasDeadlineExpired(deadlineAt: string | null, nowMs: number) {
-  return deadlineAt ? new Date(deadlineAt).getTime() <= nowMs : false;
+  return deadlineAt ? new Date(deadlineAt).getTime() <= nowMs : false
 }
 
 function formatElapsed(startedAt: string | null, nowMs: number) {
   if (!startedAt) {
-    return null;
+    return null
   }
 
-  const elapsedMs = Math.max(0, nowMs - new Date(startedAt).getTime());
-  const totalSeconds = Math.floor(elapsedMs / 1000);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
+  const elapsedMs = Math.max(0, nowMs - new Date(startedAt).getTime())
+  const totalSeconds = Math.floor(elapsedMs / 1000)
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
 
-  return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+  return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
 }
 
 function getMatchJoinAddress(match: PickupMatchState) {
   if (match.server.joinAddress?.trim()) {
-    return match.server.joinAddress.trim();
+    return match.server.joinAddress.trim()
   }
 
   if (match.server.ip?.trim() && typeof match.server.port === "number") {
-    return `${match.server.ip.trim()}:${match.server.port}`;
+    return `${match.server.ip.trim()}:${match.server.port}`
   }
 
-  return null;
+  return null
 }
 
 function VetoPlayerSlot({
@@ -112,21 +109,21 @@ function VetoPlayerSlot({
   player,
   isActiveCaptain,
 }: {
-  highlightTone?: "blue" | "red" | null;
-  player: PickupMatchPlayerCard;
-  isActiveCaptain: boolean;
+  highlightTone?: "blue" | "red" | null
+  player: PickupMatchPlayerCard
+  isActiveCaptain: boolean
 }) {
   const highlightClasses =
     highlightTone === "blue"
       ? "border-primary/35 bg-primary/8 text-foreground opacity-100"
       : highlightTone === "red"
         ? "border-destructive/35 bg-destructive/8 text-foreground opacity-100"
-        : null;
-  const displayRating = player.displayAfter ?? player.displayBefore;
+        : null
+  const displayRating = player.displayAfter ?? player.displayBefore
   const ratingDelta =
     player.displayAfter != null && player.displayBefore != null
       ? player.displayAfter - player.displayBefore
-      : null;
+      : null
 
   return (
     <div
@@ -148,7 +145,9 @@ function VetoPlayerSlot({
         <div className="flex items-center gap-2">
           <div
             className={`truncate text-sm font-semibold ${
-              highlightClasses || isActiveCaptain ? "text-foreground" : "text-muted-foreground"
+              highlightClasses || isActiveCaptain
+                ? "text-foreground"
+                : "text-muted-foreground"
             }`}
           >
             <PlayerName
@@ -173,13 +172,17 @@ function VetoPlayerSlot({
       <span className="inline-flex h-6 min-w-6 items-center justify-center gap-1 rounded-md border border-sidebar-border/70 bg-muted px-2 text-xs leading-none text-muted-foreground">
         <span>{displayRating}</span>
         {ratingDelta !== null && ratingDelta !== 0 ? (
-          <span className={ratingDelta > 0 ? "text-emerald-400" : "text-destructive"}>
+          <span
+            className={
+              ratingDelta > 0 ? "text-emerald-400" : "text-destructive"
+            }
+          >
             {ratingDelta > 0 ? `+${ratingDelta}` : ratingDelta}
           </span>
         ) : null}
       </span>
     </div>
-  );
+  )
 }
 
 function VetoTeamColumn({
@@ -187,9 +190,9 @@ function VetoTeamColumn({
   activeCaptainId,
   highlightTone,
 }: {
-  players: PickupMatchPlayerCard[];
-  activeCaptainId: string | null;
-  highlightTone?: "blue" | "red" | null;
+  players: PickupMatchPlayerCard[]
+  activeCaptainId: string | null
+  highlightTone?: "blue" | "red" | null
 }) {
   return (
     <div className="flex flex-col gap-3">
@@ -202,7 +205,7 @@ function VetoTeamColumn({
         />
       ))}
     </div>
-  );
+  )
 }
 
 function VetoMapCard({
@@ -212,13 +215,13 @@ function VetoMapCard({
   mapKey,
   onBan,
 }: {
-  canBan: boolean;
-  isBanned: boolean;
-  isFinal: boolean;
-  mapKey: string;
-  onBan: (mapKey: string) => void;
+  canBan: boolean
+  isBanned: boolean
+  isFinal: boolean
+  mapKey: string
+  onBan: (mapKey: string) => void
 }) {
-  const map = getMapEntry(mapKey);
+  const map = getMapEntry(mapKey)
 
   return (
     <button
@@ -237,15 +240,17 @@ function VetoMapCard({
         ) : null}
       </div>
       <div className="min-w-0 flex-1">
-        <div className={`truncate text-sm font-semibold ${isBanned ? "text-muted-foreground" : "text-foreground"}`}>
+        <div
+          className={`truncate text-sm font-semibold ${isBanned ? "text-muted-foreground" : "text-foreground"}`}
+        >
           {map?.name ?? mapKey}
         </div>
       </div>
-      <div className="shrink-0 text-sm font-semibold uppercase tracking-[0.16em] text-primary">
+      <div className="shrink-0 text-sm font-semibold tracking-[0.16em] text-primary uppercase">
         {isFinal ? "Selected" : isBanned ? "Banned" : canBan ? "Ban" : ""}
       </div>
     </button>
-  );
+  )
 }
 
 function PickupActiveMatchLayout({
@@ -256,48 +261,59 @@ function PickupActiveMatchLayout({
   match,
   onVetoBan,
 }: {
-  canBan: boolean;
-  countdownNowMs: number;
-  currentPlayerId: string | null;
-  locationFlag: string | null;
-  match: PickupMatchState;
-  onVetoBan: (mapKey: string) => void;
+  canBan: boolean
+  countdownNowMs: number
+  currentPlayerId: string | null
+  locationFlag: string | null
+  match: PickupMatchState
+  onVetoBan: (mapKey: string) => void
 }) {
-  const isVeto = match.status === "veto";
-  const isProvisioning = match.status === "provisioning";
-  const isServerReady = match.status === "server_ready";
-  const isLive = match.status === "live";
-  const isCompleted = match.status === "completed";
-  const serverJoinAddress = getMatchJoinAddress(match);
-  const liveElapsed = formatElapsed(match.liveStartedAt, countdownNowMs);
+  const isVeto = match.status === "veto"
+  const isProvisioning = match.status === "provisioning"
+  const isServerReady = match.status === "server_ready"
+  const isLive = match.status === "live"
+  const isCompleted = match.status === "completed"
+  const serverJoinAddress = getMatchJoinAddress(match)
+  const liveElapsed = formatElapsed(match.liveStartedAt, countdownNowMs)
   const activeCaptain =
-    [...match.teams.left, ...match.teams.right].find((player) => player.id === match.veto.currentCaptainPlayerId) ??
-    null;
-  const activeCaptainId = isVeto ? match.veto.currentCaptainPlayerId : null;
+    [...match.teams.left, ...match.teams.right].find(
+      (player) => player.id === match.veto.currentCaptainPlayerId
+    ) ?? null
+  const activeCaptainId = isVeto ? match.veto.currentCaptainPlayerId : null
   const turnText =
     match.veto.currentCaptainPlayerId === currentPlayerId
       ? "Your turn to ban"
       : activeCaptain
         ? `${stripQuakeColors(activeCaptain.personaName).trim()}'s turn`
-        : "Waiting for captain";
-  const mapOrder = [...match.veto.availableMaps, ...match.veto.bannedMaps];
+        : "Waiting for captain"
+  const mapOrder = [...match.veto.availableMaps, ...match.veto.bannedMaps]
   const statusTitle =
     match.status === "server_ready"
       ? "Server ready"
       : match.status === "live"
         ? "Match live"
-      : match.status === "completed"
-        ? "Match completed"
-        : "Pickup match";
-  const leftHighlightTone = isCompleted ? (match.winnerTeam === "left" ? "blue" : null) : null;
-  const rightHighlightTone = isCompleted ? (match.winnerTeam === "right" ? "red" : null) : null;
+        : match.status === "completed"
+          ? "Match completed"
+          : "Pickup match"
+  const leftHighlightTone = isCompleted
+    ? match.winnerTeam === "left"
+      ? "blue"
+      : null
+    : null
+  const rightHighlightTone = isCompleted
+    ? match.winnerTeam === "right"
+      ? "red"
+      : null
+    : null
 
   return (
     <div className="flex flex-col gap-8">
       <div className="flex min-h-32 items-center justify-center text-center sm:min-h-40">
         {isVeto ? (
           <div className="flex flex-col items-center">
-            <p className="text-lg font-semibold text-foreground sm:text-xl">{turnText}</p>
+            <p className="text-lg font-semibold text-foreground sm:text-xl">
+              {turnText}
+            </p>
             <p className="mt-2 text-5xl font-semibold tracking-tight text-primary sm:text-6xl">
               {formatCountdown(match.veto.deadlineAt, countdownNowMs)}
             </p>
@@ -324,7 +340,9 @@ function PickupActiveMatchLayout({
               Match Live
             </p>
             <p className="text-sm text-muted-foreground">
-              {liveElapsed ? `Live for ${liveElapsed}` : serverJoinAddress ?? "Server is live"}
+              {liveElapsed
+                ? `Live for ${liveElapsed}`
+                : (serverJoinAddress ?? "Server is live")}
             </p>
           </div>
         ) : isCompleted ? (
@@ -333,9 +351,12 @@ function PickupActiveMatchLayout({
           </p>
         ) : (
           <div className="flex flex-col items-center">
-            <p className="text-lg font-semibold text-foreground sm:text-xl">{statusTitle}</p>
+            <p className="text-lg font-semibold text-foreground sm:text-xl">
+              {statusTitle}
+            </p>
             <p className="mt-2 text-sm text-muted-foreground">
-              Match #{match.id.slice(0, 8)} | Rating delta {match.balanceSummary?.ratingDelta ?? 0}
+              Match #{match.id.slice(0, 8)} | Rating delta{" "}
+              {match.balanceSummary?.ratingDelta ?? 0}
             </p>
           </div>
         )}
@@ -385,7 +406,9 @@ function PickupActiveMatchLayout({
               {isCompleted ? (
                 <>
                   <div className="flex h-[4.5rem] items-center justify-between rounded-md border border-border bg-card px-4">
-                    <p className="text-sm font-semibold text-foreground">Winner</p>
+                    <p className="text-sm font-semibold text-foreground">
+                      Winner
+                    </p>
                     <span
                       className={`inline-flex h-6 min-w-6 items-center justify-center rounded-md border px-2 text-xs leading-none ${
                         match.winnerTeam === "left"
@@ -404,7 +427,9 @@ function PickupActiveMatchLayout({
                   </div>
                   <div className="flex h-[4.5rem] items-center justify-between rounded-md border border-border bg-card px-4">
                     <div>
-                      <p className="text-sm font-semibold text-foreground">Final score</p>
+                      <p className="text-sm font-semibold text-foreground">
+                        Final score
+                      </p>
                       <p className="mt-1 text-xs text-muted-foreground">
                         {match.finalScore ?? "Final score pending"}
                       </p>
@@ -437,10 +462,10 @@ function PickupActiveMatchLayout({
                     disabled={!serverJoinAddress}
                     onClick={() => {
                       if (!serverJoinAddress) {
-                        return;
+                        return
                       }
 
-                      navigateToUrl(buildSteamConnectUrl(serverJoinAddress));
+                      navigateToUrl(buildSteamConnectUrl(serverJoinAddress))
                     }}
                   >
                     <Steam data-icon="inline-start" />
@@ -464,7 +489,9 @@ function PickupActiveMatchLayout({
                         : "Match state is syncing"}
                   </p>
                 </div>
-                <Badge variant="secondary">{match.status.replace(/_/g, " ")}</Badge>
+                <Badge variant="secondary">
+                  {match.status.replace(/_/g, " ")}
+                </Badge>
               </div>
 
               <div className="flex h-[4.5rem] items-center gap-3 rounded-md border border-border bg-card px-4">
@@ -472,7 +499,7 @@ function PickupActiveMatchLayout({
                   <Button
                     className="h-10 min-w-36"
                     onClick={() => {
-                      navigateToUrl(buildSteamConnectUrl(serverJoinAddress));
+                      navigateToUrl(buildSteamConnectUrl(serverJoinAddress))
                     }}
                   >
                     <Steam data-icon="inline-start" />
@@ -521,20 +548,21 @@ function PickupActiveMatchLayout({
         />
       </div>
     </div>
-  );
+  )
 }
 
 function ReadyPlayerTile({
   player,
   spinnerPlayerId,
 }: {
-  player: PickupMatchPlayerCard;
-  spinnerPlayerId: string | null;
+  player: PickupMatchPlayerCard
+  spinnerPlayerId: string | null
 }) {
-  const isReady = player.readyState === "ready";
-  const shouldShowAvatarImage = !!player.avatarUrl;
-  const normalizedName = stripQuakeColors(player.personaName).trim() || "Unknown player";
-  const showSpinner = !isReady && spinnerPlayerId === player.id;
+  const isReady = player.readyState === "ready"
+  const shouldShowAvatarImage = !!player.avatarUrl
+  const normalizedName =
+    stripQuakeColors(player.personaName).trim() || "Unknown player"
+  const showSpinner = !isReady && spinnerPlayerId === player.id
 
   return (
     <Tooltip>
@@ -556,9 +584,11 @@ function ReadyPlayerTile({
           </div>
         </div>
       </TooltipTrigger>
-      <TooltipContent side="top" sideOffset={2}>{normalizedName}</TooltipContent>
+      <TooltipContent side="top" sideOffset={2}>
+        {normalizedName}
+      </TooltipContent>
     </Tooltip>
-  );
+  )
 }
 
 function PickupReadyModal({
@@ -568,32 +598,37 @@ function PickupReadyModal({
   onReadyUp,
   readyActionPending = false,
 }: {
-  countdownNowMs: number;
-  currentPlayerId: string | null;
-  match: PickupMatchState;
-  onReadyUp: () => void;
-  readyActionPending?: boolean;
+  countdownNowMs: number
+  currentPlayerId: string | null
+  match: PickupMatchState
+  onReadyUp: () => void
+  readyActionPending?: boolean
 }) {
-  const players = [...match.teams.left, ...match.teams.right];
-  const readyCount = players.filter((player) => player.readyState === "ready").length;
+  const players = [...match.teams.left, ...match.teams.right]
+  const readyCount = players.filter(
+    (player) => player.readyState === "ready"
+  ).length
   const viewerReady = players.some(
-    (player) => player.id === currentPlayerId && player.readyState === "ready",
-  );
-  const readyExpired = hasDeadlineExpired(match.readyDeadlineAt, countdownNowMs);
-  const countdownLabel = formatCountdown(match.readyDeadlineAt, countdownNowMs);
+    (player) => player.id === currentPlayerId && player.readyState === "ready"
+  )
+  const readyExpired = hasDeadlineExpired(match.readyDeadlineAt, countdownNowMs)
+  const countdownLabel = formatCountdown(match.readyDeadlineAt, countdownNowMs)
   const spinnerPlayerId =
     players.find((player) =>
-      player.id === currentPlayerId ? player.readyState !== "ready" : false,
+      player.id === currentPlayerId ? player.readyState !== "ready" : false
     )?.id ??
     players.find((player) => player.readyState !== "ready")?.id ??
-    null;
+    null
 
   return (
     <Dialog open>
-      <DialogContent className="max-w-5xl border-0 bg-transparent p-0 shadow-none" showCloseButton={false}>
+      <DialogContent
+        className="max-w-5xl border-0 bg-transparent p-0 shadow-none"
+        showCloseButton={false}
+      >
         <div className="flex flex-col gap-8 rounded-lg bg-background px-6 py-8 sm:px-8">
           <DialogHeader className="items-center text-center sm:text-center">
-            <DialogTitle className="text-3xl font-semibold uppercase tracking-[0.08em] sm:text-5xl">
+            <DialogTitle className="text-3xl font-semibold tracking-[0.08em] uppercase sm:text-5xl">
               Pickup started!
             </DialogTitle>
           </DialogHeader>
@@ -614,7 +649,7 @@ function PickupReadyModal({
             <p className="text-sm font-medium text-foreground">
               {readyCount} / {players.length} players ready
             </p>
-            <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">
+            <p className="text-xs tracking-[0.16em] text-muted-foreground uppercase">
               {viewerReady
                 ? `Ready confirmed | ${countdownLabel} remaining`
                 : readyExpired
@@ -640,7 +675,7 @@ function PickupReadyModal({
         </div>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
 const mockStages: PickupMockStage[] = [
@@ -652,7 +687,7 @@ const mockStages: PickupMockStage[] = [
   "server_ready",
   "live",
   "completed",
-];
+]
 
 export function PickupPage({
   guestMode,
@@ -674,135 +709,140 @@ export function PickupPage({
   recentMatches,
   userLoading = false,
 }: {
-  guestMode: boolean;
-  liveMatches: PickupMatchState[];
-  mockMode: boolean;
-  mockStage: PickupMockStage;
-  onConnectWithSteam: () => void;
-  onJoinQueue: (queue: PickupQueueSummary) => void;
-  onOpenMatch: (matchId: string) => void;
-  onOpenPlayerProfile: (playerId: string) => void;
-  onSetMockStage: (stage: PickupMockStage) => void;
-  onReadyUp: () => void;
-  onVetoBan: (mapKey: string) => void;
-  pickupAvailable: boolean;
-  player: PickupPlayer | null;
-  playerState: PickupPlayerState | null;
-  publicState: PickupPublicState | null;
-  readyActionPending?: boolean;
-  recentMatches: PickupProfileMatch[];
-  userLoading?: boolean;
+  guestMode: boolean
+  liveMatches: PickupMatchState[]
+  mockMode: boolean
+  mockStage: PickupMockStage
+  onConnectWithSteam: () => void
+  onJoinQueue: (queue: PickupQueueSummary) => void
+  onOpenMatch: (matchId: string) => void
+  onOpenPlayerProfile: (playerId: string) => void
+  onSetMockStage: (stage: PickupMockStage) => void
+  onReadyUp: () => void
+  onVetoBan: (mapKey: string) => void
+  pickupAvailable: boolean
+  player: PickupPlayer | null
+  playerState: PickupPlayerState | null
+  publicState: PickupPublicState | null
+  readyActionPending?: boolean
+  recentMatches: PickupProfileMatch[]
+  userLoading?: boolean
 }) {
-  const shouldGatePlayAction = guestMode || (!player && !userLoading);
-  const activeState = playerState?.stage ?? "idle";
-  const fogHornAudioRef = useRef<HTMLAudioElement | null>(null);
-  const tickAudioRef = useRef<HTMLAudioElement | null>(null);
-  const playedReadyCheckMatchIdRef = useRef<string | null>(null);
+  const shouldGatePlayAction = guestMode || (!player && !userLoading)
+  const activeState = playerState?.stage ?? "idle"
+  const fogHornAudioRef = useRef<HTMLAudioElement | null>(null)
+  const tickAudioRef = useRef<HTMLAudioElement | null>(null)
+  const playedReadyCheckMatchIdRef = useRef<string | null>(null)
   const readyCheckCountRef = useRef<{ count: number; matchId: string | null }>({
     count: 0,
     matchId: null,
-  });
-  const [countdownNowMs, setCountdownNowMs] = useState(() => Date.now());
-  const match =
-    playerState && "match" in playerState ? playerState.match : null;
-  const activeCaptainId = match?.veto.currentCaptainPlayerId ?? null;
+  })
+  const [countdownNowMs, setCountdownNowMs] = useState(() => Date.now())
+  const match = playerState && "match" in playerState ? playerState.match : null
+  const activeCaptainId = match?.veto.currentCaptainPlayerId ?? null
   const canBan =
-    match &&
-    player &&
-    match.status === "veto" &&
-    activeCaptainId === player.id;
+    match && player && match.status === "veto" && activeCaptainId === player.id
   const locationFlag = match?.server.countryCode
     ? getCountryFlagSrc(match.server.countryCode)
-    : null;
+    : null
   const showHeroBackground =
-    activeState === "idle" || activeState === "queue" || activeState === "ready_check";
-  const availableQueues = publicState?.queues ?? [];
+    activeState === "idle" ||
+    activeState === "queue" ||
+    activeState === "ready_check"
+  const availableQueues = publicState?.queues ?? []
   const selectedQueue =
     (playerState?.stage === "queue"
       ? availableQueues.find((queue) => queue.id === playerState.queue.queueId)
       : null) ??
     publicState?.queue ??
     availableQueues[0] ??
-    null;
+    null
   const isMatchStage =
     activeState === "veto" ||
     activeState === "provisioning" ||
     activeState === "server_ready" ||
     activeState === "completed" ||
-    activeState === "live";
+    activeState === "live"
   const pageClassName = showHeroBackground
     ? ""
     : isMatchStage
       ? "flex min-h-[calc(100vh-8rem)] flex-1 flex-col gap-6 bg-[linear-gradient(180deg,#050505_0%,#121212_100%)] p-6"
-      : "flex flex-1 flex-col gap-6 p-6";
+      : "flex flex-1 flex-col gap-6 p-6"
 
   useEffect(() => {
     if (!match || !["ready_check", "veto", "live"].includes(match.status)) {
-      return;
+      return
     }
 
     const intervalId = window.setInterval(() => {
-      setCountdownNowMs(Date.now());
-    }, 1000);
+      setCountdownNowMs(Date.now())
+    }, 1000)
 
     return () => {
-      window.clearInterval(intervalId);
-    };
-  }, [match?.id, match?.liveStartedAt, match?.readyDeadlineAt, match?.status, match?.veto.deadlineAt]);
+      window.clearInterval(intervalId)
+    }
+  }, [
+    match,
+    match?.id,
+    match?.liveStartedAt,
+    match?.readyDeadlineAt,
+    match?.status,
+    match?.veto.deadlineAt,
+  ])
 
   useEffect(() => {
-    const fogHornAudio = new Audio(fogHornSound);
-    fogHornAudio.preload = "auto";
-    fogHornAudio.volume = readyCheckFogHornVolume;
-    fogHornAudioRef.current = fogHornAudio;
+    const fogHornAudio = new Audio(fogHornSound)
+    fogHornAudio.preload = "auto"
+    fogHornAudio.volume = readyCheckFogHornVolume
+    fogHornAudioRef.current = fogHornAudio
 
-    const tickAudio = new Audio(tickSound);
-    tickAudio.preload = "auto";
-    tickAudio.volume = readyCheckTickVolume;
-    tickAudioRef.current = tickAudio;
+    const tickAudio = new Audio(tickSound)
+    tickAudio.preload = "auto"
+    tickAudio.volume = readyCheckTickVolume
+    tickAudioRef.current = tickAudio
 
     return () => {
-      fogHornAudioRef.current = null;
-      tickAudioRef.current = null;
-    };
-  }, []);
+      fogHornAudioRef.current = null
+      tickAudioRef.current = null
+    }
+  }, [])
 
   useEffect(() => {
     if (match?.status !== "ready_check") {
-      playedReadyCheckMatchIdRef.current = null;
-      return;
+      playedReadyCheckMatchIdRef.current = null
+      return
     }
 
     if (playedReadyCheckMatchIdRef.current === match.id) {
-      return;
+      return
     }
 
-    playedReadyCheckMatchIdRef.current = match.id;
-    playAudioClip(fogHornAudioRef.current, readyCheckFogHornVolume);
-  }, [match?.id, match?.status]);
+    playedReadyCheckMatchIdRef.current = match.id
+    playAudioClip(fogHornAudioRef.current, readyCheckFogHornVolume)
+  }, [match?.id, match?.status])
 
   useEffect(() => {
     if (match?.status !== "ready_check") {
-      readyCheckCountRef.current = { count: 0, matchId: null };
-      return;
+      readyCheckCountRef.current = { count: 0, matchId: null }
+      return
     }
 
     const readyCount = [...match.teams.left, ...match.teams.right].filter(
-      (queuedPlayer) => queuedPlayer.readyState === "ready",
-    ).length;
-    const previous = readyCheckCountRef.current;
+      (queuedPlayer) => queuedPlayer.readyState === "ready"
+    ).length
+    const previous = readyCheckCountRef.current
 
     if (previous.matchId !== match.id) {
-      readyCheckCountRef.current = { count: readyCount, matchId: match.id };
-      return;
+      readyCheckCountRef.current = { count: readyCount, matchId: match.id }
+      return
     }
 
     if (readyCount > previous.count) {
-      playAudioClip(tickAudioRef.current, readyCheckTickVolume);
+      playAudioClip(tickAudioRef.current, readyCheckTickVolume)
     }
 
-    readyCheckCountRef.current = { count: readyCount, matchId: match.id };
-  }, [match]);
+    readyCheckCountRef.current = { count: readyCount, matchId: match.id }
+  }, [match])
 
   if (!pickupAvailable) {
     return (
@@ -814,13 +854,14 @@ export function PickupPage({
             </EmptyMedia>
             <EmptyTitle>Pickup service unavailable</EmptyTitle>
             <EmptyDescription>
-              Set <code>VITE_PICKUP_API_URL</code> and <code>VITE_REALTIME_URL</code> to enable
-              Steam pickup login and queue state.
+              Set <code>VITE_PICKUP_API_URL</code> and{" "}
+              <code>VITE_REALTIME_URL</code> to enable Steam pickup login and
+              queue state.
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
       </div>
-    );
+    )
   }
 
   return (
@@ -850,15 +891,16 @@ export function PickupPage({
       ) : null}
 
       {mockMode ? (
-        <div className="pointer-events-none fixed bottom-6 right-6 z-50">
+        <div className="pointer-events-none fixed right-6 bottom-6 z-50">
           <Card className="pointer-events-auto w-[22rem] border-white/10 bg-black/80 py-0 text-white backdrop-blur">
             <CardContent className="flex flex-col gap-3 p-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/45">
+                <p className="text-xs font-semibold tracking-[0.18em] text-white/45 uppercase">
                   Mock Pickup Flow
                 </p>
                 <p className="mt-1 text-xs text-white/60">
-                  Force the next pickup screen locally without waiting for 8 players.
+                  Force the next pickup screen locally without waiting for 8
+                  players.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -902,7 +944,6 @@ export function PickupPage({
         </div>
       ) : null}
 
-
       {!match && activeState !== "queue" && activeState !== "idle" ? (
         <Empty className="border border-white/10 bg-black/40 text-white">
           <EmptyHeader>
@@ -918,5 +959,5 @@ export function PickupPage({
         </Empty>
       ) : null}
     </div>
-  );
+  )
 }

@@ -1,29 +1,29 @@
-import { ArrowUpRight, InfoCircle } from "@/components/icon";
-import { useLocalStorage } from "@/hooks/use-local-storage";
-import type { PickupNotice } from "@/lib/pickup";
-import { cn } from "@/lib/utils";
+import { ArrowUpRight, InfoCircle } from "@/components/icon"
+import { useLocalStorage } from "@/hooks/use-local-storage"
+import type { PickupNotice } from "@/lib/pickup"
+import { cn } from "@/lib/utils"
 
 const noticeToneClasses: Record<PickupNotice["variant"], string> = {
   info: "bg-blue-600 text-white",
   success: "bg-emerald-600 text-white",
   alert: "bg-amber-500 text-black",
   danger: "bg-red-600 text-white",
-};
+}
 
 export function NoticeBar({
   notice,
   className,
 }: {
-  notice: PickupNotice;
-  className?: string;
+  notice: PickupNotice
+  className?: string
 }) {
   const [dismissed, setDismissed] = useLocalStorage(
     `notice:${notice.id}:dismissed`,
     "0"
-  );
+  )
 
   if (notice.dismissable && dismissed === "1") {
-    return null;
+    return null
   }
 
   return (
@@ -68,5 +68,5 @@ export function NoticeBar({
         ) : null}
       </div>
     </div>
-  );
+  )
 }

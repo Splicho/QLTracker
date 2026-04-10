@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -6,7 +6,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"
 
 export function ManageCoverModal({
   coverUrl,
@@ -16,12 +16,12 @@ export function ManageCoverModal({
   onDeleteCover,
   open,
 }: {
-  coverUrl: string;
-  isDeleting: boolean;
-  onChangeCover: () => void;
-  onClose: () => void;
-  onDeleteCover: () => void;
-  open: boolean;
+  coverUrl: string
+  isDeleting: boolean
+  onChangeCover: () => void
+  onClose: () => void
+  onDeleteCover: () => void
+  open: boolean
 }) {
   return (
     <Dialog onOpenChange={(nextOpen) => !nextOpen && onClose()} open={open}>
@@ -64,5 +64,5 @@ export function ManageCoverModal({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

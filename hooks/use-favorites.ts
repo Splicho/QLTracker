@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { useLocalStorage } from "@/hooks/use-local-storage";
+import { useMemo } from "react"
+import { useLocalStorage } from "@/hooks/use-local-storage"
 import {
   countServersForList,
   DEFAULT_FAVORITES_STATE,
@@ -8,31 +8,31 @@ import {
   parseFavoritesState,
   serializeFavoritesState,
   type FavoritesState,
-} from "@/lib/favorites";
+} from "@/lib/favorites"
 
 export function useFavorites() {
   const [rawValue, setRawValue] = useLocalStorage(
     FAVORITES_STORAGE_KEY,
     serializeFavoritesState(DEFAULT_FAVORITES_STATE)
-  );
+  )
 
-  const state = useMemo(() => parseFavoritesState(rawValue), [rawValue]);
+  const state = useMemo(() => parseFavoritesState(rawValue), [rawValue])
 
   function setState(nextState: FavoritesState) {
-    setRawValue(serializeFavoritesState(nextState));
+    setRawValue(serializeFavoritesState(nextState))
   }
 
   function createList(name: string) {
-    const trimmedName = name.trim();
+    const trimmedName = name.trim()
     if (!trimmedName) {
-      return;
+      return
     }
 
-    const normalizedName = trimmedName.toLowerCase();
+    const normalizedName = trimmedName.toLowerCase()
     if (
       state.lists.some((list) => list.name.toLowerCase() === normalizedName)
     ) {
-      return;
+      return
     }
 
     setState({
@@ -45,7 +45,7 @@ export function useFavorites() {
           createdAt: new Date().toISOString(),
         },
       ],
-    });
+    })
   }
 
   function addServerToList(
@@ -53,12 +53,12 @@ export function useFavorites() {
     listId: string
   ) {
     if (!state.lists.some((list) => list.id === listId)) {
-      return;
+      return
     }
 
     const existingServer = state.servers.find(
       (entry) => entry.addr === server.addr
-    );
+    )
 
     if (!existingServer) {
       setState({
@@ -71,12 +71,12 @@ export function useFavorites() {
             listIds: [listId],
           },
         ],
-      });
-      return;
+      })
+      return
     }
 
     if (existingServer.listIds.includes(listId)) {
-      return;
+      return
     }
 
     setState({
@@ -89,7 +89,7 @@ export function useFavorites() {
             }
           : entry
       ),
-    });
+    })
   }
 
   function moveServerToList(
@@ -101,29 +101,29 @@ export function useFavorites() {
       fromListId === toListId ||
       !state.lists.some((list) => list.id === toListId)
     ) {
-      return;
+      return
     }
 
     setState({
       ...state,
       servers: state.servers.map((entry) => {
         if (entry.addr !== addr) {
-          return entry;
+          return entry
         }
 
         const nextListIds = entry.listIds.filter(
           (listId) => listId !== fromListId
-        );
+        )
         if (!nextListIds.includes(toListId)) {
-          nextListIds.push(toListId);
+          nextListIds.push(toListId)
         }
 
         return {
           ...entry,
           listIds: nextListIds,
-        };
+        }
       }),
-    });
+    })
   }
 
   function removeServerFromList(addr: string, listId: string) {
@@ -141,19 +141,19 @@ export function useFavorites() {
             : entry
         )
         .filter((entry) => entry.listIds.length > 0),
-    });
+    })
   }
 
   function removeServer(addr: string) {
     setState({
       ...state,
       servers: state.servers.filter((entry) => entry.addr !== addr),
-    });
+    })
   }
 
   function deleteList(listId: string) {
     if (!state.lists.some((list) => list.id === listId)) {
-      return false;
+      return false
     }
 
     setState({
@@ -161,12 +161,14 @@ export function useFavorites() {
       servers: state.servers
         .map((entry) => ({
           ...entry,
-          listIds: entry.listIds.filter((entryListId) => entryListId !== listId),
+          listIds: entry.listIds.filter(
+            (entryListId) => entryListId !== listId
+          ),
         }))
         .filter((entry) => entry.listIds.length > 0),
-    });
+    })
 
-    return true;
+    return true
   }
 
   return {
@@ -178,5 +180,5 @@ export function useFavorites() {
     removeServer,
     removeServerFromList,
     countServersForList: (listId: string) => countServersForList(state, listId),
-  };
+  }
 }

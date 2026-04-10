@@ -1,19 +1,14 @@
-import type { CSSProperties, ReactNode } from "react";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import type { CSSProperties, ReactNode } from "react"
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 
 type AppFrameProps = {
-  content: ReactNode;
-  header: ReactNode;
-  notice: ReactNode;
-  sidebar: ReactNode;
-};
+  content: ReactNode
+  header: ReactNode
+  notice: ReactNode
+  sidebar: ReactNode
+}
 
-export function AppFrame({
-  content,
-  header,
-  notice,
-  sidebar,
-}: AppFrameProps) {
+export function AppFrame({ content, header, notice, sidebar }: AppFrameProps) {
   return (
     <SidebarProvider>
       <div className="flex min-h-svh w-full flex-col">
@@ -37,5 +32,5 @@ export function AppFrame({
         </div>
       </div>
     </SidebarProvider>
-  );
+  )
 }

@@ -1,34 +1,34 @@
-import { useEffect, useMemo, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowUpRight, CoverImage, GameController } from "@/components/icon";
-import { CropImageDialog } from "@/components/profile/crop-image";
-import { ManageCoverModal } from "@/components/profile/manage-cover-modal";
-import { PlayerProfileMatchesPane } from "@/components/profile/player-profile-matches-pane";
-import { PlayerProfileOverviewPane } from "@/components/profile/player-profile-overview-pane";
-import { PlayerProfileStatsPane } from "@/components/profile/player-profile-stats-pane";
-import { UploadCoverModal } from "@/components/profile/upload-cover-modal";
-import { PlayerAvatar } from "@/components/pickup/player-avatar";
-import { PlayerName } from "@/components/pickup/player-name";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useImageUploadFlow } from "@/hooks/use-image-upload-flow";
-import { useRealtimePlayerPresence } from "@/hooks/use-realtime-player-presence";
-import { useMutation } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { ArrowUpRight, CoverImage, GameController } from "@/components/icon"
+import { CropImageDialog } from "@/components/profile/crop-image"
+import { ManageCoverModal } from "@/components/profile/manage-cover-modal"
+import { PlayerProfileMatchesPane } from "@/components/profile/player-profile-matches-pane"
+import { PlayerProfileOverviewPane } from "@/components/profile/player-profile-overview-pane"
+import { PlayerProfileStatsPane } from "@/components/profile/player-profile-stats-pane"
+import { UploadCoverModal } from "@/components/profile/upload-cover-modal"
+import { PlayerAvatar } from "@/components/pickup/player-avatar"
+import { PlayerName } from "@/components/pickup/player-name"
+import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useImageUploadFlow } from "@/hooks/use-image-upload-flow"
+import { useRealtimePlayerPresence } from "@/hooks/use-realtime-player-presence"
+import { useMutation } from "@tanstack/react-query"
 import {
   fetchPickupPlayerProfile,
   isPickupApiConfigured,
   type PickupPlayerProfile,
   updatePickupProfileMedia,
   uploadPickupProfileImage,
-} from "@/lib/pickup";
-import { stripQuakeColors } from "@/lib/quake";
-import { createFallbackServerFromPresence } from "@/lib/server-utils";
-import type { ServerInteractionContext } from "@/hooks/use-server-interactions";
-import type { SteamServer } from "@/lib/steam";
+} from "@/lib/pickup"
+import { stripQuakeColors } from "@/lib/quake"
+import { createFallbackServerFromPresence } from "@/lib/server-utils"
+import type { ServerInteractionContext } from "@/hooks/use-server-interactions"
+import type { SteamServer } from "@/lib/steam"
 
-const pickupCoverCropFileName = "pickup-cover.webp";
-const pickupAvatarCropFileName = "pickup-avatar.webp";
+const pickupCoverCropFileName = "pickup-cover.webp"
+const pickupAvatarCropFileName = "pickup-avatar.webp"
 
 function LoadingState() {
   return (
@@ -38,13 +38,13 @@ function LoadingState() {
         <Skeleton className="h-full w-full rounded-xl" />
       </div>
     </section>
-  );
+  )
 }
 
 function getProfileErrorMessage(error: unknown) {
   return error instanceof Error
     ? error.message
-    : "Unexpected pickup profile error.";
+    : "Unexpected pickup profile error."
 }
 
 export function PlayerProfilePage({
@@ -57,66 +57,73 @@ export function PlayerProfilePage({
   sessionToken,
   servers,
 }: {
-  currentPlayerId: string | null;
-  initialData?: PickupPlayerProfile;
-  onOpenMatch: (matchId: string) => void;
-  onOpenServer: (context: ServerInteractionContext) => void;
-  onProfileNameChange?: (name: string | null) => void;
-  playerId: string | null;
-  sessionToken: string;
-  servers: SteamServer[];
+  currentPlayerId: string | null
+  initialData?: PickupPlayerProfile
+  onOpenMatch: (matchId: string) => void
+  onOpenServer: (context: ServerInteractionContext) => void
+  onProfileNameChange?: (name: string | null) => void
+  playerId: string | null
+  sessionToken: string
+  servers: SteamServer[]
 }) {
-  const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState("overview");
+  const queryClient = useQueryClient()
+  const [activeTab, setActiveTab] = useState("overview")
   const profileQuery = useQuery({
     queryKey: ["pickup", "player-profile", playerId],
     queryFn: () => fetchPickupPlayerProfile(playerId!),
     enabled: isPickupApiConfigured() && Boolean(playerId),
     initialData,
     staleTime: 30_000,
-  });
-  const profile = profileQuery.data ?? null;
-  const player = profile?.player ?? null;
-  const coverProfilePlayerId = player?.id ?? playerId ?? "";
-  const meQueryKey = ["pickup", "me", sessionToken] as const;
+  })
+  const profile = profileQuery.data ?? null
+  const player = profile?.player ?? null
+  const coverProfilePlayerId = player?.id ?? playerId ?? ""
+  const meQueryKey = ["pickup", "me", sessionToken] as const
 
   useEffect(() => {
     if (!player) {
-      onProfileNameChange?.(null);
-      return;
+      onProfileNameChange?.(null)
+      return
     }
 
-    onProfileNameChange?.(stripQuakeColors(player.personaName));
+    onProfileNameChange?.(stripQuakeColors(player.personaName))
 
     return () => {
-      onProfileNameChange?.(null);
-    };
-  }, [onProfileNameChange, player]);
+      onProfileNameChange?.(null)
+    }
+  }, [onProfileNameChange, player])
 
-  const playerPresence = useRealtimePlayerPresence(player?.steamId ?? null, true);
+  const playerPresence = useRealtimePlayerPresence(
+    player?.steamId ?? null,
+    true
+  )
   const activeServer = useMemo(() => {
     if (!playerPresence.presence) {
-      return null;
+      return null
     }
 
     return (
       servers.find((server) => server.addr === playerPresence.presence?.addr) ??
       createFallbackServerFromPresence(playerPresence.presence)
-    );
-  }, [playerPresence.presence, servers]);
+    )
+  }, [playerPresence.presence, servers])
 
   const canEditCover =
     Boolean(player) &&
     Boolean(sessionToken.trim()) &&
     Boolean(currentPlayerId) &&
-    currentPlayerId === player?.id;
+    currentPlayerId === player?.id
   const coverUpload = useImageUploadFlow({
     errorMessage: "Cover upload failed.",
     onUpload: async (file) => {
-      const uploaded = await uploadPickupProfileImage(sessionToken, "cover", file);
+      const uploaded = await uploadPickupProfileImage(
+        sessionToken,
+        "cover",
+        file
+      )
       await updatePickupProfileMedia(sessionToken, {
         customCoverUrl: uploaded.url,
-      });
+      })
       await Promise.all([
         queryClient.invalidateQueries({
           queryKey: ["pickup", "player-profile", coverProfilePlayerId],
@@ -124,15 +131,15 @@ export function PlayerProfilePage({
         queryClient.invalidateQueries({
           queryKey: meQueryKey,
         }),
-      ]);
+      ])
     },
     successMessage: "Profile cover updated.",
-  });
+  })
   const deleteCoverMutation = useMutation({
     mutationFn: async () => {
       await updatePickupProfileMedia(sessionToken, {
         customCoverUrl: null,
-      });
+      })
       await Promise.all([
         queryClient.invalidateQueries({
           queryKey: ["pickup", "player-profile", coverProfilePlayerId],
@@ -140,16 +147,20 @@ export function PlayerProfilePage({
         queryClient.invalidateQueries({
           queryKey: meQueryKey,
         }),
-      ]);
+      ])
     },
-  });
+  })
   const avatarUpload = useImageUploadFlow({
     errorMessage: "Avatar upload failed.",
     onUpload: async (file) => {
-      const uploaded = await uploadPickupProfileImage(sessionToken, "avatar", file);
+      const uploaded = await uploadPickupProfileImage(
+        sessionToken,
+        "avatar",
+        file
+      )
       await updatePickupProfileMedia(sessionToken, {
         customAvatarUrl: uploaded.url,
-      });
+      })
       await Promise.all([
         queryClient.invalidateQueries({
           queryKey: ["pickup", "player-profile", coverProfilePlayerId],
@@ -157,10 +168,10 @@ export function PlayerProfilePage({
         queryClient.invalidateQueries({
           queryKey: meQueryKey,
         }),
-      ]);
+      ])
     },
     successMessage: "Profile avatar updated.",
-  });
+  })
 
   if (!playerId) {
     return (
@@ -171,7 +182,7 @@ export function PlayerProfilePage({
           </p>
         </div>
       </section>
-    );
+    )
   }
 
   if (!isPickupApiConfigured()) {
@@ -187,11 +198,11 @@ export function PlayerProfilePage({
           </p>
         </div>
       </section>
-    );
+    )
   }
 
   if (profileQuery.isPending) {
-    return <LoadingState />;
+    return <LoadingState />
   }
 
   if (profileQuery.isError || !profile) {
@@ -206,7 +217,7 @@ export function PlayerProfilePage({
           </p>
         </div>
       </section>
-    );
+    )
   }
   if (!player) {
     return (
@@ -220,9 +231,9 @@ export function PlayerProfilePage({
           </p>
         </div>
       </section>
-    );
+    )
   }
-  const resolvedPlayer = player;
+  const resolvedPlayer = player
 
   return (
     <section className="flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -353,17 +364,26 @@ export function PlayerProfilePage({
             </TabsList>
           </div>
         </div>
-        <TabsContent className="min-h-0 flex-1 data-[state=inactive]:hidden" value="overview">
+        <TabsContent
+          className="min-h-0 flex-1 data-[state=inactive]:hidden"
+          value="overview"
+        >
           <PlayerProfileOverviewPane
             onOpenMatch={onOpenMatch}
             onOpenMatches={() => setActiveTab("matches")}
             profile={profile}
           />
         </TabsContent>
-        <TabsContent className="min-h-0 flex-1 data-[state=inactive]:hidden" value="stats">
+        <TabsContent
+          className="min-h-0 flex-1 data-[state=inactive]:hidden"
+          value="stats"
+        >
           <PlayerProfileStatsPane profile={profile} />
         </TabsContent>
-        <TabsContent className="min-h-0 flex-1 data-[state=inactive]:hidden" value="matches">
+        <TabsContent
+          className="min-h-0 flex-1 data-[state=inactive]:hidden"
+          value="matches"
+        >
           <PlayerProfileMatchesPane
             onOpenMatch={onOpenMatch}
             profile={profile}
@@ -374,15 +394,17 @@ export function PlayerProfilePage({
         coverUrl={resolvedPlayer.coverImageUrl ?? ""}
         isDeleting={deleteCoverMutation.isPending}
         onChangeCover={() => {
-          coverUpload.closeManageModal();
-          coverUpload.openUploadModal();
+          coverUpload.closeManageModal()
+          coverUpload.openUploadModal()
         }}
         onClose={coverUpload.closeManageModal}
         onDeleteCover={async () => {
-          await deleteCoverMutation.mutateAsync();
-          coverUpload.closeManageModal();
+          await deleteCoverMutation.mutateAsync()
+          coverUpload.closeManageModal()
         }}
-        open={coverUpload.isManageModalOpen && Boolean(resolvedPlayer.coverImageUrl)}
+        open={
+          coverUpload.isManageModalOpen && Boolean(resolvedPlayer.coverImageUrl)
+        }
       />
       <UploadCoverModal
         description="Drop a JPG, PNG, or WEBP image here."
@@ -421,5 +443,5 @@ export function PlayerProfilePage({
         title="Crop avatar"
       />
     </section>
-  );
+  )
 }

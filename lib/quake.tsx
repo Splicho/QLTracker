@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from "react"
 
 export const QUAKE_COLOR_MAP: Record<string, string> = {
   "0": "#111111",
@@ -9,27 +9,27 @@ export const QUAKE_COLOR_MAP: Record<string, string> = {
   "5": "#06b6d4",
   "6": "#ec4899",
   "7": "currentColor",
-};
+}
 
 type QuakeTextProps = {
-  text: string;
-  fallbackClassName?: string;
-};
+  text: string
+  fallbackClassName?: string
+}
 
 export function stripQuakeColors(text: string) {
-  return text.replace(/\^[0-7]/g, "");
+  return text.replace(/\^[0-7]/g, "")
 }
 
 export function renderQuakeText(text: string): ReactNode[] {
-  const segments: ReactNode[] = [];
-  const cleanText = text ?? "";
-  let currentColor = QUAKE_COLOR_MAP["7"];
-  let buffer = "";
-  let index = 0;
+  const segments: ReactNode[] = []
+  const cleanText = text ?? ""
+  let currentColor = QUAKE_COLOR_MAP["7"]
+  let buffer = ""
+  let index = 0
 
   const flush = () => {
     if (!buffer) {
-      return;
+      return
     }
 
     segments.push(
@@ -39,30 +39,30 @@ export function renderQuakeText(text: string): ReactNode[] {
       >
         {buffer}
       </span>
-    );
-    buffer = "";
-  };
+    )
+    buffer = ""
+  }
 
   while (index < cleanText.length) {
     if (cleanText[index] === "^" && index + 1 < cleanText.length) {
-      const next = cleanText[index + 1];
+      const next = cleanText[index + 1]
       if (next in QUAKE_COLOR_MAP) {
-        flush();
-        currentColor = QUAKE_COLOR_MAP[next];
-        index += 2;
-        continue;
+        flush()
+        currentColor = QUAKE_COLOR_MAP[next]
+        index += 2
+        continue
       }
     }
 
-    buffer += cleanText[index];
-    index += 1;
+    buffer += cleanText[index]
+    index += 1
   }
 
-  flush();
+  flush()
 
-  return segments.length > 0 ? segments : [stripQuakeColors(cleanText)];
+  return segments.length > 0 ? segments : [stripQuakeColors(cleanText)]
 }
 
 export function QuakeText({ text, fallbackClassName }: QuakeTextProps) {
-  return <span className={fallbackClassName}>{renderQuakeText(text)}</span>;
+  return <span className={fallbackClassName}>{renderQuakeText(text)}</span>
 }

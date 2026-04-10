@@ -1,12 +1,12 @@
-import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Copy, Eye, Pencil, Play, Trash2, Users } from "lucide-react";
-import { toast } from "sonner";
-import { useTranslation } from "react-i18next";
-import { Change } from "@/components/icon";
-import { PlayerName } from "@/components/pickup/player-name";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { useMemo, useState } from "react"
+import { useQuery } from "@tanstack/react-query"
+import { Copy, Eye, Pencil, Play, Trash2, Users } from "lucide-react"
+import { toast } from "sonner"
+import { useTranslation } from "react-i18next"
+import { Change } from "@/components/icon"
+import { PlayerName } from "@/components/pickup/player-name"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import {
   Empty,
   EmptyContent,
@@ -14,8 +14,8 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/components/ui/empty";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@/components/ui/empty"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
   TableBody,
@@ -23,69 +23,69 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui/table"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useTrackedPlayers } from "@/hooks/use-tracked-players";
-import { stripQuakeColors } from "@/lib/quake";
-import type { ServerInteractionContext } from "@/hooks/use-server-interactions";
+} from "@/components/ui/tooltip"
+import { useTrackedPlayers } from "@/hooks/use-tracked-players"
+import { stripQuakeColors } from "@/lib/quake"
+import type { ServerInteractionContext } from "@/hooks/use-server-interactions"
 import {
   fetchRealtimePlayerNameHistoryLookup,
   fetchRealtimePlayerPresenceLookup,
   isRealtimeEnabled,
   type PlayerNameHistoryEntry,
   type RealtimePlayerPresence,
-} from "@/lib/realtime";
+} from "@/lib/realtime"
 import {
   createFallbackServerFromPresence,
   getGameModeLabel,
-} from "@/lib/server-utils";
+} from "@/lib/server-utils"
 import {
   type ServerPing,
   fetchSteamServerPings,
   type SteamServer,
-} from "@/lib/steam";
-import { TrackedPlayerAliasesDialog } from "@/components/pages/tracked-player-aliases-dialog";
-import { TrackedPlayerNoteDialog } from "@/components/pages/tracked-player-note-dialog";
+} from "@/lib/steam"
+import { TrackedPlayerAliasesDialog } from "@/components/pages/tracked-player-aliases-dialog"
+import { TrackedPlayerNoteDialog } from "@/components/pages/tracked-player-note-dialog"
 
 export function WatchlistPage({
   servers,
   onOpenServer,
   onJoinServer,
 }: {
-  servers: SteamServer[];
-  onOpenServer: (context: ServerInteractionContext) => void;
-  onJoinServer: (context: ServerInteractionContext) => void;
+  servers: SteamServer[]
+  onOpenServer: (context: ServerInteractionContext) => void
+  onJoinServer: (context: ServerInteractionContext) => void
 }) {
-  const { t } = useTranslation();
-  const { players, setPlayerNote, untrackPlayer } = useTrackedPlayers();
-  const realtimeAvailable = isRealtimeEnabled();
+  const { t } = useTranslation()
+  const { players, setPlayerNote, untrackPlayer } = useTrackedPlayers()
+  const realtimeAvailable = isRealtimeEnabled()
   const [aliasHistorySteamId, setAliasHistorySteamId] = useState<string | null>(
     null
-  );
-  const [editingSteamId, setEditingSteamId] = useState<string | null>(null);
+  )
+  const [editingSteamId, setEditingSteamId] = useState<string | null>(null)
   const trackedSteamIds = useMemo(
     () => players.map((player) => player.steamId),
     [players]
-  );
+  )
   const editingPlayer = useMemo(
     () =>
       editingSteamId
-        ? players.find((player) => player.steamId === editingSteamId) ?? null
+        ? (players.find((player) => player.steamId === editingSteamId) ?? null)
         : null,
     [editingSteamId, players]
-  );
+  )
   const aliasHistoryPlayer = useMemo(
     () =>
       aliasHistorySteamId
-        ? players.find((player) => player.steamId === aliasHistorySteamId) ??
-          null
+        ? (players.find((player) => player.steamId === aliasHistorySteamId) ??
+          null)
         : null,
     [aliasHistorySteamId, players]
-  );
+  )
   const presenceQuery = useQuery({
     queryKey: ["realtime", "presence-lookup", trackedSteamIds],
     queryFn: () => fetchRealtimePlayerPresenceLookup(trackedSteamIds),
@@ -93,11 +93,11 @@ export function WatchlistPage({
     staleTime: 10_000,
     refetchInterval: 15_000,
     placeholderData: (previousData) => previousData,
-  });
+  })
   const liveServersByAddr = useMemo(
     () => Object.fromEntries(servers.map((server) => [server.addr, server])),
     [servers]
-  );
+  )
   const onlineServerAddresses = useMemo(
     () =>
       Array.from(
@@ -111,7 +111,7 @@ export function WatchlistPage({
         )
       ),
     [liveServersByAddr, presenceQuery.data]
-  );
+  )
   const pingQuery = useQuery({
     queryKey: ["steam", "server-pings", "watchlist", onlineServerAddresses],
     queryFn: () => fetchSteamServerPings(onlineServerAddresses),
@@ -119,7 +119,7 @@ export function WatchlistPage({
     staleTime: 10_000,
     refetchInterval: 15_000,
     placeholderData: (previousData) => previousData,
-  });
+  })
   const aliasHistoryQuery = useQuery({
     queryKey: ["realtime", "player-name-history", trackedSteamIds],
     queryFn: () => fetchRealtimePlayerNameHistoryLookup(trackedSteamIds),
@@ -127,7 +127,7 @@ export function WatchlistPage({
     staleTime: 30_000,
     refetchInterval: 30_000,
     placeholderData: (previousData) => previousData,
-  });
+  })
   const requiresPasswordByAddr = useMemo<Record<string, boolean | null>>(
     () =>
       Object.fromEntries(
@@ -137,16 +137,18 @@ export function WatchlistPage({
         ])
       ),
     [pingQuery.data]
-  );
+  )
 
   const rows = useMemo(
     () =>
       players.map((trackedPlayer) => {
-        const presence = presenceQuery.data?.[trackedPlayer.steamId] ?? null;
-        const liveServer = presence ? liveServersByAddr[presence.addr] ?? null : null;
+        const presence = presenceQuery.data?.[trackedPlayer.steamId] ?? null
+        const liveServer = presence
+          ? (liveServersByAddr[presence.addr] ?? null)
+          : null
         const remoteNameHistory =
-          aliasHistoryQuery.data?.[trackedPlayer.steamId] ?? [];
-        const modeLabel = getGameModeLabel(presence?.gameMode, t);
+          aliasHistoryQuery.data?.[trackedPlayer.steamId] ?? []
+        const modeLabel = getGameModeLabel(presence?.gameMode, t)
         const interactionContext = presence
           ? {
               server: liveServer ?? createFallbackServerFromPresence(presence),
@@ -157,7 +159,7 @@ export function WatchlistPage({
                   ? requiresPasswordByAddr[liveServer.addr] === true
                   : false,
             }
-          : null;
+          : null
 
         return {
           aliases: mergeTrackedPlayerAliases(
@@ -168,7 +170,7 @@ export function WatchlistPage({
           trackedPlayer,
           presence,
           interactionContext,
-        };
+        }
       }),
     [
       aliasHistoryQuery.data,
@@ -178,18 +180,18 @@ export function WatchlistPage({
       requiresPasswordByAddr,
       t,
     ]
-  );
-  const onlineCount = rows.filter((row) => row.presence != null).length;
-  const serviceUnavailable = !realtimeAvailable || presenceQuery.isError;
+  )
+  const onlineCount = rows.filter((row) => row.presence != null).length
+  const serviceUnavailable = !realtimeAvailable || presenceQuery.isError
 
   const copySteamId = async (steamId: string) => {
     try {
-      await navigator.clipboard.writeText(steamId);
-      toast.success(t("watchlist.toasts.steamIdCopied"));
+      await navigator.clipboard.writeText(steamId)
+      toast.success(t("watchlist.toasts.steamIdCopied"))
     } catch {
-      toast.error(t("watchlist.toasts.steamIdCopyError"));
+      toast.error(t("watchlist.toasts.steamIdCopyError"))
     }
-  };
+  }
 
   return (
     <section className="flex min-h-0 flex-1 flex-col px-4 py-4">
@@ -278,7 +280,7 @@ export function WatchlistPage({
                                   onClick={() => {
                                     setAliasHistorySteamId(
                                       row.trackedPlayer.steamId
-                                    );
+                                    )
                                   }}
                                 >
                                   <Change className="size-4" />
@@ -307,15 +309,17 @@ export function WatchlistPage({
                         )}
                       </TableCell>
                       <TableCell className="max-w-56 truncate text-muted-foreground">
-                        {row.presence ? row.presence.serverName : t("watchlist.offline")}
+                        {row.presence
+                          ? row.presence.serverName
+                          : t("watchlist.offline")}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
                         {row.presence?.map ?? "-"}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
                         {row.presence
-                          ? getGameModeLabel(row.presence.gameMode, t) ??
-                            t("serverList.modeUnknown")
+                          ? (getGameModeLabel(row.presence.gameMode, t) ??
+                            t("serverList.modeUnknown"))
                           : "-"}
                       </TableCell>
                       <TableCell>
@@ -330,7 +334,7 @@ export function WatchlistPage({
                                   disabled={!row.interactionContext}
                                   onClick={() => {
                                     if (row.interactionContext) {
-                                      onOpenServer(row.interactionContext);
+                                      onOpenServer(row.interactionContext)
                                     }
                                   }}
                                 >
@@ -349,7 +353,7 @@ export function WatchlistPage({
                                 size="icon"
                                 variant="outline"
                                 onClick={() => {
-                                  void copySteamId(row.trackedPlayer.steamId);
+                                  void copySteamId(row.trackedPlayer.steamId)
                                 }}
                               >
                                 <Copy className="size-4" />
@@ -366,7 +370,7 @@ export function WatchlistPage({
                             className="bg-success text-success-foreground hover:bg-success-hover"
                             onClick={() => {
                               if (row.interactionContext?.canJoin) {
-                                onJoinServer(row.interactionContext);
+                                onJoinServer(row.interactionContext)
                               }
                             }}
                           >
@@ -379,7 +383,7 @@ export function WatchlistPage({
                                 size="icon"
                                 variant="outline"
                                 onClick={() => {
-                                  setEditingSteamId(row.trackedPlayer.steamId);
+                                  setEditingSteamId(row.trackedPlayer.steamId)
                                 }}
                               >
                                 <Pencil className="size-4" />
@@ -401,7 +405,7 @@ export function WatchlistPage({
                                       row.trackedPlayer.playerName
                                     ),
                                   })
-                                );
+                                )
                               }
                             }}
                           >
@@ -422,7 +426,7 @@ export function WatchlistPage({
         trackedPlayer={editingPlayer}
         onOpenChange={(open) => {
           if (!open) {
-            setEditingSteamId(null);
+            setEditingSteamId(null)
           }
         }}
         onSaveNote={setPlayerNote}
@@ -436,12 +440,12 @@ export function WatchlistPage({
         }
         onOpenChange={(open) => {
           if (!open) {
-            setAliasHistorySteamId(null);
+            setAliasHistorySteamId(null)
           }
         }}
       />
     </section>
-  );
+  )
 }
 
 function mergeTrackedPlayerAliases(
@@ -449,21 +453,21 @@ function mergeTrackedPlayerAliases(
   localAliases: string[],
   remoteNameHistory: PlayerNameHistoryEntry[]
 ) {
-  const aliases: string[] = [];
-  const seenAliases = new Set<string>([currentPlayerName]);
+  const aliases: string[] = []
+  const seenAliases = new Set<string>([currentPlayerName])
 
   for (const alias of [
     ...remoteNameHistory.map((entry) => entry.playerName),
     ...localAliases,
   ]) {
-    const normalizedAlias = alias.trim();
+    const normalizedAlias = alias.trim()
     if (!normalizedAlias || seenAliases.has(normalizedAlias)) {
-      continue;
+      continue
     }
 
-    seenAliases.add(normalizedAlias);
-    aliases.push(normalizedAlias);
+    seenAliases.add(normalizedAlias)
+    aliases.push(normalizedAlias)
   }
 
-  return aliases;
+  return aliases
 }

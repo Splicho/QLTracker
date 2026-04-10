@@ -1,4 +1,4 @@
-import type { AppLanguage } from "@/lib/settings";
+import type { AppLanguage } from "@/lib/settings"
 
 const LANGUAGE_FLAG_IDS: Record<AppLanguage, string> = {
   en: "gb",
@@ -29,8 +29,8 @@ const LANGUAGE_FLAG_IDS: Record<AppLanguage, string> = {
   ro: "ro",
   lt: "lt",
   cs: "cz",
-};
+}
 
 export function getLanguageFlagSrc(language: AppLanguage) {
-  return `/images/flags/${LANGUAGE_FLAG_IDS[language]}.png`;
+  return `/images/flags/${LANGUAGE_FLAG_IDS[language]}.png`
 }

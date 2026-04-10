@@ -1,41 +1,41 @@
-"use client";
+"use client"
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react"
 
 import {
   ActionButton,
   Field,
   FieldSelect,
   FieldTextArea,
-} from "@/components/pickup-admin-fields";
+} from "@/components/pickup-admin-fields"
 import {
   Button,
   Input,
   Modal,
   toast,
   useOverlayState,
-} from "@/components/pickup-admin-ui";
-import { requestJson } from "@/lib/client/request-json";
-import type { PickupNoticeDto } from "@/lib/server/notices";
+} from "@/components/pickup-admin-ui"
+import { requestJson } from "@/lib/client/request-json"
+import type { PickupNoticeDto } from "@/lib/server/notices"
 
-type NoticeVariant = PickupNoticeDto["variant"];
-type PendingAction = "create" | "update" | null;
+type NoticeVariant = PickupNoticeDto["variant"]
+type PendingAction = "create" | "update" | null
 
 const variantOptions: Array<{ label: string; value: NoticeVariant }> = [
   { label: "Success", value: "success" },
   { label: "Danger", value: "danger" },
   { label: "Alert", value: "alert" },
   { label: "Info", value: "info" },
-];
+]
 
 type NoticeFormState = {
-  content: string;
-  dismissable: boolean;
-  enabled: boolean;
-  linkHref: string;
-  linkLabel: string;
-  variant: NoticeVariant;
-};
+  content: string
+  dismissable: boolean
+  enabled: boolean
+  linkHref: string
+  linkLabel: string
+  variant: NoticeVariant
+}
 
 function createDefaultForm(): NoticeFormState {
   return {
@@ -45,7 +45,7 @@ function createDefaultForm(): NoticeFormState {
     linkHref: "",
     linkLabel: "",
     variant: "info",
-  };
+  }
 }
 
 function createFormFromNotice(notice: PickupNoticeDto): NoticeFormState {
@@ -56,69 +56,71 @@ function createFormFromNotice(notice: PickupNoticeDto): NoticeFormState {
     linkHref: notice.linkHref ?? "",
     linkLabel: notice.linkLabel ?? "",
     variant: notice.variant,
-  };
+  }
 }
 
 function formatTimestamp(value: string) {
-  return new Date(value).toLocaleString();
+  return new Date(value).toLocaleString()
 }
 
 export function PickupAdminNotices({
   initialNotices,
 }: {
-  initialNotices: PickupNoticeDto[];
+  initialNotices: PickupNoticeDto[]
 }) {
-  const [notices, setNotices] = useState(initialNotices);
-  const [form, setForm] = useState<NoticeFormState>(createDefaultForm);
-  const [editingNoticeId, setEditingNoticeId] = useState<string | null>(null);
-  const [pendingAction, setPendingAction] = useState<PendingAction>(null);
-  const modal = useOverlayState();
+  const [notices, setNotices] = useState(initialNotices)
+  const [form, setForm] = useState<NoticeFormState>(createDefaultForm)
+  const [editingNoticeId, setEditingNoticeId] = useState<string | null>(null)
+  const [pendingAction, setPendingAction] = useState<PendingAction>(null)
+  const modal = useOverlayState()
 
   const editingNotice = useMemo(
     () => notices.find((notice) => notice.id === editingNoticeId) ?? null,
-    [editingNoticeId, notices],
-  );
+    [editingNoticeId, notices]
+  )
 
   useEffect(() => {
     if (!modal.isOpen) {
-      setEditingNoticeId(null);
-      setForm(createDefaultForm());
-      return;
+      setEditingNoticeId(null)
+      setForm(createDefaultForm())
+      return
     }
 
     if (editingNotice) {
-      setForm(createFormFromNotice(editingNotice));
-      return;
+      setForm(createFormFromNotice(editingNotice))
+      return
     }
 
-    setForm(createDefaultForm());
-  }, [editingNotice, modal.isOpen]);
+    setForm(createDefaultForm())
+  }, [editingNotice, modal.isOpen])
 
   const upsertLocalNotice = (notice: PickupNoticeDto) => {
     setNotices((current) =>
-      [...current.filter((item) => item.id !== notice.id), notice].sort((left, right) => {
-        if (left.enabled !== right.enabled) {
-          return left.enabled ? -1 : 1;
-        }
+      [...current.filter((item) => item.id !== notice.id), notice].sort(
+        (left, right) => {
+          if (left.enabled !== right.enabled) {
+            return left.enabled ? -1 : 1
+          }
 
-        return right.updatedAt.localeCompare(left.updatedAt);
-      }),
-    );
-  };
+          return right.updatedAt.localeCompare(left.updatedAt)
+        }
+      )
+    )
+  }
 
   const submitNotice = async () => {
-    const trimmedContent = form.content.trim();
-    const trimmedHref = form.linkHref.trim();
-    const trimmedLabel = form.linkLabel.trim();
+    const trimmedContent = form.content.trim()
+    const trimmedHref = form.linkHref.trim()
+    const trimmedLabel = form.linkLabel.trim()
 
     if (!trimmedContent) {
-      toast.danger("Notice content is required.");
-      return;
+      toast.danger("Notice content is required.")
+      return
     }
 
     if ((trimmedHref && !trimmedLabel) || (!trimmedHref && trimmedLabel)) {
-      toast.danger("Link URL and link label must be set together.");
-      return;
+      toast.danger("Link URL and link label must be set together.")
+      return
     }
 
     const payload = {
@@ -128,9 +130,9 @@ export function PickupAdminNotices({
       linkHref: trimmedHref || null,
       linkLabel: trimmedLabel || null,
       variant: form.variant,
-    };
+    }
 
-    setPendingAction(editingNotice ? "update" : "create");
+    setPendingAction(editingNotice ? "update" : "create")
 
     try {
       if (editingNotice) {
@@ -139,43 +141,47 @@ export function PickupAdminNotices({
           {
             body: JSON.stringify(payload),
             method: "PATCH",
-          },
-        );
+          }
+        )
 
-        upsertLocalNotice(response.notice);
-        toast.success("Notice updated.");
+        upsertLocalNotice(response.notice)
+        toast.success("Notice updated.")
       } else {
         const response = await requestJson<{ notice: PickupNoticeDto }>(
           "/api/pickup/admin/notices",
           {
             body: JSON.stringify(payload),
             method: "POST",
-          },
-        );
+          }
+        )
 
-        upsertLocalNotice(response.notice);
-        toast.success("Notice created.");
+        upsertLocalNotice(response.notice)
+        toast.success("Notice created.")
       }
 
-      modal.close();
+      modal.close()
     } catch (error) {
-      toast.danger(editingNotice ? "Notice update failed." : "Notice creation failed.", {
-        description: error instanceof Error ? error.message : "Request failed.",
-      });
+      toast.danger(
+        editingNotice ? "Notice update failed." : "Notice creation failed.",
+        {
+          description:
+            error instanceof Error ? error.message : "Request failed.",
+        }
+      )
     } finally {
-      setPendingAction(null);
+      setPendingAction(null)
     }
-  };
+  }
 
   const openCreateModal = () => {
-    setEditingNoticeId(null);
-    modal.open();
-  };
+    setEditingNoticeId(null)
+    modal.open()
+  }
 
   const openEditModal = (noticeId: string) => {
-    setEditingNoticeId(noticeId);
-    modal.open();
-  };
+    setEditingNoticeId(noticeId)
+    modal.open()
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-10 text-white">
@@ -186,7 +192,11 @@ export function PickupAdminNotices({
             Manage launcher-wide notice bars shown above the full app shell.
           </p>
         </div>
-        <Button className="h-11 cursor-pointer" variant="secondary" onPress={openCreateModal}>
+        <Button
+          className="h-11 cursor-pointer"
+          variant="secondary"
+          onPress={openCreateModal}
+        >
           Create Notice
         </Button>
       </header>
@@ -195,20 +205,21 @@ export function PickupAdminNotices({
         <div className="border-b border-white/10 px-6 py-4">
           <h2 className="text-lg font-medium">Active and Draft Notices</h2>
           <p className="mt-1 text-sm text-white/60">
-            Enabled notices are returned by the public notices API and shown in the launcher.
+            Enabled notices are returned by the public notices API and shown in
+            the launcher.
           </p>
         </div>
 
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
-            <thead className="bg-[#111111] text-xs uppercase tracking-[0.18em] text-white/40">
+            <thead className="bg-[#111111] text-xs tracking-[0.18em] text-white/40 uppercase">
               <tr>
                 <th className="px-6 py-3 font-medium">Content</th>
                 <th className="px-6 py-3 font-medium">Variant</th>
                 <th className="px-6 py-3 font-medium">Status</th>
                 <th className="px-6 py-3 font-medium">Dismissable</th>
                 <th className="px-6 py-3 font-medium">Updated</th>
-                <th className="px-6 py-3 font-medium text-right">Actions</th>
+                <th className="px-6 py-3 text-right font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -217,7 +228,9 @@ export function PickupAdminNotices({
                   <tr key={notice.id} className="border-t border-white/10">
                     <td className="px-6 py-4">
                       <div className="flex max-w-2xl flex-col gap-1">
-                        <span className="font-medium text-white">{notice.content}</span>
+                        <span className="font-medium text-white">
+                          {notice.content}
+                        </span>
                         {notice.linkHref && notice.linkLabel ? (
                           <span className="text-sm text-white/50">
                             {notice.linkLabel} {"->"} {notice.linkHref}
@@ -225,14 +238,18 @@ export function PickupAdminNotices({
                         ) : null}
                       </div>
                     </td>
-                    <td className="px-6 py-4 capitalize text-white/70">{notice.variant}</td>
+                    <td className="px-6 py-4 text-white/70 capitalize">
+                      {notice.variant}
+                    </td>
                     <td className="px-6 py-4 text-white/70">
                       {notice.enabled ? "Enabled" : "Disabled"}
                     </td>
                     <td className="px-6 py-4 text-white/70">
                       {notice.dismissable ? "Yes" : "No"}
                     </td>
-                    <td className="px-6 py-4 text-white/70">{formatTimestamp(notice.updatedAt)}</td>
+                    <td className="px-6 py-4 text-white/70">
+                      {formatTimestamp(notice.updatedAt)}
+                    </td>
                     <td className="px-6 py-4 text-right">
                       <Button
                         className="cursor-pointer"
@@ -266,7 +283,8 @@ export function PickupAdminNotices({
                     {editingNotice ? "Edit Notice" : "Create Notice"}
                   </Modal.Heading>
                   <p className="mt-1 text-sm text-white/60">
-                    Notices render above the sidebar, header, and page content in the launcher.
+                    Notices render above the sidebar, header, and page content
+                    in the launcher.
                   </p>
                 </div>
                 <Modal.CloseTrigger />
@@ -318,7 +336,9 @@ export function PickupAdminNotices({
                         }
                       />
                       <div className="space-y-0.5">
-                        <p className="text-sm font-medium text-white">Enabled</p>
+                        <p className="text-sm font-medium text-white">
+                          Enabled
+                        </p>
                         <p className="text-xs text-white/50">
                           Enabled notices are returned to the launcher.
                         </p>
@@ -338,7 +358,9 @@ export function PickupAdminNotices({
                         }
                       />
                       <div className="space-y-0.5">
-                        <p className="text-sm font-medium text-white">Dismissable</p>
+                        <p className="text-sm font-medium text-white">
+                          Dismissable
+                        </p>
                         <p className="text-xs text-white/50">
                           Users can close the notice locally in the launcher.
                         </p>
@@ -382,11 +404,17 @@ export function PickupAdminNotices({
                 </div>
               </Modal.Body>
               <Modal.Footer className="flex justify-end gap-3 border-t border-white/10 px-6 py-4">
-                <Button className="cursor-pointer" variant="secondary" onPress={modal.close}>
+                <Button
+                  className="cursor-pointer"
+                  variant="secondary"
+                  onPress={modal.close}
+                >
                   Cancel
                 </Button>
                 <ActionButton
-                  isDisabled={pendingAction !== null || form.content.trim().length === 0}
+                  isDisabled={
+                    pendingAction !== null || form.content.trim().length === 0
+                  }
                   isPending={pendingAction !== null}
                   onPress={() => void submitNotice()}
                   variant="primary"
@@ -399,5 +427,5 @@ export function PickupAdminNotices({
         </Modal.Backdrop>
       </Modal>
     </div>
-  );
+  )
 }

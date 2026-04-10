@@ -1,21 +1,21 @@
-import type { MetadataRoute } from "next";
+import type { MetadataRoute } from "next"
 
 import {
   listSitemapNewsArticles,
   listSitemapPickupMatches,
   listSitemapPickupPlayers,
-} from "@/lib/server/public-seo";
-import { getSiteUrl } from "@/lib/seo";
+} from "@/lib/server/public-seo"
+import { getSiteUrl } from "@/lib/seo"
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic"
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const siteUrl = getSiteUrl().replace(/\/$/, "");
+  const siteUrl = getSiteUrl().replace(/\/$/, "")
   const [articles, matches, players] = await Promise.all([
     listSitemapNewsArticles(),
     listSitemapPickupMatches(),
     listSitemapPickupPlayers(),
-  ]);
+  ])
 
   const staticEntries: MetadataRoute.Sitemap = [
     {
@@ -48,7 +48,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
       url: `${siteUrl}/news/archive`,
     },
-  ];
+  ]
 
   return [
     ...staticEntries,
@@ -70,5 +70,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.5,
       url: `${siteUrl}/matches/${match.id}`,
     })),
-  ];
+  ]
 }

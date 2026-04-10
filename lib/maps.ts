@@ -1,10 +1,10 @@
-import mapIds from "@/lib/map-ids.json";
+import mapIds from "@/lib/map-ids.json"
 
 export type MapEntry = {
-  id: string;
-  name: string;
-  image: string;
-};
+  id: string
+  name: string
+  image: string
+}
 
 function normalizeMapKey(value: string) {
   return value
@@ -13,29 +13,29 @@ function normalizeMapKey(value: string) {
     .replace(/^workshop\/\d+\//, "")
     .replace(/^baseq3\/maps\//, "")
     .replace(/^maps\//, "")
-    .replace(/\.bsp$/, "");
+    .replace(/\.bsp$/, "")
 }
 
 function toCompactMapKey(value: string) {
-  return normalizeMapKey(value).replace(/[\s_-]+/g, "");
+  return normalizeMapKey(value).replace(/[\s_-]+/g, "")
 }
 
 function toDisplayName(id: string) {
   return id
     .replace(/([a-z])([A-Z])/g, "$1 $2")
     .replace(/[-_]+/g, " ")
-    .replace(/\b\w/g, (char) => char.toUpperCase());
+    .replace(/\b\w/g, (char) => char.toUpperCase())
 }
 
 export const mapEntries: MapEntry[] = (mapIds as string[]).map((id) => ({
   id,
   image: `/images/levelshots/${id}.jpg`,
   name: toDisplayName(id),
-}));
+}))
 
 export const mapLookup = Object.fromEntries(
-  mapEntries.map((entry) => [entry.id, entry]),
-) satisfies Record<string, MapEntry>;
+  mapEntries.map((entry) => [entry.id, entry])
+) satisfies Record<string, MapEntry>
 
 const normalizedMapLookup = Object.fromEntries(
   mapEntries.flatMap((entry) => [
@@ -43,40 +43,40 @@ const normalizedMapLookup = Object.fromEntries(
     [toCompactMapKey(entry.id), entry],
     [normalizeMapKey(entry.name), entry],
     [toCompactMapKey(entry.name), entry],
-  ]),
-) satisfies Record<string, MapEntry>;
+  ])
+) satisfies Record<string, MapEntry>
 
 export function getMapEntry(mapId: string | null | undefined) {
   if (!mapId) {
-    return null;
+    return null
   }
 
-  const directMatch = mapLookup[mapId];
+  const directMatch = mapLookup[mapId]
   if (directMatch) {
-    return directMatch;
+    return directMatch
   }
 
   const normalizedMatch =
     normalizedMapLookup[normalizeMapKey(mapId)] ??
-    normalizedMapLookup[toCompactMapKey(mapId)];
+    normalizedMapLookup[toCompactMapKey(mapId)]
 
   if (normalizedMatch) {
-    return normalizedMatch;
+    return normalizedMatch
   }
 
   const fallbackEntry =
     normalizedMapLookup.default ??
     normalizedMapLookup[normalizeMapKey("default")] ??
     mapLookup.default ??
-    mapEntries[0];
+    mapEntries[0]
 
   if (!fallbackEntry) {
-    return null;
+    return null
   }
 
   return {
     id: mapId,
     image: fallbackEntry.image,
     name: toDisplayName(normalizeMapKey(mapId) || mapId),
-  };
+  }
 }

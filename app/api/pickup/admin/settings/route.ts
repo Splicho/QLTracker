@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
-import { z } from "zod";
+import { NextResponse } from "next/server"
+import { z } from "zod"
 
-import { handleRouteError } from "@/lib/server/errors";
-import { requirePickupAdminSession } from "@/lib/server/pickup-auth";
-import { getPickupSettings, toPickupSettingsDto } from "@/lib/server/pickup";
-import { getPrisma } from "@/lib/server/prisma";
+import { handleRouteError } from "@/lib/server/errors"
+import { requirePickupAdminSession } from "@/lib/server/pickup-auth"
+import { getPickupSettings, toPickupSettingsDto } from "@/lib/server/pickup"
+import { getPrisma } from "@/lib/server/prisma"
 
 const patchSchema = z.object({
   callbackSecret: z.string().trim().max(255).optional().nullable(),
@@ -17,56 +17,56 @@ const patchSchema = z.object({
   r2PublicBaseUrl: z.string().trim().url().optional().nullable(),
   r2SecretAccessKey: z.string().trim().max(255).optional().nullable(),
   vetoTurnDurationSeconds: z.number().int().min(10).max(120).optional(),
-});
+})
 
 function normalizeOptional(value: string | null | undefined) {
-  const trimmed = value?.trim();
-  return trimmed ? trimmed : null;
+  const trimmed = value?.trim()
+  return trimmed ? trimmed : null
 }
 
 function preserveSecretOnBlank(
   value: string | null | undefined,
-  currentValue: string | null,
+  currentValue: string | null
 ) {
   if (value === undefined) {
-    return undefined;
+    return undefined
   }
 
   if (value === null) {
-    return currentValue;
+    return currentValue
   }
 
-  const trimmed = value.trim();
+  const trimmed = value.trim()
   if (trimmed.length === 0) {
-    return currentValue;
+    return currentValue
   }
 
-  return trimmed;
+  return trimmed
 }
 
-export const runtime = "nodejs";
+export const runtime = "nodejs"
 
 export async function GET(request: Request) {
   try {
-    await requirePickupAdminSession(request);
+    await requirePickupAdminSession(request)
     return NextResponse.json({
       settings: toPickupSettingsDto(await getPickupSettings()),
-    });
+    })
   } catch (error) {
-    return handleRouteError(error, "Pickup settings could not be loaded.");
+    return handleRouteError(error, "Pickup settings could not be loaded.")
   }
 }
 
 export async function PATCH(request: Request) {
   try {
-    await requirePickupAdminSession(request);
-    const patch = patchSchema.parse(await request.json());
-    const prisma = getPrisma();
+    await requirePickupAdminSession(request)
+    const patch = patchSchema.parse(await request.json())
+    const prisma = getPrisma()
     const existing = await prisma.pickupSettings.findUnique({
       where: {
         id: "default",
       },
-    });
+    })
     const settings = await prisma.pickupSettings.upsert({
       where: {
         id: "default",
@@ -87,7 +87,7 @@ export async function PATCH(request: Request) {
       update: {
         callbackSecret: preserveSecretOnBlank(
           patch.callbackSecret,
-          existing?.callbackSecret ?? null,
+          existing?.callbackSecret ?? null
         ),
         provisionApiUrl:
           patch.provisionApiUrl !== undefined
@@ -95,7 +95,7 @@ export async function PATCH(request: Request) {
             : undefined,
         provisionAuthToken: preserveSecretOnBlank(
           patch.provisionAuthToken,
-          existing?.provisionAuthToken ?? null,
+          existing?.provisionAuthToken ?? null
         ),
         readyCheckDurationSeconds: patch.readyCheckDurationSeconds,
         r2AccountId:
@@ -104,7 +104,7 @@ export async function PATCH(request: Request) {
             : undefined,
         r2AccessKeyId: preserveSecretOnBlank(
           patch.r2AccessKeyId,
-          existing?.r2AccessKeyId ?? null,
+          existing?.r2AccessKeyId ?? null
         ),
         r2BucketName:
           patch.r2BucketName !== undefined
@@ -116,16 +116,16 @@ export async function PATCH(request: Request) {
             : undefined,
         r2SecretAccessKey: preserveSecretOnBlank(
           patch.r2SecretAccessKey,
-          existing?.r2SecretAccessKey ?? null,
+          existing?.r2SecretAccessKey ?? null
         ),
         vetoTurnDurationSeconds: patch.vetoTurnDurationSeconds,
       },
-    });
+    })
 
     return NextResponse.json({
       settings: toPickupSettingsDto(settings),
-    });
+    })
   } catch (error) {
-    return handleRouteError(error, "Pickup settings could not be saved.");
+    return handleRouteError(error, "Pickup settings could not be saved.")
   }
 }

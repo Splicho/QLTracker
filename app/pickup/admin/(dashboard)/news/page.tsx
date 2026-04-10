@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { redirect } from "next/navigation"
 
 export default function PickupAdminNewsPage() {
-  redirect("/admin/news");
+  redirect("/admin/news")
 }

@@ -1,20 +1,20 @@
-import { Medal } from "@/components/icon";
-import { RecentMatchRow } from "@/components/profile/recent-match-row";
+import { Medal } from "@/components/icon"
+import { RecentMatchRow } from "@/components/profile/recent-match-row"
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/components/ui/empty";
-import type { PickupProfileMatch } from "@/lib/pickup";
+} from "@/components/ui/empty"
+import type { PickupProfileMatch } from "@/lib/pickup"
 
 export function PickupRecentMatches({
   matches,
   onOpenMatch,
 }: {
-  matches: PickupProfileMatch[];
-  onOpenMatch: (matchId: string) => void;
+  matches: PickupProfileMatch[]
+  onOpenMatch: (matchId: string) => void
 }) {
   return (
     <section className="border-t border-border">
@@ -41,13 +41,13 @@ export function PickupRecentMatches({
               </EmptyMedia>
               <EmptyTitle>No recent matches yet</EmptyTitle>
               <EmptyDescription>
-                Completed pickup matches will show up here once the recent
-                match feed is wired.
+                Completed pickup matches will show up here once the recent match
+                feed is wired.
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
         </div>
       )}
     </section>
-  );
+  )
 }

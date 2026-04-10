@@ -1,7 +1,11 @@
-import { DeleteObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import {
+  DeleteObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3"
 
-import { routeError } from "@/lib/server/errors";
-import { getPickupSettings } from "@/lib/server/pickup";
+import { routeError } from "@/lib/server/errors"
+import { getPickupSettings } from "@/lib/server/pickup"
 
 const SUPPORTED_IMAGE_TYPES = new Set([
   "image/avif",
@@ -9,10 +13,10 @@ const SUPPORTED_IMAGE_TYPES = new Set([
   "image/jpeg",
   "image/png",
   "image/webp",
-]);
+])
 
 function normalizeBaseUrl(value: string) {
-  return value.replace(/\/+$/, "");
+  return value.replace(/\/+$/, "")
 }
 
 function sanitizeFileStem(value: string) {
@@ -20,43 +24,40 @@ function sanitizeFileStem(value: string) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
-    .slice(0, 80);
+    .slice(0, 80)
 }
 
 function extensionForContentType(contentType: string) {
   switch (contentType) {
     case "image/avif":
-      return "avif";
+      return "avif"
     case "image/gif":
-      return "gif";
+      return "gif"
     case "image/jpeg":
-      return "jpg";
+      return "jpg"
     case "image/png":
-      return "png";
+      return "png"
     case "image/webp":
-      return "webp";
+      return "webp"
     default:
-      return "bin";
+      return "bin"
   }
 }
 
-async function uploadImageToR2(params: {
-  file: File;
-  objectKey: string;
-}) {
-  const { file, objectKey } = params;
+async function uploadImageToR2(params: { file: File; objectKey: string }) {
+  const { file, objectKey } = params
 
   if (!SUPPORTED_IMAGE_TYPES.has(file.type)) {
-    routeError(400, "Only AVIF, GIF, JPEG, PNG, and WEBP images are supported.");
+    routeError(400, "Only AVIF, GIF, JPEG, PNG, and WEBP images are supported.")
   }
 
   if (file.size > 10 * 1024 * 1024) {
-    routeError(400, "Image uploads must be 10 MB or smaller.");
+    routeError(400, "Image uploads must be 10 MB or smaller.")
   }
 
-  const config = await getR2Config();
-  const body = Buffer.from(await file.arrayBuffer());
-  const client = createR2Client(config);
+  const config = await getR2Config()
+  const body = Buffer.from(await file.arrayBuffer())
+  const client = createR2Client(config)
 
   await client.send(
     new PutObjectCommand({
@@ -65,17 +66,17 @@ async function uploadImageToR2(params: {
       Body: body,
       ContentType: file.type,
       CacheControl: "public, max-age=31536000, immutable",
-    }),
-  );
+    })
+  )
 
   return {
     key: objectKey,
     url: `${config.publicBaseUrl}/${objectKey}`,
-  };
+  }
 }
 
 async function getR2Config() {
-  const settings = await getPickupSettings();
+  const settings = await getPickupSettings()
 
   if (
     !settings.r2AccountId ||
@@ -84,7 +85,7 @@ async function getR2Config() {
     !settings.r2AccessKeyId ||
     !settings.r2SecretAccessKey
   ) {
-    routeError(400, "Cloudflare R2 is not configured in pickup admin settings.");
+    routeError(400, "Cloudflare R2 is not configured in pickup admin settings.")
   }
 
   return {
@@ -93,7 +94,7 @@ async function getR2Config() {
     bucketName: settings.r2BucketName,
     publicBaseUrl: normalizeBaseUrl(settings.r2PublicBaseUrl),
     secretAccessKey: settings.r2SecretAccessKey,
-  };
+  }
 }
 
 function createR2Client(config: Awaited<ReturnType<typeof getR2Config>>) {
@@ -104,20 +105,20 @@ function createR2Client(config: Awaited<ReturnType<typeof getR2Config>>) {
       accessKeyId: config.accessKeyId,
       secretAccessKey: config.secretAccessKey,
     },
-  });
+  })
 }
 
 function extractObjectKeyFromPublicUrl(
   imageUrl: string,
-  publicBaseUrl: string,
+  publicBaseUrl: string
 ) {
   try {
-    const parsedImageUrl = new URL(imageUrl);
-    const parsedBaseUrl = new URL(publicBaseUrl);
-    const normalizedBasePath = parsedBaseUrl.pathname.replace(/\/+$/, "");
+    const parsedImageUrl = new URL(imageUrl)
+    const parsedBaseUrl = new URL(publicBaseUrl)
+    const normalizedBasePath = parsedBaseUrl.pathname.replace(/\/+$/, "")
 
     if (parsedImageUrl.origin !== parsedBaseUrl.origin) {
-      return null;
+      return null
     }
 
     if (
@@ -127,76 +128,78 @@ function extractObjectKeyFromPublicUrl(
         parsedImageUrl.pathname.startsWith(`${normalizedBasePath}/`)
       )
     ) {
-      return null;
+      return null
     }
 
     const objectKey = parsedImageUrl.pathname
       .slice(normalizedBasePath.length)
-      .replace(/^\/+/, "");
+      .replace(/^\/+/, "")
 
-    return objectKey || null;
+    return objectKey || null
   } catch {
-    return null;
+    return null
   }
 }
 
 export async function uploadNewsImageToR2(params: {
-  file: File;
-  kind: "content" | "cover";
-  title: string;
+  file: File
+  kind: "content" | "cover"
+  title: string
 }) {
-  const { file, kind, title } = params;
-  const extension = extensionForContentType(file.type);
-  const stem = sanitizeFileStem(title) || "article-image";
-  const objectKey = `news/${kind}/${new Date().toISOString().slice(0, 10)}/${stem}-${Date.now()}.${extension}`;
+  const { file, kind, title } = params
+  const extension = extensionForContentType(file.type)
+  const stem = sanitizeFileStem(title) || "article-image"
+  const objectKey = `news/${kind}/${new Date().toISOString().slice(0, 10)}/${stem}-${Date.now()}.${extension}`
 
   return uploadImageToR2({
     file,
     objectKey,
-  });
+  })
 }
 
 export async function uploadPickupProfileImageToR2(params: {
-  file: File;
-  kind: "avatar" | "cover";
-  playerId: string;
-  personaName: string;
+  file: File
+  kind: "avatar" | "cover"
+  playerId: string
+  personaName: string
 }) {
-  const { file, kind, playerId, personaName } = params;
-  const extension = extensionForContentType(file.type);
-  const stem = sanitizeFileStem(personaName) || "pickup-player";
-  const objectKey = `pickup/players/${playerId}/${kind}/${stem}-${Date.now()}.${extension}`;
+  const { file, kind, playerId, personaName } = params
+  const extension = extensionForContentType(file.type)
+  const stem = sanitizeFileStem(personaName) || "pickup-player"
+  const objectKey = `pickup/players/${playerId}/${kind}/${stem}-${Date.now()}.${extension}`
 
   return uploadImageToR2({
     file,
     objectKey,
-  });
+  })
 }
 
 export async function deletePickupImagesFromR2(imageUrls: string[]) {
   if (imageUrls.length === 0) {
-    return;
+    return
   }
 
-  const settings = await getPickupSettings();
+  const settings = await getPickupSettings()
   const publicBaseUrl = settings.r2PublicBaseUrl
     ? normalizeBaseUrl(settings.r2PublicBaseUrl)
-    : null;
+    : null
 
   if (!publicBaseUrl) {
-    return;
+    return
   }
 
   const objectKeys = Array.from(
     new Set(
       imageUrls
-        .map((imageUrl) => extractObjectKeyFromPublicUrl(imageUrl, publicBaseUrl))
-        .filter((objectKey): objectKey is string => Boolean(objectKey)),
-    ),
-  );
+        .map((imageUrl) =>
+          extractObjectKeyFromPublicUrl(imageUrl, publicBaseUrl)
+        )
+        .filter((objectKey): objectKey is string => Boolean(objectKey))
+    )
+  )
 
   if (objectKeys.length === 0) {
-    return;
+    return
   }
 
   if (
@@ -205,20 +208,20 @@ export async function deletePickupImagesFromR2(imageUrls: string[]) {
     !settings.r2AccessKeyId ||
     !settings.r2SecretAccessKey
   ) {
-    routeError(400, "Cloudflare R2 is not configured in pickup admin settings.");
+    routeError(400, "Cloudflare R2 is not configured in pickup admin settings.")
   }
 
-  const accountId = settings.r2AccountId;
-  const accessKeyId = settings.r2AccessKeyId;
-  const bucketName = settings.r2BucketName;
-  const secretAccessKey = settings.r2SecretAccessKey;
+  const accountId = settings.r2AccountId
+  const accessKeyId = settings.r2AccessKeyId
+  const bucketName = settings.r2BucketName
+  const secretAccessKey = settings.r2SecretAccessKey
   const client = createR2Client({
     accountId,
     accessKeyId,
     bucketName,
     publicBaseUrl,
     secretAccessKey,
-  });
+  })
 
   await Promise.all(
     objectKeys.map((objectKey) =>
@@ -226,12 +229,12 @@ export async function deletePickupImagesFromR2(imageUrls: string[]) {
         new DeleteObjectCommand({
           Bucket: bucketName,
           Key: objectKey,
-        }),
-      ),
-    ),
-  );
+        })
+      )
+    )
+  )
 }
 
 export async function deleteNewsImagesFromR2(imageUrls: string[]) {
-  return deletePickupImagesFromR2(imageUrls);
+  return deletePickupImagesFromR2(imageUrls)
 }

@@ -1,36 +1,33 @@
-import { ArrowLeft } from "lucide-react";
-import { Medal } from "@/components/icon";
-import { RecentMatchRow } from "@/components/profile/recent-match-row";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react"
+import { Medal } from "@/components/icon"
+import { RecentMatchRow } from "@/components/profile/recent-match-row"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/components/ui/empty";
-import type {
-  PickupPlayerProfile,
-  PickupSeasonalRating,
-} from "@/lib/pickup";
+} from "@/components/ui/empty"
+import type { PickupPlayerProfile, PickupSeasonalRating } from "@/lib/pickup"
 
 function formatWinRate(value: number | null) {
   if (value == null) {
-    return "-";
+    return "-"
   }
 
-  return `${Math.round(value)}%`;
+  return `${Math.round(value)}%`
 }
 
 function getHighestRating(ratings: PickupSeasonalRating[]) {
   if (ratings.length === 0) {
-    return null;
+    return null
   }
 
   return ratings.reduce((best, current) =>
     current.displayRating > best.displayRating ? current : best
-  );
+  )
 }
 
 export function PlayerProfileOverviewPane({
@@ -38,15 +35,15 @@ export function PlayerProfileOverviewPane({
   profile,
   onOpenMatches,
 }: {
-  onOpenMatch: (matchId: string) => void;
-  profile: PickupPlayerProfile;
-  onOpenMatches: () => void;
+  onOpenMatch: (matchId: string) => void
+  profile: PickupPlayerProfile
+  onOpenMatches: () => void
 }) {
-  const highestRating = getHighestRating(profile.ratings);
+  const highestRating = getHighestRating(profile.ratings)
   const hasOverviewData =
     profile.stats.totalMatches > 0 ||
     profile.ratings.length > 0 ||
-    profile.recentMatches.length > 0;
+    profile.recentMatches.length > 0
 
   if (!hasOverviewData) {
     return (
@@ -65,23 +62,23 @@ export function PlayerProfileOverviewPane({
           </Empty>
         </div>
       </div>
-    );
+    )
   }
 
   return (
     <div className="min-h-0 flex-1 data-[state=inactive]:hidden">
       <div className="border-b border-border">
         <div className="grid grid-cols-2 gap-0 sm:grid-cols-4">
-          <div className="border-b border-border px-4 py-4 sm:border-b-0 sm:border-r">
-            <p className="text-[11px] font-medium uppercase text-muted-foreground">
+          <div className="border-b border-border px-4 py-4 sm:border-r sm:border-b-0">
+            <p className="text-[11px] font-medium text-muted-foreground uppercase">
               Matches
             </p>
             <p className="mt-1 text-2xl font-semibold text-foreground">
               {profile.stats.totalMatches}
             </p>
           </div>
-          <div className="border-b border-border px-4 py-4 sm:border-b-0 sm:border-r">
-            <p className="text-[11px] font-medium uppercase text-muted-foreground">
+          <div className="border-b border-border px-4 py-4 sm:border-r sm:border-b-0">
+            <p className="text-[11px] font-medium text-muted-foreground uppercase">
               Wins
             </p>
             <p className="mt-1 text-2xl font-semibold text-foreground">
@@ -89,7 +86,7 @@ export function PlayerProfileOverviewPane({
             </p>
           </div>
           <div className="px-4 py-4 sm:border-r">
-            <p className="text-[11px] font-medium uppercase text-muted-foreground">
+            <p className="text-[11px] font-medium text-muted-foreground uppercase">
               Win Rate
             </p>
             <p className="mt-1 text-2xl font-semibold text-foreground">
@@ -97,7 +94,7 @@ export function PlayerProfileOverviewPane({
             </p>
           </div>
           <div className="px-4 py-4">
-            <p className="text-[11px] font-medium uppercase text-muted-foreground">
+            <p className="text-[11px] font-medium text-muted-foreground uppercase">
               Peak Rating
             </p>
             <p className="mt-1 text-2xl font-semibold text-foreground">
@@ -112,7 +109,7 @@ export function PlayerProfileOverviewPane({
             profile.ratings.map((rating) => (
               <Badge
                 key={`${rating.seasonId}:${rating.queueId}`}
-                className="h-8 gap-1.5 rounded-md border-border/70 bg-muted pl-2 pr-1 text-xs font-medium text-foreground"
+                className="h-8 gap-1.5 rounded-md border-border/70 bg-muted pr-1 pl-2 text-xs font-medium text-foreground"
                 variant="outline"
               >
                 <span className="text-foreground/70">{rating.queueName}</span>
@@ -123,7 +120,9 @@ export function PlayerProfileOverviewPane({
               </Badge>
             ))
           ) : (
-            <p className="text-sm text-muted-foreground">No active ratings yet.</p>
+            <p className="text-sm text-muted-foreground">
+              No active ratings yet.
+            </p>
           )}
         </div>
       </div>
@@ -170,5 +169,5 @@ export function PlayerProfileOverviewPane({
         )}
       </div>
     </div>
-  );
+  )
 }

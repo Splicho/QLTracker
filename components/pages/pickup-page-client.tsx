@@ -1,24 +1,24 @@
-"use client";
+"use client"
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { PickupPage } from "@/components/pages/pickup-page";
-import { usePickupAuth } from "@/hooks/use-pickup-auth";
-import { usePickupState } from "@/hooks/use-pickup-state";
-import { fetchPickupLandingData, type PickupLandingData, type PickupPublicState } from "@/lib/pickup";
-import { getRealtimeSocket, isRealtimeEnabled } from "@/lib/realtime";
-import type { InitialPickupBrowserState } from "@/lib/server/pickup-browser";
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { PickupPage } from "@/components/pages/pickup-page"
+import { usePickupAuth } from "@/hooks/use-pickup-auth"
+import { usePickupState } from "@/hooks/use-pickup-state"
+import { fetchPickupLandingData, type PickupLandingData } from "@/lib/pickup"
+import { getRealtimeSocket, isRealtimeEnabled } from "@/lib/realtime"
+import type { InitialPickupBrowserState } from "@/lib/server/pickup-browser"
 
 export function PickupPageClient({
   initialPickupState,
   initialLandingData,
 }: {
-  initialPickupState?: InitialPickupBrowserState;
-  initialLandingData?: PickupLandingData;
+  initialPickupState?: InitialPickupBrowserState
+  initialLandingData?: PickupLandingData
 }) {
-  const router = useRouter();
-  const queryClient = useQueryClient();
+  const router = useRouter()
+  const queryClient = useQueryClient()
   const auth = usePickupAuth(
     initialPickupState
       ? {
@@ -27,53 +27,53 @@ export function PickupPageClient({
           ratings: initialPickupState.ratings,
           sessionToken: initialPickupState.sessionToken,
         }
-      : undefined,
-  );
+      : undefined
+  )
   const pickup = usePickupState(
     auth.sessionToken,
     true,
     auth.player,
     initialPickupState?.publicState ?? null,
-    initialPickupState?.playerState ?? null,
-  );
+    initialPickupState?.playerState ?? null
+  )
   const landingQuery = useQuery({
     queryKey: ["pickup", "landing"],
     queryFn: fetchPickupLandingData,
     initialData: initialLandingData,
     staleTime: 15_000,
     refetchInterval: 15_000,
-  });
+  })
 
   useEffect(() => {
     if (!isRealtimeEnabled()) {
-      return;
+      return
     }
 
-    const socket = getRealtimeSocket();
+    const socket = getRealtimeSocket()
     if (!socket) {
-      return;
+      return
     }
 
     const refetchLanding = () => {
       void queryClient.invalidateQueries({
         queryKey: ["pickup", "landing"],
-      });
-    };
+      })
+    }
 
-    socket.on("connect", refetchLanding);
-    socket.on("pickup:public-state", refetchLanding);
-    socket.on("pickup:state", refetchLanding);
+    socket.on("connect", refetchLanding)
+    socket.on("pickup:public-state", refetchLanding)
+    socket.on("pickup:state", refetchLanding)
 
     if (!socket.connected) {
-      socket.connect();
+      socket.connect()
     }
 
     return () => {
-      socket.off("connect", refetchLanding);
-      socket.off("pickup:public-state", refetchLanding);
-      socket.off("pickup:state", refetchLanding);
-    };
-  }, [queryClient]);
+      socket.off("connect", refetchLanding)
+      socket.off("pickup:public-state", refetchLanding)
+      socket.off("pickup:state", refetchLanding)
+    }
+  }, [queryClient])
 
   return (
     <PickupPage
@@ -96,5 +96,5 @@ export function PickupPageClient({
       recentMatches={landingQuery.data?.recentMatches ?? []}
       userLoading={auth.userLoading}
     />
-  );
+  )
 }

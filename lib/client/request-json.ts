@@ -6,11 +6,11 @@ export function requestJson<T>(url: string, init?: RequestInit) {
       ...(init?.headers ?? {}),
     },
   }).then(async (response) => {
-    const payload = (await response.json()) as T & { message?: string };
+    const payload = (await response.json()) as T & { message?: string }
     if (!response.ok) {
-      throw new Error(payload.message ?? "Request failed.");
+      throw new Error(payload.message ?? "Request failed.")
     }
 
-    return payload;
-  });
+    return payload
+  })
 }

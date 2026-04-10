@@ -1,11 +1,11 @@
 export type ServerCountryLocation = {
-  addr: string;
-  ip: string;
-  country_name: string | null;
-  country_code: string | null;
-};
+  addr: string
+  ip: string
+  country_name: string | null
+  country_code: string | null
+}
 
-export type ServerRegion = "eu" | "na" | "sa" | "za" | "apac";
+export type ServerRegion = "eu" | "na" | "sa" | "za" | "apac"
 
 const regionCountryCodes: Record<ServerRegion, Set<string>> = {
   eu: new Set([
@@ -163,33 +163,32 @@ const regionCountryCodes: Record<ServerRegion, Set<string>> = {
     "vu",
     "ws",
   ]),
-};
+}
 
 export function getCountryFlagSrc(countryCode: string | null | undefined) {
-  const normalizedCode = countryCode?.trim().toLowerCase();
-  const flagId = normalizedCode && /^[a-z-]+$/.test(normalizedCode)
-    ? normalizedCode
-    : "none";
+  const normalizedCode = countryCode?.trim().toLowerCase()
+  const flagId =
+    normalizedCode && /^[a-z-]+$/.test(normalizedCode) ? normalizedCode : "none"
 
-  return `/images/flags/${flagId}.png`;
+  return `/images/flags/${flagId}.png`
 }
 
 export function getRegionFromCountryCode(
   countryCode: string | null | undefined
 ): ServerRegion | null {
-  const normalizedCode = countryCode?.trim().toLowerCase();
+  const normalizedCode = countryCode?.trim().toLowerCase()
 
   if (!normalizedCode) {
-    return null;
+    return null
   }
 
   for (const [region, codes] of Object.entries(regionCountryCodes) as Array<
     [ServerRegion, Set<string>]
   >) {
     if (codes.has(normalizedCode)) {
-      return region;
+      return region
     }
   }
 
-  return null;
+  return null
 }

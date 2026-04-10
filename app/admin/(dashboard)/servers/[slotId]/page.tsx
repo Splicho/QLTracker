@@ -1,11 +1,11 @@
-import { PickupAdminSlotDetail } from "@/components/pickup-admin-slot-detail";
+import { PickupAdminSlotDetail } from "@/components/pickup-admin-slot-detail"
 
 export default async function AdminSlotDetailPage({
   params,
 }: {
-  params: Promise<{ slotId: string }>;
+  params: Promise<{ slotId: string }>
 }) {
-  const { slotId } = await params;
+  const { slotId } = await params
 
-  return <PickupAdminSlotDetail slotId={Number(slotId)} />;
+  return <PickupAdminSlotDetail slotId={Number(slotId)} />
 }

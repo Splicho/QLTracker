@@ -1,32 +1,35 @@
-"use client";
+"use client"
 
-import { useMemo } from "react";
-import { ServerFilters } from "@/components/server/server-filters";
-import { ServerList } from "@/components/server/server-list";
-import { useLocalStorage } from "@/hooks/use-local-storage";
-import { useLiveServers } from "@/hooks/use-live-servers";
-import { useServerInteractions } from "@/hooks/use-server-interactions";
+import { useMemo } from "react"
+import { ServerFilters } from "@/components/server/server-filters"
+import { ServerList } from "@/components/server/server-list"
+import { useLocalStorage } from "@/hooks/use-local-storage"
+import { useLiveServers } from "@/hooks/use-live-servers"
+import { useServerInteractions } from "@/hooks/use-server-interactions"
 import {
   SERVER_FILTERS_STORAGE_KEY,
   parseStoredServerFilters,
   serializeServerFilters,
-} from "@/lib/server-filters-storage";
-import { createDefaultServerFilters } from "@/lib/server-filters";
-import type { SteamServer } from "@/lib/steam";
+} from "@/lib/server-filters-storage"
+import { createDefaultServerFilters } from "@/lib/server-filters"
+import type { SteamServer } from "@/lib/steam"
 
 export function ServersPageClient({
   initialServers,
 }: {
-  initialServers: SteamServer[];
+  initialServers: SteamServer[]
 }) {
   const { error, isLoading, isRefreshing, refetch, servers } =
-    useLiveServers(initialServers);
-  const interactions = useServerInteractions({});
+    useLiveServers(initialServers)
+  const interactions = useServerInteractions({})
   const [rawFilters, setRawFilters] = useLocalStorage(
     SERVER_FILTERS_STORAGE_KEY,
     serializeServerFilters(createDefaultServerFilters())
-  );
-  const filters = useMemo(() => parseStoredServerFilters(rawFilters), [rawFilters]);
+  )
+  const filters = useMemo(
+    () => parseStoredServerFilters(rawFilters),
+    [rawFilters]
+  )
 
   return (
     <>
@@ -53,5 +56,5 @@ export function ServersPageClient({
       </section>
       {interactions.overlays}
     </>
-  );
+  )
 }

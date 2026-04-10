@@ -1,29 +1,27 @@
-"use client";
+"use client"
 
-import { useState } from "react";
+import { useState } from "react"
 
-import { Field } from "@/components/pickup-admin-fields";
-import {
-  Button,
-  Input,
-  Spinner,
-  toast,
-} from "@/components/pickup-admin-ui";
-import { requestJson } from "@/lib/client/request-json";
-import type { PickupAdminSettingsDto, PickupSettingsDto } from "@/lib/server/pickup";
+import { Field } from "@/components/pickup-admin-fields"
+import { Button, Input, Spinner, toast } from "@/components/pickup-admin-ui"
+import { requestJson } from "@/lib/client/request-json"
+import type {
+  PickupAdminSettingsDto,
+  PickupSettingsDto,
+} from "@/lib/server/pickup"
 
 type SettingsFormState = {
-  callbackSecret: string;
-  provisionApiUrl: string;
-  provisionAuthToken: string;
-  readyCheckDurationSeconds: number;
-  r2AccountId: string;
-  r2AccessKeyId: string;
-  r2BucketName: string;
-  r2PublicBaseUrl: string;
-  r2SecretAccessKey: string;
-  vetoTurnDurationSeconds: number;
-};
+  callbackSecret: string
+  provisionApiUrl: string
+  provisionAuthToken: string
+  readyCheckDurationSeconds: number
+  r2AccountId: string
+  r2AccessKeyId: string
+  r2BucketName: string
+  r2PublicBaseUrl: string
+  r2SecretAccessKey: string
+  vetoTurnDurationSeconds: number
+}
 
 function createForm(settings: PickupSettingsDto): SettingsFormState {
   return {
@@ -37,46 +35,50 @@ function createForm(settings: PickupSettingsDto): SettingsFormState {
     r2PublicBaseUrl: settings.r2PublicBaseUrl ?? "",
     r2SecretAccessKey: "",
     vetoTurnDurationSeconds: settings.vetoTurnDurationSeconds,
-  };
+  }
 }
 
 export function PickupAdminSettings({
   initialSettings,
 }: {
-  initialSettings: PickupAdminSettingsDto;
+  initialSettings: PickupAdminSettingsDto
 }) {
-  const [settings, setSettings] = useState(initialSettings.settings);
-  const [form, setForm] = useState(createForm(initialSettings.settings));
-  const [isPending, setIsPending] = useState(false);
+  const [settings, setSettings] = useState(initialSettings.settings)
+  const [form, setForm] = useState(createForm(initialSettings.settings))
+  const [isPending, setIsPending] = useState(false)
 
   const saveSettings = () => {
-    setIsPending(true);
-    void requestJson<{ settings: PickupSettingsDto }>("/api/pickup/admin/settings", {
-      body: JSON.stringify(form),
-      method: "PATCH",
-    })
+    setIsPending(true)
+    void requestJson<{ settings: PickupSettingsDto }>(
+      "/api/pickup/admin/settings",
+      {
+        body: JSON.stringify(form),
+        method: "PATCH",
+      }
+    )
       .then((payload) => {
-        setSettings(payload.settings);
-        setForm(createForm(payload.settings));
-        toast.success("Shared pickup settings saved.");
+        setSettings(payload.settings)
+        setForm(createForm(payload.settings))
+        toast.success("Shared pickup settings saved.")
       })
       .catch((error) => {
         toast.danger("Shared settings failed.", {
-          description: error instanceof Error ? error.message : "Request failed.",
-        });
+          description:
+            error instanceof Error ? error.message : "Request failed.",
+        })
       })
       .finally(() => {
-        setIsPending(false);
-      });
-  };
+        setIsPending(false)
+      })
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-10 text-white">
       <header className="space-y-1">
         <h1 className="text-3xl font-medium tracking-tight">Settings</h1>
         <p className="text-sm text-white/60">
-          These settings apply to every queue. Change them once and the full pickup flow updates
-          together.
+          These settings apply to every queue. Change them once and the full
+          pickup flow updates together.
         </p>
       </header>
 
@@ -85,8 +87,8 @@ export function PickupAdminSettings({
           <div className="border-b border-white/10 px-6 py-5">
             <h2 className="text-xl font-medium">Match Flow Configuration</h2>
             <p className="mt-2 text-sm text-white/60">
-              Timers and provision credentials are shared globally so queues only own queue-specific
-              data like format, map pool, and seasons.
+              Timers and provision credentials are shared globally so queues
+              only own queue-specific data like format, map pool, and seasons.
             </p>
           </div>
 
@@ -101,7 +103,8 @@ export function PickupAdminSettings({
                   onChange={(event) =>
                     setForm((current) => ({
                       ...current,
-                      readyCheckDurationSeconds: Number(event.target.value) || 0,
+                      readyCheckDurationSeconds:
+                        Number(event.target.value) || 0,
                     }))
                   }
                 />
@@ -148,7 +151,9 @@ export function PickupAdminSettings({
               label="Provision auth token"
             >
               <Input
-                placeholder={settings.hasProvisionAuthToken ? "stored" : "optional"}
+                placeholder={
+                  settings.hasProvisionAuthToken ? "stored" : "optional"
+                }
                 value={form.provisionAuthToken}
                 variant="secondary"
                 onChange={(event) =>
@@ -185,7 +190,8 @@ export function PickupAdminSettings({
               <div className="space-y-1">
                 <h3 className="text-base font-medium">Cloudflare R2</h3>
                 <p className="text-sm text-white/60">
-                  News cover images and inline content images upload through this bucket.
+                  News cover images and inline content images upload through
+                  this bucket.
                 </p>
               </div>
 
@@ -245,7 +251,9 @@ export function PickupAdminSettings({
                   label="Access key ID"
                 >
                   <Input
-                    placeholder={settings.hasR2AccessKeyId ? "stored" : "required"}
+                    placeholder={
+                      settings.hasR2AccessKeyId ? "stored" : "required"
+                    }
                     value={form.r2AccessKeyId}
                     variant="secondary"
                     onChange={(event) =>
@@ -266,7 +274,9 @@ export function PickupAdminSettings({
                   label="Secret access key"
                 >
                   <Input
-                    placeholder={settings.hasR2SecretAccessKey ? "stored" : "required"}
+                    placeholder={
+                      settings.hasR2SecretAccessKey ? "stored" : "required"
+                    }
                     type="password"
                     value={form.r2SecretAccessKey}
                     variant="secondary"
@@ -282,10 +292,16 @@ export function PickupAdminSettings({
             </div>
 
             <div className="flex justify-end border-t border-white/10 pt-5">
-              <Button isPending={isPending} variant="primary" onPress={saveSettings}>
+              <Button
+                isPending={isPending}
+                variant="primary"
+                onPress={saveSettings}
+              >
                 {({ isPending: buttonIsPending }) => (
                   <>
-                    {buttonIsPending ? <Spinner color="current" size="sm" /> : null}
+                    {buttonIsPending ? (
+                      <Spinner color="current" size="sm" />
+                    ) : null}
                     Save Shared Settings
                   </>
                 )}
@@ -295,5 +311,5 @@ export function PickupAdminSettings({
         </div>
       </section>
     </div>
-  );
+  )
 }

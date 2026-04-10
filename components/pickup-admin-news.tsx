@@ -1,7 +1,7 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import Link from "next/link"
+import { useEffect, useRef, useState } from "react"
 
 import {
   ActionButton,
@@ -9,35 +9,38 @@ import {
   FieldDateTimePicker,
   FieldInput,
   FieldSelect,
-} from "@/components/pickup-admin-fields";
-import { NewsRichEditor, type NewsRichEditorHandle } from "@/components/news-rich-editor";
+} from "@/components/pickup-admin-fields"
+import {
+  NewsRichEditor,
+  type PlateNewsEditorHandle as NewsRichEditorHandle,
+} from "@/components/news-editor/plate-news-editor"
 import {
   Button,
   Modal,
   Spinner,
   toast,
   useOverlayState,
-} from "@/components/pickup-admin-ui";
-import { requestJson } from "@/lib/client/request-json";
-import type { NewsArticleDto } from "@/lib/server/news";
+} from "@/components/pickup-admin-ui"
+import { requestJson } from "@/lib/client/request-json"
+import type { NewsArticleDto } from "@/lib/server/news"
 
 type PendingAction =
   | "createArticle"
   | "uploadContentImage"
   | "uploadCoverImage"
-  | null;
+  | null
 
 const categoryOptions = [
   { label: "Launcher", value: "launcher" },
   { label: "Pickup", value: "pickup" },
   { label: "Infrastructure", value: "infrastructure" },
   { label: "Community", value: "community" },
-] as const;
+] as const
 
-type NewsCategory = (typeof categoryOptions)[number]["value"];
+type NewsCategory = (typeof categoryOptions)[number]["value"]
 
 function formatPublishedAt(value: string) {
-  return new Date(value).toLocaleString();
+  return new Date(value).toLocaleString()
 }
 
 function createDefaultForm() {
@@ -47,39 +50,39 @@ function createDefaultForm() {
     coverImageUrl: "",
     publishedAt: new Date().toISOString().slice(0, 16),
     title: "",
-  };
+  }
 }
 
 export function PickupAdminNews({
   initialArticles,
 }: {
-  initialArticles: NewsArticleDto[];
+  initialArticles: NewsArticleDto[]
 }) {
-  const [articles, setArticles] = useState(initialArticles);
-  const [form, setForm] = useState(createDefaultForm());
-  const [pendingAction, setPendingAction] = useState<PendingAction>(null);
-  const coverInputRef = useRef<HTMLInputElement | null>(null);
-  const contentEditorRef = useRef<NewsRichEditorHandle | null>(null);
-  const createArticleModal = useOverlayState();
+  const [articles, setArticles] = useState(initialArticles)
+  const [form, setForm] = useState(createDefaultForm())
+  const [pendingAction, setPendingAction] = useState<PendingAction>(null)
+  const coverInputRef = useRef<HTMLInputElement | null>(null)
+  const contentEditorRef = useRef<NewsRichEditorHandle | null>(null)
+  const createArticleModal = useOverlayState()
 
   useEffect(() => {
     if (!createArticleModal.isOpen) {
-      return;
+      return
     }
 
-    setForm(createDefaultForm());
+    setForm(createDefaultForm())
     requestAnimationFrame(() => {
-      contentEditorRef.current?.focus();
-    });
-  }, [createArticleModal.isOpen]);
+      contentEditorRef.current?.focus()
+    })
+  }, [createArticleModal.isOpen])
 
   const createArticle = async () => {
     if (!form.content.trim()) {
-      toast.danger("Add article content first.");
-      return;
+      toast.danger("Add article content first.")
+      return
     }
 
-    setPendingAction("createArticle");
+    setPendingAction("createArticle")
     try {
       const payload = await requestJson<{ article: NewsArticleDto }>(
         "/api/pickup/admin/news",
@@ -90,73 +93,75 @@ export function PickupAdminNews({
             coverImageUrl: form.coverImageUrl.trim() || null,
             publishedAt: new Date(form.publishedAt).toISOString(),
           }),
-        },
-      );
+        }
+      )
 
       setArticles((current) =>
         [payload.article, ...current].sort((left, right) =>
-          right.publishedAt.localeCompare(left.publishedAt),
-        ),
-      );
-      setForm(createDefaultForm());
-      createArticleModal.close();
-      toast.success("Article created.");
+          right.publishedAt.localeCompare(left.publishedAt)
+        )
+      )
+      setForm(createDefaultForm())
+      createArticleModal.close()
+      toast.success("Article created.")
     } catch (error) {
       toast.danger("Article creation failed.", {
         description: error instanceof Error ? error.message : "Request failed.",
-      });
+      })
     } finally {
-      setPendingAction(null);
+      setPendingAction(null)
     }
-  };
+  }
 
   const uploadImage = async (file: File, kind: "content" | "cover") => {
     if (form.title.trim().length === 0) {
-      toast.danger("Add the article title first.");
-      return null;
+      toast.danger("Add the article title first.")
+      return null
     }
 
-    setPendingAction(kind === "cover" ? "uploadCoverImage" : "uploadContentImage");
+    setPendingAction(
+      kind === "cover" ? "uploadCoverImage" : "uploadContentImage"
+    )
 
     try {
-      const payload = new FormData();
-      payload.set("file", file);
-      payload.set("kind", kind);
-      payload.set("title", form.title.trim());
+      const payload = new FormData()
+      payload.set("file", file)
+      payload.set("kind", kind)
+      payload.set("title", form.title.trim())
 
       const response = await fetch("/api/pickup/admin/news/upload", {
         method: "POST",
         body: payload,
-      });
+      })
 
-      const body = (await response.json()) as { message?: string; url?: string };
+      const body = (await response.json()) as { message?: string; url?: string }
       if (!response.ok || !body.url) {
-        throw new Error(body.message ?? "Upload failed.");
+        throw new Error(body.message ?? "Upload failed.")
       }
 
       if (kind === "cover") {
         setForm((current) => ({
           ...current,
           coverImageUrl: body.url ?? "",
-        }));
-        toast.success("Cover image uploaded.");
+        }))
+        toast.success("Cover image uploaded.")
       } else {
-        toast.success("Content image uploaded.");
+        toast.success("Content image uploaded.")
       }
 
-      return body.url ?? null;
+      return body.url ?? null
     } catch (error) {
       toast.danger("Image upload failed.", {
         description: error instanceof Error ? error.message : "Request failed.",
-      });
-      return null;
+      })
+      return null
     } finally {
-      setPendingAction(null);
+      setPendingAction(null)
       if (coverInputRef.current) {
-        coverInputRef.current.value = "";
+        coverInputRef.current.value = ""
       }
     }
-  };
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-10 text-white">
@@ -167,7 +172,11 @@ export function PickupAdminNews({
             Create launcher articles and manage what appears in the news feed.
           </p>
         </div>
-        <Button className="h-11" variant="secondary" onPress={createArticleModal.open}>
+        <Button
+          className="h-11"
+          variant="secondary"
+          onPress={createArticleModal.open}
+        >
           Create Article
         </Button>
         <Modal state={createArticleModal}>
@@ -176,10 +185,13 @@ export function PickupAdminNews({
               <Modal.Dialog>
                 <Modal.Header className="border-b border-white/10 px-6 py-4">
                   <div>
-                    <Modal.Heading className="text-xl font-medium">Create Article</Modal.Heading>
+                    <Modal.Heading className="text-xl font-medium">
+                      Create Article
+                    </Modal.Heading>
                     <p className="mt-1 text-sm text-white/60">
-                      Slug and excerpt are generated automatically from the title and content.
-                      Upload cover and inline images directly to Cloudflare R2.
+                      Slug and excerpt are generated automatically from the
+                      title and content. Upload cover and inline images directly
+                      to Cloudflare R2.
                     </p>
                   </div>
                   <Modal.CloseTrigger />
@@ -191,7 +203,9 @@ export function PickupAdminNews({
                         disabled={pendingAction !== null}
                         placeholder="QLTracker 1.6.0 beta is ready"
                         value={form.title}
-                        onChange={(value) => setForm((current) => ({ ...current, title: value }))}
+                        onChange={(value) =>
+                          setForm((current) => ({ ...current, title: value }))
+                        }
                       />
                     </Field>
 
@@ -217,7 +231,10 @@ export function PickupAdminNews({
                         disabled={pendingAction !== null}
                         value={form.publishedAt}
                         onChange={(value) =>
-                          setForm((current) => ({ ...current, publishedAt: value }))
+                          setForm((current) => ({
+                            ...current,
+                            publishedAt: value,
+                          }))
                         }
                       />
                     </Field>
@@ -234,12 +251,12 @@ export function PickupAdminNews({
                           className="hidden"
                           type="file"
                           onChange={(event) => {
-                            const file = event.target.files?.[0];
+                            const file = event.target.files?.[0]
                             if (!file) {
-                              return;
+                              return
                             }
 
-                            void uploadImage(file, "cover");
+                            void uploadImage(file, "cover")
                           }}
                         />
                         <Button
@@ -285,7 +302,9 @@ export function PickupAdminNews({
                       <NewsRichEditor
                         ref={contentEditorRef}
                         disabled={pendingAction !== null}
-                        isUploadingImage={pendingAction === "uploadContentImage"}
+                        isUploadingImage={
+                          pendingAction === "uploadContentImage"
+                        }
                         markdown={form.content}
                         onMarkdownChange={(content) =>
                           setForm((current) => ({
@@ -293,13 +312,19 @@ export function PickupAdminNews({
                             content,
                           }))
                         }
-                        onRequestImageUpload={(file) => uploadImage(file, "content")}
+                        onRequestImageUpload={(file) =>
+                          uploadImage(file, "content")
+                        }
                       />
                     </Field>
                   </div>
                 </Modal.Body>
                 <Modal.Footer className="flex justify-end gap-3 border-t border-white/10 px-6 py-4">
-                  <Button className="cursor-pointer" variant="secondary" onPress={createArticleModal.close}>
+                  <Button
+                    className="cursor-pointer"
+                    variant="secondary"
+                    onPress={createArticleModal.close}
+                  >
                     Cancel
                   </Button>
                   <ActionButton
@@ -325,19 +350,20 @@ export function PickupAdminNews({
         <div className="border-b border-white/10 px-6 py-4">
           <h2 className="text-lg font-medium">Published Articles</h2>
           <p className="mt-1 text-sm text-white/60">
-            Latest articles appear first. The launcher can consume these via the public news API.
+            Latest articles appear first. The launcher can consume these via the
+            public news API.
           </p>
         </div>
 
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
-            <thead className="bg-[#111111] text-xs uppercase tracking-[0.18em] text-white/40">
+            <thead className="bg-[#111111] text-xs tracking-[0.18em] text-white/40 uppercase">
               <tr>
                 <th className="px-6 py-3 font-medium">Article</th>
                 <th className="px-6 py-3 font-medium">Category</th>
                 <th className="px-6 py-3 font-medium">Published</th>
                 <th className="px-6 py-3 font-medium">Slug</th>
-                <th className="px-6 py-3 font-medium text-right">Actions</th>
+                <th className="px-6 py-3 text-right font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -346,12 +372,20 @@ export function PickupAdminNews({
                   <tr key={article.id} className="border-t border-white/10">
                     <td className="px-6 py-4">
                       <div className="flex flex-col gap-1">
-                        <span className="font-medium text-white">{article.title}</span>
-                        <span className="max-w-xl text-sm text-white/55">{article.excerpt}</span>
+                        <span className="font-medium text-white">
+                          {article.title}
+                        </span>
+                        <span className="max-w-xl text-sm text-white/55">
+                          {article.excerpt}
+                        </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 capitalize text-white/70">{article.category}</td>
-                    <td className="px-6 py-4 text-white/70">{formatPublishedAt(article.publishedAt)}</td>
+                    <td className="px-6 py-4 text-white/70 capitalize">
+                      {article.category}
+                    </td>
+                    <td className="px-6 py-4 text-white/70">
+                      {formatPublishedAt(article.publishedAt)}
+                    </td>
                     <td className="px-6 py-4 text-white/45">{article.slug}</td>
                     <td className="px-6 py-4 text-right">
                       <Link
@@ -375,5 +409,5 @@ export function PickupAdminNews({
         </div>
       </section>
     </div>
-  );
+  )
 }

@@ -1,7 +1,7 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import {
   ArrowLeft,
   BellRing,
@@ -10,10 +10,10 @@ import {
   Newspaper,
   Server,
   Settings2,
-} from "lucide-react";
+} from "lucide-react"
 
-import type { PickupPlayerDto } from "@/lib/server/pickup";
-import { Button } from "@/components/ui/button";
+import type { PickupPlayerDto } from "@/lib/server/pickup"
+import { Button } from "@/components/ui/button"
 import {
   Sidebar,
   SidebarContent,
@@ -30,7 +30,7 @@ import {
   SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
-} from "@/components/ui/sidebar";
+} from "@/components/ui/sidebar"
 
 const NAV_ITEMS = [
   { href: "/admin", icon: LayoutDashboard, label: "Queues" },
@@ -38,16 +38,15 @@ const NAV_ITEMS = [
   { href: "/admin/notices", icon: BellRing, label: "Notices" },
   { href: "/admin/servers", icon: Server, label: "Servers" },
   { href: "/admin/settings", icon: Settings2, label: "Settings" },
-] as const;
+] as const
 
 export function AdminShell({
   children,
-  viewer: _viewer,
 }: {
-  children: React.ReactNode;
-  viewer: PickupPlayerDto;
+  children: React.ReactNode
+  viewer: PickupPlayerDto
 }) {
-  const pathname = usePathname();
+  const pathname = usePathname()
 
   return (
     <SidebarProvider defaultOpen={true}>
@@ -69,18 +68,22 @@ export function AdminShell({
                   const isActive =
                     item.href === "/admin"
                       ? pathname === "/admin"
-                      : pathname.startsWith(item.href);
+                      : pathname.startsWith(item.href)
 
                   return (
                     <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton asChild isActive={isActive} tooltip={item.label}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isActive}
+                        tooltip={item.label}
+                      >
                         <Link href={item.href}>
                           <item.icon />
                           <span>{item.label}</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
-                  );
+                  )
                 })}
               </SidebarMenu>
             </SidebarGroupContent>
@@ -96,7 +99,9 @@ export function AdminShell({
             >
               <Link href="/servers">
                 <ArrowLeft />
-                <span className="group-data-[collapsible=icon]:hidden">Back to QLTracker</span>
+                <span className="group-data-[collapsible=icon]:hidden">
+                  Back to QLTracker
+                </span>
               </Link>
             </Button>
             <Button
@@ -106,7 +111,9 @@ export function AdminShell({
             >
               <Link href="/admin/logout">
                 <LogOut />
-                <span className="group-data-[collapsible=icon]:hidden">Logout</span>
+                <span className="group-data-[collapsible=icon]:hidden">
+                  Logout
+                </span>
               </Link>
             </Button>
           </div>
@@ -117,16 +124,16 @@ export function AdminShell({
         <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-white/10 bg-background/80 px-4 backdrop-blur">
           <SidebarTrigger className="text-white hover:bg-white/10 hover:text-white" />
           <div className="flex flex-col">
-            <span className="text-xs uppercase tracking-[0.2em] text-white/40">
+            <span className="text-xs tracking-[0.2em] text-white/40 uppercase">
               Admin
             </span>
-            <span className="text-sm font-medium text-white">Pickup operations</span>
+            <span className="text-sm font-medium text-white">
+              Pickup operations
+            </span>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto">
-          {children}
-        </main>
+        <main className="flex-1 overflow-y-auto">{children}</main>
       </SidebarInset>
     </SidebarProvider>
-  );
+  )
 }

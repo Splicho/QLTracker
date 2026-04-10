@@ -1,36 +1,35 @@
-import { useState } from "react";
-import { ServerDrawer } from "@/components/server/server-drawer";
-import { ServerPasswordDialog } from "@/components/server/server-password-dialog";
-import { useServerPasswords } from "@/hooks/use-server-passwords";
-import { navigateToUrl } from "@/lib/open-url";
-import { buildSteamConnectUrl } from "@/lib/server-utils";
-import type { SteamServer } from "@/lib/steam";
+import { useState } from "react"
+import { ServerDrawer } from "@/components/server/server-drawer"
+import { ServerPasswordDialog } from "@/components/server/server-password-dialog"
+import { useServerPasswords } from "@/hooks/use-server-passwords"
+import { navigateToUrl } from "@/lib/open-url"
+import { buildSteamConnectUrl } from "@/lib/server-utils"
+import type { SteamServer } from "@/lib/steam"
 
 type DiscordPresenceServerContext = {
-  modeLabel: string | null;
-  server: SteamServer;
-};
+  modeLabel: string | null
+  server: SteamServer
+}
 
 export type ServerInteractionContext = {
-  server: SteamServer;
-  modeLabel: string | null;
-  canJoin?: boolean;
-  requiresPassword?: boolean;
-};
+  server: SteamServer
+  modeLabel: string | null
+  canJoin?: boolean
+  requiresPassword?: boolean
+}
 
 export function useServerInteractions({
   onServerLaunched,
 }: {
-  onServerLaunched?: (context: DiscordPresenceServerContext) => void;
+  onServerLaunched?: (context: DiscordPresenceServerContext) => void
 }) {
-  const { getPassword, savePassword } = useServerPasswords();
-  const [activeServer, setActiveServer] = useState<ServerInteractionContext | null>(
-    null
-  );
+  const { getPassword, savePassword } = useServerPasswords()
+  const [activeServer, setActiveServer] =
+    useState<ServerInteractionContext | null>(null)
   const [passwordContext, setPasswordContext] =
-    useState<ServerInteractionContext | null>(null);
-  const [joinPassword, setJoinPassword] = useState("");
-  const [rememberServerPassword, setRememberServerPassword] = useState(false);
+    useState<ServerInteractionContext | null>(null)
+  const [joinPassword, setJoinPassword] = useState("")
+  const [rememberServerPassword, setRememberServerPassword] = useState(false)
 
   const launchServer = (
     context: ServerInteractionContext,
@@ -39,34 +38,34 @@ export function useServerInteractions({
     onServerLaunched?.({
       server: context.server,
       modeLabel: context.modeLabel,
-    });
-    navigateToUrl(buildSteamConnectUrl(context.server.addr, password));
-  };
+    })
+    navigateToUrl(buildSteamConnectUrl(context.server.addr, password))
+  }
 
   const requestJoin = (context: ServerInteractionContext) => {
     if (context.canJoin === false) {
-      return;
+      return
     }
 
     if (context.requiresPassword !== true) {
-      launchServer(context);
-      return;
+      launchServer(context)
+      return
     }
 
-    const savedPassword = getPassword(context.server.addr);
+    const savedPassword = getPassword(context.server.addr)
     if (savedPassword) {
-      launchServer(context, savedPassword);
-      return;
+      launchServer(context, savedPassword)
+      return
     }
 
-    setPasswordContext(context);
-    setJoinPassword("");
-    setRememberServerPassword(false);
-  };
+    setPasswordContext(context)
+    setJoinPassword("")
+    setRememberServerPassword(false)
+  }
 
   return {
     openServerDetails(context: ServerInteractionContext) {
-      setActiveServer(context);
+      setActiveServer(context)
     },
     requestJoin,
     overlays: (
@@ -76,17 +75,19 @@ export function useServerInteractions({
           server={activeServer?.server ?? null}
           requiresPassword={activeServer?.requiresPassword === true}
           hasSavedPassword={
-            activeServer ? Boolean(getPassword(activeServer.server.addr)) : false
+            activeServer
+              ? Boolean(getPassword(activeServer.server.addr))
+              : false
           }
           canJoin={activeServer?.canJoin !== false}
           onOpenChange={(open) => {
             if (!open) {
-              setActiveServer(null);
+              setActiveServer(null)
             }
           }}
           onJoin={() => {
             if (activeServer) {
-              requestJoin(activeServer);
+              requestJoin(activeServer)
             }
           }}
         />
@@ -98,34 +99,34 @@ export function useServerInteractions({
           rememberPassword={rememberServerPassword}
           onOpenChange={(open) => {
             if (!open) {
-              setPasswordContext(null);
-              setJoinPassword("");
-              setRememberServerPassword(false);
+              setPasswordContext(null)
+              setJoinPassword("")
+              setRememberServerPassword(false)
             }
           }}
           onPasswordChange={setJoinPassword}
           onRememberPasswordChange={setRememberServerPassword}
           onSubmit={() => {
             if (!passwordContext) {
-              return;
+              return
             }
 
-            const password = joinPassword.trim();
+            const password = joinPassword.trim()
             if (!password) {
-              return;
+              return
             }
 
             if (rememberServerPassword) {
-              savePassword(passwordContext.server.addr, password);
+              savePassword(passwordContext.server.addr, password)
             }
 
-            launchServer(passwordContext, password);
-            setPasswordContext(null);
-            setJoinPassword("");
-            setRememberServerPassword(false);
+            launchServer(passwordContext, password)
+            setPasswordContext(null)
+            setJoinPassword("")
+            setRememberServerPassword(false)
           }}
         />
       </>
     ),
-  };
+  }
 }

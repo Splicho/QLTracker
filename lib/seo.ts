@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata } from "next"
 
 export const siteConfig = {
   name: "QLTracker",
@@ -24,35 +24,35 @@ export const siteConfig = {
     url: "/images/og-image.jpg",
     width: 1200,
   },
-} as const;
+} as const
 
 export function getSiteUrl(): string {
   const envUrl =
     process.env.PUBLIC_BASE_URL?.trim() ||
-    process.env.NEXT_PUBLIC_SITE_URL?.trim();
+    process.env.NEXT_PUBLIC_SITE_URL?.trim()
 
   if (!envUrl) {
-    return siteConfig.url;
+    return siteConfig.url
   }
 
   if (envUrl.startsWith("http://") || envUrl.startsWith("https://")) {
-    return envUrl;
+    return envUrl
   }
 
-  return `https://${envUrl}`;
+  return `https://${envUrl}`
 }
 
 export function getMetadataBase() {
-  return new URL(getSiteUrl());
+  return new URL(getSiteUrl())
 }
 
 export function resolveAbsoluteUrl(pathOrUrl: string): string {
   if (pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://")) {
-    return pathOrUrl;
+    return pathOrUrl
   }
 
-  const normalizedPath = pathOrUrl.startsWith("/") ? pathOrUrl : `/${pathOrUrl}`;
-  return new URL(normalizedPath, getSiteUrl()).toString();
+  const normalizedPath = pathOrUrl.startsWith("/") ? pathOrUrl : `/${pathOrUrl}`
+  return new URL(normalizedPath, getSiteUrl()).toString()
 }
 
 export function createSiteMetadata(): Metadata {
@@ -98,7 +98,7 @@ export function createSiteMetadata(): Metadata {
       ],
       shortcut: "/images/icons/favicon-96x96.png",
     },
-  };
+  }
 }
 
 export function createPageMetadata({
@@ -106,12 +106,12 @@ export function createPageMetadata({
   path,
   title,
 }: {
-  description?: string;
-  path: string;
-  title?: string;
+  description?: string
+  path: string
+  title?: string
 }): Metadata {
-  const resolvedDescription = description ?? siteConfig.description;
-  const resolvedTitle = title ?? siteConfig.name;
+  const resolvedDescription = description ?? siteConfig.description
+  const resolvedTitle = title ?? siteConfig.name
 
   return {
     title,
@@ -134,7 +134,7 @@ export function createPageMetadata({
       images: [siteConfig.ogImage.url],
       title: resolvedTitle,
     },
-  };
+  }
 }
 
 export function createArticleMetadata({
@@ -144,13 +144,15 @@ export function createArticleMetadata({
   publishedAt,
   title,
 }: {
-  description: string;
-  imageUrl?: string;
-  path: string;
-  publishedAt: string;
-  title: string;
+  description: string
+  imageUrl?: string
+  path: string
+  publishedAt: string
+  title: string
 }): Metadata {
-  const resolvedImageUrl = resolveAbsoluteUrl(imageUrl ?? siteConfig.ogImage.url);
+  const resolvedImageUrl = resolveAbsoluteUrl(
+    imageUrl ?? siteConfig.ogImage.url
+  )
 
   return {
     title,
@@ -180,7 +182,7 @@ export function createArticleMetadata({
       description,
       images: [resolvedImageUrl],
     },
-  };
+  }
 }
 
 export function createPlayerMetadata({
@@ -188,9 +190,9 @@ export function createPlayerMetadata({
   path,
   title,
 }: {
-  description: string;
-  path: string;
-  title: string;
+  description: string
+  path: string
+  title: string
 }): Metadata {
   return {
     title,
@@ -213,7 +215,7 @@ export function createPlayerMetadata({
       description,
       images: [siteConfig.ogImage.url],
     },
-  };
+  }
 }
 
 export function createMatchMetadata({
@@ -221,9 +223,9 @@ export function createMatchMetadata({
   path,
   title,
 }: {
-  description: string;
-  path: string;
-  title: string;
+  description: string
+  path: string
+  title: string
 }): Metadata {
   return {
     title,
@@ -246,5 +248,5 @@ export function createMatchMetadata({
       description,
       images: [siteConfig.ogImage.url],
     },
-  };
+  }
 }

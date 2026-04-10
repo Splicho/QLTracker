@@ -1,27 +1,27 @@
-"use client";
+"use client"
 
-import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDown, LoaderCircle, LogOut, Settings } from "lucide-react";
-import { useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion"
+import { ChevronDown, LoaderCircle, LogOut, Settings } from "lucide-react"
+import { useMemo } from "react"
+import { useRouter } from "next/navigation"
 import type {
   PickupPlayer,
   PickupPlayerState,
   PickupSeasonalRating,
-} from "@/lib/pickup";
-import { Medal, Steam } from "@/components/icon";
-import { PlayerAvatar } from "@/components/pickup/player-avatar";
-import { PlayerName } from "@/components/pickup/player-name";
-import { PickupQueueStack } from "@/components/pickup/pickup-queue-stack";
-import { Badge } from "@/components/ui/badge";
+} from "@/lib/pickup"
+import { Medal, Steam } from "@/components/icon"
+import { PlayerAvatar } from "@/components/pickup/player-avatar"
+import { PlayerName } from "@/components/pickup/player-name"
+import { PickupQueueStack } from "@/components/pickup/pickup-queue-stack"
+import { Badge } from "@/components/ui/badge"
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
+} from "@/components/ui/breadcrumb"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,31 +29,27 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+} from "@/components/ui/dropdown-menu"
+import { Separator } from "@/components/ui/separator"
+import { SidebarTrigger } from "@/components/ui/sidebar"
 
 function sortSeasonalRatings(ratings: PickupSeasonalRating[]) {
   return [...ratings].sort((left, right) => {
     if (right.displayRating !== left.displayRating) {
-      return right.displayRating - left.displayRating;
+      return right.displayRating - left.displayRating
     }
 
-    return left.queueName.localeCompare(right.queueName);
-  });
+    return left.queueName.localeCompare(right.queueName)
+  })
 }
 
-function SeasonalRatingsMenu({
-  ratings,
-}: {
-  ratings: PickupSeasonalRating[];
-}) {
-  const router = useRouter();
-  const sortedRatings = useMemo(() => sortSeasonalRatings(ratings), [ratings]);
-  const highestRating = sortedRatings[0];
+function SeasonalRatingsMenu({ ratings }: { ratings: PickupSeasonalRating[] }) {
+  const router = useRouter()
+  const sortedRatings = useMemo(() => sortSeasonalRatings(ratings), [ratings])
+  const highestRating = sortedRatings[0]
 
   if (!highestRating) {
-    return null;
+    return null
   }
 
   return (
@@ -95,17 +91,17 @@ function SeasonalRatingsMenu({
         </div>
       </DropdownMenuContent>
     </DropdownMenu>
-  );
+  )
 }
 
 function PickupHeaderMenu({
   onSignOut,
   player,
 }: {
-  onSignOut: () => void;
-  player: PickupPlayer;
+  onSignOut: () => void
+  player: PickupPlayer
 }) {
-  const router = useRouter();
+  const router = useRouter()
 
   return (
     <DropdownMenu>
@@ -157,7 +153,7 @@ function PickupHeaderMenu({
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  );
+  )
 }
 
 export function Header({
@@ -174,24 +170,24 @@ export function Header({
   pickupPlayer,
   pickupRatings,
 }: {
-  breadcrumbParent?: string | null;
-  pageTitle: string;
-  pickupLinking?: boolean;
-  pickupStackCapacity?: number | null;
-  pickupStackCount?: number | null;
+  breadcrumbParent?: string | null
+  pageTitle: string
+  pickupLinking?: boolean
+  pickupStackCapacity?: number | null
+  pickupStackCount?: number | null
   pickupStackPlayers?: Array<
     Pick<PickupPlayer, "avatarUrl" | "id" | "personaName">
-  >;
-  onPickupLeaveQueue?: (() => void) | null;
-  pickupStage?: PickupPlayerState["stage"] | null;
-  onPickupLogin?: (() => void) | null;
-  onPickupSignOut?: (() => void) | null;
-  pickupPlayer?: PickupPlayer | null;
-  pickupRatings?: PickupSeasonalRating[];
+  >
+  onPickupLeaveQueue?: (() => void) | null
+  pickupStage?: PickupPlayerState["stage"] | null
+  onPickupLogin?: (() => void) | null
+  onPickupSignOut?: (() => void) | null
+  pickupPlayer?: PickupPlayer | null
+  pickupRatings?: PickupSeasonalRating[]
 }) {
   const showQueueBanner =
     pickupPlayer != null &&
-    (pickupStage === "queue" || pickupStage === "ready_check");
+    (pickupStage === "queue" || pickupStage === "ready_check")
 
   return (
     <header className="relative flex h-16 items-center gap-3 border-b border-border px-4">
@@ -239,10 +235,7 @@ export function Header({
           <SeasonalRatingsMenu ratings={pickupRatings} />
         ) : null}
         {pickupPlayer && onPickupSignOut ? (
-          <PickupHeaderMenu
-            onSignOut={onPickupSignOut}
-            player={pickupPlayer}
-          />
+          <PickupHeaderMenu onSignOut={onPickupSignOut} player={pickupPlayer} />
         ) : null}
       </div>
 
@@ -276,5 +269,5 @@ export function Header({
         ) : null}
       </AnimatePresence>
     </header>
-  );
+  )
 }

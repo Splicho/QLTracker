@@ -1,13 +1,17 @@
-"use client";
+"use client"
 
-import { useMemo } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { X } from "lucide-react";
-import type { PickupPlayer, PickupPlayerState } from "@/lib/pickup";
-import { PlayerAvatar } from "@/components/pickup/player-avatar";
-import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { stripQuakeColors } from "@/lib/quake";
+import { useMemo } from "react"
+import { AnimatePresence, motion } from "framer-motion"
+import { X } from "lucide-react"
+import type { PickupPlayer, PickupPlayerState } from "@/lib/pickup"
+import { PlayerAvatar } from "@/components/pickup/player-avatar"
+import { Button } from "@/components/ui/button"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { stripQuakeColors } from "@/lib/quake"
 
 function QueueDots() {
   return (
@@ -28,12 +32,12 @@ function QueueDots() {
         </motion.span>
       ))}
     </span>
-  );
+  )
 }
 
 function normalizeTooltipName(name: string) {
-  const strippedName = stripQuakeColors(name).trim();
-  return strippedName.length > 0 ? strippedName : "Unknown player";
+  const strippedName = stripQuakeColors(name).trim()
+  return strippedName.length > 0 ? strippedName : "Unknown player"
 }
 
 export function PickupQueueStack({
@@ -43,52 +47,53 @@ export function PickupQueueStack({
   participants,
   stage,
 }: {
-  capacity: number | null;
-  currentCount: number | null;
-  onLeaveQueue?: (() => void) | null;
-  participants: Array<Pick<PickupPlayer, "avatarUrl" | "id" | "personaName">>;
-  player?: Pick<PickupPlayer, "avatarUrl" | "id" | "personaName">;
-  stage: PickupPlayerState["stage"] | null;
+  capacity: number | null
+  currentCount: number | null
+  onLeaveQueue?: (() => void) | null
+  participants: Array<Pick<PickupPlayer, "avatarUrl" | "id" | "personaName">>
+  player?: Pick<PickupPlayer, "avatarUrl" | "id" | "personaName">
+  stage: PickupPlayerState["stage"] | null
 }) {
   const uniqueParticipants = useMemo(() => {
-    const seenIds = new Set<string>();
-    const result: Array<Pick<PickupPlayer, "avatarUrl" | "id" | "personaName">> =
-      [];
+    const seenIds = new Set<string>()
+    const result: Array<
+      Pick<PickupPlayer, "avatarUrl" | "id" | "personaName">
+    > = []
 
     for (const participant of participants) {
       if (seenIds.has(participant.id)) {
-        continue;
+        continue
       }
 
-      seenIds.add(participant.id);
-      result.push(participant);
+      seenIds.add(participant.id)
+      result.push(participant)
     }
 
-    return result;
-  }, [participants]);
+    return result
+  }, [participants])
   const visibleParticipants = useMemo(
     () => uniqueParticipants.slice(-4),
     [uniqueParticipants]
-  );
+  )
   const overflowCount = Math.max(
     uniqueParticipants.length - visibleParticipants.length,
     0
-  );
-  const isQueueStage = stage === "queue";
-  const isStartedStage = stage === "ready_check";
-  const participantCount = currentCount ?? uniqueParticipants.length;
-  const queueCapacity = capacity ?? participantCount;
-  const showBanner = isQueueStage || isStartedStage;
+  )
+  const isQueueStage = stage === "queue"
+  const isStartedStage = stage === "ready_check"
+  const participantCount = currentCount ?? uniqueParticipants.length
+  const queueCapacity = capacity ?? participantCount
+  const showBanner = isQueueStage || isStartedStage
 
   if (!showBanner) {
-    return null;
+    return null
   }
 
   return (
     <div className="relative w-full max-w-[30rem]">
-      <div className="pointer-events-none absolute inset-x-10 bottom-[-16px] h-8 rounded-full bg-success/70 blur-2xl opacity-70" />
+      <div className="pointer-events-none absolute inset-x-10 bottom-[-16px] h-8 rounded-full bg-success/70 opacity-70 blur-2xl" />
       <div className="relative h-11 w-full rounded-full border border-success-foreground/15 bg-success px-3 text-success-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
-        <div className="absolute left-3 top-1/2 flex min-w-[6.25rem] -translate-y-1/2 items-center">
+        <div className="absolute top-1/2 left-3 flex min-w-[6.25rem] -translate-y-1/2 items-center">
           <AnimatePresence initial={false} mode="popLayout">
             {visibleParticipants.map((participant, index) => (
               <Tooltip key={participant.id}>
@@ -112,7 +117,12 @@ export function PickupQueueStack({
                       },
                       opacity: { duration: 0.18, ease: "easeOut" },
                       scale: { duration: 0.2, ease: "easeOut" },
-                      x: { type: "spring", stiffness: 420, damping: 30, mass: 0.7 },
+                      x: {
+                        type: "spring",
+                        stiffness: 420,
+                        damping: 30,
+                        mass: 0.7,
+                      },
                     }}
                   >
                     <PlayerAvatar
@@ -232,7 +242,7 @@ export function PickupQueueStack({
         </div>
 
         {isQueueStage ? (
-          <div className="absolute right-2 top-1/2 -translate-y-1/2">
+          <div className="absolute top-1/2 right-2 -translate-y-1/2">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -252,5 +262,5 @@ export function PickupQueueStack({
         ) : null}
       </div>
     </div>
-  );
+  )
 }
