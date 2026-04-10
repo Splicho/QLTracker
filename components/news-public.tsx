@@ -377,104 +377,106 @@ function NewsArticleInner({
         <h1 className="text-3xl leading-tight font-semibold text-white">
           {article.title}
         </h1>
-        <ReactMarkdown
-          rehypePlugins={[rehypeRaw]}
-          remarkPlugins={[remarkGfm, remarkBreaks]}
-          components={{
-            a(props) {
-              const { children, className, ...rest } = props
-              return (
-                <a
-                  {...rest}
-                  className={`inline-flex items-center gap-1.5 text-white underline underline-offset-4 ${className ?? ""}`.trim()}
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  <span>{children}</span>
-                  <ArrowUpRight className="size-3.5 shrink-0" />
-                </a>
-              )
-            },
-            h1(props) {
-              return (
-                <h1
-                  className="mt-6 w-full text-2xl font-semibold text-white"
-                  {...props}
-                />
-              )
-            },
-            h2(props) {
-              return (
-                <h2
-                  className="mt-6 w-full text-xl font-semibold text-white"
-                  {...props}
-                />
-              )
-            },
-            h3(props) {
-              return (
-                <h3
-                  className="mt-5 w-full text-lg font-semibold text-white"
-                  {...props}
-                />
-              )
-            },
-            p(props) {
-              return (
-                <p
-                  className="w-full text-base leading-7 text-white/65"
-                  {...props}
-                />
-              )
-            },
-            ul(props) {
-              return (
-                <ul
-                  className="w-full list-disc space-y-2 pl-6 text-base text-white/65"
-                  {...props}
-                />
-              )
-            },
-            ol(props) {
-              return (
-                <ol
-                  className="w-full list-decimal space-y-2 pl-6 text-base text-white/65"
-                  {...props}
-                />
-              )
-            },
-            li(props) {
-              return <li className="leading-7" {...props} />
-            },
-            code({ className, ...props }) {
-              return (
-                <code
-                  className={`rounded bg-white/10 px-1.5 py-0.5 text-[0.9em] ${className ?? ""}`.trim()}
-                  {...props}
-                />
-              )
-            },
-            pre(props) {
-              return (
-                <pre
-                  className="w-full overflow-x-auto rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-white"
-                  {...props}
-                />
-              )
-            },
-            img({ alt, src }) {
-              return src ? (
-                <img
-                  alt={alt ?? ""}
-                  className="w-full rounded-2xl object-cover"
-                  src={src}
-                />
-              ) : null
-            },
-          }}
-        >
-          {article.content}
-        </ReactMarkdown>
+        <div className="flex flex-col gap-2">
+          <ReactMarkdown
+            rehypePlugins={[rehypeRaw]}
+            remarkPlugins={[remarkGfm, remarkBreaks]}
+            components={{
+              a(props) {
+                const { children, className, ...rest } = props
+                return (
+                  <a
+                    {...rest}
+                    className={`inline-flex items-center gap-1.5 text-white underline underline-offset-4 ${className ?? ""}`.trim()}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    <span>{children}</span>
+                    <ArrowUpRight className="size-3.5 shrink-0" />
+                  </a>
+                )
+              },
+              h1(props) {
+                return (
+                  <h1
+                    className="mt-4 w-full text-2xl font-semibold text-white"
+                    {...props}
+                  />
+                )
+              },
+              h2(props) {
+                return (
+                  <h2
+                    className="mt-4 w-full text-xl font-semibold text-white"
+                    {...props}
+                  />
+                )
+              },
+              h3(props) {
+                return (
+                  <h3
+                    className="mt-3 w-full text-lg font-semibold text-white"
+                    {...props}
+                  />
+                )
+              },
+              p(props) {
+                return (
+                  <p
+                    className="w-full text-base leading-relaxed text-white/65"
+                    {...props}
+                  />
+                )
+              },
+              ul(props) {
+                return (
+                  <ul
+                    className="w-full list-disc space-y-1 pl-6 text-base leading-relaxed text-white/65"
+                    {...props}
+                  />
+                )
+              },
+              ol(props) {
+                return (
+                  <ol
+                    className="w-full list-decimal space-y-1 pl-6 text-base leading-relaxed text-white/65"
+                    {...props}
+                  />
+                )
+              },
+              li(props) {
+                return <li className="leading-relaxed" {...props} />
+              },
+              code({ className, ...props }) {
+                return (
+                  <code
+                    className={`rounded bg-white/10 px-1.5 py-0.5 text-[0.9em] ${className ?? ""}`.trim()}
+                    {...props}
+                  />
+                )
+              },
+              pre(props) {
+                return (
+                  <pre
+                    className="w-full overflow-x-auto rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-white"
+                    {...props}
+                  />
+                )
+              },
+              img({ alt, src }) {
+                return src ? (
+                  <img
+                    alt={alt ?? ""}
+                    className="w-full rounded-2xl object-cover"
+                    src={src}
+                  />
+                ) : null
+              },
+            }}
+          >
+            {article.content}
+          </ReactMarkdown>
+        </div>
       </div>
     </div>
   )

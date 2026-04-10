@@ -25,6 +25,72 @@ function hashPickupToken(token: string) {
   return hashOpaqueToken(`pickup:${token}`, env.SESSION_SECRET)
 }
 
+function isHttpsPublicUrl(publicBaseUrl: string) {
+  try {
+    return new URL(publicBaseUrl).protocol === "https:"
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Optional registrable domain so the session cookie is sent on both www and apex
+ * (e.g. Domain=qltracker.com). Omit on localhost or multi-label hosts we can't infer safely.
+ */
+function resolvePickupAuthCookieDomain(): string | undefined {
+  const explicit = getNotificationEnv().PICKUP_AUTH_COOKIE_DOMAIN.trim()
+  if (explicit) {
+    return explicit.replace(/^\./, "") || undefined
+  }
+
+  try {
+    const host = new URL(getNotificationEnv().PUBLIC_BASE_URL).hostname.toLowerCase()
+    if (host === "localhost" || host === "127.0.0.1") {
+      return undefined
+    }
+
+    const parts = host.split(".")
+    if (parts.length === 2) {
+      return host
+    }
+    if (parts.length === 3 && parts[0] === "www") {
+      return `${parts[1]}.${parts[2]}`
+    }
+
+    return undefined
+  } catch {
+    return undefined
+  }
+}
+
+/** Use for Set-Cookie on browser pickup sessions (Steam callback, etc.). */
+export function getPickupSessionCookieSetOptions() {
+  const env = getNotificationEnv()
+  const publicBaseUrl = env.PUBLIC_BASE_URL.replace(/\/$/, "")
+  const domain = resolvePickupAuthCookieDomain()
+  const secure =
+    process.env.NODE_ENV === "production" || isHttpsPublicUrl(publicBaseUrl)
+
+  return {
+    httpOnly: true,
+    maxAge: 60 * 60 * 24 * 90,
+    path: "/",
+    sameSite: "lax" as const,
+    secure,
+    ...(domain ? { domain } : {}),
+  }
+}
+
+/** Clear cookie with the same domain/path/secure as login so the browser actually drops it. */
+export function getPickupSessionCookieDeleteOptions() {
+  const opts = getPickupSessionCookieSetOptions()
+  return {
+    ...opts,
+    expires: new Date(0),
+    maxAge: 0,
+  }
+}
+
 export function createPickupOauthState() {
   return createOauthState()
 }

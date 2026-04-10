@@ -7,6 +7,8 @@ const envSchema = z.object({
   QLSTATS_API_URL: z.string().url().default("https://qlstats.net/api"),
   PICKUP_ADMIN_STEAM_IDS: z.string().default(""),
   PICKUP_AUTH_COOKIE_NAME: z.string().default("qltracker-pickup-session"),
+  /** If empty, derived from PUBLIC_BASE_URL (www + apex share e.g. qltracker.com). */
+  PICKUP_AUTH_COOKIE_DOMAIN: z.string().default(""),
   SESSION_SECRET: z.string().min(16),
   WORKER_POLL_INTERVAL_MS: z.coerce.number().int().positive().default(60_000),
 })

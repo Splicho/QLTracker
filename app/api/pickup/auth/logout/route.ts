@@ -3,6 +3,7 @@ import { NextResponse } from "next/server"
 import { handleRouteError } from "@/lib/server/errors"
 import {
   extractPickupSessionToken,
+  getPickupSessionCookieDeleteOptions,
   invalidatePickupSession,
 } from "@/lib/server/pickup-auth"
 import { getNotificationEnv } from "@/lib/server/env"
@@ -17,13 +18,11 @@ export async function POST(request: Request) {
     }
 
     const response = NextResponse.json({ ok: true })
-    response.cookies.set(getNotificationEnv().PICKUP_AUTH_COOKIE_NAME, "", {
-      expires: new Date(0),
-      httpOnly: true,
-      path: "/",
-      sameSite: "lax",
-      secure: true,
-    })
+    response.cookies.set(
+      getNotificationEnv().PICKUP_AUTH_COOKIE_NAME,
+      "",
+      getPickupSessionCookieDeleteOptions()
+    )
 
     return response
   } catch (error) {

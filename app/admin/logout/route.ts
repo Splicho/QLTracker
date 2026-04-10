@@ -2,7 +2,10 @@ import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 
 import { getNotificationEnv } from "@/lib/server/env"
-import { invalidatePickupSession } from "@/lib/server/pickup-auth"
+import {
+  getPickupSessionCookieDeleteOptions,
+  invalidatePickupSession,
+} from "@/lib/server/pickup-auth"
 
 export const runtime = "nodejs"
 
@@ -18,13 +21,7 @@ export async function GET() {
   const response = NextResponse.redirect(
     new URL("/admin/login", getNotificationEnv().PUBLIC_BASE_URL)
   )
-  response.cookies.set(cookieName, "", {
-    expires: new Date(0),
-    httpOnly: true,
-    path: "/",
-    sameSite: "lax",
-    secure: true,
-  })
+  response.cookies.set(cookieName, "", getPickupSessionCookieDeleteOptions())
 
   return response
 }

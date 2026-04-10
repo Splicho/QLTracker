@@ -4,7 +4,10 @@ import {
   PICKUP_GUEST_STORAGE_KEY,
   PICKUP_SESSION_STORAGE_KEY,
 } from "@/lib/pickup-auth-storage"
-import { createPickupAppSession } from "@/lib/server/pickup-auth"
+import {
+  createPickupAppSession,
+  getPickupSessionCookieSetOptions,
+} from "@/lib/server/pickup-auth"
 import { getNotificationEnv } from "@/lib/server/env"
 import {
   buildPickupAuthResultHtml,
@@ -14,14 +17,6 @@ import {
 import { getPrisma } from "@/lib/server/prisma"
 
 export const runtime = "nodejs"
-
-function shouldUseSecureCookie(publicBaseUrl: string) {
-  try {
-    return new URL(publicBaseUrl).protocol === "https:"
-  } catch {
-    return process.env.NODE_ENV === "production"
-  }
-}
 
 function redirectToLauncherPath(pathname: string | null | undefined) {
   const publicBaseUrl = getNotificationEnv().PUBLIC_BASE_URL.replace(/\/$/, "")
@@ -140,20 +135,13 @@ export async function GET(request: Request) {
         /\/$/,
         ""
       )
-      const secureCookie = shouldUseSecureCookie(publicBaseUrl)
       const response = NextResponse.redirect(
         new URL(linkSession.redirectPath || "/admin", publicBaseUrl)
       )
       response.cookies.set(
         getNotificationEnv().PICKUP_AUTH_COOKIE_NAME,
         sessionToken,
-        {
-          httpOnly: true,
-          maxAge: 60 * 60 * 24 * 90,
-          path: "/",
-          sameSite: "lax",
-          secure: secureCookie,
-        }
+        getPickupSessionCookieSetOptions()
       )
       return response
     }
