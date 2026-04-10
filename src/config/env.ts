@@ -13,6 +13,7 @@ const envSchema = z
     DISCORD_SECONDARY_GUILD_ID: z.string().min(1).optional(),
     DISCORD_SECONDARY_NAME: z.string().min(1).default('secondary'),
     INTERNAL_WEBHOOK_PORT: z.coerce.number().int().positive().default(8788),
+    PUBLIC_APP_URL: z.string().url().optional(),
     PICKUP_QUEUE_ALERTS_CHANNEL_ID: z.string().min(1).optional(),
     PICKUP_QUEUE_ALERTS_ROLE_ID: z.string().min(1).optional(),
     PICKUP_QUEUE_ALERTS_WEBHOOK_SECRET: z.string().min(16).optional(),
@@ -45,10 +46,11 @@ const envSchema = z
       });
     }
 
+    const hasPublicAppUrl = Boolean(value.PUBLIC_APP_URL);
     const hasQueueAlertsChannelId = Boolean(value.PICKUP_QUEUE_ALERTS_CHANNEL_ID);
     const hasQueueAlertsSecret = Boolean(value.PICKUP_QUEUE_ALERTS_WEBHOOK_SECRET);
 
-    if (!hasQueueAlertsChannelId && !hasQueueAlertsSecret) {
+    if (!hasPublicAppUrl && !hasQueueAlertsChannelId && !hasQueueAlertsSecret) {
       return;
     }
 
@@ -81,6 +83,14 @@ const envSchema = z
         code: z.ZodIssueCode.custom,
         path: ['PICKUP_QUEUE_ALERTS_WEBHOOK_SECRET'],
         message: 'PICKUP_QUEUE_ALERTS_WEBHOOK_SECRET is required when pickup queue alerts are enabled'
+      });
+    }
+
+    if (!hasPublicAppUrl) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['PUBLIC_APP_URL'],
+        message: 'PUBLIC_APP_URL is required when pickup queue alerts are enabled'
       });
     }
   });

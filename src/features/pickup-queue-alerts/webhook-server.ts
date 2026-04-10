@@ -1,6 +1,12 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { createServer, type Server as HttpServer } from 'node:http';
-import { EmbedBuilder, type Client } from 'discord.js';
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  EmbedBuilder,
+  type Client,
+} from 'discord.js';
 import { z } from 'zod';
 
 import { env } from '../../config/env.js';
@@ -83,7 +89,7 @@ async function postQueueOpenedAlert(
       },
       {
         name: 'Status',
-        value: `${payload.currentPlayers}/${payload.queue.playerCount} in queue`,
+        value: `${payload.currentPlayers}/${payload.queue.playerCount}`,
         inline: true,
       },
       {
@@ -106,12 +112,21 @@ async function postQueueOpenedAlert(
 
   const messagePayload: {
     allowedMentions: { parse: string[]; roles?: string[] };
+    components: ActionRowBuilder<ButtonBuilder>[];
     content?: string;
     embeds: EmbedBuilder[];
   } = {
     allowedMentions: env.PICKUP_QUEUE_ALERTS_ROLE_ID
       ? { parse: [], roles: [env.PICKUP_QUEUE_ALERTS_ROLE_ID] }
       : { parse: [] },
+    components: [
+      new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+          .setLabel('Join queue')
+          .setStyle(ButtonStyle.Link)
+          .setURL(new URL('/pickup', env.PUBLIC_APP_URL).toString()),
+      ),
+    ],
     embeds: [embed],
   };
 
