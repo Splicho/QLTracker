@@ -3,6 +3,7 @@ import { NextResponse } from "next/server"
 import {
   createPickupOauthState,
   getPickupLinkSessionExpiry,
+  logPickupAuthDebug,
 } from "@/lib/server/pickup-auth"
 import {
   buildPickupSteamAuthorizeUrl,
@@ -26,5 +27,10 @@ export async function GET() {
     },
   })
 
-  return NextResponse.redirect(buildPickupSteamAuthorizeUrl(oauthState))
+  const authorizeUrl = buildPickupSteamAuthorizeUrl(oauthState)
+  logPickupAuthDebug("admin login start: redirecting to Steam", {
+    authorizeHost: new URL(authorizeUrl).host,
+  })
+
+  return NextResponse.redirect(authorizeUrl)
 }

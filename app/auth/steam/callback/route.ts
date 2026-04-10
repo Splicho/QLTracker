@@ -7,6 +7,7 @@ import {
 import {
   createPickupAppSession,
   getPickupSessionCookieSetOptions,
+  logPickupAuthDebug,
 } from "@/lib/server/pickup-auth"
 import { getNotificationEnv } from "@/lib/server/env"
 import {
@@ -17,6 +18,19 @@ import {
 import { getPrisma } from "@/lib/server/prisma"
 
 export const runtime = "nodejs"
+
+function logCallbackIngress(request: Request) {
+  const u = new URL(request.url)
+  logPickupAuthDebug("steam callback: ingress", {
+    urlHost: u.host,
+    pathname: u.pathname,
+    hasPickupState: u.searchParams.has("pickup_state"),
+    openidMode: u.searchParams.get("openid.mode"),
+    xForwardedHost: request.headers.get("x-forwarded-host"),
+    xForwardedProto: request.headers.get("x-forwarded-proto"),
+    xForwardedSsl: request.headers.get("x-forwarded-ssl"),
+  })
+}
 
 function redirectToLauncherPath(pathname: string | null | undefined) {
   const publicBaseUrl = getNotificationEnv().PUBLIC_BASE_URL.replace(/\/$/, "")
@@ -50,12 +64,15 @@ function buildLauncherRedirectHtml(
 
 export async function GET(request: Request) {
   const url = new URL(request.url)
+  logCallbackIngress(request)
+
   const error =
     url.searchParams.get("openid.mode") === "cancel" ? "cancelled" : null
   const state = url.searchParams.get("pickup_state")
   const prisma = getPrisma()
 
   if (!state) {
+    logPickupAuthDebug("steam callback: abort — missing pickup_state")
     return redirectToLauncherPath("/pickup")
   }
 
@@ -64,8 +81,18 @@ export async function GET(request: Request) {
   })
 
   if (!linkSession) {
+    logPickupAuthDebug(
+      "steam callback: abort — no PickupLinkSession for oauth state"
+    )
     return redirectToLauncherPath("/pickup")
   }
+
+  logPickupAuthDebug("steam callback: link session found", {
+    flow: linkSession.flow,
+    redirectPath: linkSession.redirectPath,
+    status: linkSession.status,
+    expiresAtMs: linkSession.expiresAt.getTime(),
+  })
 
   if (linkSession.expiresAt.getTime() <= Date.now()) {
     await prisma.pickupLinkSession.update({
@@ -80,6 +107,7 @@ export async function GET(request: Request) {
       return redirectToLauncherPath(linkSession.redirectPath)
     }
 
+    logPickupAuthDebug("steam callback: link session expired (browser flow)")
     return new Response(
       buildPickupAuthResultHtml(
         false,
@@ -93,6 +121,7 @@ export async function GET(request: Request) {
   }
 
   if (error) {
+    logPickupAuthDebug("steam callback: user cancelled or OpenID error mode")
     await prisma.pickupLinkSession.update({
       where: { id: linkSession.id },
       data: {
@@ -135,17 +164,29 @@ export async function GET(request: Request) {
         /\/$/,
         ""
       )
-      const response = NextResponse.redirect(
-        new URL(linkSession.redirectPath || "/admin", publicBaseUrl)
+      const redirectTo = new URL(
+        linkSession.redirectPath || "/admin",
+        publicBaseUrl
       )
+      const cookieOpts = getPickupSessionCookieSetOptions()
+      logPickupAuthDebug("steam callback: success — setting session cookie", {
+        PUBLIC_BASE_URL: publicBaseUrl,
+        redirectTo: redirectTo.toString(),
+        cookieName: getNotificationEnv().PICKUP_AUTH_COOKIE_NAME,
+        cookieOptions: cookieOpts,
+        sessionTokenLength: sessionToken.length,
+        NODE_ENV: process.env.NODE_ENV,
+      })
+      const response = NextResponse.redirect(redirectTo)
       response.cookies.set(
         getNotificationEnv().PICKUP_AUTH_COOKIE_NAME,
         sessionToken,
-        getPickupSessionCookieSetOptions()
+        cookieOpts
       )
       return response
     }
 
+    logPickupAuthDebug("steam callback: success — launcher flow (localStorage)")
     return new Response(
       buildLauncherRedirectHtml(linkSession.redirectPath, sessionToken),
       {
@@ -155,6 +196,10 @@ export async function GET(request: Request) {
   } catch (cause) {
     const message =
       cause instanceof Error ? cause.message : "Steam authorization failed."
+
+    logPickupAuthDebug("steam callback: validation / upsert failed", {
+      message,
+    })
 
     await prisma.pickupLinkSession.update({
       where: { id: linkSession.id },
