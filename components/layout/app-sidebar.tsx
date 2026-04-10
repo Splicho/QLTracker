@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import NumberFlow from "@number-flow/react"
-import { ArrowLeft, Cookie, Shield, Users } from "lucide-react"
+import { ArrowLeft, Cookie, Shield } from "lucide-react"
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react"
 import packageJson from "../../package.json"
 import { useQuery } from "@tanstack/react-query"
@@ -456,7 +456,7 @@ export function AppSidebar({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="flex min-w-0 items-center gap-2 border-l border-sidebar-border px-3 py-2">
-                      <Users className="size-3.5 shrink-0 text-muted-foreground" />
+                      <Medal className="size-3.5 shrink-0 text-muted-foreground" />
                       <NumberFlow
                         className="truncate text-sm font-semibold text-foreground"
                         value={pickupQueueCount ?? 0}
