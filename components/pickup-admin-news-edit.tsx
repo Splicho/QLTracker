@@ -252,11 +252,7 @@ export function PickupAdminNewsEdit({ article }: { article: NewsArticleDto }) {
                 {({ isPending }) =>
                   isPending ? (
                     <>
-                      <Spinner
-                        className="shrink-0"
-                        color="current"
-                        size="sm"
-                      />
+                      <Spinner className="shrink-0" color="current" size="sm" />
                       <span>Uploading cover…</span>
                     </>
                   ) : (

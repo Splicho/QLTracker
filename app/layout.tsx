@@ -1,12 +1,16 @@
 import { Inter } from "next/font/google"
-import { GoogleAnalytics } from "@next/third-parties/google"
 import { cookies } from "next/headers"
 
 import "./globals.css"
 import { AppQueryProvider } from "@/components/app-query-provider"
+import { CookieConsentBanner } from "@/components/cookie-consent-banner"
 import { RootChrome } from "@/components/root-chrome"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
+import {
+  COOKIE_CONSENT_COOKIE_NAME,
+  isCookieConsentValue,
+} from "@/lib/cookie-consent"
 import { createSiteMetadata } from "@/lib/seo"
 import { getInitialPickupBrowserState } from "@/lib/server/pickup-browser"
 import { listPublicPickupNoticeDtos } from "@/lib/server/notices"
@@ -33,6 +37,7 @@ export default async function RootLayout({
   const googleAnalyticsId =
     process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim() ?? ""
   const cookieStore = await cookies()
+  const consentValue = cookieStore.get(COOKIE_CONSENT_COOKIE_NAME)?.value
   const initialThemeValue = cookieStore.get(THEME_COOKIE_NAME)?.value
   const initialTheme = isTheme(initialThemeValue) ? initialThemeValue : "system"
   const initialResolvedTheme = getServerResolvedTheme(
@@ -40,6 +45,9 @@ export default async function RootLayout({
     cookieStore.get(RESOLVED_THEME_COOKIE_NAME)?.value,
     initialTheme
   )
+  const initialCookieConsent = isCookieConsentValue(consentValue)
+    ? consentValue
+    : null
   const [initialPickupState, initialNotices] = await Promise.all([
     getInitialPickupBrowserState(),
     listPublicPickupNoticeDtos(),
@@ -72,11 +80,12 @@ export default async function RootLayout({
               {children}
             </RootChrome>
             <Toaster richColors position="bottom-right" />
+            <CookieConsentBanner
+              googleAnalyticsId={googleAnalyticsId}
+              initialConsent={initialCookieConsent}
+            />
           </AppQueryProvider>
         </ThemeProvider>
-        {googleAnalyticsId ? (
-          <GoogleAnalytics gaId={googleAnalyticsId} />
-        ) : null}
       </body>
     </html>
   )

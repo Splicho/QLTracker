@@ -270,7 +270,7 @@ Modal.Dialog = function AdminModalDialog({
   return (
     <DialogContent
       className={cn(
-        "min-h-0 flex flex-col gap-0 overflow-hidden border-border/60 bg-background p-0 text-foreground",
+        "flex min-h-0 flex-col gap-0 overflow-hidden border-border/60 bg-background p-0 text-foreground",
         getModalSizeClass(size),
         className
       )}
@@ -311,10 +311,7 @@ Modal.Body = function AdminModalBody({
 }: React.ComponentProps<"div">) {
   return (
     <div
-      className={cn(
-        "min-h-0 flex-1 overflow-y-auto px-6 py-5",
-        className
-      )}
+      className={cn("min-h-0 flex-1 overflow-y-auto px-6 py-5", className)}
       {...props}
     />
   )

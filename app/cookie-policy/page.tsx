@@ -51,9 +51,10 @@ export default function CookiePolicyPage() {
         <p>
           Example: <code>qltracker-pickup-session</code> is used to maintain a
           signed-in pickup session. It is a first-party cookie, set with
-          security attributes such as <code>HttpOnly</code>, <code>SameSite</code>,
-          and <code>Secure</code> where applicable, and can remain active for
-          up to 90 days unless cleared earlier by logout or expiry.
+          security attributes such as <code>HttpOnly</code>,{" "}
+          <code>SameSite</code>, and <code>Secure</code> where applicable, and
+          can remain active for up to 90 days unless cleared earlier by logout
+          or expiry.
         </p>
       </PolicySection>
 

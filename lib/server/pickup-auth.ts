@@ -45,7 +45,9 @@ function resolvePickupAuthCookieDomain(): string | undefined {
   }
 
   try {
-    const host = new URL(getNotificationEnv().PUBLIC_BASE_URL).hostname.toLowerCase()
+    const host = new URL(
+      getNotificationEnv().PUBLIC_BASE_URL
+    ).hostname.toLowerCase()
     if (host === "localhost" || host === "127.0.0.1") {
       return undefined
     }
@@ -70,14 +72,18 @@ function resolvePickupAuthCookieDomain(): string | undefined {
  * Domain=qltracker.com for that internal host, so the cookie never reaches the client.
  * Omit Domain in that case; the browser still scopes the cookie to the public host.
  */
-function shouldOmitCookieDomainForRequest(request: Request | undefined): boolean {
+function shouldOmitCookieDomainForRequest(
+  request: Request | undefined
+): boolean {
   if (!request) {
     return false
   }
 
   let publicHost: string
   try {
-    publicHost = new URL(getNotificationEnv().PUBLIC_BASE_URL).hostname.toLowerCase()
+    publicHost = new URL(
+      getNotificationEnv().PUBLIC_BASE_URL
+    ).hostname.toLowerCase()
   } catch {
     return false
   }

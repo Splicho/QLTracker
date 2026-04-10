@@ -159,44 +159,44 @@ export function FavoritesPage({
             </div>
           </div>
           <div className="flex flex-col gap-3 p-3">
-          {state.lists.length > 0 ? (
-            <div className="flex gap-2 overflow-x-auto pb-1">
-              {state.lists.map((list) => (
-                <button
-                  key={list.id}
-                  type="button"
-                  onClick={() => setPreferredListId(list.id)}
-                  className={`flex min-w-fit cursor-pointer items-center justify-between gap-2 rounded-md py-1.5 pr-2 pl-2.5 text-left text-sm whitespace-nowrap ${
-                    selectedList?.id === list.id
-                      ? "bg-accent text-accent-foreground"
-                      : "text-foreground hover:bg-accent/50"
-                  }`}
-                >
-                  <span className="truncate">{list.name}</span>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Badge
-                        variant="outline"
-                        className="flex h-6 min-w-6 items-center justify-center gap-1 rounded-md px-1.5 text-xs leading-none"
-                      >
-                        <GameController className="size-3" />
-                        <span>{playerCountsByList[list.id] ?? 0}</span>
-                      </Badge>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="z-[200]">
-                      {t("favorites.playersTooltip")}
-                    </TooltipContent>
-                  </Tooltip>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <div className="flex items-center justify-center px-4 py-6">
-              <p className="text-sm text-muted-foreground">
-                {t("favorites.noLists")}
-              </p>
-            </div>
-          )}
+            {state.lists.length > 0 ? (
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {state.lists.map((list) => (
+                  <button
+                    key={list.id}
+                    type="button"
+                    onClick={() => setPreferredListId(list.id)}
+                    className={`flex min-w-fit cursor-pointer items-center justify-between gap-2 rounded-md py-1.5 pr-2 pl-2.5 text-left text-sm whitespace-nowrap ${
+                      selectedList?.id === list.id
+                        ? "bg-accent text-accent-foreground"
+                        : "text-foreground hover:bg-accent/50"
+                    }`}
+                  >
+                    <span className="truncate">{list.name}</span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge
+                          variant="outline"
+                          className="flex h-6 min-w-6 items-center justify-center gap-1 rounded-md px-1.5 text-xs leading-none"
+                        >
+                          <GameController className="size-3" />
+                          <span>{playerCountsByList[list.id] ?? 0}</span>
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="z-[200]">
+                        {t("favorites.playersTooltip")}
+                      </TooltipContent>
+                    </Tooltip>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="flex items-center justify-center px-4 py-6">
+                <p className="text-sm text-muted-foreground">
+                  {t("favorites.noLists")}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 

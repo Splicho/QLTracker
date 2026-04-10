@@ -313,6 +313,31 @@ function getQlStatsPlayerProfileUrl(steamId: string) {
   return `https://qlstats.net/player/${steamId}`
 }
 
+function ServerPlayerCountPill({
+  players,
+  maxPlayers,
+}: {
+  players: number
+  maxPlayers: number
+}) {
+  return (
+    <div className="inline-grid grid-cols-2 items-center overflow-hidden rounded-full border border-border bg-card shadow-xs">
+      <span
+        className={`inline-flex min-w-8 items-center justify-center px-2 py-0.5 text-[11px] font-semibold tabular-nums ${
+          players > 0
+            ? "bg-sidebar text-sidebar-foreground"
+            : "bg-muted/70 text-muted-foreground"
+        }`}
+      >
+        {players}
+      </span>
+      <span className="inline-flex min-w-8 items-center justify-center bg-sidebar-accent px-2 py-0.5 text-[11px] font-medium text-sidebar-accent-foreground tabular-nums">
+        {maxPlayers}
+      </span>
+    </div>
+  )
+}
+
 const playerTeamSectionMeta = {
   blue: {
     labelKey: "serverList.drawer.teams.blue",
@@ -1284,8 +1309,12 @@ export function ServerList({
             <ArrowUpDown className="size-3.5" />
           </Button>
         ),
-        cell: ({ row }) =>
-          `${row.original.players}/${row.original.max_players}`,
+        cell: ({ row }) => (
+          <ServerPlayerCountPill
+            players={row.original.players}
+            maxPlayers={row.original.max_players}
+          />
+        ),
       },
       {
         id: "actions",

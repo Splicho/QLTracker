@@ -266,11 +266,7 @@ export function AppSidebar({
 
   return (
     <Sidebar
-      className={
-        noticeVisible
-          ? "!top-12 !h-[calc(100svh-3rem)] !p-0"
-          : "!p-0"
-      }
+      className={noticeVisible ? "!top-12 !h-[calc(100svh-3rem)] !p-0" : "!p-0"}
       collapsible="icon"
       variant="inset"
     >

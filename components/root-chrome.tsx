@@ -96,10 +96,10 @@ export function RootChrome({
   initialPickupState?: InitialPickupBrowserState
 }) {
   const pathname = usePathname() ?? "/"
-  const newsArticleSlug = pathname.startsWith("/news/")
-    && !pathname.startsWith("/news/archive")
-    ? (pathname.split("/").filter(Boolean).at(-1) ?? null)
-    : null
+  const newsArticleSlug =
+    pathname.startsWith("/news/") && !pathname.startsWith("/news/archive")
+      ? (pathname.split("/").filter(Boolean).at(-1) ?? null)
+      : null
   const pickupAuth = usePickupAuth(
     initialPickupState
       ? {

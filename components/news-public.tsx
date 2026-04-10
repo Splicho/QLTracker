@@ -65,20 +65,12 @@ function NewsArticleMetaRow({
   publishedAt: string
 }) {
   return (
-    <p
-      className={cn(
-        "flex flex-wrap items-center gap-3 text-sm",
-        className,
-      )}
-    >
+    <p className={cn("flex flex-wrap items-center gap-3 text-sm", className)}>
       <span className="font-semibold text-white/55 uppercase">
         {toLabel(category)}
       </span>
-      <span
-        aria-hidden
-        className="h-1 w-1 shrink-0 rounded-full bg-white/35"
-      />
-      <span className="font-normal normal-case text-white/50">
+      <span aria-hidden className="h-1 w-1 shrink-0 rounded-full bg-white/35" />
+      <span className="font-normal text-white/50 normal-case">
         {formatPublishedAt(publishedAt)}
       </span>
     </p>
@@ -392,7 +384,11 @@ function NewsArticleInner({
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
-      <Button variant="ghost" asChild className="w-fit text-white/70 hover:text-white">
+      <Button
+        variant="ghost"
+        asChild
+        className="w-fit text-white/70 hover:text-white"
+      >
         <Link href="/news">
           <ArrowLeft className="size-4 shrink-0" />
           Back to news

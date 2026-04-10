@@ -15,9 +15,7 @@ export function isValidPickupNoticeLinkHref(raw: string): boolean {
     return false
   }
   if (s.startsWith("/")) {
-    return (
-      s.length <= MAX_NOTICE_LINK_HREF && !/[\x00-\x1f\x7f\\]/.test(s)
-    )
+    return s.length <= MAX_NOTICE_LINK_HREF && !/[\x00-\x1f\x7f\\]/.test(s)
   }
   try {
     const u = new URL(s)
@@ -41,13 +39,10 @@ export const pickupNoticeLinkHrefSchema = z.preprocess(
   z
     .union([
       z.null(),
-      z
-        .string()
-        .max(MAX_NOTICE_LINK_HREF)
-        .refine(isValidPickupNoticeLinkHref, {
-          message:
-            "Link must be https://… or a path on this site starting with / (e.g. /news/slug).",
-        }),
+      z.string().max(MAX_NOTICE_LINK_HREF).refine(isValidPickupNoticeLinkHref, {
+        message:
+          "Link must be https://… or a path on this site starting with / (e.g. /news/slug).",
+      }),
     ])
     .optional()
 )
