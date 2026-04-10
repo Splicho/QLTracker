@@ -137,6 +137,26 @@ app.get("/healthz", async (_request, response) => {
   });
 });
 
+app.get("/api/admin/slots", async (request, response) => {
+  try {
+    requireProvisionAuth(request);
+    await reconcileSlots();
+    response.json({
+      ok: true,
+      slots: SLOT_DEFINITIONS.map((slot) => ({
+        metadata: readSlotMetadata(slot.id),
+        slot: readSlotState(slot),
+      })),
+    });
+  } catch (error) {
+    const status = error instanceof Error && error.message === "Unauthorized." ? 401 : 500;
+    response.status(status).json({
+      ok: false,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+});
+
 app.post("/api/pickups/provision", async (request, response) => {
   try {
     requireProvisionAuth(request);
@@ -361,6 +381,10 @@ app.post("/internal/slots/:slotId/stats-supplemental", (request, response) => {
       response.status(403).json({ ok: false, error: "Invalid slot token." });
       return;
     }
+
+    console.info(
+      `[pickup] supplemental stats ${payload.kind} for slot ${slotId} match ${payload.matchId}`,
+    );
 
     recordSupplementalEvent(
       slotId,

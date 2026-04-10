@@ -20,8 +20,27 @@ set +a
 
 mkdir -p "$FS_HOMEPATH" "$LOG_DIR"
 
-exec "${QLDS_BASE_DIR}/run_server_x64_minqlx.sh" \
-  +set fs_homepath "$FS_HOMEPATH" \
-  +set net_ip "$PUBLIC_IP" \
-  +set net_port "$GAME_PORT" \
+args=(
+  +set fs_homepath "$FS_HOMEPATH"
+  +set net_ip "$PUBLIC_IP"
+  +set net_port "$GAME_PORT"
+  +set zmq_stats_enable "${ZMQ_STATS_ENABLE:-1}"
+  +set zmq_stats_ip "$ZMQ_STATS_IP"
+  +set zmq_stats_port "$ZMQ_STATS_PORT"
   +exec "$SERVER_CFG"
+)
+
+if [[ -n "${ZMQ_STATS_PASSWORD:-}" ]]; then
+  args=(
+    +set fs_homepath "$FS_HOMEPATH"
+    +set net_ip "$PUBLIC_IP"
+    +set net_port "$GAME_PORT"
+    +set zmq_stats_enable "${ZMQ_STATS_ENABLE:-1}"
+    +set zmq_stats_ip "$ZMQ_STATS_IP"
+    +set zmq_stats_port "$ZMQ_STATS_PORT"
+    +set zmq_stats_password "$ZMQ_STATS_PASSWORD"
+    +exec "$SERVER_CFG"
+  )
+fi
+
+exec "${QLDS_BASE_DIR}/run_server_x64_minqlx.sh" "${args[@]}"

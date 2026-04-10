@@ -44,6 +44,7 @@ class qltracker_stats_bridge(minqlx.Plugin):
     def post_payload(self, payload):
         url = self.get_cvar("qlx_pickupStatsUrl")
         if not url:
+            self.logger.warning("pickup stats url is missing; skipping supplemental stats post")
             return
 
         request = urllib.request.Request(
@@ -63,6 +64,7 @@ class qltracker_stats_bridge(minqlx.Plugin):
 
         try:
             self.post_payload(payload)
+            self.logger.info("posted start supplemental stats for match %s", payload.get("matchId"))
         except urllib.error.URLError as error:
             self.logger.error("failed to post start supplemental stats: %s", error)
         except Exception as error:
@@ -79,6 +81,7 @@ class qltracker_stats_bridge(minqlx.Plugin):
 
         try:
             self.post_payload(payload)
+            self.logger.info("posted end supplemental stats for match %s", payload.get("matchId"))
         except urllib.error.URLError as error:
             self.logger.error("failed to post end supplemental stats: %s", error)
         except Exception as error:

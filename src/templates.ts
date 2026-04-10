@@ -72,6 +72,10 @@ export function buildSlotEnv(slotDir: string, slot: SlotDefinition) {
     `SLOT_ID=${slot.id}`,
     `GAME_PORT=${slot.gamePort}`,
     `ZMQ_PORT=${slot.zmqPort}`,
+    `ZMQ_STATS_ENABLE=1`,
+    `ZMQ_STATS_IP=${config.publicIp}`,
+    `ZMQ_STATS_PORT=${slot.zmqPort}`,
+    `ZMQ_STATS_PASSWORD=${config.zmqStatsPassword ?? ""}`,
     `SLOT_DIR=${slotDir}`,
     `SERVER_CFG=pickup-server.cfg`,
     `FS_HOMEPATH=${path.join(slotDir, "home")}`,
@@ -107,12 +111,6 @@ export function buildServerCfg(
     `set qlx_serverBrandName "${pickupBrandName}"`,
     `set qlx_serverBrandTopField "${queueLabel}"`,
     `set qlx_serverBrandBottomField "^7Hosted by ^1QLTracker"`,
-    `set zmq_stats_enable "1"`,
-    `set zmq_stats_ip "${config.publicIp}"`,
-    `set zmq_stats_port "${slot.zmqPort}"`,
-    ...(config.zmqStatsPassword
-      ? [`set zmq_stats_password "${config.zmqStatsPassword}"`]
-      : []),
     `set qlx_rconPort "${rconPort}"`,
     `set qlx_rconToken "${rconToken}"`,
     `set qlx_pickupMetadataFile "${metadataFile}"`,
@@ -151,12 +149,6 @@ export function buildManualServerCfg(
     `set qlx_serverBrandName "${manualBrandName}"`,
     `set qlx_serverBrandTopField "${manualLabel}"`,
     `set qlx_serverBrandBottomField "^7Hosted by ^1QLTracker"`,
-    `set zmq_stats_enable "1"`,
-    `set zmq_stats_ip "${config.publicIp}"`,
-    `set zmq_stats_port "${slot.zmqPort}"`,
-    ...(config.zmqStatsPassword
-      ? [`set zmq_stats_password "${config.zmqStatsPassword}"`]
-      : []),
     `set qlx_rconPort "${rconPort}"`,
     `set qlx_rconToken "${rconToken}"`,
     `set serverstartup "map ${map} hoq_ca"`,
