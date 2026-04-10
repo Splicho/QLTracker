@@ -270,7 +270,7 @@ Modal.Dialog = function AdminModalDialog({
   return (
     <DialogContent
       className={cn(
-        "gap-0 overflow-hidden border-border/60 bg-background p-0 text-foreground",
+        "min-h-0 flex flex-col gap-0 overflow-hidden border-border/60 bg-background p-0 text-foreground",
         getModalSizeClass(size),
         className
       )}
@@ -288,7 +288,7 @@ Modal.Header = function AdminModalHeader({
 }: React.ComponentProps<"div">) {
   return (
     <UiDialogHeader
-      className={cn("gap-1 border-b px-6 py-4 text-left", className)}
+      className={cn("shrink-0 gap-1 border-b px-6 py-4 text-left", className)}
       {...props}
     >
       {children}
@@ -309,7 +309,15 @@ Modal.Body = function AdminModalBody({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  return <div className={cn("px-6 py-5", className)} {...props} />
+  return (
+    <div
+      className={cn(
+        "min-h-0 flex-1 overflow-y-auto px-6 py-5",
+        className
+      )}
+      {...props}
+    />
+  )
 }
 
 Modal.Footer = function AdminModalFooter({
@@ -318,7 +326,7 @@ Modal.Footer = function AdminModalFooter({
 }: React.ComponentProps<"div">) {
   return (
     <UiDialogFooter
-      className={cn("border-t px-6 py-4", className)}
+      className={cn("shrink-0 border-t px-6 py-4", className)}
       {...props}
     />
   )

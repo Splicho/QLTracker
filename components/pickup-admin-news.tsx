@@ -260,19 +260,26 @@ export function PickupAdminNews({
                           }}
                         />
                         <Button
-                          className="cursor-pointer"
+                          className="inline-flex cursor-pointer items-center gap-2"
                           isDisabled={pendingAction !== null}
+                          isPending={pendingAction === "uploadCoverImage"}
                           variant="secondary"
                           onPress={() => coverInputRef.current?.click()}
                         >
-                          {pendingAction === "uploadCoverImage" ? (
-                            <>
-                              <Spinner color="current" size="sm" />
-                              Uploading cover...
-                            </>
-                          ) : (
-                            "Upload cover image"
-                          )}
+                          {({ isPending }) =>
+                            isPending ? (
+                              <>
+                                <Spinner
+                                  className="shrink-0"
+                                  color="current"
+                                  size="sm"
+                                />
+                                <span>Uploading cover…</span>
+                              </>
+                            ) : (
+                              "Upload cover image"
+                            )
+                          }
                         </Button>
                         {form.coverImageUrl ? (
                           <a
@@ -288,7 +295,7 @@ export function PickupAdminNews({
                       {form.coverImageUrl ? (
                         <img
                           alt="Article cover preview"
-                          className="mt-4 h-48 w-full rounded-2xl object-cover"
+                          className="mt-4 max-h-[min(12rem,32vh)] w-full rounded-2xl object-cover"
                           src={form.coverImageUrl}
                         />
                       ) : null}

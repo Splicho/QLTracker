@@ -243,19 +243,26 @@ export function PickupAdminNewsEdit({ article }: { article: NewsArticleDto }) {
                 }}
               />
               <Button
-                className="cursor-pointer"
+                className="inline-flex cursor-pointer items-center gap-2"
                 isDisabled={pendingAction !== null}
+                isPending={pendingAction === "uploadCoverImage"}
                 variant="secondary"
                 onPress={() => coverInputRef.current?.click()}
               >
-                {pendingAction === "uploadCoverImage" ? (
-                  <>
-                    <Spinner color="current" size="sm" />
-                    Uploading cover...
-                  </>
-                ) : (
-                  "Upload cover image"
-                )}
+                {({ isPending }) =>
+                  isPending ? (
+                    <>
+                      <Spinner
+                        className="shrink-0"
+                        color="current"
+                        size="sm"
+                      />
+                      <span>Uploading cover…</span>
+                    </>
+                  ) : (
+                    "Upload cover image"
+                  )
+                }
               </Button>
               {form.coverImageUrl ? (
                 <a
@@ -271,7 +278,7 @@ export function PickupAdminNewsEdit({ article }: { article: NewsArticleDto }) {
             {form.coverImageUrl ? (
               <img
                 alt="Article cover preview"
-                className="mt-4 h-56 w-full rounded-2xl object-cover"
+                className="mt-4 max-h-[min(14rem,36vh)] w-full rounded-2xl object-cover"
                 src={form.coverImageUrl}
               />
             ) : null}
