@@ -117,7 +117,7 @@ export function createPickupService(io: Server) {
       ],
     );
 
-    const queueResult = await pool.query<PickupQueueRow>(
+    const insertedQueueResult = await pool.query<PickupQueueRow>(
       `
         insert into "PickupQueue" (
           "id",
@@ -141,13 +141,7 @@ export function createPickupService(io: Server) {
           now(),
           now()
         )
-        on conflict ("slug") do update
-        set
-          "name" = excluded."name",
-          "description" = excluded."description",
-          "teamSize" = excluded."teamSize",
-          "playerCount" = excluded."playerCount",
-          "updatedAt" = now()
+        on conflict ("slug") do nothing
         returning
           "id",
           "slug",
@@ -166,35 +160,57 @@ export function createPickupService(io: Server) {
       ],
     );
 
-    const queue = queueResult.rows[0]!;
+    const insertedQueue = insertedQueueResult.rows[0] ?? null;
+    const queue =
+      insertedQueue ??
+      (
+        await pool.query<PickupQueueRow>(
+          `
+            select
+              "id",
+              "slug",
+              "name",
+              "description",
+              "teamSize",
+              "playerCount",
+              "enabled"
+            from "PickupQueue"
+            where "slug" = $1
+            limit 1
+          `,
+          [DEFAULT_QUEUE.slug],
+        )
+      ).rows[0]!;
 
-    for (const [index, [mapKey, label]] of DEFAULT_MAP_POOL.entries()) {
-      await pool.query(
-        `
-          insert into "PickupMapPool" (
-            "id",
-            "queueId",
-            "mapKey",
-            "label",
-            "sortOrder",
-            "active",
-            "createdAt",
-            "updatedAt"
-          )
-          values (
-            gen_random_uuid()::text,
-            $1,
-            $2,
-            $3,
-            $4,
-            true,
-            now(),
-            now()
-          )
-          on conflict ("queueId", "mapKey") do nothing
-        `,
-        [queue.id, mapKey, label, index],
-      );
+    if (insertedQueue) {
+      for (const [index, [mapKey, label]] of DEFAULT_MAP_POOL.entries()) {
+        await pool.query(
+          `
+            insert into "PickupMapPool" (
+              "id",
+              "queueId",
+              "mapKey",
+              "label",
+              "sortOrder",
+              "active",
+              "createdAt",
+              "updatedAt"
+            )
+            values (
+              gen_random_uuid()::text,
+              $1,
+              $2,
+              $3,
+              $4,
+              true,
+              now(),
+              now()
+            )
+            on conflict ("queueId", "mapKey") do nothing
+          `,
+          [queue.id, mapKey, label, index],
+        );
+      }
     }
 
     const seasons = await pool.query<{ count: string }>(
