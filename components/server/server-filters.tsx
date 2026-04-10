@@ -116,7 +116,7 @@ export function ServerFilters({
 
   return (
     <section className="border-b border-border px-4 py-4">
-      <div className="flex w-full max-w-5xl flex-col gap-3">
+      <div className="flex w-full flex-col gap-3">
         <div className="flex items-center justify-between gap-2">
           <h2 className="text-sm font-medium">{t("filters.title")}</h2>
           <div className="flex items-center gap-1">
@@ -294,18 +294,13 @@ export function ServerFilters({
                     <Heart className="size-4" />
                     {t("filters.showFavorites")}
                   </Button>
+                  {hasActiveFilters ? (
+                    <Button variant="ghost" onClick={onReset}>
+                      <X className="size-4" />
+                      {t("filters.clearAll")}
+                    </Button>
+                  ) : null}
                 </div>
-
-                {hasActiveFilters ? (
-                  <Button
-                    variant="ghost"
-                    onClick={onReset}
-                    className="self-start"
-                  >
-                    <X className="size-4" />
-                    {t("filters.clearAll")}
-                  </Button>
-                ) : null}
               </div>
             </div>
           </motion.div>
