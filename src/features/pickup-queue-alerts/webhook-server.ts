@@ -19,6 +19,7 @@ const PICKUP_QUEUE_ALERTS_SIGNATURE_HEADER = 'x-qltracker-signature';
 const MAX_BODY_SIZE_BYTES = 64 * 1024;
 
 const queueOpenedPayloadSchema = z.object({
+  action: z.enum(['opened', 'joined']),
   currentPlayers: z.number().int().nonnegative(),
   joinedAt: z.string().datetime(),
   player: z.object({
@@ -66,6 +67,7 @@ async function postQueueOpenedAlert(
     {
       channelId: env.PICKUP_QUEUE_ALERTS_CHANNEL_ID,
       currentPlayers: payload.currentPlayers,
+      action: payload.action,
       playerId: payload.player.id,
       playerName: payload.player.personaName,
       queueId: payload.queue.id,
@@ -99,10 +101,18 @@ async function postQueueOpenedAlert(
     }) => Promise<unknown>;
   };
 
+  const isQueueOpened = payload.action === 'opened';
+  const embedTitle = isQueueOpened
+    ? `${payload.queue.name} queue is now open`
+    : `${payload.player.personaName} joined ${payload.queue.name}`;
+  const embedDescription = isQueueOpened
+    ? `${payload.player.personaName} opened the queue.`
+    : `The queue is now ${payload.currentPlayers}/${payload.queue.playerCount}.`;
+
   const embed = new EmbedBuilder()
     .setColor(0xff5c58)
-    .setTitle(`${payload.queue.name} queue is now open`)
-    .setDescription(`${payload.player.personaName} joined the queue.`)
+    .setTitle(embedTitle)
+    .setDescription(embedDescription)
     .setTimestamp(new Date(payload.joinedAt))
     .addFields(
       {
@@ -139,7 +149,7 @@ async function postQueueOpenedAlert(
     content?: string;
     embeds: EmbedBuilder[];
   } = {
-    allowedMentions: env.PICKUP_QUEUE_ALERTS_ROLE_ID
+    allowedMentions: isQueueOpened && env.PICKUP_QUEUE_ALERTS_ROLE_ID
       ? { parse: [], roles: [env.PICKUP_QUEUE_ALERTS_ROLE_ID] }
       : { parse: [] },
     components: [
@@ -153,7 +163,7 @@ async function postQueueOpenedAlert(
     embeds: [embed],
   };
 
-  if (env.PICKUP_QUEUE_ALERTS_ROLE_ID) {
+  if (isQueueOpened && env.PICKUP_QUEUE_ALERTS_ROLE_ID) {
     messagePayload.content = `<@&${env.PICKUP_QUEUE_ALERTS_ROLE_ID}>`;
   }
 
@@ -161,7 +171,11 @@ async function postQueueOpenedAlert(
     {
       buttonUrl: new URL('/pickup', env.PUBLIC_APP_URL).toString(),
       channelId: env.PICKUP_QUEUE_ALERTS_CHANNEL_ID,
-      mentionRoleId: env.PICKUP_QUEUE_ALERTS_ROLE_ID ?? null,
+      action: payload.action,
+      mentionRoleId:
+        isQueueOpened && env.PICKUP_QUEUE_ALERTS_ROLE_ID
+          ? env.PICKUP_QUEUE_ALERTS_ROLE_ID
+          : null,
       status: `${payload.currentPlayers}/${payload.queue.playerCount}`,
     },
     'Sending pickup queue alert to Discord',
@@ -277,6 +291,7 @@ export function startPickupQueueAlertsWebhook(runtimes: readonly BotRuntime[]): 
       logger.info(
         {
           currentPlayers: parsedPayload.currentPlayers,
+          action: parsedPayload.action,
           playerId: parsedPayload.player.id,
           playerName: parsedPayload.player.personaName,
           queueId: parsedPayload.queue.id,
