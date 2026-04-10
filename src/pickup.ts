@@ -112,25 +112,11 @@ export function createPickupService(io: Server) {
     payload: PickupQueueOpenedAlertPayload,
   ): Promise<void> {
     if (!config.pickupQueueAlertsWebhookUrl || !config.pickupQueueAlertsWebhookSecret) {
-      console.info("Skipping pickup queue alert webhook because it is not configured.", {
-        hasWebhookSecret: Boolean(config.pickupQueueAlertsWebhookSecret),
-        hasWebhookUrl: Boolean(config.pickupQueueAlertsWebhookUrl),
-        queueSlug: payload.queue.slug,
-      });
       return;
     }
 
     const body = JSON.stringify(payload);
     const signature = createSignature(config.pickupQueueAlertsWebhookSecret, body);
-
-    console.info("Sending pickup queue alert webhook.", {
-      currentPlayers: payload.currentPlayers,
-      playerId: payload.player.id,
-      playerName: payload.player.personaName,
-      queueId: payload.queue.id,
-      queueSlug: payload.queue.slug,
-      url: config.pickupQueueAlertsWebhookUrl,
-    });
 
     try {
       const response = await fetch(config.pickupQueueAlertsWebhookUrl, {
@@ -143,26 +129,12 @@ export function createPickupService(io: Server) {
       });
 
       if (!response.ok) {
-        console.warn("Failed to deliver pickup queue alert webhook.", {
-          queueSlug: payload.queue.slug,
-          status: response.status,
-          statusText: response.statusText,
-          url: config.pickupQueueAlertsWebhookUrl,
-        });
-        return;
+        console.warn(
+          `Failed to deliver pickup queue alert webhook: HTTP ${response.status}`,
+        );
       }
-
-      console.info("Delivered pickup queue alert webhook.", {
-        queueSlug: payload.queue.slug,
-        status: response.status,
-        url: config.pickupQueueAlertsWebhookUrl,
-      });
     } catch (error) {
-      console.warn("Failed to deliver pickup queue alert webhook.", {
-        error,
-        queueSlug: payload.queue.slug,
-        url: config.pickupQueueAlertsWebhookUrl,
-      });
+      console.warn("Failed to deliver pickup queue alert webhook", error);
     }
   }
 
@@ -1932,14 +1904,6 @@ export function createPickupService(io: Server) {
       const currentPlayers = queueCountBeforeJoin + 1;
       const action = queueCountBeforeJoin === 0 ? "opened" : "joined";
 
-      console.info("Triggering pickup queue alert webhook after successful join.", {
-        action,
-        currentPlayers,
-        playerId: session.player.id,
-        queueId: queue.id,
-        queueSlug: queue.slug,
-      });
-
       void notifyQueueOpened({
         action,
         currentPlayers,
@@ -1959,14 +1923,6 @@ export function createPickupService(io: Server) {
           teamSize: queue.teamSize,
         },
         type: "pickup.queue_opened",
-      });
-    } else {
-      console.info("Skipping pickup queue alert webhook after join.", {
-        inserted: Boolean(insertResult.rowCount),
-        playerId: session.player.id,
-        queueCountBeforeJoin,
-        queueId: queue.id,
-        queueSlug: queue.slug,
       });
     }
 
