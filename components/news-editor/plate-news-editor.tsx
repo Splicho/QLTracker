@@ -60,7 +60,7 @@ function ParagraphElement(props: PlateElementProps) {
     <PlateElement
       {...props}
       as="p"
-      className="min-h-[1.75rem] text-sm leading-7 text-white/88 [&:not(:last-child)]:mb-4"
+      className="min-h-[1.125rem] text-sm leading-snug text-white/88 [&:not(:last-child)]:mb-1"
     />
   )
 }
@@ -74,23 +74,29 @@ function HeadingElement({
 }) {
   const sizeClassName =
     level === "h1"
-      ? "text-3xl font-semibold"
+      ? "text-3xl leading-tight font-semibold tracking-tight"
       : level === "h2"
-        ? "text-2xl font-semibold"
-        : "text-xl font-semibold"
+        ? "text-2xl leading-tight font-semibold tracking-tight"
+        : "text-xl leading-snug font-semibold"
+  const spacingClassName =
+    level === "h1"
+      ? "mt-7 mb-3 first:mt-0"
+      : level === "h2"
+        ? "mt-6 mb-2 first:mt-0"
+        : "mt-5 mb-1.5 first:mt-0"
 
   return (
     <PlateElement
       {...props}
       as={level}
-      className={cn("mt-6 text-white first:mt-0", sizeClassName, className)}
+      className={cn("text-white", sizeClassName, spacingClassName, className)}
     />
   )
 }
 
 function HorizontalRuleElement(props: PlateElementProps) {
   return (
-    <PlateElement {...props} as="div" className="my-6">
+    <PlateElement {...props} as="div" className="my-4">
       <div contentEditable={false}>
         <hr className="border-white/10" />
       </div>
@@ -104,7 +110,7 @@ function BulletedListElement(props: PlateElementProps) {
     <PlateElement
       {...props}
       as="ul"
-      className="mb-4 list-disc pl-6 text-white/88"
+      className="mb-3 list-disc pl-6 text-white/88"
     />
   )
 }
@@ -114,13 +120,13 @@ function NumberedListElement(props: PlateElementProps) {
     <PlateElement
       {...props}
       as="ol"
-      className="mb-4 list-decimal pl-6 text-white/88"
+      className="mb-3 list-decimal pl-6 text-white/88"
     />
   )
 }
 
 function ListItemElement(props: PlateElementProps) {
-  return <PlateElement {...props} as="li" className="mb-2 last:mb-0" />
+  return <PlateElement {...props} as="li" className="mb-1 last:mb-0" />
 }
 
 function ListItemContentElement(props: PlateElementProps) {
@@ -128,7 +134,7 @@ function ListItemContentElement(props: PlateElementProps) {
     <PlateElement
       {...props}
       as="div"
-      className="min-h-[1.75rem] text-sm leading-7 text-white/88"
+      className="min-h-[1.125rem] text-sm leading-snug text-white/88"
     />
   )
 }
@@ -148,7 +154,7 @@ function LinkElement(props: PlateElementProps<TLinkElement>) {
 
 function ImageElement(props: PlateElementProps<TMediaElement>) {
   return (
-    <PlateElement {...props} as="div" className="my-6">
+    <PlateElement {...props} as="div" className="my-4">
       <div contentEditable={false}>
         <img
           alt=""
@@ -253,7 +259,7 @@ export const PlateNewsEditor = forwardRef<
     disabled,
     isUploadingImage = false,
     markdown,
-    minHeightClassName = "h-[22rem]",
+    minHeightClassName = "h-[32rem]",
     onMarkdownChange,
     onRequestImageUpload,
   },
@@ -365,12 +371,16 @@ export const PlateNewsEditor = forwardRef<
           }}
         >
           <ScrollArea className={cn("w-full", minHeightClassName)}>
-            <PlateContent
-              ref={contentRef}
-              className="min-h-full bg-transparent px-4 py-4 text-sm leading-7 text-white [caret-color:white] outline-none [&_.slate-selected]:bg-white/10 [&_em]:italic [&_strong]:font-semibold [&_u]:underline [&_u]:underline-offset-4"
-              disableDefaultStyles
-              placeholder="Write your article..."
-            />
+            {/* Radix ScrollArea viewport often does not give children a usable % height; stretch so the
+                slate textbox fills the panel instead of collapsing to ~one line (tiny click target). */}
+            <div className="flex min-h-full w-full flex-col">
+              <PlateContent
+                ref={contentRef}
+                className="flex min-h-full w-full flex-1 flex-col bg-transparent px-4 py-3 text-sm leading-snug text-white [caret-color:white] outline-none [&_.slate-selected]:bg-white/10 [&_[data-slate-node='element']]:!block [&_[data-slate-node='element']]:!min-w-0 [&_[data-slate-node='text']]:!block [&_[data-slate-node='text']]:!w-full [&_[data-slate-node='text']]:!min-w-0 [&_[data-slate-leaf]]:!inline [&_[data-slate-string]]:!inline [&_em]:italic [&_strong]:font-semibold [&_u]:underline [&_u]:underline-offset-4"
+                disableDefaultStyles
+                placeholder="Write your article..."
+              />
+            </div>
           </ScrollArea>
         </Plate>
       </div>

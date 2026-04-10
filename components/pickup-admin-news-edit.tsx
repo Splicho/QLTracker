@@ -286,7 +286,7 @@ export function PickupAdminNewsEdit({ article }: { article: NewsArticleDto }) {
               disabled={pendingAction !== null}
               isUploadingImage={pendingAction === "uploadContentImage"}
               markdown={form.content}
-              minHeightClassName="h-[24rem]"
+              minHeightClassName="h-[32rem]"
               onMarkdownChange={(content) =>
                 setForm((current) => ({
                   ...current,
