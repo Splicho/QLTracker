@@ -58,6 +58,27 @@ const DEFAULT_MAP_POOL = [
 const ratingEnv = new TrueSkill(1000, 150, 75, 5, 0);
 const COMPLETED_MATCH_VISIBLE_MS = 30_000;
 const PROVISION_RETRY_DELAYS_MS = [0, 5_000, 10_000, 20_000, 30_000] as const;
+const PICKUP_QUEUE_ALERTS_SIGNATURE_HEADER = "x-qltracker-signature";
+
+type PickupQueueOpenedAlertPayload = {
+  currentPlayers: number;
+  joinedAt: string;
+  player: {
+    avatarUrl: string | null;
+    id: string;
+    personaName: string;
+    profileUrl: string | null;
+    steamId: string;
+  };
+  queue: {
+    id: string;
+    name: string;
+    playerCount: number;
+    slug: string;
+    teamSize: number;
+  };
+  type: "pickup.queue_opened";
+};
 
 function hashPickupToken(token: string) {
   return crypto
@@ -68,6 +89,10 @@ function hashPickupToken(token: string) {
 
 function createSignature(secret: string, body: string) {
   return crypto.createHmac("sha256", secret).update(body).digest("hex");
+}
+
+function stripQuakeColors(value: string) {
+  return value.replace(/\^\^/g, "\0").replace(/\^\d/g, "").replace(/\0/g, "^").trim();
 }
 
 function createRating(mu: number, sigma: number) {
@@ -81,6 +106,36 @@ export function createPickupService(io: Server) {
   const vetoTimers = new Map<string, NodeJS.Timeout>();
   const queueDisconnectTimers = new Map<string, NodeJS.Timeout>();
   const connectedPickupSocketsByPlayerId = new Map<string, Set<string>>();
+
+  async function notifyQueueOpened(
+    payload: PickupQueueOpenedAlertPayload,
+  ): Promise<void> {
+    if (!config.pickupQueueAlertsWebhookUrl || !config.pickupQueueAlertsWebhookSecret) {
+      return;
+    }
+
+    const body = JSON.stringify(payload);
+    const signature = createSignature(config.pickupQueueAlertsWebhookSecret, body);
+
+    try {
+      const response = await fetch(config.pickupQueueAlertsWebhookUrl, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          [PICKUP_QUEUE_ALERTS_SIGNATURE_HEADER]: signature,
+        },
+        body,
+      });
+
+      if (!response.ok) {
+        console.warn(
+          `Failed to deliver pickup queue alert webhook: HTTP ${response.status}`,
+        );
+      }
+    } catch (error) {
+      console.warn("Failed to deliver pickup queue alert webhook", error);
+    }
+  }
 
   async function ensureBootstrapData() {
     await pool.query(
@@ -1814,7 +1869,18 @@ export function createPickupService(io: Server) {
     }
 
     await getOrCreatePlayerSeasonRating(session.player, activeSeason);
-    await pool.query(
+    const queueCountBeforeJoinResult = await pool.query<{ count: string }>(
+      `
+        select count(*)::text as count
+        from "PickupQueueMember"
+        where "queueId" = $1
+      `,
+      [queue.id],
+    );
+    const queueCountBeforeJoin = Number(
+      queueCountBeforeJoinResult.rows[0]?.count ?? "0",
+    );
+    const insertResult = await pool.query(
       `
         insert into "PickupQueueMember" (
           "id",
@@ -1832,6 +1898,28 @@ export function createPickupService(io: Server) {
       `,
       [queue.id, session.player.id],
     );
+
+    if (insertResult.rowCount && queueCountBeforeJoin === 0) {
+      void notifyQueueOpened({
+        currentPlayers: 1,
+        joinedAt: new Date().toISOString(),
+        player: {
+          avatarUrl: session.player.avatarUrl,
+          id: session.player.id,
+          personaName: stripQuakeColors(session.player.personaName),
+          profileUrl: session.player.profileUrl,
+          steamId: session.player.steamId,
+        },
+        queue: {
+          id: queue.id,
+          name: queue.name,
+          playerCount: queue.playerCount,
+          slug: queue.slug,
+          teamSize: queue.teamSize,
+        },
+        type: "pickup.queue_opened",
+      });
+    }
 
     await broadcastPublicState();
     await emitPlayerState(session.player.id);

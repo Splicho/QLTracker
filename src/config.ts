@@ -9,6 +9,8 @@ const envSchema = z.object({
   HISTORY_RETENTION_DAYS: z.coerce.number().int().positive().default(7),
   HISTORY_SAMPLE_INTERVAL_MS: z.coerce.number().int().positive().default(300000),
   PICKUP_QUEUE_DISCONNECT_GRACE_MS: z.coerce.number().int().positive().default(15000),
+  PICKUP_QUEUE_ALERTS_WEBHOOK_SECRET: z.string().optional(),
+  PICKUP_QUEUE_ALERTS_WEBHOOK_URL: z.string().url().optional(),
   POLL_INTERVAL_MS: z.coerce.number().int().positive().default(30000),
   QLSTATS_API_URL: z.string().default("https://qlstats.net/api"),
   REALTIME_INGEST_TOKEN: z.string().min(1, "REALTIME_INGEST_TOKEN is required"),
@@ -19,6 +21,29 @@ const envSchema = z.object({
   TRUESKILL_URL_TEMPLATE: z
     .string()
     .default("http://qlrelax.freemyip.com/elo/bn/%s"),
+}).superRefine((value, context) => {
+  const hasAlertsUrl = Boolean(value.PICKUP_QUEUE_ALERTS_WEBHOOK_URL);
+  const hasAlertsSecret = Boolean(value.PICKUP_QUEUE_ALERTS_WEBHOOK_SECRET);
+
+  if (!hasAlertsUrl && !hasAlertsSecret) {
+    return;
+  }
+
+  if (!hasAlertsUrl) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["PICKUP_QUEUE_ALERTS_WEBHOOK_URL"],
+      message: "PICKUP_QUEUE_ALERTS_WEBHOOK_URL is required when queue alerts are enabled",
+    });
+  }
+
+  if (!hasAlertsSecret) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["PICKUP_QUEUE_ALERTS_WEBHOOK_SECRET"],
+      message: "PICKUP_QUEUE_ALERTS_WEBHOOK_SECRET is required when queue alerts are enabled",
+    });
+  }
 });
 
 const parsedEnv = envSchema.parse(process.env);
@@ -35,6 +60,10 @@ export const config = {
   historyRetentionDays: parsedEnv.HISTORY_RETENTION_DAYS,
   historySampleIntervalMs: parsedEnv.HISTORY_SAMPLE_INTERVAL_MS,
   ingestToken: parsedEnv.REALTIME_INGEST_TOKEN,
+  pickupQueueAlertsWebhookSecret:
+    parsedEnv.PICKUP_QUEUE_ALERTS_WEBHOOK_SECRET?.trim() ?? "",
+  pickupQueueAlertsWebhookUrl:
+    parsedEnv.PICKUP_QUEUE_ALERTS_WEBHOOK_URL?.trim().replace(/\/+$/, "") ?? "",
   pickupQueueDisconnectGraceMs: parsedEnv.PICKUP_QUEUE_DISCONNECT_GRACE_MS,
   pollIntervalMs: parsedEnv.POLL_INTERVAL_MS,
   port: parsedEnv.PORT,
