@@ -1,36 +1,17 @@
 import { NextResponse } from "next/server"
-import { cookies } from "next/headers"
 
-import { getNotificationEnv } from "@/lib/server/env"
-import {
-  getPickupSessionCookieDeleteOptions,
-  invalidatePickupSession,
-  serializePickupSessionSetCookie,
-  type PickupSessionCookieSetOpts,
-} from "@/lib/server/pickup-auth"
+import { performPickupAdminBrowserLogout } from "@/lib/server/pickup-auth"
 
 export const runtime = "nodejs"
 
-export async function GET(request: Request) {
-  const cookieStore = await cookies()
-  const cookieName = getNotificationEnv().PICKUP_AUTH_COOKIE_NAME
-  const token = cookieStore.get(cookieName)?.value
+/** Logout must be POST so Next.js `<Link prefetch>` never hits GET and revokes the session. */
+export async function POST(request: Request) {
+  return performPickupAdminBrowserLogout(request)
+}
 
-  if (token) {
-    await invalidatePickupSession(token)
-  }
-
-  const delOpts = getPickupSessionCookieDeleteOptions(request)
-  const loginUrl = new URL("/admin/login", getNotificationEnv().PUBLIC_BASE_URL)
-  return new NextResponse(null, {
-    status: 302,
-    headers: {
-      Location: loginUrl.toString(),
-      "Set-Cookie": serializePickupSessionSetCookie(
-        cookieName,
-        "",
-        delOpts as PickupSessionCookieSetOpts
-      ),
-    },
-  })
+export function GET() {
+  return NextResponse.json(
+    { message: "Use the Logout button." },
+    { status: 405, headers: { Allow: "POST" } }
+  )
 }

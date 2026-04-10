@@ -104,18 +104,18 @@ export function AdminShell({
                 </span>
               </Link>
             </Button>
-            <Button
-              asChild
-              className="h-10 w-full justify-start group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
-              variant="destructive"
-            >
-              <Link href="/admin/logout">
+            <form action="/admin/logout" className="w-full" method="POST">
+              <Button
+                className="h-10 w-full justify-start group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+                type="submit"
+                variant="destructive"
+              >
                 <LogOut />
                 <span className="group-data-[collapsible=icon]:hidden">
                   Logout
                 </span>
-              </Link>
-            </Button>
+              </Button>
+            </form>
           </div>
         </SidebarFooter>
         <SidebarRail />

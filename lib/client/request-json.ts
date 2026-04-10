@@ -1,5 +1,6 @@
 export function requestJson<T>(url: string, init?: RequestInit) {
   return fetch(url, {
+    credentials: init?.credentials ?? "include",
     ...init,
     headers: {
       "Content-Type": "application/json",

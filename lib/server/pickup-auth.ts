@@ -1,4 +1,5 @@
 import { cookies } from "next/headers"
+import { NextResponse } from "next/server"
 import type { PickupPlayer } from "@prisma/client"
 
 import {
@@ -230,6 +231,39 @@ export function serializePickupSessionSetCookie(
     parts.push(`Domain=${opts.domain}`)
   }
   return parts.join("; ")
+}
+
+/**
+ * Revoke pickup admin session in DB, clear httpOnly cookie, redirect to login.
+ * Call from **POST** only in Route Handlers: a GET `/admin/logout` + Next.js `<Link prefetch>`
+ * will fire this during prefetch and log the user out immediately (session + cookie gone).
+ */
+export async function performPickupAdminBrowserLogout(request: Request) {
+  const cookieStore = await cookies()
+  const env = getNotificationEnv()
+  const cookieName = env.PICKUP_AUTH_COOKIE_NAME
+  const token = cookieStore.get(cookieName)?.value
+
+  if (token) {
+    await invalidatePickupSession(token)
+  }
+
+  const delOpts = getPickupSessionCookieDeleteOptions(request)
+  const loginUrl = new URL(
+    "/admin/login",
+    env.PUBLIC_BASE_URL.replace(/\/$/, "")
+  )
+  return new NextResponse(null, {
+    status: 302,
+    headers: {
+      Location: loginUrl.toString(),
+      "Set-Cookie": serializePickupSessionSetCookie(
+        cookieName,
+        "",
+        delOpts as PickupSessionCookieSetOpts
+      ),
+    },
+  })
 }
 
 /** Clear cookie with the same domain/path/secure as login so the browser actually drops it. */
