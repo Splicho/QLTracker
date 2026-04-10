@@ -61,6 +61,7 @@ const PROVISION_RETRY_DELAYS_MS = [0, 5_000, 10_000, 20_000, 30_000] as const;
 const PICKUP_QUEUE_ALERTS_SIGNATURE_HEADER = "x-qltracker-signature";
 
 type PickupQueueOpenedAlertPayload = {
+  action: "joined" | "opened";
   currentPlayers: number;
   joinedAt: string;
   player: {
@@ -1927,14 +1928,21 @@ export function createPickupService(io: Server) {
       [queue.id, session.player.id],
     );
 
-    if (insertResult.rowCount && queueCountBeforeJoin === 0) {
-      console.info("Queue transitioned from empty to open; triggering alert webhook.", {
+    if (insertResult.rowCount) {
+      const currentPlayers = queueCountBeforeJoin + 1;
+      const action = queueCountBeforeJoin === 0 ? "opened" : "joined";
+
+      console.info("Triggering pickup queue alert webhook after successful join.", {
+        action,
+        currentPlayers,
         playerId: session.player.id,
         queueId: queue.id,
         queueSlug: queue.slug,
       });
+
       void notifyQueueOpened({
-        currentPlayers: 1,
+        action,
+        currentPlayers,
         joinedAt: new Date().toISOString(),
         player: {
           avatarUrl: session.player.avatarUrl,
