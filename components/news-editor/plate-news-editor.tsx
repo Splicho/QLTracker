@@ -399,7 +399,7 @@ export const PlateNewsEditor = forwardRef<
             <div className="flex min-h-full w-full flex-col">
               <PlateContent
                 ref={contentRef}
-                className="flex min-h-full w-full flex-1 flex-col break-words whitespace-pre-wrap bg-transparent px-4 py-3 text-sm leading-snug text-white [caret-color:white] outline-none [&_.slate-selected]:bg-white/10 [&_[data-slate-node='element']]:!block [&_[data-slate-node='element']]:!min-w-0 [&_[data-slate-node='text']]:!inline [&_[data-slate-node='text']]:!min-w-0 [&_[data-slate-leaf]]:!inline [&_[data-slate-string]]:!inline [&_em]:italic [&_strong]:inline [&_strong]:font-semibold [&_u]:underline [&_u]:underline-offset-4"
+                className="flex min-h-full w-full flex-1 flex-col break-words whitespace-pre-wrap bg-transparent px-4 py-3 text-sm leading-snug text-white [caret-color:white] outline-none [&_.slate-selected]:bg-white/10 [&_[data-slate-node='text']]:!inline [&_[data-slate-node='text']]:!min-w-0 [&_[data-slate-leaf]]:!inline [&_[data-slate-string]]:!inline [&_em]:italic [&_strong]:inline [&_strong]:font-semibold [&_u]:underline [&_u]:underline-offset-4"
                 disableDefaultStyles
                 placeholder="Write your article..."
               />
