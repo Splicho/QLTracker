@@ -34,7 +34,7 @@ export async function generateMetadata({
     title: article.title,
     path: `/news/${article.slug}`,
     description: article.excerpt,
-    imageUrl: `/news/${article.slug}/opengraph-image`,
+    imageUrl: article.coverImageUrl ?? siteConfig.ogImage.url,
     publishedAt: article.publishedAt.toISOString(),
   })
 }

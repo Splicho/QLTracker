@@ -51,7 +51,11 @@ function getHeaderState(pathname: string) {
   }
 
   if (pathname.startsWith("/news/")) {
-    return { breadcrumbParent: "News", pageTitle: "Article" }
+    const slug = pathname.split("/").filter(Boolean).at(-1) ?? "Article"
+    return {
+      breadcrumbParent: "News",
+      pageTitle: decodeURIComponent(slug),
+    }
   }
 
   if (pathname.startsWith("/news")) {
