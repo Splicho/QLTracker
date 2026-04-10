@@ -29,6 +29,7 @@ type SlotBuffer = {
 };
 
 const MAX_EVENTS = 500;
+const MAX_ZMQ_FRAME_PREVIEW = 240;
 const TRACKED_EVENT_TYPES = new Set([
   "MATCH_STARTED",
   "ROUND_OVER",
@@ -218,6 +219,31 @@ function relayTrackedEvent(
   });
 }
 
+function formatFramePreview(frame: Buffer) {
+  const text = frame.toString("utf8").replace(/\s+/g, " ").trim();
+  if (text.length <= MAX_ZMQ_FRAME_PREVIEW) {
+    return text;
+  }
+
+  return `${text.slice(0, MAX_ZMQ_FRAME_PREVIEW)}...`;
+}
+
+function logZmqFrames(
+  slotId: number,
+  frames: readonly Buffer[],
+  context: "parsed" | "unparsed",
+) {
+  const summary = frames.map((frame, index) => ({
+    index,
+    preview: formatFramePreview(frame),
+    size: frame.length,
+  }));
+
+  console.info(
+    `[zmq] slot ${slotId} ${context} frames ${JSON.stringify(summary)}`,
+  );
+}
+
 function handleZmqMessage(slotId: number, raw: Buffer | readonly Buffer[]) {
   const slot = getSlotDefinition(slotId);
   const buffer = slotBuffers.get(slotId);
@@ -225,10 +251,19 @@ function handleZmqMessage(slotId: number, raw: Buffer | readonly Buffer[]) {
     return;
   }
 
+  const frames = Array.isArray(raw) ? raw : [raw];
   const parsed = parseZmqMessage(raw);
   if (!parsed) {
+    logZmqFrames(slotId, frames, "unparsed");
     return;
   }
+
+  logZmqFrames(slotId, frames, "parsed");
+  console.info(
+    `[zmq] slot ${slotId} parsed event ${parsed.type} for ${
+      buffer.currentMatchId ?? "no-active-match"
+    }`,
+  );
 
   updatePlayers(buffer, parsed.type, parsed.data);
   pushEvent(buffer, parsed.type, parsed.data);
