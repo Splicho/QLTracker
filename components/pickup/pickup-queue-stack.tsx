@@ -71,14 +71,6 @@ export function PickupQueueStack({
 
     return result
   }, [participants])
-  const visibleParticipants = useMemo(
-    () => uniqueParticipants.slice(-4),
-    [uniqueParticipants]
-  )
-  const overflowCount = Math.max(
-    uniqueParticipants.length - visibleParticipants.length,
-    0
-  )
   const isQueueStage = stage === "queue"
   const isStartedStage = stage === "ready_check"
   const participantCount = currentCount ?? uniqueParticipants.length
@@ -95,7 +87,7 @@ export function PickupQueueStack({
       <div className="relative h-11 w-full rounded-full border border-success-foreground/15 bg-success px-3 text-success-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
         <div className="absolute top-1/2 left-3 flex min-w-[6.25rem] -translate-y-1/2 items-center">
           <AnimatePresence initial={false} mode="popLayout">
-            {visibleParticipants.map((participant, index) => (
+            {uniqueParticipants.map((participant, index) => (
               <Tooltip key={participant.id}>
                 <TooltipTrigger asChild>
                   <motion.div
@@ -106,7 +98,7 @@ export function PickupQueueStack({
                     exit={{ opacity: 0, scale: 0.94, x: -10 }}
                     style={{
                       marginLeft: index === 0 ? 0 : -8,
-                      zIndex: visibleParticipants.length - index,
+                      zIndex: uniqueParticipants.length - index,
                     }}
                     transition={{
                       layout: {
@@ -140,14 +132,6 @@ export function PickupQueueStack({
               </Tooltip>
             ))}
           </AnimatePresence>
-          {overflowCount > 0 ? (
-            <motion.div
-              layout
-              className="relative ml-1 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-black/14 px-1.5 text-[11px] font-semibold text-success-foreground/92 ring-1 ring-black/10"
-            >
-              +{overflowCount}
-            </motion.div>
-          ) : null}
         </div>
 
         <div
