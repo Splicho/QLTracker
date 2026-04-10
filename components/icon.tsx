@@ -412,6 +412,25 @@ export function ArrowUpRight(props: SVGProps<SVGSVGElement>) {
   )
 }
 
+export function ArrowLeft(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 16 16"
+      {...props}
+    >
+      <g transform="translate(16 0) scale(-1 1)">
+        <path
+          fill="currentColor"
+          d="M3 7h7.586L8.293 4.707l1.414-1.414L14.414 8l-4.707 4.707l-1.414-1.414L10.586 9H3z"
+        />
+      </g>
+    </svg>
+  )
+}
+
 export function ArrowRight(props: SVGProps<SVGSVGElement>) {
   return (
     <svg

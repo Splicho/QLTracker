@@ -37,7 +37,7 @@ export function NoticeBar({
         className
       )}
     >
-      <div className="mx-auto flex min-h-12 w-full max-w-[1600px] items-center justify-center gap-3 px-4 text-center">
+      <div className="mx-auto flex min-h-12 w-full max-w-[1600px] items-center justify-center px-4 text-center">
         <div className="flex min-w-0 items-center gap-2 text-sm font-medium">
           <InfoCircle className="size-4 shrink-0 opacity-90" />
           <span className="truncate">{notice.content}</span>

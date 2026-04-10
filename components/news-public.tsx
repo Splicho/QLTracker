@@ -4,12 +4,15 @@ import Link from "next/link"
 import { useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
+import { remarkMdx } from "@platejs/markdown"
 import ReactMarkdown from "react-markdown"
 import rehypeRaw from "rehype-raw"
 import remarkBreaks from "remark-breaks"
 import remarkGfm from "remark-gfm"
 
-import { ArrowRight, ArrowUpRight } from "@/components/icon"
+import { ArrowLeft, ArrowRight, ArrowUpRight } from "@/components/icon"
+import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   fetchNewsArticleQuery,
@@ -17,6 +20,7 @@ import {
   newsQueryKeys,
 } from "@/lib/news-query"
 import type { NewsArticleDto } from "@/lib/server/news"
+import { cn } from "@/lib/utils"
 
 const categoryOrder = [
   "All",
@@ -45,10 +49,40 @@ function toLabel(
 
 function formatPublishedAt(value: string) {
   return new Intl.DateTimeFormat("en-GB", {
-    day: "numeric",
-    month: "short",
+    day: "2-digit",
+    month: "long",
     year: "numeric",
   }).format(new Date(value))
+}
+
+function NewsArticleMetaRow({
+  category,
+  className,
+  publishedAt,
+}: {
+  category: NewsArticleDto["category"]
+  className?: string
+  publishedAt: string
+}) {
+  return (
+    <p
+      className={cn(
+        "flex flex-wrap items-center gap-3 text-sm",
+        className,
+      )}
+    >
+      <span className="font-semibold text-white/55 uppercase">
+        {toLabel(category)}
+      </span>
+      <span
+        aria-hidden
+        className="h-1 w-1 shrink-0 rounded-full bg-white/35"
+      />
+      <span className="font-normal normal-case text-white/50">
+        {formatPublishedAt(publishedAt)}
+      </span>
+    </p>
+  )
 }
 
 function NewsImage({
@@ -97,7 +131,7 @@ function NewsTabs({ activeCategory }: { activeCategory: CategoryFilter }) {
         {categoryOrder.map((category) => (
           <TabsTrigger
             key={category}
-            className="h-14 rounded-none px-3 text-sm font-medium text-white/60 after:bg-white group-data-[orientation=horizontal]/tabs:after:bottom-[-1px] hover:text-white data-[state=active]:text-white dark:text-white/60 dark:hover:text-white dark:data-[state=active]:text-white"
+            className="h-14 rounded-none px-3 text-sm font-medium text-white/60 after:bg-primary group-data-[orientation=horizontal]/tabs:after:bottom-[-1px] hover:text-white data-[state=active]:text-white dark:text-white/60 dark:hover:text-white dark:data-[state=active]:text-white"
             value={category}
           >
             {category}
@@ -172,12 +206,11 @@ function NewsFeedInner({
                 />
               </Link>
 
-              <p className="relative text-sm font-semibold tracking-[0.14em] text-white/55 uppercase">
-                {toLabel(article.category)}
-              </p>
-              <p className="relative text-sm text-white/50">
-                {formatPublishedAt(article.publishedAt)}
-              </p>
+              <NewsArticleMetaRow
+                category={article.category}
+                className="relative"
+                publishedAt={article.publishedAt}
+              />
               <h2 className="relative text-2xl leading-tight font-semibold text-white">
                 {article.title}
               </h2>
@@ -185,7 +218,7 @@ function NewsFeedInner({
                 {article.excerpt}
               </p>
               <Link
-                className="relative inline-flex w-fit items-center gap-2 text-sm font-semibold text-white"
+                className="relative mt-4 inline-flex w-fit items-center gap-2 text-sm font-semibold text-white"
                 href={`/news/${article.slug}`}
               >
                 Read more
@@ -208,11 +241,11 @@ function NewsFeedInner({
                   href={`/news/${article.slug}`}
                 >
                   <div className="flex min-w-0 flex-col gap-2">
-                    <div className="flex items-center gap-3 text-xs font-semibold tracking-[0.14em] text-white/45 uppercase">
-                      <span>{toLabel(article.category)}</span>
-                      <span className="h-1 w-1 rounded-full bg-white/35" />
-                      <span>{formatPublishedAt(article.publishedAt)}</span>
-                    </div>
+                    <NewsArticleMetaRow
+                      category={article.category}
+                      className="text-xs"
+                      publishedAt={article.publishedAt}
+                    />
                     <h3 className="text-lg font-semibold text-white">
                       {article.title}
                     </h3>
@@ -303,11 +336,11 @@ function NewsArchiveInner({
                 href={`/news/${article.slug}`}
               >
                 <div className="flex min-w-0 flex-col gap-2">
-                  <div className="flex items-center gap-3 text-xs font-semibold tracking-[0.14em] text-white/45 uppercase">
-                    <span>{toLabel(article.category)}</span>
-                    <span className="h-1 w-1 rounded-full bg-white/35" />
-                    <span>{formatPublishedAt(article.publishedAt)}</span>
-                  </div>
+                  <NewsArticleMetaRow
+                    category={article.category}
+                    className="text-xs"
+                    publishedAt={article.publishedAt}
+                  />
                   <h3 className="text-lg font-semibold text-white">
                     {article.title}
                   </h3>
@@ -359,6 +392,12 @@ function NewsArticleInner({
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
+      <Button variant="ghost" asChild className="w-fit text-white/70 hover:text-white">
+        <Link href="/news">
+          <ArrowLeft className="size-4 shrink-0" />
+          Back to news
+        </Link>
+      </Button>
       <div className="overflow-hidden rounded-3xl">
         <NewsImage
           alt={article.title}
@@ -368,19 +407,18 @@ function NewsArticleInner({
       </div>
 
       <div className="flex w-full flex-col gap-3">
-        <p className="text-sm font-semibold tracking-[0.14em] text-white/55 uppercase">
-          {toLabel(article.category)}
-        </p>
-        <p className="text-sm text-white/50">
-          {formatPublishedAt(article.publishedAt)}
-        </p>
+        <NewsArticleMetaRow
+          category={article.category}
+          publishedAt={article.publishedAt}
+        />
         <h1 className="text-3xl leading-tight font-semibold text-white">
           {article.title}
         </h1>
-        <div className="flex flex-col gap-2">
+        <Separator className="mt-3 bg-white/10" />
+        <div className="mt-6 flex flex-col gap-2">
           <ReactMarkdown
             rehypePlugins={[rehypeRaw]}
-            remarkPlugins={[remarkGfm, remarkBreaks]}
+            remarkPlugins={[remarkGfm, remarkBreaks, remarkMdx]}
             components={{
               a(props) {
                 const { children, className, ...rest } = props

@@ -38,7 +38,12 @@ import {
   ListPlugin,
   NumberedListPlugin,
 } from "@platejs/list-classic/react"
-import { deserializeMd, MarkdownPlugin, serializeMd } from "@platejs/markdown"
+import {
+  deserializeMd,
+  MarkdownPlugin,
+  remarkMdx,
+  serializeMd,
+} from "@platejs/markdown"
 import { insertImage } from "@platejs/media"
 import { ImagePlugin } from "@platejs/media/react"
 import remarkGfm from "remark-gfm"
@@ -47,6 +52,9 @@ import { PlateNewsEditorLinkModal } from "@/components/news-editor/plate-news-ed
 import { PlateNewsEditorToolbar } from "@/components/news-editor/plate-news-editor-toolbar"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
+
+/** GFM + MDX so font marks (color, size, etc.) can stringify as `<span style="…">` without errors. */
+const newsRemarkPlugins = [remarkGfm, remarkMdx]
 
 const DEFAULT_VALUE = [
   {
@@ -216,7 +224,7 @@ function createEditorPlugins() {
     }),
     MarkdownPlugin.configure({
       options: {
-        remarkPlugins: [remarkGfm],
+        remarkPlugins: newsRemarkPlugins,
       },
     }),
   ]
@@ -225,7 +233,7 @@ function createEditorPlugins() {
 function deserializeMarkdown(editor: PlateEditor, markdown: string) {
   const value = deserializeMd(editor, markdown, {
     preserveEmptyParagraphs: true,
-    remarkPlugins: [remarkGfm],
+    remarkPlugins: newsRemarkPlugins,
   })
 
   return value.length > 0 ? value : DEFAULT_VALUE
@@ -234,7 +242,7 @@ function deserializeMarkdown(editor: PlateEditor, markdown: string) {
 function serializeMarkdown(editor: PlateEditor) {
   return serializeMd(editor, {
     preserveEmptyParagraphs: true,
-    remarkPlugins: [remarkGfm],
+    remarkPlugins: newsRemarkPlugins,
   })
 }
 
