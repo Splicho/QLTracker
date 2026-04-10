@@ -27,7 +27,8 @@ export function handleRouteError(
   }
 
   if (error instanceof ZodError) {
-    return NextResponse.json({ message: fallbackMessage }, { status: 500 })
+    const message = error.issues[0]?.message ?? fallbackMessage
+    return NextResponse.json({ message }, { status: 400 })
   }
 
   console.error(error)

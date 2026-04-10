@@ -16,10 +16,7 @@ import type {
 import { getNotificationEnv } from "@/lib/server/env"
 import { routeError } from "@/lib/server/errors"
 import { getPrisma } from "@/lib/server/prisma"
-import {
-  isPickupAdminSteamId,
-  logPickupAuthDebug,
-} from "@/lib/server/pickup-auth"
+import { isPickupAdminSteamId } from "@/lib/server/pickup-auth"
 import type { PickupMatchState, PickupProfileMatch } from "@/lib/pickup"
 
 export const DEFAULT_PICKUP_QUEUE_SLUG = "4v4-ca"
@@ -320,14 +317,6 @@ export function buildPickupSteamAuthorizeUrl(oauthState: string) {
   )
   url.searchParams.set("openid.return_to", returnTo)
   url.searchParams.set("openid.realm", env.PUBLIC_BASE_URL.replace(/\/$/, ""))
-
-  const returnToUrl = new URL(returnTo)
-  logPickupAuthDebug("buildPickupSteamAuthorizeUrl", {
-    returnToOrigin: returnToUrl.origin,
-    returnToPath: returnToUrl.pathname,
-    hasPickupStateParam: returnToUrl.searchParams.has("pickup_state"),
-    realm: env.PUBLIC_BASE_URL.replace(/\/$/, ""),
-  })
 
   return url.toString()
 }

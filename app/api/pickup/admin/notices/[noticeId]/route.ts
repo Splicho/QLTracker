@@ -3,7 +3,11 @@ import type { PickupNoticeVariant } from "@prisma/client"
 import { z } from "zod"
 
 import { handleRouteError } from "@/lib/server/errors"
-import { toPickupNoticeDto, updatePickupNotice } from "@/lib/server/notices"
+import {
+  pickupNoticeLinkHrefSchema,
+  toPickupNoticeDto,
+  updatePickupNotice,
+} from "@/lib/server/notices"
 import { requirePickupAdminSession } from "@/lib/server/pickup-auth"
 
 const bodySchema = z
@@ -11,7 +15,7 @@ const bodySchema = z
     content: z.string().trim().min(1).max(500),
     dismissable: z.boolean(),
     enabled: z.boolean(),
-    linkHref: z.string().trim().url().nullable().optional(),
+    linkHref: pickupNoticeLinkHrefSchema,
     linkLabel: z.string().trim().min(1).max(80).nullable().optional(),
     variant: z.enum(["success", "danger", "alert", "info"]),
   })

@@ -9,8 +9,6 @@ const envSchema = z.object({
   PICKUP_AUTH_COOKIE_NAME: z.string().default("qltracker-pickup-session"),
   /** If empty, derived from PUBLIC_BASE_URL (www + apex share e.g. qltracker.com). */
   PICKUP_AUTH_COOKIE_DOMAIN: z.string().default(""),
-  /** Set to "1" in production to log pickup auth / Steam callback diagnostics (no secrets). */
-  PICKUP_AUTH_DEBUG: z.string().default(""),
   SESSION_SECRET: z.string().min(16),
   WORKER_POLL_INTERVAL_MS: z.coerce.number().int().positive().default(60_000),
 })

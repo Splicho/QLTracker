@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 
 import {
@@ -15,6 +16,7 @@ import {
   toast,
   useOverlayState,
 } from "@/components/pickup-admin-ui"
+import { Button as ShadcnLinkButton } from "@/components/ui/button"
 import { requestJson } from "@/lib/client/request-json"
 import type { PickupNoticeDto } from "@/lib/server/notices"
 
@@ -232,9 +234,26 @@ export function PickupAdminNotices({
                           {notice.content}
                         </span>
                         {notice.linkHref && notice.linkLabel ? (
-                          <span className="text-sm text-white/50">
-                            {notice.linkLabel} {"->"} {notice.linkHref}
-                          </span>
+                          <ShadcnLinkButton
+                            variant="link"
+                            size="sm"
+                            asChild
+                            className="h-auto justify-start p-0 text-sm text-accent hover:text-accent/80"
+                          >
+                            {notice.linkHref.startsWith("/") ? (
+                              <Link href={notice.linkHref}>
+                                {notice.linkLabel}
+                              </Link>
+                            ) : (
+                              <a
+                                href={notice.linkHref}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                {notice.linkLabel}
+                              </a>
+                            )}
+                          </ShadcnLinkButton>
                         ) : null}
                       </div>
                     </td>

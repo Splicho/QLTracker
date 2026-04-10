@@ -14,27 +14,6 @@ import { getPrisma } from "@/lib/server/prisma"
 const PICKUP_SESSION_DURATION_MS = 1000 * 60 * 60 * 24 * 90
 const PICKUP_LINK_SESSION_DURATION_MS = 1000 * 60 * 10
 
-export function isPickupAuthDebugEnabled() {
-  const fromEnv = getNotificationEnv().PICKUP_AUTH_DEBUG.trim() === "1"
-  return fromEnv || process.env.NODE_ENV === "development"
-}
-
-/** Safe diagnostics only — never log session tokens or STEAM keys. */
-export function logPickupAuthDebug(
-  message: string,
-  meta?: Record<string, unknown>
-) {
-  if (!isPickupAuthDebugEnabled()) {
-    return
-  }
-
-  if (meta && Object.keys(meta).length > 0) {
-    console.info(`[pickup-auth:debug] ${message}`, meta)
-  } else {
-    console.info(`[pickup-auth:debug] ${message}`)
-  }
-}
-
 export type AuthenticatedPickupSession = {
   sessionId: string
   token: string
@@ -164,25 +143,6 @@ export function getPickupSessionCookieSetOptions(request?: Request) {
   const omitDomain = shouldOmitCookieDomainForRequest(request)
   const domain = omitDomain ? undefined : resolvePickupAuthCookieDomain()
   const secure = shouldUseSecurePickupCookie(request, publicBaseUrl)
-
-  if (isPickupAuthDebugEnabled()) {
-    if (omitDomain) {
-      logPickupAuthDebug(
-        "getPickupSessionCookieSetOptions: omitting Domain (request.url host ≠ PUBLIC_BASE_URL host; reverse proxy / Cloudflare)"
-      )
-    }
-    logPickupAuthDebug("getPickupSessionCookieSetOptions: secure flag", {
-      secure,
-      requestUrlProtocol: (() => {
-        try {
-          return new URL(request?.url ?? "about:blank").protocol
-        } catch {
-          return "invalid"
-        }
-      })(),
-      xForwardedProto: request?.headers.get("x-forwarded-proto") ?? null,
-    })
-  }
 
   return {
     httpOnly: true,
@@ -416,25 +376,15 @@ export async function getPickupBrowserSession() {
   const token = cookieStore.get(cookieName)?.value?.trim()
 
   if (!token) {
-    logPickupAuthDebug("getPickupBrowserSession: missing cookie", {
-      cookieName,
-      cookieNamesPresent: cookieStore.getAll().map((c) => c.name),
-    })
     return null
   }
 
   try {
     return await requirePickupSessionByToken(token)
   } catch (error) {
-    const cause =
-      error instanceof RouteError
-        ? { status: error.status, message: error.message }
-        : { message: error instanceof Error ? error.message : String(error) }
-    logPickupAuthDebug("getPickupBrowserSession: token not accepted", {
-      cookieName,
-      tokenLength: token.length,
-      ...cause,
-    })
+    if (!(error instanceof RouteError)) {
+      console.error("[pickup-auth] getPickupBrowserSession:", error)
+    }
     return null
   }
 }

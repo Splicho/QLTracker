@@ -1,4 +1,7 @@
+import Link from "next/link"
+
 import { ArrowUpRight, InfoCircle } from "@/components/icon"
+import { Button } from "@/components/ui/button"
 import { useLocalStorage } from "@/hooks/use-local-storage"
 import type { PickupNotice } from "@/lib/pickup"
 import { cn } from "@/lib/utils"
@@ -40,18 +43,37 @@ export function NoticeBar({
           <span className="truncate">{notice.content}</span>
         </div>
         {notice.linkHref && notice.linkLabel ? (
-          <a
-            href={notice.linkHref}
-            target="_blank"
-            rel="noreferrer"
+          <Button
+            variant="link"
+            size="sm"
+            asChild
             className={cn(
-              "inline-flex shrink-0 items-center gap-1 text-sm font-semibold underline-offset-4 transition-opacity hover:opacity-90",
-              notice.variant === "alert" ? "text-black" : "text-white"
+              "h-auto shrink-0 p-0 text-sm font-semibold",
+              notice.variant === "alert"
+                ? "text-black hover:text-black/80"
+                : "text-white hover:text-white/90"
             )}
           >
-            {notice.linkLabel}
-            <ArrowUpRight className="size-3.5" />
-          </a>
+            {notice.linkHref.startsWith("/") ? (
+              <Link
+                href={notice.linkHref}
+                className="group inline-flex items-center gap-1"
+              >
+                {notice.linkLabel}
+                <ArrowUpRight className="size-3.5 shrink-0 transition-transform duration-200 ease-out group-hover:translate-x-0.5 group-hover:-translate-y-px" />
+              </Link>
+            ) : (
+              <a
+                href={notice.linkHref}
+                target="_blank"
+                rel="noreferrer"
+                className="group inline-flex items-center gap-1"
+              >
+                {notice.linkLabel}
+                <ArrowUpRight className="size-3.5 shrink-0 transition-transform duration-200 ease-out group-hover:translate-x-0.5 group-hover:-translate-y-px" />
+              </a>
+            )}
+          </Button>
         ) : null}
         {notice.dismissable ? (
           <button
