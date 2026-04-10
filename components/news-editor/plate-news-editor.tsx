@@ -50,7 +50,6 @@ import remarkGfm from "remark-gfm"
 
 import { PlateNewsEditorLinkModal } from "@/components/news-editor/plate-news-editor-link-modal"
 import { PlateNewsEditorToolbar } from "@/components/news-editor/plate-news-editor-toolbar"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 
 /** GFM + MDX so font marks (color, size, etc.) can stringify as `<span style="…">` without errors. */
@@ -282,7 +281,6 @@ export const PlateNewsEditor = forwardRef<
     [plugins]
   )
   const contentRef = useRef<HTMLDivElement | null>(null)
-  const lastSyncedMarkdownRef = useRef(markdown)
   const selectionRef = useRef<TSelection | null>(null)
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false)
   const activeMarks = editor.api.marks() ?? {}
@@ -291,17 +289,27 @@ export const PlateNewsEditor = forwardRef<
   const activeFontSize =
     typeof activeMarks.fontSize === "string" ? activeMarks.fontSize : null
 
+  // Only replace the editor when the `markdown` prop truly differs from what the
+  // editor would serialize (external updates: load article, save response). Do not
+  // compare to a ref updated in onValueChange — that can race parent state and call
+  // setValue while the prop is still one keystroke behind, which eats Space and jitters layout.
   useEffect(() => {
     if (!editor) {
       return
     }
 
-    if (markdown === lastSyncedMarkdownRef.current) {
+    let serialized: string
+    try {
+      serialized = serializeMarkdown(editor)
+    } catch {
+      return
+    }
+
+    if (serialized === markdown) {
       return
     }
 
     editor.tf.setValue(deserializeMarkdown(editor, markdown))
-    lastSyncedMarkdownRef.current = markdown
   }, [editor, markdown])
 
   const storeSelection = () => {
@@ -373,23 +381,30 @@ export const PlateNewsEditor = forwardRef<
           editor={editor}
           readOnly={disabled}
           onValueChange={() => {
-            const nextMarkdown = serializeMarkdown(editor)
-            lastSyncedMarkdownRef.current = nextMarkdown
-            onMarkdownChange(nextMarkdown)
+            try {
+              onMarkdownChange(serializeMarkdown(editor))
+            } catch {
+              /* avoid breaking typing if serialize throws mid-edit */
+            }
           }}
         >
-          <ScrollArea className={cn("w-full", minHeightClassName)}>
-            {/* Radix ScrollArea viewport often does not give children a usable % height; stretch so the
-                slate textbox fills the panel instead of collapsing to ~one line (tiny click target). */}
+          {/* Native overflow instead of Radix ScrollArea: ScrollArea’s viewport handles Space for
+              scrolling and blocks inserting spaces in the contenteditable editor. */}
+          <div
+            className={cn(
+              "w-full overflow-y-auto overscroll-contain",
+              minHeightClassName,
+            )}
+          >
             <div className="flex min-h-full w-full flex-col">
               <PlateContent
                 ref={contentRef}
-                className="flex min-h-full w-full flex-1 flex-col bg-transparent px-4 py-3 text-sm leading-snug text-white [caret-color:white] outline-none [&_.slate-selected]:bg-white/10 [&_[data-slate-node='element']]:!block [&_[data-slate-node='element']]:!min-w-0 [&_[data-slate-node='text']]:!inline [&_[data-slate-node='text']]:!min-w-0 [&_[data-slate-leaf]]:!inline [&_[data-slate-string]]:!inline [&_em]:italic [&_strong]:inline [&_strong]:font-semibold [&_u]:underline [&_u]:underline-offset-4"
+                className="flex min-h-full w-full flex-1 flex-col break-words whitespace-pre-wrap bg-transparent px-4 py-3 text-sm leading-snug text-white [caret-color:white] outline-none [&_.slate-selected]:bg-white/10 [&_[data-slate-node='element']]:!block [&_[data-slate-node='element']]:!min-w-0 [&_[data-slate-node='text']]:!inline [&_[data-slate-node='text']]:!min-w-0 [&_[data-slate-leaf]]:!inline [&_[data-slate-string]]:!inline [&_em]:italic [&_strong]:inline [&_strong]:font-semibold [&_u]:underline [&_u]:underline-offset-4"
                 disableDefaultStyles
                 placeholder="Write your article..."
               />
             </div>
-          </ScrollArea>
+          </div>
         </Plate>
       </div>
 
