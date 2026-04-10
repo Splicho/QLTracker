@@ -9,6 +9,7 @@ import { Header } from "@/components/layout/header"
 import { NoticeBar } from "@/components/layout/notice-bar"
 import { usePickupAuth } from "@/hooks/use-pickup-auth"
 import { usePickupState } from "@/hooks/use-pickup-state"
+import { fetchNewsArticleQuery, newsQueryKeys } from "@/lib/news-query"
 import { fetchPickupNotices } from "@/lib/pickup"
 import type { PublicPickupNoticeDto } from "@/lib/server/notices"
 import type { InitialPickupBrowserState } from "@/lib/server/pickup-browser"
@@ -87,6 +88,10 @@ export function RootChrome({
   initialPickupState?: InitialPickupBrowserState
 }) {
   const pathname = usePathname() ?? "/"
+  const newsArticleSlug = pathname.startsWith("/news/")
+    && !pathname.startsWith("/news/archive")
+    ? (pathname.split("/").filter(Boolean).at(-1) ?? null)
+    : null
   const pickupAuth = usePickupAuth(
     initialPickupState
       ? {
@@ -111,8 +116,23 @@ export function RootChrome({
     staleTime: 60_000,
     refetchInterval: 60_000,
   })
+  const newsArticleQuery = useQuery({
+    queryKey: newsArticleSlug
+      ? newsQueryKeys.article(newsArticleSlug)
+      : ["news", "article", "inactive"],
+    queryFn: () => fetchNewsArticleQuery(newsArticleSlug ?? ""),
+    enabled: newsArticleSlug != null,
+    staleTime: 60_000,
+  })
   const activeNotice = noticesQuery.data?.find(Boolean) ?? null
   const headerState = getHeaderState(pathname)
+  const resolvedHeaderState =
+    newsArticleSlug && newsArticleQuery.data
+      ? {
+          ...headerState,
+          pageTitle: newsArticleQuery.data.title,
+        }
+      : headerState
   const activePickupViewer =
     pickupState.playerState?.viewer ?? pickupAuth.player
   const activeQueueId =
@@ -165,7 +185,7 @@ export function RootChrome({
       content={children}
       header={
         <Header
-          breadcrumbParent={headerState.breadcrumbParent}
+          breadcrumbParent={resolvedHeaderState.breadcrumbParent}
           onPickupLogin={
             pickupAuth.pickupAvailable && !pickupAuth.player
               ? pickupAuth.connectWithSteam
@@ -173,7 +193,7 @@ export function RootChrome({
           }
           onPickupLeaveQueue={pickupState.leaveQueue}
           onPickupSignOut={pickupAuth.signOut}
-          pageTitle={headerState.pageTitle}
+          pageTitle={resolvedHeaderState.pageTitle}
           pickupLinking={pickupAuth.isLinking}
           pickupPlayer={activePickupViewer}
           pickupRatings={pickupAuth.ratings}
