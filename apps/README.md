@@ -1,14 +1,20 @@
-# Apps
+# Application Overview
 
-This folder contains the deployable QLTracker applications.
+Each app in this folder is a standalone deployable service. They can be run
+independently or together through the monorepo workspace.
 
-## Structure
+| App | Purpose | Default Port | Tech Stack | Deploy Target |
+| --- | --- | --- | --- | --- |
+| `web` | Public website, server browser, pickup UI, admin pages, and account flows | App platform managed | Next.js, React, Prisma | Dokploy |
+| `realtime` | Pickup state, queue lifecycle, ingestion, and service APIs | `3011` | Node.js, TypeScript, PostgreSQL, Steam APIs | Dokploy |
+| `provisioner` | Quake Live pickup server allocation, match orchestration, and VPS-side control | `7070` | Node.js, TypeScript, systemd, minqlx, ZeroMQ | Dedicated VPS |
+| `bot` | Discord bots, queue alerts, and chat-side integrations | `8788` internal webhook listener | Node.js, TypeScript, Discord.js-style bot runtime | Dokploy |
 
-- `web` - frontend, admin UI, public pages, auth flows, and browser-side pickup
-  experience
-- `realtime` - pickup queues, match lifecycle, ingestion, and realtime APIs
-- `provisioner` - VPS-side Quake Live server allocation and match orchestration
-- `bot` - Discord bots, queue alert webhooks, and related integrations
+## Notes
 
-Each app keeps its own runtime code, environment variables, and deployment
-surface, while shared contracts and helpers live under `packages/`.
+- `web`, `realtime`, and `bot` are intended to deploy from the monorepo in
+  Dokploy.
+- `provisioner` is not a normal app-platform service. It runs on a dedicated
+  VPS because it needs direct access to systemd, Quake Live server files, and
+  minqlx runtime assets.
+- Shared cross-service logic lives under `packages/`.
