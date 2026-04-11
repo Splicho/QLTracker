@@ -1,5 +1,5 @@
 import { env } from '../config/env.js';
-import { sharedSlashCommands } from '../discord/command-registry.js';
+import { secondarySlashCommands, sharedSlashCommands } from '../discord/command-registry.js';
 
 import type { BotDefinition } from './types.js';
 
@@ -21,7 +21,7 @@ const secondaryBot: BotDefinition | null =
         token: env.DISCORD_SECONDARY_TOKEN,
         clientId: env.DISCORD_SECONDARY_CLIENT_ID,
         activityName: 'Quake Live',
-        commands: sharedSlashCommands,
+        commands: secondarySlashCommands,
         ...(env.DISCORD_SECONDARY_GUILD_ID ? { guildId: env.DISCORD_SECONDARY_GUILD_ID } : {})
       }
     : null;

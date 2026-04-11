@@ -13,6 +13,34 @@ export function createInteractionCreateEvent(
   return {
     name: Events.InteractionCreate,
     async execute(interaction) {
+      if (interaction.isAutocomplete()) {
+        const command = commandMap.get(interaction.commandName);
+
+        if (!command?.autocomplete) {
+          await interaction.respond([]);
+          return;
+        }
+
+        try {
+          await command.autocomplete(interaction);
+        } catch (error: unknown) {
+          logger.error(
+            {
+              err: error,
+              botId: bot.id,
+              botName: bot.displayName,
+              commandName: interaction.commandName,
+              userId: interaction.user.id
+            },
+            'Slash command autocomplete failed'
+          );
+
+          await interaction.respond([]);
+        }
+
+        return;
+      }
+
       if (!interaction.isChatInputCommand()) {
         return;
       }

@@ -13,6 +13,7 @@ const envSchema = z
     DISCORD_SECONDARY_CLIENT_ID: z.string().min(1).optional(),
     DISCORD_SECONDARY_GUILD_ID: z.string().min(1).optional(),
     DISCORD_SECONDARY_NAME: z.string().min(1).default('secondary'),
+    DATABASE_URL: z.string().url().optional(),
     INTERNAL_WEBHOOK_PORT: z.coerce.number().int().positive().default(8788),
     PUBLIC_APP_URL: z.string().url().optional(),
     PICKUP_QUEUE_ALERTS_CHANNEL_ID: z.string().min(1).optional(),

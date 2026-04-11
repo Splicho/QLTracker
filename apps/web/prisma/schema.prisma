@@ -188,11 +188,23 @@ model PickupPlayer {
   killEventsAsKiller PickupKillEvent[]       @relation("PickupKillEventKiller")
   killEventsAsVictim PickupKillEvent[]       @relation("PickupKillEventVictim")
   linkSessions     PickupLinkSession[]
+  discordLinks     PickupDiscordLink[]
   matchStatLines   PickupPlayerMatchStat[]
   queueMemberships PickupQueueMember[]
   matchPlayers     PickupMatchPlayer[]
   seasonRatings    PickupPlayerSeasonRating[]
   weaponStatLines  PickupPlayerWeaponStat[]
+}
+
+model PickupDiscordLink {
+  id            String       @id @default(cuid())
+  discordUserId String       @unique
+  playerId      String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  player        PickupPlayer @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([playerId])
 }
 
 model PickupAppSession {
