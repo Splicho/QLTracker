@@ -92,13 +92,17 @@ export function PickupEmptyBackground({
           </p>
           <div className="mt-8 flex justify-center">
             {guestMode ? (
-              <Button className="gap-2" onClick={onConnectWithSteam} size="lg">
+              <Button
+                className="!h-14 gap-2 px-8 text-lg"
+                onClick={onConnectWithSteam}
+                size="lg"
+              >
                 <Steam data-icon="inline-start" />
                 Continue with Steam
               </Button>
             ) : isQueued ? (
               <Button
-                className="gap-2 bg-success text-success-foreground shadow-[0_0_28px_color-mix(in_oklch,var(--color-success)_28%,transparent)]"
+                className="!h-14 gap-2 bg-success px-8 text-lg text-success-foreground shadow-[0_0_28px_color-mix(in_oklch,var(--color-success)_28%,transparent)]"
                 disabled
                 size="lg"
               >
@@ -109,7 +113,7 @@ export function PickupEmptyBackground({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
-                    className="cursor-pointer gap-2 bg-success text-success-foreground shadow-[0_0_28px_color-mix(in_oklch,var(--color-success)_28%,transparent)] hover:bg-success-hover hover:shadow-[0_0_34px_color-mix(in_oklch,var(--color-success-hover)_34%,transparent)]"
+                    className="!h-14 cursor-pointer gap-2 bg-success px-8 text-lg text-success-foreground shadow-[0_0_28px_color-mix(in_oklch,var(--color-success)_28%,transparent)] hover:bg-success-hover hover:shadow-[0_0_34px_color-mix(in_oklch,var(--color-success-hover)_34%,transparent)]"
                     size="lg"
                   >
                     <Play data-icon="inline-start" />
