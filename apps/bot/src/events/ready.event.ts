@@ -17,10 +17,12 @@ export function createReadyEvent(bot: BotDefinition): DiscordEvent<Events.Client
         {
           botId: bot.id,
           botName: bot.displayName,
+          commands: bot.commands.map((command) => `/${command.data.name}`),
+          presence: bot.activityName,
           userTag: client.user.tag,
           guildCount: client.guilds.cache.size
         },
-        'Discord bot is ready'
+        'Discord bot ready with commands'
       );
     }
   };

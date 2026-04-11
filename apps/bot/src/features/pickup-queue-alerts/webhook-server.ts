@@ -125,6 +125,7 @@ async function postQueueOpenedAlert(
 
 export function startPickupQueueAlertsWebhook(runtimes: readonly BotRuntime[]): HttpServer | null {
   if (!env.PICKUP_QUEUE_ALERTS_CHANNEL_ID || !env.PICKUP_QUEUE_ALERTS_WEBHOOK_SECRET) {
+    logger.info('Pickup queue alerts webhook disabled');
     return null;
   }
 

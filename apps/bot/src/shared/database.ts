@@ -16,6 +16,10 @@ export function getDatabasePool(): Pool | null {
   return pool;
 }
 
+export function isDatabaseConfigured(): boolean {
+  return Boolean(env.DATABASE_URL);
+}
+
 export async function queryRows<T extends Record<string, unknown>>(
   sql: string,
   values: readonly unknown[] = []

@@ -5,6 +5,7 @@ import { botDefinitions } from '../bots/definitions.js';
 import { registerEvents } from '../discord/register-events.js';
 import { createDiscordEvents } from '../events/index.js';
 import { startPickupQueueAlertsWebhook } from '../features/pickup-queue-alerts/webhook-server.js';
+import { isDatabaseConfigured } from '../shared/database.js';
 import { logger } from '../shared/logger.js';
 
 import type { BotDefinition } from '../bots/types.js';
@@ -18,6 +19,32 @@ function createClient(): Client {
   return new Client({
     intents: [GatewayIntentBits.Guilds]
   });
+}
+
+function commandNames(bot: BotDefinition): string[] {
+  return bot.commands.map((command) => `/${command.data.name}`);
+}
+
+function hasPickupCommands(bot: BotDefinition): boolean {
+  return bot.commands.some((command) => command.data.name === 'rating' || command.data.name === 'steamid');
+}
+
+function logStartupPlan(runtimes: readonly BotRuntime[]): void {
+  logger.info(
+    {
+      botCount: runtimes.length,
+      bots: runtimes.map((runtime) => ({
+        botId: runtime.bot.id,
+        botName: runtime.bot.displayName,
+        commandCount: runtime.bot.commands.length,
+        commands: commandNames(runtime.bot),
+        guildScope: runtime.bot.guildId ?? 'global',
+        pickupCommandsEnabled: hasPickupCommands(runtime.bot)
+      })),
+      pickupDatabaseConfigured: isDatabaseConfigured()
+    },
+    'Discord bot startup plan loaded'
+  );
 }
 
 function registerShutdownHandlers(
@@ -52,11 +79,28 @@ function registerShutdownHandlers(
 
 async function startRuntime(runtime: BotRuntime): Promise<void> {
   registerEvents(runtime.client, createDiscordEvents(runtime.bot), runtime.bot);
+
+  logger.info(
+    {
+      botId: runtime.bot.id,
+      botName: runtime.bot.displayName,
+      commandCount: runtime.bot.commands.length,
+      commands: commandNames(runtime.bot),
+      guildScope: runtime.bot.guildId ?? 'global',
+      pickupDatabaseConfigured: hasPickupCommands(runtime.bot) ? isDatabaseConfigured() : undefined
+    },
+    'Discord bot commands loaded'
+  );
+
   await runtime.client.login(runtime.bot.token);
 
   logger.info(
-    { botId: runtime.bot.id, botName: runtime.bot.displayName },
-    'Discord login successful'
+    {
+      botId: runtime.bot.id,
+      botName: runtime.bot.displayName,
+      clientId: runtime.bot.clientId
+    },
+    'Discord bot authenticated'
   );
 }
 
@@ -68,6 +112,7 @@ export async function startBots(): Promise<void> {
   let queueAlertsServer: HttpServer | null = null;
 
   try {
+    logStartupPlan(runtimes);
     await Promise.all(runtimes.map((runtime) => startRuntime(runtime)));
     queueAlertsServer = startPickupQueueAlertsWebhook(runtimes);
   } catch (error: unknown) {
