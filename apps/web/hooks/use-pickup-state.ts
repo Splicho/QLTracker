@@ -43,10 +43,7 @@ function getCompletedMatchDismissDelayMs(playerState: PickupPlayerState) {
     return COMPLETED_MATCH_DISMISS_MS
   }
 
-  return Math.max(
-    0,
-    COMPLETED_MATCH_DISMISS_MS - (Date.now() - completedAtMs)
-  )
+  return Math.max(0, COMPLETED_MATCH_DISMISS_MS - (Date.now() - completedAtMs))
 }
 
 type PickupStateModel = {
@@ -544,7 +541,10 @@ export function usePickupState(
           type: "set_public_state",
           nextState: nextPublicResult.data,
         })
-        queryClient.setQueryData(["pickup", "public-state"], nextPublicResult.data)
+        queryClient.setQueryData(
+          ["pickup", "public-state"],
+          nextPublicResult.data
+        )
         logPublicStateSnapshot(
           "pickup.ready_timeout.public_state",
           nextPublicResult.data

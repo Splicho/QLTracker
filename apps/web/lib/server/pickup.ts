@@ -547,14 +547,39 @@ export function toPickupRatingDto(
 function toPickupMatchWeaponStatDto(
   stat: PickupPlayerWeaponStat
 ): PickupMatchWeaponStatDto {
+  const raw =
+    stat.raw && typeof stat.raw === "object" && !Array.isArray(stat.raw)
+      ? (stat.raw as Record<string, unknown>)
+      : null
+  const readRawNumber = (...keys: string[]) => {
+    if (!raw) {
+      return null
+    }
+
+    for (const key of keys) {
+      const value = raw[key]
+      if (typeof value === "number" && Number.isFinite(value)) {
+        return value
+      }
+      if (typeof value === "string" && value.trim().length > 0) {
+        const parsed = Number(value)
+        if (Number.isFinite(parsed)) {
+          return parsed
+        }
+      }
+    }
+
+    return null
+  }
+
   return {
-    accuracy: stat.accuracy ?? null,
-    damage: stat.damage ?? null,
-    deaths: stat.deaths ?? null,
-    hits: stat.hits ?? null,
-    kills: stat.kills ?? null,
-    shots: stat.shots ?? null,
-    timeSeconds: stat.timeSeconds ?? null,
+    accuracy: stat.accuracy ?? readRawNumber("ACCURACY", "accuracy", "AC"),
+    damage: stat.damage ?? readRawNumber("DAMAGE", "damage", "DG", "DMG"),
+    deaths: stat.deaths ?? readRawNumber("DEATHS", "deaths", "D"),
+    hits: stat.hits ?? readRawNumber("HITS", "hits", "H"),
+    kills: stat.kills ?? readRawNumber("KILLS", "kills", "K"),
+    shots: stat.shots ?? readRawNumber("SHOTS", "shots", "S"),
+    timeSeconds: stat.timeSeconds ?? readRawNumber("TIME", "time", "T"),
     weapon: stat.weapon,
   }
 }
@@ -576,13 +601,18 @@ function toPickupMatchKillEventDto(
   }
 }
 
-function toPickupMatchChatEventDto(event: PickupMatchChatEvent) {
+function toPickupMatchChatEventDto(
+  event: PickupMatchChatEvent,
+  playerById?: Map<string, PickupPlayerDto>
+) {
+  const player = event.playerId ? playerById?.get(event.playerId) : null
+
   return {
     channel: event.channel,
     createdAt: event.createdAt.toISOString(),
     id: event.id,
     message: event.message,
-    personaName: event.personaName,
+    personaName: player?.personaName ?? event.personaName,
     playerId: event.playerId ?? null,
     sentAt: event.sentAt.toISOString(),
     steamId: event.steamId ?? null,
@@ -1236,6 +1266,12 @@ export async function getPickupMatchDetail(
   const playerStatsByPlayerId = new Map(
     match.playerStats.map((stat) => [stat.playerId, stat])
   )
+  const playerById = new Map(
+    match.players.map((membership) => [
+      membership.playerId,
+      toPickupPlayerDto(membership.player),
+    ])
+  )
   const weaponStatsByPlayerId = new Map<string, PickupPlayerWeaponStat[]>()
   for (const stat of match.weaponStats) {
     const existing = weaponStatsByPlayerId.get(stat.playerId) ?? []
@@ -1284,7 +1320,9 @@ export async function getPickupMatchDetail(
   }
 
   return {
-    chat: match.chatEvents.map(toPickupMatchChatEventDto),
+    chat: match.chatEvents.map((event) =>
+      toPickupMatchChatEventDto(event, playerById)
+    ),
     kills: match.killEvents.map(toPickupMatchKillEventDto),
     match: {
       completedAt: match.completedAt?.toISOString() ?? null,

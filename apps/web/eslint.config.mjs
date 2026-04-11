@@ -1,3 +1,3 @@
-import nextConfig from "@qltracker/eslint-config/next";
+import nextConfig from "@qltracker/eslint-config/next"
 
-export default nextConfig;
+export default nextConfig

@@ -93,11 +93,11 @@ function normalizeTeam(value: unknown): "left" | "right" | null {
     return null;
   }
 
-  if (["left", "red"].includes(normalized)) {
+  if (["1", "left", "red"].includes(normalized)) {
     return "left";
   }
 
-  if (["right", "blue"].includes(normalized)) {
+  if (["2", "right", "blue"].includes(normalized)) {
     return "right";
   }
 
@@ -155,15 +155,24 @@ function parseWeaponEntries(rawWeapons: unknown) {
       accuracy: readNumber(
         pickFirst(raw.ACCURACY, raw.accuracy, raw.AC, raw.accuracy_pct),
       ),
-      damage: readNumber(pickFirst(raw.DAMAGE, raw.damage)),
-      deaths: readNumber(pickFirst(raw.DEATHS, raw.deaths)),
-      hits: readNumber(pickFirst(raw.HITS, raw.hits)),
-      kills: readNumber(pickFirst(raw.KILLS, raw.kills)),
+      damage: readNumber(pickFirst(raw.DAMAGE, raw.damage, raw.DG, raw.DMG)),
+      deaths: readNumber(pickFirst(raw.DEATHS, raw.deaths, raw.D)),
+      hits: readNumber(pickFirst(raw.HITS, raw.hits, raw.H)),
+      kills: readNumber(pickFirst(raw.KILLS, raw.kills, raw.K)),
       raw,
       shots: readNumber(
-        pickFirst(raw.SHOTS, raw.shots, raw.ATTACKS, raw.attacks, raw.fired),
+        pickFirst(
+          raw.SHOTS,
+          raw.shots,
+          raw.ATTACKS,
+          raw.attacks,
+          raw.fired,
+          raw.S,
+        ),
       ),
-      timeSeconds: readNumber(pickFirst(raw.TIME, raw.time, raw.timeSeconds)),
+      timeSeconds: readNumber(
+        pickFirst(raw.TIME, raw.time, raw.timeSeconds, raw.T),
+      ),
       weapon,
     });
   };
@@ -223,6 +232,7 @@ function parsePlayerStatsEvent(
           event.data.damageDealt,
           event.data.DMG_GIVEN,
           event.data.damageGiven,
+          event.data.DG,
         ),
       ),
       damageTaken: readNumber(
@@ -230,10 +240,11 @@ function parsePlayerStatsEvent(
           event.data.DAMAGE_TAKEN,
           event.data.damageTaken,
           event.data.DMG_TAKEN,
+          event.data.DR,
         ),
       ),
-      deaths: readNumber(pickFirst(event.data.DEATHS, event.data.deaths)),
-      kills: readNumber(pickFirst(event.data.KILLS, event.data.kills)),
+      deaths: readNumber(pickFirst(event.data.DEATHS, event.data.deaths, event.data.D)),
+      kills: readNumber(pickFirst(event.data.KILLS, event.data.kills, event.data.K)),
       medals: asObject(pickFirst(event.data.MEDALS, event.data.medals)),
       ping: readNumber(pickFirst(event.data.PING, event.data.ping)),
       raw: event.data,
@@ -245,6 +256,40 @@ function parsePlayerStatsEvent(
       weapons,
     },
   };
+}
+
+function hasNonZeroNumber(...values: Array<number | null>) {
+  return values.some((value) => typeof value === "number" && value !== 0);
+}
+
+function hasMeaningfulWeaponStats(
+  weapon: ReturnType<typeof parseWeaponEntries>[number],
+) {
+  return hasNonZeroNumber(
+    weapon.accuracy,
+    weapon.damage,
+    weapon.deaths,
+    weapon.hits,
+    weapon.kills,
+    weapon.shots,
+    weapon.timeSeconds,
+  );
+}
+
+function hasMeaningfulPlayerStats(
+  stats: NonNullable<ReturnType<typeof parsePlayerStatsEvent>>["stats"],
+) {
+  return (
+    hasNonZeroNumber(
+      stats.accuracy,
+      stats.damageGiven,
+      stats.damageTaken,
+      stats.deaths,
+      stats.kills,
+      stats.score,
+      stats.timeSeconds,
+    ) || stats.weapons.some(hasMeaningfulWeaponStats)
+  );
 }
 
 function parseKillEvent(index: MatchPlayerIndex, event: MatchStatsEvent) {
@@ -463,6 +508,10 @@ async function upsertPlayerStats(
     return;
   }
 
+  if (!hasMeaningfulPlayerStats(parsed.stats)) {
+    return;
+  }
+
   await client.query(
     `
       insert into "PickupPlayerMatchStat" (
@@ -533,7 +582,7 @@ async function upsertPlayerStats(
     ],
   );
 
-  for (const weapon of parsed.stats.weapons) {
+  for (const weapon of parsed.stats.weapons.filter(hasMeaningfulWeaponStats)) {
     await client.query(
       `
         insert into "PickupPlayerWeaponStat" (

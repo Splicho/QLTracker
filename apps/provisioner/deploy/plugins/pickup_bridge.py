@@ -129,13 +129,15 @@ class pickup_bridge(minqlx.Plugin):
         if message.startswith(prefix):
             return
 
+        player_name = getattr(player, "name", None) or player.clean_name
+
         try:
             self.post_json(
                 "chat",
                 {
                     "channel": channel_name,
                     "message": message,
-                    "playerName": player.clean_name,
+                    "playerName": player_name,
                     "playerSteamId": str(steam_id) if steam_id is not None else None,
                     "sentAt": datetime.now(timezone.utc).isoformat(),
                 },

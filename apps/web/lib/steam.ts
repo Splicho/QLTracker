@@ -71,7 +71,11 @@ export type RealtimeServerSnapshot = {
   version?: string | null
 }
 
-function sanitizeServerCounts(players: number, maxPlayers: number, playersInfoCount: number) {
+function sanitizeServerCounts(
+  players: number,
+  maxPlayers: number,
+  playersInfoCount: number
+) {
   const safeMaxPlayers = Math.max(
     1,
     Math.min(64, Number.isFinite(maxPlayers) ? Math.trunc(maxPlayers) : 16)
@@ -81,7 +85,10 @@ function sanitizeServerCounts(players: number, maxPlayers: number, playersInfoCo
     Math.min(
       safeMaxPlayers,
       playersInfoCount > 0
-        ? Math.min(Number.isFinite(players) ? Math.trunc(players) : 0, playersInfoCount)
+        ? Math.min(
+            Number.isFinite(players) ? Math.trunc(players) : 0,
+            playersInfoCount
+          )
         : Number.isFinite(players)
           ? Math.trunc(players)
           : 0

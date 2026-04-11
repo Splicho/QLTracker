@@ -217,7 +217,9 @@ export function RootChrome({
               match={readyCheckMatch}
               onReadyUp={pickupState.readyUp}
               readyActionPending={pickupState.readyActionPending}
-              serverNow={readyCheckPlayerState?.serverNow ?? new Date().toISOString()}
+              serverNow={
+                readyCheckPlayerState?.serverNow ?? new Date().toISOString()
+              }
             />
           ) : null}
         </>

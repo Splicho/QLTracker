@@ -1,5 +1,5 @@
 export const QUAKE_COLOR_MAP: Record<string, string> = {
-  "0": "#111111",
+  "0": "#000000",
   "1": "#ef4444",
   "2": "#22c55e",
   "3": "#eab308",

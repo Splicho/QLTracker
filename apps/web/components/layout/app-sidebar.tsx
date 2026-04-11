@@ -256,7 +256,8 @@ export function AppSidebar({
       ),
     [pickupPublicStateQuery.data]
   )
-  const hasLivePickupMatch = (pickupLandingQuery.data?.liveMatches?.length ?? 0) > 0
+  const hasLivePickupMatch =
+    (pickupLandingQuery.data?.liveMatches?.length ?? 0) > 0
   const currentNewsSlug = useMemo(() => {
     if (!pathname.startsWith("/news/")) {
       return null
@@ -462,7 +463,7 @@ export function AppSidebar({
                   <TooltipTrigger asChild>
                     <div className="flex min-w-0 items-center gap-2 px-3 py-2">
                       <GameController className="size-3.5 shrink-0 text-muted-foreground" />
-                      <span className="text-sm font-semibold leading-none text-foreground tabular-nums">
+                      <span className="text-sm leading-none font-semibold text-foreground tabular-nums">
                         {overallQuakeLivePlayers}
                       </span>
                       <span className="relative inline-flex size-2 shrink-0">
@@ -479,7 +480,7 @@ export function AppSidebar({
                   <TooltipTrigger asChild>
                     <div className="flex min-w-0 items-center gap-2 border-l border-sidebar-border px-3 py-2">
                       <Medal className="size-3.5 shrink-0 text-muted-foreground" />
-                      <span className="text-sm font-semibold leading-none text-foreground tabular-nums">
+                      <span className="text-sm leading-none font-semibold text-foreground tabular-nums">
                         {pickupQueueCount ?? 0}
                       </span>
                       <span className="relative inline-flex size-2 shrink-0">

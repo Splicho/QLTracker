@@ -308,9 +308,7 @@ function MetadataSection({
           <div className="sm:col-span-2">
             <span className="text-xs text-blue-400">Blue Team</span>
             <p className="text-white/80">
-              {visibleMetadata.teams.blue
-                .map((p) => p.personaName)
-                .join(", ")}
+              {visibleMetadata.teams.blue.map((p) => p.personaName).join(", ")}
             </p>
           </div>
         )}
