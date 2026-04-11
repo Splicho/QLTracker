@@ -2,6 +2,7 @@ import type { Server as HttpServer } from 'node:http';
 import { Client, GatewayIntentBits } from 'discord.js';
 
 import { botDefinitions } from '../bots/definitions.js';
+import { registerCommandsForBots } from '../discord/register-commands.js';
 import { registerEvents } from '../discord/register-events.js';
 import { createDiscordEvents } from '../events/index.js';
 import { startPickupQueueAlertsWebhook } from '../features/pickup-queue-alerts/webhook-server.js';
@@ -109,6 +110,7 @@ export async function startBots(): Promise<void> {
 
   try {
     logStartupPlan(runtimes);
+    await registerCommandsForBots(runtimes.map((runtime) => runtime.bot));
     await Promise.all(runtimes.map((runtime) => startRuntime(runtime)));
     queueAlertsServer = startPickupQueueAlertsWebhook(runtimes);
   } catch (error: unknown) {
