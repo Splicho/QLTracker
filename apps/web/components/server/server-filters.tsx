@@ -16,6 +16,7 @@ import {
   RegionSouthAfrica,
   RegionSouthAmerica,
 } from "@/components/icon"
+import { getCountryFlagSrc } from "@/lib/countries"
 import { mapEntries } from "@/lib/maps"
 import {
   RATING_FILTER_MAX,
@@ -87,10 +88,16 @@ const gameModeOptions = [
 ]
 
 export function ServerFilters({
+  availableLocations,
   value,
   onChange,
   onReset,
 }: {
+  availableLocations: Array<{
+    countryCode: string | null
+    label: string
+    value: string
+  }>
   value: ServerFiltersValue
   onChange: (next: ServerFiltersValue) => void
   onReset: () => void
@@ -100,6 +107,7 @@ export function ServerFilters({
   const hasActiveFilters =
     value.search.trim().length > 0 ||
     value.region !== "all" ||
+    value.location !== "all" ||
     value.visibility !== "all" ||
     value.maps.length > 0 ||
     value.gameMode !== "all" ||
@@ -173,7 +181,7 @@ export function ServerFilters({
               </div>
 
               <div className="flex flex-col gap-3">
-                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)_minmax(0,0.8fr)_minmax(0,0.8fr)_minmax(0,0.85fr)]">
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)_minmax(0,1fr)_minmax(0,0.8fr)_minmax(0,0.8fr)_minmax(0,0.85fr)]">
                   <TagFilter
                     value={value.tags}
                     onChange={(tags) => onChange({ ...value, tags })}
@@ -202,6 +210,12 @@ export function ServerFilters({
                       ))}
                     </SelectContent>
                   </Select>
+
+                  <LocationFilter
+                    availableLocations={availableLocations}
+                    value={value.location}
+                    onChange={(location) => onChange({ ...value, location })}
+                  />
 
                   <Select
                     value={value.visibility}
@@ -601,6 +615,102 @@ function TagFilter({
             />
           </div>
         </div>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+function LocationFilter({
+  availableLocations,
+  value,
+  onChange,
+}: {
+  availableLocations: Array<{
+    countryCode: string | null
+    label: string
+    value: string
+  }>
+  value: string
+  onChange: (location: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+
+  const selectedLocation =
+    availableLocations.find((location) => location.value === value) ?? null
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          className="w-full justify-between"
+          role="combobox"
+          aria-expanded={open}
+        >
+          <span className="truncate text-left">
+            <span className="flex items-center gap-2">
+              {selectedLocation?.countryCode ? (
+                <img
+                  src={getCountryFlagSrc(selectedLocation.countryCode)}
+                  alt=""
+                  className="h-3.5 w-5 rounded-[2px] object-cover"
+                />
+              ) : null}
+              <span className="truncate">
+                {selectedLocation?.label ?? "All locations"}
+              </span>
+            </span>
+          </span>
+          <ChevronsUpDown className="size-4 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[22rem] p-0" align="start">
+        <Command>
+          <CommandInput placeholder="Search location..." />
+          <CommandList className="max-h-72">
+            <CommandEmpty>No locations found.</CommandEmpty>
+            <CommandGroup>
+              <CommandItem
+                value="all all locations"
+                onSelect={() => {
+                  onChange("all")
+                  setOpen(false)
+                }}
+              >
+                <Check
+                  className={`mr-2 size-4 ${
+                    value === "all" ? "opacity-100" : "opacity-0"
+                  }`}
+                />
+                All locations
+              </CommandItem>
+              {availableLocations.map((location) => (
+                <CommandItem
+                  key={location.value}
+                  value={`${location.value} ${location.label}`}
+                  onSelect={() => {
+                    onChange(location.value)
+                    setOpen(false)
+                  }}
+                >
+                  <Check
+                    className={`mr-2 size-4 ${
+                      value === location.value ? "opacity-100" : "opacity-0"
+                    }`}
+                  />
+                  {location.countryCode ? (
+                    <img
+                      src={getCountryFlagSrc(location.countryCode)}
+                      alt=""
+                      className="h-3.5 w-5 rounded-[2px] object-cover"
+                    />
+                  ) : null}
+                  <span className="truncate">{location.label}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
       </PopoverContent>
     </Popover>
   )

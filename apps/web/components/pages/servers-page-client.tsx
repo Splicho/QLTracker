@@ -30,11 +30,38 @@ export function ServersPageClient({
     () => parseStoredServerFilters(rawFilters),
     [rawFilters]
   )
+  const availableLocations = useMemo(() => {
+    const locationsByValue = new Map<
+      string,
+      { countryCode: string | null; label: string; value: string }
+    >()
+
+    for (const server of servers) {
+      const countryCode = server.country_code?.trim().toLowerCase()
+      const countryName = server.country_name?.trim()
+      const value = countryCode || countryName?.toLowerCase()
+
+      if (!value || !countryName || locationsByValue.has(value)) {
+        continue
+      }
+
+      locationsByValue.set(value, {
+        countryCode: countryCode ?? null,
+        label: countryName,
+        value,
+      })
+    }
+
+    return [...locationsByValue.values()].sort((left, right) =>
+      left.label.localeCompare(right.label)
+    )
+  }, [servers])
 
   return (
     <>
       <section className="flex min-h-0 flex-1 flex-col overflow-hidden">
         <ServerFilters
+          availableLocations={availableLocations}
           value={filters}
           onChange={(next) => setRawFilters(serializeServerFilters(next))}
           onReset={() =>

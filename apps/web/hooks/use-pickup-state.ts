@@ -28,6 +28,27 @@ import { getRealtimeSocket } from "@/lib/realtime"
 const pickupMockMode = process.env.NEXT_PUBLIC_PICKUP_MOCK_MODE === "1"
 const COMPLETED_MATCH_DISMISS_MS = 12_000
 
+function getCompletedMatchDismissDelayMs(playerState: PickupPlayerState) {
+  if (playerState.stage !== "completed") {
+    return COMPLETED_MATCH_DISMISS_MS
+  }
+
+  if (!playerState.match.completedAt) {
+    return COMPLETED_MATCH_DISMISS_MS
+  }
+
+  const completedAtMs = new Date(playerState.match.completedAt).getTime()
+
+  if (!Number.isFinite(completedAtMs)) {
+    return COMPLETED_MATCH_DISMISS_MS
+  }
+
+  return Math.max(
+    0,
+    COMPLETED_MATCH_DISMISS_MS - (Date.now() - completedAtMs)
+  )
+}
+
 type PickupStateModel = {
   dismissedCompletedMatchId: string | null
   mockStage: PickupMockStage
@@ -277,6 +298,7 @@ export function usePickupState(
       return
     }
 
+    const dismissDelayMs = getCompletedMatchDismissDelayMs(playerState)
     const timeoutId = window.setTimeout(() => {
       if (mockMode) {
         dispatch({
@@ -295,7 +317,7 @@ export function usePickupState(
         ),
         matchId: playerState.match.id,
       })
-    }, COMPLETED_MATCH_DISMISS_MS)
+    }, dismissDelayMs)
 
     return () => {
       window.clearTimeout(timeoutId)

@@ -10,6 +10,7 @@ export type RatingSystem = "qelo" | "trueskill"
 export type ServerFiltersValue = {
   search: string
   region: string
+  location: string
   visibility: "all" | "public" | "private"
   maps: string[]
   gameMode: string
@@ -25,6 +26,7 @@ export function createDefaultServerFilters(): ServerFiltersValue {
   return {
     search: "",
     region: "all",
+    location: "all",
     visibility: "all",
     maps: [],
     gameMode: "all",

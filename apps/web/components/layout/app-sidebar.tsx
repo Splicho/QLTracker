@@ -445,7 +445,7 @@ export function AppSidebar({
         ) : (
           <>
             <div className="px-2 pb-2 group-data-[collapsible=icon]:hidden">
-              <div className="grid grid-cols-2 overflow-hidden rounded-md border border-sidebar-border bg-sidebar-accent/35">
+              <div className="grid grid-cols-2 overflow-hidden rounded-md border border-sidebar-border bg-muted">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="flex min-w-0 items-center gap-2 px-3 py-2">

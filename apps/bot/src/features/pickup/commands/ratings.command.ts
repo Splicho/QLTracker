@@ -61,10 +61,6 @@ function truncateCell(value: string, maxWidth: number) {
   return `${value.slice(0, Math.max(0, maxWidth - 1))}\u2026`;
 }
 
-function padCell(value: string, width: number) {
-  return value.padEnd(width, ' ');
-}
-
 function buildDisplayRows(rows: LeaderboardRow[]): LeaderboardDisplayRow[] {
   return rows.map((row, index) => {
     const name = truncateCell(formatPickupPlayerName(row.personaName) || 'Player', 16);
@@ -81,30 +77,37 @@ function buildDisplayRows(rows: LeaderboardRow[]): LeaderboardDisplayRow[] {
 
 function buildTable(rows: LeaderboardDisplayRow[]) {
   const columns = [
-    { key: 'rank', label: '#', width: 3 },
-    { key: 'name', label: 'Player', width: 16 },
-    { key: 'rating', label: 'Rating', width: 6 },
-    { key: 'wins', label: 'W', width: 3 },
-    { key: 'losses', label: 'L', width: 3 },
-    { key: 'gamesPlayed', label: 'Games', width: 5 }
+    { key: 'rank', label: '#', minWidth: 2, align: 'right' },
+    { key: 'name', label: 'Player', minWidth: 12, align: 'left' },
+    { key: 'rating', label: 'Rating', minWidth: 6, align: 'right' },
+    { key: 'wins', label: 'W', minWidth: 1, align: 'right' },
+    { key: 'losses', label: 'L', minWidth: 1, align: 'right' },
+    { key: 'gamesPlayed', label: 'Games', minWidth: 5, align: 'right' }
   ] as const;
 
-  const border = `+${columns.map((column) => '-'.repeat(column.width + 2)).join('+')}+`;
-  const header = `|${columns
-    .map((column) => ` ${padCell(column.label, column.width)} `)
-    .join('|')}|`;
-  const body = rows.flatMap((row) => {
-    const record = row as Record<string, string>;
-    const dataRow = `|${columns
-      .map((column) => ` ${padCell(record[column.key] ?? '', column.width)} `)
-      .join('|')}|`;
-    const spacerRow = `|${columns
-      .map((column) => ` ${padCell('', column.width)} `)
-      .join('|')}|`;
-    return [dataRow, border, spacerRow];
+  const widths = columns.map((column) => {
+    const values = rows.map((row) => (row as Record<string, string>)[column.key] ?? '');
+    return Math.max(column.minWidth, column.label.length, ...values.map((value) => value.length));
   });
 
-  return ['```text', border, header, border, ...body, border, '```'].join('\n');
+  function formatCell(value: string, width: number, align: 'left' | 'right') {
+    return align === 'right' ? value.padStart(width, ' ') : value.padEnd(width, ' ');
+  }
+
+  const normalizedBorder = `+${widths.map((width) => '-'.repeat(width + 2)).join('+')}+`;
+  const header = `|${columns
+    .map((column, index) => ` ${formatCell(column.label, widths[index]!, column.align)} `)
+    .join('|')}|`;
+  const body = rows.map((row) => {
+    const record = row as Record<string, string>;
+    return `|${columns
+      .map((column, index) =>
+        ` ${formatCell(record[column.key] ?? '', widths[index]!, column.align)} `
+      )
+      .join('|')}|`;
+  });
+
+  return ['```text', normalizedBorder, header, normalizedBorder, ...body, normalizedBorder, '```'].join('\n');
 }
 
 export const ratingsCommand: SlashCommand = {

@@ -66,11 +66,14 @@ function NewsArticleMetaRow({
 }) {
   return (
     <p className={cn("flex flex-wrap items-center gap-3 text-sm", className)}>
-      <span className="font-semibold text-white/55 uppercase">
+      <span className="font-semibold text-muted-foreground uppercase">
         {toLabel(category)}
       </span>
-      <span aria-hidden className="h-1 w-1 shrink-0 rounded-full bg-white/35" />
-      <span className="font-normal text-white/50 normal-case">
+      <span
+        aria-hidden
+        className="h-1 w-1 shrink-0 rounded-full bg-muted-foreground/50"
+      />
+      <span className="font-normal text-muted-foreground normal-case">
         {formatPublishedAt(publishedAt)}
       </span>
     </p>
@@ -89,7 +92,7 @@ function NewsImage({
   if (!src) {
     return (
       <div
-        className={`flex items-center justify-center bg-white/5 text-sm text-white/45 ${className ?? ""}`.trim()}
+        className={`flex items-center justify-center bg-muted/40 text-sm text-muted-foreground ${className ?? ""}`.trim()}
       >
         No cover image
       </div>
@@ -123,7 +126,7 @@ function NewsTabs({ activeCategory }: { activeCategory: CategoryFilter }) {
         {categoryOrder.map((category) => (
           <TabsTrigger
             key={category}
-            className="h-14 rounded-none px-3 text-sm font-medium text-white/60 after:bg-primary group-data-[orientation=horizontal]/tabs:after:bottom-[-1px] hover:text-white data-[state=active]:text-white dark:text-white/60 dark:hover:text-white dark:data-[state=active]:text-white"
+            className="h-14 rounded-none px-3 text-sm font-medium text-muted-foreground after:bg-primary group-data-[orientation=horizontal]/tabs:after:bottom-[-1px] hover:text-foreground data-[state=active]:text-foreground"
             value={category}
           >
             {category}
@@ -164,7 +167,7 @@ function NewsFeedInner({
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
       <NewsTabs activeCategory={activeCategory} />
-      <h1 className="text-xl font-semibold text-white">QLTracker News</h1>
+      <h1 className="text-xl font-semibold text-foreground">QLTracker News</h1>
 
       {articlesQuery.error instanceof Error ? (
         <p className="text-sm text-rose-300">{articlesQuery.error.message}</p>
@@ -172,8 +175,8 @@ function NewsFeedInner({
 
       {!articlesQuery.isLoading && visibleArticles.length === 0 ? (
         <div className="pt-2">
-          <h2 className="text-xl font-semibold text-white">No news yet</h2>
-          <p className="mt-2 text-sm text-white/60">
+          <h2 className="text-xl font-semibold text-foreground">No news yet</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
             News articles will show up here once they are published.
           </p>
         </div>
@@ -186,7 +189,7 @@ function NewsFeedInner({
               key={article.id}
               className="group relative flex flex-col gap-3 overflow-hidden rounded-[1.25rem] p-3"
             >
-              <div className="pointer-events-none absolute inset-0 scale-95 rounded-[1.25rem] bg-white/[0.04] opacity-0 transition duration-300 ease-out group-hover:scale-100 group-hover:opacity-100" />
+              <div className="pointer-events-none absolute inset-0 scale-95 rounded-[1.25rem] bg-muted opacity-0 transition duration-300 ease-out group-hover:scale-100 group-hover:opacity-100" />
               <Link
                 className="relative cursor-pointer overflow-hidden rounded-lg text-left"
                 href={`/news/${article.slug}`}
@@ -203,14 +206,14 @@ function NewsFeedInner({
                 className="relative"
                 publishedAt={article.publishedAt}
               />
-              <h2 className="relative text-2xl leading-tight font-semibold text-white">
+              <h2 className="relative text-2xl leading-tight font-semibold text-foreground">
                 {article.title}
               </h2>
-              <p className="relative text-sm leading-6 text-white/65">
+              <p className="relative text-sm leading-6 text-muted-foreground">
                 {article.excerpt}
               </p>
               <Link
-                className="relative mt-4 inline-flex w-fit items-center gap-2 text-sm font-semibold text-white"
+                className="relative mt-4 inline-flex w-fit items-center gap-2 text-sm font-semibold text-foreground"
                 href={`/news/${article.slug}`}
               >
                 Read more
@@ -223,11 +226,11 @@ function NewsFeedInner({
 
       {listArticles.length > 0 ? (
         <>
-          <div className="h-px bg-white/10" />
+          <div className="h-px bg-border" />
           <div className="flex flex-col">
             {listArticles.map((article, index) => (
               <div key={article.id}>
-                {index > 0 ? <div className="h-px bg-white/10" /> : null}
+                {index > 0 ? <div className="h-px bg-border" /> : null}
                 <Link
                   className="flex items-start justify-between gap-6 py-5 transition-opacity hover:opacity-75"
                   href={`/news/${article.slug}`}
@@ -238,15 +241,15 @@ function NewsFeedInner({
                       className="text-xs"
                       publishedAt={article.publishedAt}
                     />
-                    <h3 className="text-lg font-semibold text-white">
+                    <h3 className="text-lg font-semibold text-foreground">
                       {article.title}
                     </h3>
-                    <p className="max-w-2xl text-sm leading-6 text-white/60">
+                    <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
                       {article.excerpt}
                     </p>
                   </div>
 
-                  <ArrowRight className="mt-1 size-5 shrink-0 text-white/45" />
+                  <ArrowRight className="mt-1 size-5 shrink-0 text-muted-foreground" />
                 </Link>
               </div>
             ))}
@@ -256,10 +259,10 @@ function NewsFeedInner({
 
       {archivedArticles.length > 0 ? (
         <>
-          <div className="h-px bg-white/10" />
+          <div className="h-px bg-border" />
           <div className="pt-3">
             <Link
-              className="inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/5"
+              className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted/50"
               href="/news/archive"
             >
               Article Archive
@@ -303,9 +306,11 @@ function NewsArchiveInner({
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
       <div className="flex items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold text-white">Article Archive</h1>
+        <h1 className="text-xl font-semibold text-foreground">
+          Article Archive
+        </h1>
         <Link
-          className="text-sm font-semibold text-white/70 transition hover:text-white"
+          className="text-sm font-semibold text-muted-foreground transition hover:text-foreground"
           href="/news"
         >
           Back to latest news
@@ -317,12 +322,14 @@ function NewsArchiveInner({
       ) : null}
 
       {archivedArticles.length === 0 ? (
-        <p className="text-sm text-white/60">No archived articles yet.</p>
+        <p className="text-sm text-muted-foreground">
+          No archived articles yet.
+        </p>
       ) : (
         <div className="flex flex-col">
           {archivedArticles.map((article, index) => (
             <div key={article.id}>
-              {index > 0 ? <div className="h-px bg-white/10" /> : null}
+              {index > 0 ? <div className="h-px bg-border" /> : null}
               <Link
                 className="flex items-start justify-between gap-6 py-5 transition-opacity hover:opacity-75"
                 href={`/news/${article.slug}`}
@@ -333,15 +340,15 @@ function NewsArchiveInner({
                     className="text-xs"
                     publishedAt={article.publishedAt}
                   />
-                  <h3 className="text-lg font-semibold text-white">
+                  <h3 className="text-lg font-semibold text-foreground">
                     {article.title}
                   </h3>
-                  <p className="max-w-2xl text-sm leading-6 text-white/60">
+                  <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
                     {article.excerpt}
                   </p>
                 </div>
 
-                <ArrowRight className="mt-1 size-5 shrink-0 text-white/45" />
+                <ArrowRight className="mt-1 size-5 shrink-0 text-muted-foreground" />
               </Link>
             </div>
           ))}
@@ -387,7 +394,7 @@ function NewsArticleInner({
       <Button
         variant="ghost"
         asChild
-        className="w-fit text-white/70 hover:text-white"
+        className="w-fit text-muted-foreground hover:text-foreground"
       >
         <Link href="/news">
           <ArrowLeft className="size-4 shrink-0" />
@@ -407,10 +414,10 @@ function NewsArticleInner({
           category={article.category}
           publishedAt={article.publishedAt}
         />
-        <h1 className="text-3xl leading-tight font-semibold text-white">
+        <h1 className="text-3xl leading-tight font-semibold text-foreground">
           {article.title}
         </h1>
-        <Separator className="mt-3 bg-white/10" />
+        <Separator className="mt-3 bg-border" />
         <div className="mt-6 flex flex-col gap-2">
           <ReactMarkdown
             rehypePlugins={[rehypeRaw]}
@@ -421,7 +428,7 @@ function NewsArticleInner({
                 return (
                   <a
                     {...rest}
-                    className={`inline-flex items-center gap-1.5 text-white underline underline-offset-4 ${className ?? ""}`.trim()}
+                    className={`inline-flex items-center gap-1.5 text-foreground underline underline-offset-4 ${className ?? ""}`.trim()}
                     rel="noreferrer"
                     target="_blank"
                   >
@@ -433,7 +440,7 @@ function NewsArticleInner({
               h1(props) {
                 return (
                   <h1
-                    className="mt-4 w-full text-2xl font-semibold text-white"
+                    className="mt-4 w-full text-2xl font-semibold text-foreground"
                     {...props}
                   />
                 )
@@ -441,7 +448,7 @@ function NewsArticleInner({
               h2(props) {
                 return (
                   <h2
-                    className="mt-4 w-full text-xl font-semibold text-white"
+                    className="mt-4 w-full text-xl font-semibold text-foreground"
                     {...props}
                   />
                 )
@@ -449,7 +456,7 @@ function NewsArticleInner({
               h3(props) {
                 return (
                   <h3
-                    className="mt-3 w-full text-lg font-semibold text-white"
+                    className="mt-3 w-full text-lg font-semibold text-foreground"
                     {...props}
                   />
                 )
@@ -457,7 +464,7 @@ function NewsArticleInner({
               p(props) {
                 return (
                   <p
-                    className="w-full text-base leading-relaxed text-white/65"
+                    className="w-full text-base leading-relaxed text-muted-foreground"
                     {...props}
                   />
                 )
@@ -465,7 +472,7 @@ function NewsArticleInner({
               ul(props) {
                 return (
                   <ul
-                    className="w-full list-disc space-y-1 pl-6 text-base leading-relaxed text-white/65"
+                    className="w-full list-disc space-y-1 pl-6 text-base leading-relaxed text-muted-foreground"
                     {...props}
                   />
                 )
@@ -473,7 +480,7 @@ function NewsArticleInner({
               ol(props) {
                 return (
                   <ol
-                    className="w-full list-decimal space-y-1 pl-6 text-base leading-relaxed text-white/65"
+                    className="w-full list-decimal space-y-1 pl-6 text-base leading-relaxed text-muted-foreground"
                     {...props}
                   />
                 )
@@ -484,7 +491,7 @@ function NewsArticleInner({
               code({ className, ...props }) {
                 return (
                   <code
-                    className={`rounded bg-white/10 px-1.5 py-0.5 text-[0.9em] ${className ?? ""}`.trim()}
+                    className={`rounded bg-muted px-1.5 py-0.5 text-[0.9em] text-foreground ${className ?? ""}`.trim()}
                     {...props}
                   />
                 )
@@ -492,7 +499,7 @@ function NewsArticleInner({
               pre(props) {
                 return (
                   <pre
-                    className="w-full overflow-x-auto rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-white"
+                    className="w-full overflow-x-auto rounded-xl border border-border bg-muted/40 p-4 text-sm text-foreground"
                     {...props}
                   />
                 )

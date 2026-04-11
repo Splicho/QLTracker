@@ -1,6 +1,13 @@
-import "dotenv/config";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { normalizeUrl, parseEnv, splitCommaSeparated, trimToNull } from "@qltracker/config";
+import dotenv from "dotenv";
 import { z } from "zod";
+
+const appDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+
+dotenv.config({ path: path.join(appDir, ".env") });
+dotenv.config({ override: true, path: path.join(appDir, ".env.local") });
 
 const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(3011),

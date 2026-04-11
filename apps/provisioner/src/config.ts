@@ -1,10 +1,14 @@
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { parseEnv, trimToNull } from "@qltracker/config";
 import dotenv from "dotenv";
 import { z } from "zod";
 
-dotenv.config();
+const appDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+
+dotenv.config({ path: path.join(appDir, ".env") });
+dotenv.config({ override: true, path: path.join(appDir, ".env.local") });
 
 const envSchema = z.object({
   CALLBACK_SECRET: z.string().min(1),

@@ -29,6 +29,10 @@ export function parseStoredServerFilters(rawValue: string): ServerFiltersValue {
         typeof parsed.search === "string" ? parsed.search : defaults.search,
       region:
         typeof parsed.region === "string" ? parsed.region : defaults.region,
+      location:
+        typeof parsed.location === "string"
+          ? parsed.location
+          : defaults.location,
       visibility:
         parsed.visibility === "all" ||
         parsed.visibility === "public" ||

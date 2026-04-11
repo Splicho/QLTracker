@@ -62,7 +62,7 @@ const DEFAULT_MAP_POOL = [
 ] as const;
 
 const ratingEnv = new TrueSkill(1000, 150, 75, 5, 0);
-const COMPLETED_MATCH_VISIBLE_MS = 30_000;
+const COMPLETED_MATCH_VISIBLE_MS = 12_000;
 const PROVISION_RETRY_DELAYS_MS = [0, 5_000, 10_000, 20_000, 30_000] as const;
 function hashPickupToken(token: string) {
   return crypto

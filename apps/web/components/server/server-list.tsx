@@ -199,6 +199,14 @@ function resolveServerRegion(server: SteamServer) {
   )
 }
 
+function resolveServerLocationValue(server: SteamServer) {
+  return (
+    server.country_code?.trim().toLowerCase() ??
+    server.country_name?.trim().toLowerCase() ??
+    null
+  )
+}
+
 function normalizeGameMode(server: SteamServer) {
   if (server.game_mode?.trim()) {
     return server.game_mode.trim().toLowerCase()
@@ -325,13 +333,13 @@ function ServerPlayerCountPill({
       <span
         className={`inline-flex min-w-8 items-center justify-center px-2 py-0.5 text-[11px] font-semibold tabular-nums ${
           players > 0
-            ? "bg-sidebar text-sidebar-foreground"
-            : "bg-muted/70 text-muted-foreground"
+            ? "bg-muted text-foreground"
+            : "bg-muted text-muted-foreground"
         }`}
       >
         {players}
       </span>
-      <span className="inline-flex min-w-8 items-center justify-center bg-sidebar-accent px-2 py-0.5 text-[11px] font-medium text-sidebar-accent-foreground tabular-nums">
+      <span className="inline-flex min-w-8 items-center justify-center bg-muted px-2 py-0.5 text-[11px] font-medium text-foreground tabular-nums">
         {maxPlayers}
       </span>
     </div>
@@ -1053,12 +1061,21 @@ export function ServerList({
       return region === filters.region
     })
   }, [filters.region, staticFilteredServers])
-  const visibilityFilteredServers = useMemo(() => {
-    if (filters.visibility === "all") {
+  const locationFilteredServers = useMemo(() => {
+    if (filters.location === "all") {
       return regionFilteredServers
     }
 
-    return regionFilteredServers.filter((server) => {
+    return regionFilteredServers.filter(
+      (server) => resolveServerLocationValue(server) === filters.location
+    )
+  }, [filters.location, regionFilteredServers])
+  const visibilityFilteredServers = useMemo(() => {
+    if (filters.visibility === "all") {
+      return locationFilteredServers
+    }
+
+    return locationFilteredServers.filter((server) => {
       const requiresPassword = server.requires_password
 
       if (filters.visibility === "private") {
@@ -1067,7 +1084,7 @@ export function ServerList({
 
       return requiresPassword === false
     })
-  }, [filters.visibility, regionFilteredServers])
+  }, [filters.visibility, locationFilteredServers])
 
   const ratingFilterActive =
     filters.ratingRange[0] !== RATING_FILTER_MIN ||
@@ -1164,7 +1181,8 @@ export function ServerList({
   const columns = useMemo<ColumnDef<SteamServer>[]>(
     () => [
       {
-        accessorKey: "name",
+        id: "map",
+        accessorFn: (row) => row.map,
         header: ({ column }) => (
           <Button
             type="button"
@@ -1172,21 +1190,19 @@ export function ServerList({
             className="-ml-2 h-8 px-2.5 text-xs tracking-[0.12em] text-muted-foreground uppercase hover:bg-transparent"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            {t("serverList.table.server")}
+            {t("serverList.drawer.map")}
             <ArrowUpDown className="size-3.5" />
           </Button>
         ),
         cell: ({ row }) => {
           const map = getMapEntry(row.original.map)
-          const requiresPassword =
-            resolvedRequiresPasswordByAddr[row.original.addr] === true
-          const hasSavedPassword = Boolean(getPassword(row.original.addr))
+          const mapName = map?.name ?? row.original.map
 
           return (
             <div className="relative h-11 min-w-0 overflow-hidden">
               {map ? (
                 <div
-                  className="pointer-events-none absolute inset-y-0 left-0 w-[25%] min-w-28 bg-cover bg-left bg-no-repeat opacity-60"
+                  className="pointer-events-none absolute inset-y-0 left-0 w-[38%] min-w-40 bg-cover bg-center bg-no-repeat opacity-70"
                   style={{
                     backgroundImage: `url(${map.image})`,
                     maskImage:
@@ -1200,37 +1216,62 @@ export function ServerList({
                   }}
                 />
               ) : null}
-              <div className="relative z-10 flex h-full min-w-0 items-center px-3 text-sm font-medium text-foreground">
-                <div className="flex min-w-0 items-center gap-2">
-                  <div className="min-w-0 truncate">
-                    <PlayerName
-                      fallbackClassName="truncate"
-                      personaName={row.original.name}
-                    />
-                  </div>
-                  {requiresPassword ? (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Badge
-                          variant="outline"
-                          className="h-5 shrink-0 gap-1 rounded-md border-amber-500/40 bg-amber-500/10 px-1.5 text-[10px] font-medium text-amber-300"
-                        >
-                          {hasSavedPassword ? (
-                            <Unlock className="size-3" />
-                          ) : (
-                            <Lock className="size-3" />
-                          )}
-                        </Badge>
-                      </TooltipTrigger>
-                      <TooltipContent side="top">
-                        {hasSavedPassword
-                          ? t("serverList.passwordSaved")
-                          : t("serverList.passwordRequired")}
-                      </TooltipContent>
-                    </Tooltip>
-                  ) : null}
-                </div>
+              <div className="absolute inset-y-0 left-0 z-10 flex w-[38%] min-w-40 items-center justify-center px-3">
+                <span className="truncate text-center text-sm font-semibold text-white [text-shadow:0_1px_3px_rgb(0_0_0_/_0.95)]">
+                  {mapName}
+                </span>
               </div>
+            </div>
+          )
+        },
+      },
+      {
+        accessorKey: "name",
+        header: ({ column }) => (
+          <Button
+            type="button"
+            variant="ghost"
+            className="-ml-2 h-8 px-2.5 text-xs tracking-[0.12em] text-muted-foreground uppercase hover:bg-transparent"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            {t("serverList.table.server")}
+            <ArrowUpDown className="size-3.5" />
+          </Button>
+        ),
+        cell: ({ row }) => {
+          const requiresPassword =
+            resolvedRequiresPasswordByAddr[row.original.addr] === true
+          const hasSavedPassword = Boolean(getPassword(row.original.addr))
+
+          return (
+            <div className="flex min-w-0 items-center gap-2 text-sm font-medium text-foreground">
+              <div className="min-w-0 truncate">
+                <PlayerName
+                  fallbackClassName="truncate"
+                  personaName={row.original.name}
+                />
+              </div>
+              {requiresPassword ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge
+                      variant="outline"
+                      className="h-5 shrink-0 gap-1 rounded-md border-amber-500/40 bg-amber-500/10 px-1.5 text-[10px] font-medium text-amber-300"
+                    >
+                      {hasSavedPassword ? (
+                        <Unlock className="size-3" />
+                      ) : (
+                        <Lock className="size-3" />
+                      )}
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">
+                    {hasSavedPassword
+                      ? t("serverList.passwordSaved")
+                      : t("serverList.passwordRequired")}
+                  </TooltipContent>
+                </Tooltip>
+              ) : null}
             </div>
           )
         },
@@ -1265,7 +1306,7 @@ export function ServerList({
                 row.original.country_name
               }
               title={row.original.country_name}
-              className="h-4 w-4 rounded-full object-cover"
+              className="h-4 w-4 object-cover"
             />
           )
         },
@@ -1478,8 +1519,11 @@ export function ServerList({
                   >
                     <TableCell className="relative h-11 p-0 align-middle">
                       <div className="flex h-full items-center px-3">
-                        <Skeleton className="h-4 w-56" />
+                        <Skeleton className="h-4 w-40" />
                       </div>
+                    </TableCell>
+                    <TableCell className="h-11 px-3 py-0 align-middle">
+                      <Skeleton className="h-4 w-44" />
                     </TableCell>
                     <TableCell className="h-11 px-3 py-0 align-middle">
                       <Skeleton className="h-4 w-4 rounded-full" />
@@ -1542,7 +1586,7 @@ export function ServerList({
                         <TableCell
                           key={cell.id}
                           className={
-                            cell.column.id === "name"
+                            cell.column.id === "map"
                               ? "relative h-11 p-0 align-middle"
                               : "h-11 px-3 py-0 align-middle"
                           }

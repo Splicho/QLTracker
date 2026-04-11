@@ -10,7 +10,7 @@ const LANGUAGE_FLAG_IDS: Record<AppLanguage, string> = {
   sr: "rs",
   fr: "fr",
   it: "it",
-  et: "et",
+  et: "ee",
   nl: "nl",
   fi: "fi",
   sv: "se",
