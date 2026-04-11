@@ -1,13 +1,11 @@
 {
   "extends": "@qltracker/typescript-config/node",
   "compilerOptions": {
-    "strict": true,
+    "declaration": true,
+    "outDir": "dist",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "outDir": "dist",
-    "rootDir": "src",
-    "types": ["node"]
+    "rootDir": "src"
   },
   "include": ["src/**/*.ts"]
 }

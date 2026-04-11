@@ -1,8 +1,6 @@
 {
+  "extends": "@qltracker/typescript-config/node",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
     "lib": [
       "ES2023"
     ],
@@ -13,10 +11,6 @@
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
     "noImplicitOverride": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
     "types": [
       "node"
     ]

@@ -1,8 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
+import type { PickupStatsRelayEvent } from "@qltracker/contracts";
 import zmq from "zeromq";
 import { config, SLOT_DEFINITIONS, type SlotDefinition } from "./config.js";
-import { postPickupStatsEvents, type PickupStatsRelayEvent } from "./stats-callback-client.js";
+import { postPickupStatsEvents } from "./stats-callback-client.js";
 import { parseZmqMessage } from "./stats-parser.js";
 import { readSlotState } from "./slots.js";
 

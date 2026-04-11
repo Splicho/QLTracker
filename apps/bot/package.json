@@ -1,5 +1,5 @@
 {
-  "name": "qltracker-bot",
+  "name": "@qltracker/bot",
   "version": "0.1.0",
   "private": true,
   "description": "Lightweight Discord bot scaffold for Quake Live tracking.",
@@ -10,6 +10,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsx watch src/index.ts",
+    "lint": "eslint src --ext .ts",
     "register:commands": "tsx src/scripts/register-commands.ts",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit"
@@ -23,14 +24,19 @@
   ],
   "license": "UNLICENSED",
   "dependencies": {
+    "@qltracker/config": "workspace:*",
+    "@qltracker/contracts": "workspace:*",
     "discord.js": "^14.26.2",
     "dotenv": "^17.4.1",
     "pino": "^10.3.1",
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@qltracker/eslint-config": "workspace:*",
+    "@qltracker/typescript-config": "workspace:*",
     "@types/node": "^25.5.2",
+    "eslint": "^9.39.4",
     "tsx": "^4.21.0",
-    "typescript": "^6.0.2"
+    "typescript": "^5.9.3"
   }
 }

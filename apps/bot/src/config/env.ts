@@ -1,5 +1,6 @@
 import 'dotenv/config';
 
+import { parseEnv } from '@qltracker/config';
 import { z } from 'zod';
 
 const envSchema = z
@@ -95,14 +96,4 @@ const envSchema = z
     }
   });
 
-const parsedEnv = envSchema.safeParse(process.env);
-
-if (!parsedEnv.success) {
-  const flattenedErrors = parsedEnv.error.issues
-    .map((issue) => `${issue.path.join('.') || 'env'}: ${issue.message}`)
-    .join('\n');
-
-  throw new Error(`Invalid environment configuration:\n${flattenedErrors}`);
-}
-
-export const env = parsedEnv.data;
+export const env = parseEnv(envSchema);

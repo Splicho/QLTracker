@@ -1,7 +1,9 @@
-import { Medal } from "@/components/icon"
+import { Eye, InfoCircle, Medal } from "@/components/icon"
 import { PlayerAvatar } from "@/components/pickup/player-avatar"
 import { PlayerName } from "@/components/pickup/player-name"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { ButtonGroup } from "@/components/ui/button-group"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   Empty,
@@ -10,8 +12,23 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty"
+import { Spinner } from "@/components/ui/spinner"
 import { getMapEntry } from "@/lib/maps"
+import { navigateToUrl } from "@/lib/open-url"
 import type { PickupMatchState } from "@/lib/pickup"
+import { buildSteamConnectUrl } from "@/lib/server-utils"
+
+function getMatchJoinAddress(match: PickupMatchState) {
+  if (match.server.joinAddress?.trim()) {
+    return match.server.joinAddress.trim()
+  }
+
+  if (match.server.ip?.trim() && typeof match.server.port === "number") {
+    return `${match.server.ip.trim()}:${match.server.port}`
+  }
+
+  return null
+}
 
 export function PickupLiveMatches({
   matches,
@@ -39,6 +56,7 @@ export function PickupLiveMatches({
         <div className="grid items-stretch gap-4 px-6 py-6 xl:grid-cols-2">
           {matches.map((match) => {
             const map = getMapEntry(match.finalMapKey ?? "default")
+            const serverJoinAddress = getMatchJoinAddress(match)
             const maxTeamSize = Math.max(
               match.teams.left.length,
               match.teams.right.length
@@ -78,8 +96,15 @@ export function PickupLiveMatches({
                     </div>
 
                     <div className="flex justify-center">
-                      <div className="rounded-md border border-border/70 bg-sidebar/90 px-3 py-1 text-center text-sm font-semibold text-foreground">
-                        {match.finalScore ?? "Round in progress"}
+                      <div className="inline-flex items-center gap-2 rounded-md border border-border/70 bg-sidebar/90 px-3 py-1 text-center text-sm font-semibold text-foreground">
+                        {match.finalScore ? (
+                          match.finalScore
+                        ) : (
+                          <>
+                            <Spinner className="size-3.5" />
+                            <span>Round in progress</span>
+                          </>
+                        )}
                       </div>
                     </div>
 
@@ -198,6 +223,39 @@ export function PickupLiveMatches({
                         </div>
                       </div>
                     </div>
+
+                    <ButtonGroup className="w-full [&>*]:flex-1">
+                      <Button
+                        className="cursor-pointer"
+                        disabled={!serverJoinAddress}
+                        onClick={(event) => {
+                          event.stopPropagation()
+
+                          if (!serverJoinAddress) {
+                            return
+                          }
+
+                          navigateToUrl(buildSteamConnectUrl(serverJoinAddress))
+                        }}
+                        type="button"
+                        variant="default"
+                      >
+                        <Eye data-icon="inline-start" />
+                        Join to spectate
+                      </Button>
+                      <Button
+                        className="cursor-pointer"
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          onOpenMatch(match.id)
+                        }}
+                        type="button"
+                        variant="secondary"
+                      >
+                        <InfoCircle data-icon="inline-start" />
+                        Match info
+                      </Button>
+                    </ButtonGroup>
                   </div>
                 </CardContent>
               </Card>

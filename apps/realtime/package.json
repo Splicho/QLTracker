@@ -1,15 +1,19 @@
 {
-  "name": "qltracker-realtime",
+  "name": "@qltracker/realtime",
   "private": true,
   "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.json",
+    "lint": "eslint src --ext .ts",
     "start": "node dist/index.js",
-    "check": "tsc --noEmit -p tsconfig.json"
+    "check": "tsc --noEmit -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
+    "@qltracker/config": "workspace:*",
+    "@qltracker/contracts": "workspace:*",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
@@ -20,11 +24,14 @@
     "zod": "^4.1.11"
   },
   "devDependencies": {
+    "@qltracker/eslint-config": "workspace:*",
+    "@qltracker/typescript-config": "workspace:*",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/maxmind": "^2.0.4",
     "@types/node": "^24.7.2",
     "@types/pg": "^8.15.5",
+    "eslint": "^9.39.4",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   }

@@ -1,43 +1,23 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { createServer, type Server as HttpServer } from 'node:http';
 import {
+  pickupQueueAlertPayloadSchema,
+  pickupQueueAlertsPath,
+  pickupQueueAlertsSignatureHeader,
+} from '@qltracker/contracts';
+import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
   EmbedBuilder,
   type Client,
 } from 'discord.js';
-import { z } from 'zod';
 
 import { env } from '../../config/env.js';
 import { logger } from '../../shared/logger.js';
 
 import type { BotDefinition } from '../../bots/types.js';
-
-const PICKUP_QUEUE_ALERTS_PATH = '/internal/pickup/queue-opened';
-const PICKUP_QUEUE_ALERTS_SIGNATURE_HEADER = 'x-qltracker-signature';
 const MAX_BODY_SIZE_BYTES = 64 * 1024;
-
-const queueOpenedPayloadSchema = z.object({
-  action: z.enum(['opened', 'joined']),
-  currentPlayers: z.number().int().nonnegative(),
-  joinedAt: z.string().datetime(),
-  player: z.object({
-    avatarUrl: z.string().url().nullable(),
-    id: z.string().min(1),
-    personaName: z.string().min(1),
-    profileUrl: z.string().url().nullable(),
-    steamId: z.string().min(1),
-  }),
-  queue: z.object({
-    id: z.string().min(1),
-    name: z.string().min(1),
-    playerCount: z.number().int().positive(),
-    slug: z.string().min(1),
-    teamSize: z.number().int().positive(),
-  }),
-  type: z.literal('pickup.queue_opened'),
-});
 
 type BotRuntime = {
   readonly bot: BotDefinition;
@@ -61,7 +41,7 @@ function hasValidSignature(body: string, signatureHeader: string | undefined): b
 
 async function postQueueOpenedAlert(
   client: Client,
-  payload: z.infer<typeof queueOpenedPayloadSchema>,
+  payload: import('@qltracker/contracts').PickupQueueAlertPayload,
 ): Promise<void> {
   const channel = await client.channels.fetch(env.PICKUP_QUEUE_ALERTS_CHANNEL_ID ?? '');
 
@@ -159,7 +139,7 @@ export function startPickupQueueAlertsWebhook(runtimes: readonly BotRuntime[]): 
   }
 
   const server = createServer((request, response) => {
-    if (request.method !== 'POST' || request.url !== PICKUP_QUEUE_ALERTS_PATH) {
+    if (request.method !== 'POST' || request.url !== pickupQueueAlertsPath) {
       response.writeHead(404).end('Not found');
       return;
     }
@@ -192,19 +172,19 @@ export function startPickupQueueAlertsWebhook(runtimes: readonly BotRuntime[]): 
         return;
       }
 
-      const signatureHeader = Array.isArray(request.headers[PICKUP_QUEUE_ALERTS_SIGNATURE_HEADER])
-        ? request.headers[PICKUP_QUEUE_ALERTS_SIGNATURE_HEADER][0]
-        : request.headers[PICKUP_QUEUE_ALERTS_SIGNATURE_HEADER];
+      const signatureHeader = Array.isArray(request.headers[pickupQueueAlertsSignatureHeader])
+        ? request.headers[pickupQueueAlertsSignatureHeader][0]
+        : request.headers[pickupQueueAlertsSignatureHeader];
 
       if (!hasValidSignature(rawBody, signatureHeader)) {
         response.writeHead(401).end('Invalid signature');
         return;
       }
 
-      let parsedPayload: z.infer<typeof queueOpenedPayloadSchema>;
+      let parsedPayload: import('@qltracker/contracts').PickupQueueAlertPayload;
 
       try {
-        parsedPayload = queueOpenedPayloadSchema.parse(JSON.parse(rawBody));
+        parsedPayload = pickupQueueAlertPayloadSchema.parse(JSON.parse(rawBody));
       } catch (error) {
         logger.warn({ err: error }, 'Rejected invalid pickup queue alert payload');
         response.writeHead(400).end('Invalid payload');

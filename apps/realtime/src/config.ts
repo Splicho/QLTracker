@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { normalizeUrl, parseEnv, splitCommaSeparated, trimToNull } from "@qltracker/config";
 import { z } from "zod";
 
 const envSchema = z.object({
@@ -46,30 +47,33 @@ const envSchema = z.object({
   }
 });
 
-const parsedEnv = envSchema.parse(process.env);
+const parsedEnv = parseEnv(envSchema);
+const pickupQueueAlertsWebhookUrl = trimToNull(
+  parsedEnv.PICKUP_QUEUE_ALERTS_WEBHOOK_URL,
+);
 
 export const config = {
   corsOrigins:
     parsedEnv.CORS_ORIGIN.trim() === "*"
       ? "*"
-      : parsedEnv.CORS_ORIGIN.split(",")
-          .map((value) => value.trim())
-          .filter((value) => value.length > 0),
+      : splitCommaSeparated(parsedEnv.CORS_ORIGIN),
   databaseUrl: parsedEnv.DATABASE_URL,
   geoliteCountryDbPath: parsedEnv.GEOLITE_COUNTRY_DB_PATH.trim(),
   historyRetentionDays: parsedEnv.HISTORY_RETENTION_DAYS,
   historySampleIntervalMs: parsedEnv.HISTORY_SAMPLE_INTERVAL_MS,
   ingestToken: parsedEnv.REALTIME_INGEST_TOKEN,
-  pickupQueueAlertsWebhookSecret:
-    parsedEnv.PICKUP_QUEUE_ALERTS_WEBHOOK_SECRET?.trim() ?? "",
-  pickupQueueAlertsWebhookUrl:
-    parsedEnv.PICKUP_QUEUE_ALERTS_WEBHOOK_URL?.trim().replace(/\/+$/, "") ?? "",
+  pickupQueueAlertsWebhookSecret: trimToNull(
+    parsedEnv.PICKUP_QUEUE_ALERTS_WEBHOOK_SECRET,
+  ) ?? "",
+  pickupQueueAlertsWebhookUrl: pickupQueueAlertsWebhookUrl
+    ? normalizeUrl(pickupQueueAlertsWebhookUrl)
+    : "",
   pickupQueueDisconnectGraceMs: parsedEnv.PICKUP_QUEUE_DISCONNECT_GRACE_MS,
   pollIntervalMs: parsedEnv.POLL_INTERVAL_MS,
   port: parsedEnv.PORT,
-  qlstatsApiUrl: parsedEnv.QLSTATS_API_URL.trim().replace(/\/+$/, ""),
+  qlstatsApiUrl: normalizeUrl(parsedEnv.QLSTATS_API_URL),
   sessionSecret: parsedEnv.SESSION_SECRET,
-  steamApiKey: parsedEnv.STEAM_API_KEY?.trim() ?? "",
+  steamApiKey: trimToNull(parsedEnv.STEAM_API_KEY) ?? "",
   steamAppId: parsedEnv.STEAM_APP_ID.trim() || "282440",
   steamServerLimit: parsedEnv.STEAM_SERVER_LIMIT,
   trueskillUrlTemplate: parsedEnv.TRUESKILL_URL_TEMPLATE.trim(),

@@ -1,0 +1,15 @@
+{
+  "name": "@qltracker/typescript-config",
+  "version": "0.1.0",
+  "private": true,
+  "files": [
+    "base.json",
+    "nextjs.json",
+    "node.json"
+  ],
+  "exports": {
+    "./base": "./base.json",
+    "./nextjs": "./nextjs.json",
+    "./node": "./node.json"
+  }
+}

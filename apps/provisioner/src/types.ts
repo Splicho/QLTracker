@@ -1,29 +1,11 @@
-import { z } from "zod";
+import {
+  pickupProvisionPayloadSchema,
+  type PickupProvisionPayload,
+} from "@qltracker/contracts";
 
-export const playerSchema = z.object({
-  personaName: z.string().min(1),
-  playerId: z.string().min(1),
-  steamId: z.string().min(1),
-});
+export const provisionPayloadSchema = pickupProvisionPayloadSchema;
 
-export const provisionPayloadSchema = z.object({
-  captains: z
-    .object({
-      left: z.string().min(1),
-      right: z.string().min(1),
-    })
-    .nullable(),
-  finalMapKey: z.string().min(1),
-  matchId: z.string().min(1),
-  queueId: z.string().min(1),
-  seasonId: z.string().min(1),
-  teams: z.object({
-    left: z.array(playerSchema).min(1),
-    right: z.array(playerSchema).min(1),
-  }),
-});
-
-export type ProvisionPayload = z.infer<typeof provisionPayloadSchema>;
+export type ProvisionPayload = PickupProvisionPayload;
 
 export type SlotStatus = "busy" | "idle" | "provisioning";
 

@@ -1,20 +1,14 @@
+import {
+  pickupStatsRelayPayloadSchema,
+  type PickupStatsRelayEvent,
+  type PickupStatsRelayPayload,
+} from "@qltracker/contracts";
 import type { PoolClient } from "pg";
 import { pool } from "../db.js";
 import type { PickupMatchPlayerRow } from "./types.js";
 
-type MatchStatsEvent = {
-  data: Record<string, unknown>;
-  eventAt: string | null;
-  eventIndex: number;
-  source: string;
-  type: string;
-};
-
-type MatchStatsPayload = {
-  events: MatchStatsEvent[];
-  matchId: string;
-  slotId?: number;
-};
+type MatchStatsEvent = PickupStatsRelayEvent;
+type MatchStatsPayload = PickupStatsRelayPayload;
 
 type MatchPlayerIndex = {
   bySteamId: Map<string, PickupMatchPlayerRow>;
@@ -687,42 +681,7 @@ async function insertKillEvent(
 }
 
 function parsePayload(payload: Record<string, unknown>): MatchStatsPayload {
-  const matchId = readString(payload.matchId);
-  if (!matchId) {
-    throw new Error("Stats callback must include matchId.");
-  }
-
-  const events = asArray(payload.events)
-    .map((value) => asObject(value))
-    .filter((value): value is Record<string, unknown> => value != null)
-    .map((event) => {
-      const eventIndex = readNumber(event.eventIndex);
-      const type = readString(pickFirst(event.type, event.eventType));
-      const source = readString(event.source) ?? "zmq";
-      const data = asObject(event.data) ?? {};
-      if (eventIndex == null || !type) {
-        return null;
-      }
-
-      return {
-        data,
-        eventAt: readString(pickFirst(event.eventAt, event.timestamp)),
-        eventIndex,
-        source,
-        type,
-      } satisfies MatchStatsEvent;
-    })
-    .filter((event): event is MatchStatsEvent => event != null);
-
-  if (events.length === 0) {
-    throw new Error("Stats callback must include at least one event.");
-  }
-
-  return {
-    events,
-    matchId,
-    slotId: readNumber(payload.slotId) ?? undefined,
-  };
+  return pickupStatsRelayPayloadSchema.parse(payload);
 }
 
 export async function applyPickupMatchStats(

@@ -1,4 +1,8 @@
 import crypto from "node:crypto";
+import {
+  pickupQueueAlertsSignatureHeader,
+  type PickupQueueAlertPayload,
+} from "@qltracker/contracts";
 import type express from "express";
 import type { Server, Socket } from "socket.io";
 import { Rating, TrueSkill } from "ts-trueskill";
@@ -58,29 +62,6 @@ const DEFAULT_MAP_POOL = [
 const ratingEnv = new TrueSkill(1000, 150, 75, 5, 0);
 const COMPLETED_MATCH_VISIBLE_MS = 30_000;
 const PROVISION_RETRY_DELAYS_MS = [0, 5_000, 10_000, 20_000, 30_000] as const;
-const PICKUP_QUEUE_ALERTS_SIGNATURE_HEADER = "x-qltracker-signature";
-
-type PickupQueueOpenedAlertPayload = {
-  action: "joined" | "opened";
-  currentPlayers: number;
-  joinedAt: string;
-  player: {
-    avatarUrl: string | null;
-    id: string;
-    personaName: string;
-    profileUrl: string | null;
-    steamId: string;
-  };
-  queue: {
-    id: string;
-    name: string;
-    playerCount: number;
-    slug: string;
-    teamSize: number;
-  };
-  type: "pickup.queue_opened";
-};
-
 function hashPickupToken(token: string) {
   return crypto
     .createHmac("sha256", config.sessionSecret)
@@ -109,7 +90,7 @@ export function createPickupService(io: Server) {
   const connectedPickupSocketsByPlayerId = new Map<string, Set<string>>();
 
   async function notifyQueueOpened(
-    payload: PickupQueueOpenedAlertPayload,
+    payload: PickupQueueAlertPayload,
   ): Promise<void> {
     if (!config.pickupQueueAlertsWebhookUrl || !config.pickupQueueAlertsWebhookSecret) {
       return;
@@ -123,7 +104,7 @@ export function createPickupService(io: Server) {
         method: "POST",
         headers: {
           "content-type": "application/json",
-          [PICKUP_QUEUE_ALERTS_SIGNATURE_HEADER]: signature,
+          [pickupQueueAlertsSignatureHeader]: signature,
         },
         body,
       });

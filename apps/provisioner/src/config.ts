@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { parseEnv, trimToNull } from "@qltracker/config";
 import dotenv from "dotenv";
 import { z } from "zod";
 
@@ -24,10 +25,11 @@ const envSchema = z.object({
   ZMQ_STATS_PASSWORD: z.string().trim().default(""),
 });
 
-const parsed = envSchema.parse(process.env);
-const normalizedPublicCountryCode = parsed.PUBLIC_COUNTRY_CODE.trim().toLowerCase();
+const parsed = parseEnv(envSchema);
+const normalizedPublicCountryCode =
+  parsed.PUBLIC_COUNTRY_CODE.trim().toLowerCase();
 const normalizedPublicCountryName = parsed.PUBLIC_COUNTRY_NAME.trim();
-const normalizedZmqStatsPassword = parsed.ZMQ_STATS_PASSWORD.trim();
+const normalizedZmqStatsPassword = trimToNull(parsed.ZMQ_STATS_PASSWORD);
 
 export const config = {
   callbackSecret: parsed.CALLBACK_SECRET,
@@ -47,8 +49,7 @@ export const config = {
   realtimeResultCallbackUrl: parsed.REALTIME_RESULT_CALLBACK_URL,
   realtimeStatsCallbackUrl: parsed.REALTIME_STATS_CALLBACK_URL,
   slotsDir: parsed.SLOTS_DIR,
-  zmqStatsPassword:
-    normalizedZmqStatsPassword.length > 0 ? normalizedZmqStatsPassword : null,
+  zmqStatsPassword: normalizedZmqStatsPassword,
 };
 
 export type SlotDefinition = {

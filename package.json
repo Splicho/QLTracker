@@ -1,0 +1,29 @@
+{
+  "name": "qltracker",
+  "private": true,
+  "packageManager": "pnpm@10.15.0",
+  "engines": {
+    "node": ">=20.11.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "build:shared": "turbo run build --filter=@qltracker/contracts --filter=@qltracker/config",
+    "check": "pnpm lint && pnpm typecheck && pnpm build",
+    "dev": "pnpm run build:shared && turbo run dev --parallel",
+    "dev:bot": "pnpm run build:shared && turbo run dev --parallel --filter=@qltracker/contracts --filter=@qltracker/config --filter=@qltracker/bot",
+    "dev:provisioner": "pnpm run build:shared && turbo run dev --parallel --filter=@qltracker/contracts --filter=@qltracker/config --filter=@qltracker/provisioner",
+    "dev:realtime": "pnpm run build:shared && turbo run dev --parallel --filter=@qltracker/contracts --filter=@qltracker/config --filter=@qltracker/realtime",
+    "dev:web": "pnpm run build:shared && turbo run dev --parallel --filter=@qltracker/web",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "19.2.14",
+      "@types/react-dom": "19.2.3"
+    }
+  },
+  "devDependencies": {
+    "turbo": "^2.5.6"
+  }
+}
