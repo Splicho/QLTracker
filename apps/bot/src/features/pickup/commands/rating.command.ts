@@ -1,13 +1,9 @@
 import { SlashCommandBuilder } from 'discord.js';
 
 import { queryRows } from '../../../shared/database.js';
+import { formatQueueName, listActiveQueueChoices } from '../../../shared/pickup-queues.js';
 
 import type { SlashCommand } from '../../../discord/types.js';
-
-type QueueChoiceRow = {
-  name: string;
-  slug: string;
-};
 
 type RatingRow = {
   displayRating: number | null;
@@ -26,35 +22,6 @@ type LinkedSteamIdRow = {
 function normalizeSteamId(value: string | null): string | null {
   const steamId = value?.trim() ?? '';
   return /^\d{17}$/.test(steamId) ? steamId : null;
-}
-
-function formatQueueName(queueName: string) {
-  return queueName.trim() || 'pickup';
-}
-
-async function listActiveQueueChoices(search: string) {
-  const rows = await queryRows<QueueChoiceRow>(
-    `
-      select q."name", q."slug"
-      from "PickupQueue" q
-      where q."enabled" = true
-        and exists (
-          select 1
-          from "PickupSeason" s
-          where s."queueId" = q."id"
-            and s."status" = 'active'
-        )
-        and ($1::text = '' or q."name" ilike '%' || $1 || '%' or q."slug" ilike '%' || $1 || '%')
-      order by q."teamSize" asc, q."name" asc
-      limit 25
-    `,
-    [search.trim()]
-  );
-
-  return rows.map((row) => ({
-    name: row.name,
-    value: row.slug
-  }));
 }
 
 async function fetchRating(queueSlug: string, steamId: string) {

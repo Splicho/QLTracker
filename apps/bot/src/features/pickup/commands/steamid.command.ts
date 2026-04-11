@@ -1,51 +1,14 @@
 import { SlashCommandBuilder } from 'discord.js';
 
-import { queryRows } from '../../../shared/database.js';
-import { formatPickupPlayerName } from '../../../shared/pickup-player-name.js';
+import {
+  findPickupPlayer,
+  formatLinkedPlayerName,
+  normalizeSteamId,
+  steamProfileUrl,
+  upsertDiscordLink
+} from '../../../shared/pickup-discord-links.js';
 
 import type { SlashCommand } from '../../../discord/types.js';
-
-type PlayerRow = {
-  id: string;
-  personaName: string;
-  profileUrl: string | null;
-  steamId: string;
-};
-
-function normalizeSteamId(value: string): string | null {
-  const steamId = value.trim();
-  return /^\d{17}$/.test(steamId) ? steamId : null;
-}
-
-async function findPickupPlayer(steamId: string) {
-  const rows = await queryRows<PlayerRow>(
-    `
-      select "id", "personaName", "profileUrl", "steamId"
-      from "PickupPlayer"
-      where "steamId" = $1
-      limit 1
-    `,
-    [steamId]
-  );
-
-  return rows[0] ?? null;
-}
-
-async function upsertDiscordLink(discordUserId: string, playerId: string) {
-  await queryRows(
-    `
-      insert into "PickupDiscordLink" ("id", "discordUserId", "playerId", "createdAt", "updatedAt")
-      values (gen_random_uuid()::text, $1, $2, now(), now())
-      on conflict ("discordUserId")
-      do update set "playerId" = excluded."playerId", "updatedAt" = now()
-    `,
-    [discordUserId, playerId]
-  );
-}
-
-function steamProfileUrl(player: PlayerRow) {
-  return player.profileUrl?.trim() || `https://steamcommunity.com/profiles/${player.steamId}`;
-}
 
 export const steamIdCommand: SlashCommand = {
   data: new SlashCommandBuilder()
@@ -67,7 +30,7 @@ export const steamIdCommand: SlashCommand = {
       return;
     }
 
-    let player: PlayerRow | null = null;
+    let player = null;
     try {
       player = await findPickupPlayer(steamId);
     } catch {
@@ -89,7 +52,7 @@ export const steamIdCommand: SlashCommand = {
       return;
     }
 
-    const playerName = formatPickupPlayerName(player.personaName) || 'Player';
+    const playerName = formatLinkedPlayerName(player);
 
     await interaction.editReply(
       `${interaction.user} successfully linked your Discord account to [${playerName}](${steamProfileUrl(player)}).`
