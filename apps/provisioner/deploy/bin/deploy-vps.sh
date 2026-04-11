@@ -62,7 +62,11 @@ ensure_supported_node() {
 }
 
 pnpm_cmd() {
-  as_app_user env COREPACK_ENABLE_DOWNLOAD_PROMPT=0 corepack pnpm "$@"
+  local escaped_root
+  local escaped_args
+  escaped_root="$(printf '%q' "$ROOT_DIR")"
+  printf -v escaped_args '%q ' "$@"
+  as_app_user bash -lc "cd ${escaped_root} && env COREPACK_ENABLE_DOWNLOAD_PROMPT=0 corepack pnpm ${escaped_args}"
 }
 
 ensure_repo_checkout() {
