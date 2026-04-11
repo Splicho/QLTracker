@@ -78,7 +78,7 @@ function buildDisplayRows(rows: LeaderboardRow[]): LeaderboardDisplayRow[] {
 function buildTable(rows: LeaderboardDisplayRow[]) {
   const columns = [
     { key: 'rank', label: '#', minWidth: 2, align: 'right' },
-    { key: 'name', label: 'Player', minWidth: 12, align: 'left' },
+    { key: 'name', label: 'Player', minWidth: 20, align: 'left' },
     { key: 'rating', label: 'Rating', minWidth: 6, align: 'right' },
     { key: 'wins', label: 'W', minWidth: 1, align: 'right' },
     { key: 'losses', label: 'L', minWidth: 1, align: 'right' },
@@ -94,20 +94,22 @@ function buildTable(rows: LeaderboardDisplayRow[]) {
     return align === 'right' ? value.padStart(width, ' ') : value.padEnd(width, ' ');
   }
 
-  const normalizedBorder = `+${widths.map((width) => '-'.repeat(width + 2)).join('+')}+`;
-  const header = `|${columns
-    .map((column, index) => ` ${formatCell(column.label, widths[index]!, column.align)} `)
-    .join('|')}|`;
+  const header = columns
+    .map((column, index) => formatCell(column.label, widths[index]!, column.align))
+    .join('  ');
+  const separator = columns
+    .map((column, index) => '-'.repeat(Math.max(column.label.length, widths[index]!)))
+    .join('  ');
   const body = rows.map((row) => {
     const record = row as Record<string, string>;
-    return `|${columns
+    return columns
       .map((column, index) =>
-        ` ${formatCell(record[column.key] ?? '', widths[index]!, column.align)} `
+        formatCell(record[column.key] ?? '', widths[index]!, column.align)
       )
-      .join('|')}|`;
+      .join('  ');
   });
 
-  return ['```text', normalizedBorder, header, normalizedBorder, ...body, normalizedBorder, '```'].join('\n');
+  return ['```text', header, separator, ...body, '```'].join('\n');
 }
 
 export const ratingsCommand: SlashCommand = {
