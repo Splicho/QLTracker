@@ -103,6 +103,10 @@ build_app() {
   log "installing workspace dependencies"
   as_app_user env COREPACK_ENABLE_DOWNLOAD_PROMPT=0 corepack prepare "pnpm@${PNPM_VERSION}" --activate
   pnpm_cmd install --frozen-lockfile
+  log "building shared packages required by provisioner"
+  pnpm_cmd --filter @qltracker/config build
+  pnpm_cmd --filter @qltracker/contracts build
+  pnpm_cmd --filter @qltracker/crypto build
   log "building provisioner"
   pnpm_cmd --filter @qltracker/provisioner build
 }
