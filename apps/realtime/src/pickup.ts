@@ -1050,6 +1050,17 @@ export function createPickupService(io: Server) {
     io.emit("pickup:queue:update", publicState.queue);
   }
 
+  function emitMatchDetailUpdate(
+    matchId: string,
+    reason: "chat" | "live" | "result" | "stats",
+  ) {
+    io.emit("pickup:match-detail:update", {
+      matchId,
+      reason,
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
   function clearQueueDisconnectTimer(playerId: string) {
     const timer = queueDisconnectTimers.get(playerId);
     if (!timer) {
@@ -1469,6 +1480,7 @@ export function createPickupService(io: Server) {
     for (const player of players) {
       await emitPlayerState(player.playerId);
     }
+    emitMatchDetailUpdate(matchId, "live");
   }
 
   async function recordProvisionEvent(
@@ -2263,6 +2275,7 @@ export function createPickupService(io: Server) {
       const completedPlayers = await getMatchPlayers(matchId);
       void notifyMatchCompleted(completedMatch, completedPlayers);
     }
+    emitMatchDetailUpdate(matchId, "result");
   }
 
   async function applyMatchStats(
@@ -2275,6 +2288,7 @@ export function createPickupService(io: Server) {
     }
 
     await applyPickupMatchStats(matchId, payload, getMatchPlayers);
+    emitMatchDetailUpdate(matchId, "stats");
   }
 
   async function applyMatchChat(
@@ -2346,6 +2360,7 @@ export function createPickupService(io: Server) {
       `,
       [matchId, playerId, steamId || null, personaName, channel, message, sentAt],
     );
+    emitMatchDetailUpdate(matchId, "chat");
   }
 
   async function emitSocketState(socket: Socket, session: PickupSessionIdentity | null) {

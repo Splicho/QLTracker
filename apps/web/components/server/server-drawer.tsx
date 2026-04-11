@@ -107,6 +107,20 @@ function getQlStatsPlayerProfileUrl(steamId: string) {
   return `https://qlstats.net/player/${steamId}`
 }
 
+function getTeamScoreSummary(server: SteamServer) {
+  const redPlayers = server.players_info.filter((player) => player.team === 1)
+  const bluePlayers = server.players_info.filter((player) => player.team === 2)
+
+  if (redPlayers.length === 0 && bluePlayers.length === 0) {
+    return null
+  }
+
+  return {
+    blue: bluePlayers.reduce((total, player) => total + player.score, 0),
+    red: redPlayers.reduce((total, player) => total + player.score, 0),
+  }
+}
+
 const playerTeamSectionMeta = {
   blue: {
     labelKey: "serverList.drawer.teams.blue",
@@ -1035,6 +1049,7 @@ export function ServerDrawer({
 }: ServerDrawerProps) {
   const { t } = useTranslation()
   const selectedMap = server ? getMapEntry(server.map) : null
+  const teamScore = server ? getTeamScoreSummary(server) : null
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -1067,6 +1082,19 @@ export function ServerDrawer({
                   <div className="pointer-events-none absolute inset-x-0 top-11 text-center text-[11px] tracking-[0.14em] text-muted-foreground/80 uppercase">
                     {selectedMap?.name ?? server.map}
                   </div>
+                  {teamScore ? (
+                    <div className="pointer-events-none absolute inset-x-0 top-16 flex items-center justify-center gap-4">
+                      <div className="text-3xl font-semibold tracking-tight text-blue-400 drop-shadow-[0_1px_10px_rgba(0,0,0,0.55)]">
+                        {teamScore.blue}
+                      </div>
+                      <div className="text-[10px] tracking-[0.18em] text-muted-foreground/70 uppercase">
+                        Score
+                      </div>
+                      <div className="text-3xl font-semibold tracking-tight text-red-400 drop-shadow-[0_1px_10px_rgba(0,0,0,0.55)]">
+                        {teamScore.red}
+                      </div>
+                    </div>
+                  ) : null}
                   <div className="absolute inset-x-5 bottom-5 flex items-end justify-between gap-4">
                     <div className="min-w-0 flex-1">
                       <div className="flex min-w-0 items-center gap-2">

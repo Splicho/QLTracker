@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { ArrowDownLeft, ArrowUpRight, Check, X } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { Medal } from "@/components/icon"
@@ -15,6 +15,7 @@ import {
   type PickupMatchDetail,
   type PickupMatchKillEvent,
 } from "@/lib/pickup"
+import { getRealtimeSocket, isRealtimeEnabled } from "@/lib/realtime"
 import { Badge } from "@/components/ui/badge"
 import {
   ChartContainer,
@@ -953,6 +954,7 @@ export function PickupMatchPage({
   matchId: string | null
   onMatchTitleChange?: (title: string | null) => void
 }) {
+  const queryClient = useQueryClient()
   const matchQuery = useQuery({
     queryKey: ["pickup", "match", matchId],
     queryFn: () => fetchPickupMatchDetail(matchId!),
@@ -961,6 +963,39 @@ export function PickupMatchPage({
     staleTime: 15_000,
     refetchInterval: 15_000,
   })
+
+  useEffect(() => {
+    if (!matchId || !isRealtimeEnabled()) {
+      return
+    }
+
+    const socket = getRealtimeSocket()
+    if (!socket) {
+      return
+    }
+
+    const refetchMatch = (payload?: { matchId?: string }) => {
+      if (payload?.matchId && payload.matchId !== matchId) {
+        return
+      }
+
+      void queryClient.invalidateQueries({
+        queryKey: ["pickup", "match", matchId],
+      })
+    }
+
+    socket.on("connect", refetchMatch)
+    socket.on("pickup:match-detail:update", refetchMatch)
+
+    if (!socket.connected) {
+      socket.connect()
+    }
+
+    return () => {
+      socket.off("connect", refetchMatch)
+      socket.off("pickup:match-detail:update", refetchMatch)
+    }
+  }, [matchId, queryClient])
 
   useEffect(() => {
     const title = matchQuery.data?.match.queue.name ?? null

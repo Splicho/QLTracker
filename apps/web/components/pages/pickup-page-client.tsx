@@ -63,6 +63,7 @@ export function PickupPageClient({
     socket.on("connect", refetchLanding)
     socket.on("pickup:public-state", refetchLanding)
     socket.on("pickup:state", refetchLanding)
+    socket.on("pickup:match-detail:update", refetchLanding)
 
     if (!socket.connected) {
       socket.connect()
@@ -72,6 +73,7 @@ export function PickupPageClient({
       socket.off("connect", refetchLanding)
       socket.off("pickup:public-state", refetchLanding)
       socket.off("pickup:state", refetchLanding)
+      socket.off("pickup:match-detail:update", refetchLanding)
     }
   }, [queryClient])
 

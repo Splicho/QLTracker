@@ -33,6 +33,7 @@ export type SteamServer = {
     name: string
     score: number
     duration_seconds: number
+    team?: number | null
   }>
 }
 
@@ -135,7 +136,12 @@ export function mergeSteamServerSnapshot(
     version: snapshot.version ?? server.version,
     keywords: snapshot.keywords ?? server.keywords,
     connect_url: snapshot.connectUrl || server.connect_url,
-    players_info: server.players_info,
+    players_info: snapshot.playersInfo.map((player) => ({
+      duration_seconds: player.durationSeconds,
+      name: player.name,
+      score: player.score,
+      team: player.team ?? null,
+    })),
   }
 }
 
@@ -264,6 +270,7 @@ export function toSteamServer(snapshot: RealtimeServerSnapshot): SteamServer {
       duration_seconds: player.durationSeconds,
       name: player.name,
       score: player.score,
+      team: player.team ?? null,
     })),
   }
 }
@@ -283,11 +290,12 @@ export async function fetchSteamServerPlayers(addr: string) {
     return []
   }
 
-  return snapshot.playersInfo.map((player) => ({
-    duration_seconds: player.durationSeconds,
-    name: player.name,
-    score: player.score,
-  }))
+    return snapshot.playersInfo.map((player) => ({
+      duration_seconds: player.durationSeconds,
+      name: player.name,
+      score: player.score,
+      team: player.team ?? null,
+    }))
 }
 
 export async function fetchSteamServerCountries(addrs: string[]) {
