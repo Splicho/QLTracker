@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 
 import { queryRows } from '../../../shared/database.js';
+import { formatPickupPlayerName } from '../../../shared/pickup-player-name.js';
 
 import type { SlashCommand } from '../../../discord/types.js';
 
@@ -88,8 +89,10 @@ export const steamIdCommand: SlashCommand = {
       return;
     }
 
+    const playerName = formatPickupPlayerName(player.personaName) || 'Player';
+
     await interaction.editReply(
-      `${interaction.user} you successfully linked your Discord account to [${player.personaName}](${steamProfileUrl(player)}).`
+      `${interaction.user} you successfully linked your Discord account to [${playerName}](${steamProfileUrl(player)}).`
     );
   }
 };

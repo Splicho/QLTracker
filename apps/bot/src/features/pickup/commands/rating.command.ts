@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 
 import { queryRows } from '../../../shared/database.js';
+import { formatPickupPlayerName } from '../../../shared/pickup-player-name.js';
 
 import type { SlashCommand } from '../../../discord/types.js';
 
@@ -178,13 +179,15 @@ export const ratingCommand: SlashCommand = {
       return;
     }
 
+    const playerName = formatPickupPlayerName(rating.personaName) || 'Player';
+
     if (rating.displayRating === null) {
-      await interaction.editReply(`${rating.personaName} has no ${queueName} rating yet.`);
+      await interaction.editReply(`${playerName} has no **${queueName}** rating yet.`);
       return;
     }
 
     await interaction.editReply(
-      `${rating.personaName} current ${queueName} rating is ${rating.displayRating} (${rating.wins ?? 0}W-${rating.losses ?? 0}L, ${rating.gamesPlayed ?? 0} games).`
+      `${playerName} current **${queueName}** rating is **${rating.displayRating}** (${rating.wins ?? 0}W-${rating.losses ?? 0}L, ${rating.gamesPlayed ?? 0} games).`
     );
   }
 };
