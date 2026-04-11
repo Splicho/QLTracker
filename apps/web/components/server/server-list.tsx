@@ -1199,16 +1199,16 @@ export function ServerList({
           const mapName = map?.name ?? row.original.map
 
           return (
-            <div className="relative h-11 min-w-0 overflow-hidden">
+            <div className="relative h-11 min-w-24 overflow-hidden sm:min-w-0">
               {map ? (
                 <div
-                  className="pointer-events-none absolute inset-y-0 left-0 w-[38%] min-w-40 bg-cover bg-center bg-no-repeat opacity-70"
+                  className="pointer-events-none absolute inset-y-0 left-0 w-full bg-cover bg-center bg-no-repeat opacity-70 sm:w-[38%] sm:min-w-40"
                   style={{
                     backgroundImage: `url(${map.image})`,
                     maskImage:
-                      "linear-gradient(to right, black 0%, black 62%, transparent 100%)",
+                      "linear-gradient(to right, black 0%, black 80%, transparent 100%)",
                     WebkitMaskImage:
-                      "linear-gradient(to right, black 0%, black 62%, transparent 100%)",
+                      "linear-gradient(to right, black 0%, black 80%, transparent 100%)",
                     maskSize: "100% 100%",
                     WebkitMaskSize: "100% 100%",
                     maskRepeat: "no-repeat",
@@ -1216,7 +1216,7 @@ export function ServerList({
                   }}
                 />
               ) : null}
-              <div className="absolute inset-y-0 left-0 z-10 flex w-[38%] min-w-40 items-center justify-center px-3">
+              <div className="absolute inset-y-0 left-0 z-10 flex w-full items-center justify-center px-2 sm:w-[38%] sm:min-w-40 sm:px-3">
                 <span className="truncate text-center text-sm font-semibold text-white [text-shadow:0_1px_3px_rgb(0_0_0_/_0.95)]">
                   {mapName}
                 </span>
@@ -1622,7 +1622,7 @@ export function ServerList({
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.22, ease: "easeOut" }}
-                className="absolute inset-0 z-10 bg-background/25 backdrop-blur-[2px]"
+                className="pointer-events-none absolute inset-0 z-10 bg-background/25 backdrop-blur-[2px]"
               />
             ) : null}
           </AnimatePresence>
