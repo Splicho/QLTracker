@@ -16,7 +16,6 @@ in
   packages = with pkgs; [
     bash
     coreutils
-    nodePackages.eslint
     nodePackages.typescript
     git
     gnugrep
@@ -26,6 +25,9 @@ in
     postgresql
     python3
     util-linux
+    (writeShellScriptBin "eslint" ''
+      exec pnpm --filter @qltracker/web exec eslint "$@"
+    '')
   ];
 
   services.postgres.enable = true;
