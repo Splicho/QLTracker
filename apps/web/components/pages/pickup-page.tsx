@@ -297,9 +297,6 @@ function PickupActiveMatchLayout({
             <p className="text-4xl font-semibold text-foreground sm:text-6xl">
               Server Ready
             </p>
-            <p className="text-sm text-muted-foreground">
-              {serverJoinAddress ?? "Server connection details are syncing"}
-            </p>
           </div>
         ) : isLive ? (
           <div className="flex flex-col items-center gap-2">
