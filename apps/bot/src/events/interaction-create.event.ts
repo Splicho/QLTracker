@@ -5,6 +5,19 @@ import { logger } from '../shared/logger.js';
 
 import type { DiscordEvent } from '../discord/types.js';
 
+function getDiscordApiErrorCode(error: unknown): number | null {
+  if (
+    error &&
+    typeof error === 'object' &&
+    'code' in error &&
+    typeof error.code === 'number'
+  ) {
+    return error.code;
+  }
+
+  return null;
+}
+
 export function createInteractionCreateEvent(
   bot: BotDefinition
 ): DiscordEvent<Events.InteractionCreate> {
@@ -69,12 +82,31 @@ export function createInteractionCreateEvent(
       try {
         await command.execute(interaction);
       } catch (error: unknown) {
+        const errorCode = getDiscordApiErrorCode(error);
+
+        if (errorCode === 10062 || errorCode === 40060) {
+          logger.warn(
+            {
+              err: error,
+              botId: bot.id,
+              botName: bot.displayName,
+              commandName: interaction.commandName,
+              interactionId: interaction.id,
+              userId: interaction.user.id
+            },
+            'Slash command interaction was already consumed or expired'
+          );
+
+          return;
+        }
+
         logger.error(
           {
             err: error,
             botId: bot.id,
             botName: bot.displayName,
             commandName: interaction.commandName,
+            interactionId: interaction.id,
             userId: interaction.user.id
           },
           'Slash command execution failed'
