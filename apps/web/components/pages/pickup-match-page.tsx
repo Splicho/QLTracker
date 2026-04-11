@@ -1,11 +1,19 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { ArrowDownLeft, ArrowUpRight, Check, X } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { Medal } from "@/components/icon"
 import { PlayerAvatar } from "@/components/pickup/player-avatar"
 import { PlayerName } from "@/components/pickup/player-name"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { getMapEntry } from "@/lib/maps"
+import { getPickupCountryFlagSrc } from "@/lib/pickup-country"
 import { QuakeText, stripQuakeColors } from "@/lib/quake"
 import {
   fetchPickupMatchDetail,
@@ -62,16 +70,27 @@ const weaponOrder = [
   "CHAINGUN",
 ]
 
-const playerChartColors = [
-  "#60a5fa",
-  "#f87171",
-  "#34d399",
-  "#fbbf24",
-  "#a78bfa",
-  "#f472b6",
-  "#22d3ee",
-  "#fb923c",
-]
+const weaponChartColors: Record<string, string> = {
+  ROCKET: "#ff0000",
+  LIGHTNING: "#faf9ac",
+  RAILGUN: "#06cc02",
+  SHOTGUN: "#fd7c00",
+  PLASMA: "#c500ff",
+  MACHINEGUN: "#ffff00",
+  HMG: "#a78bfa",
+  GRENADE: "#029012",
+  NAILGUN: "#ec4899",
+  BFG: "#14b8a6",
+  GAUNTLET: "#f43f5e",
+  CHAINGUN: "#64748b",
+}
+
+type WeaponChartSort = "best" | "team"
+
+const chartTeamTextColor = {
+  left: "#60a5fa",
+  right: "#f87171",
+} as const
 
 function LoadingState() {
   return (
@@ -357,53 +376,107 @@ function getPlayerWeaponDamage(player: PickupMatchPlayerStats, weapon: string) {
   )
 }
 
-function buildWeaponDamageChart(players: PickupMatchPlayerStats[]): {
+function getPlayerWeaponAccuracy(
+  player: PickupMatchPlayerStats,
+  weapon: string
+) {
+  const stat = player.weaponStats.find(
+    (entry) => entry.weapon.toUpperCase() === weapon
+  )
+
+  if (!stat) {
+    return 0
+  }
+
+  if (typeof stat.accuracy === "number") {
+    return Math.round(stat.accuracy)
+  }
+
+  if (stat.hits != null && stat.shots != null && stat.shots > 0) {
+    return Math.round((stat.hits / stat.shots) * 100)
+  }
+
+  return 0
+}
+
+function buildWeaponDamageChart(
+  detail: PickupMatchDetail,
+  sortBy: WeaponChartSort
+): {
   config: ChartConfig
   data: Array<Record<string, number | string>>
-  players: Array<{ color: string; key: string; label: string }>
+  players: Array<{
+    countryCode?: string | null
+    id: string
+    key: string
+    label: string
+    personaName: string
+    team: "left" | "right"
+  }>
 } {
-  const chartPlayers = players.map((player, index) => {
-    const fallbackName = stripQuakeColors(player.player.personaName).trim()
-    return {
-      color: playerChartColors[index % playerChartColors.length] ?? "#60a5fa",
-      key: `player${index}`,
-      label: fallbackName || `Player ${index + 1}`,
-    }
-  })
+  const combinedPlayers = [
+    ...detail.teams.left.map((player) => ({ player, team: "left" as const })),
+    ...detail.teams.right.map((player) => ({ player, team: "right" as const })),
+  ]
 
-  const config = chartPlayers.reduce<ChartConfig>((nextConfig, player) => {
-    nextConfig[player.key] = {
-      color: player.color,
-      label: player.label,
+  const config = weaponOrder.reduce<ChartConfig>((nextConfig, weapon) => {
+    const meta = weaponMeta[weapon] ?? {
+      icon: "/icons/quakelive/modified.png",
+      label: weapon.slice(0, 3),
+    }
+    nextConfig[weapon] = {
+      color: weaponChartColors[weapon] ?? "#94a3b8",
+      label: meta.label,
     }
     return nextConfig
   }, {})
 
-  const data = weaponOrder
-    .map((weapon) => {
-      const meta = weaponMeta[weapon] ?? {
-        icon: "/icons/quakelive/modified.png",
-        label: weapon.slice(0, 3),
-      }
-      const row: Record<string, number | string> = {
-        icon: meta.icon,
-        weapon: meta.label,
-      }
+  const chartEntries = combinedPlayers.map(({ player, team }, index) => {
+    const fallbackName = stripQuakeColors(player.player.personaName).trim()
+    const chartPlayer = {
+      countryCode: player.player.countryCode,
+      id: player.player.id,
+      key: `player${index}`,
+      label: fallbackName || `Player ${index + 1}`,
+      personaName: player.player.personaName,
+      team,
+    }
+    const row: Record<string, number | string> = {
+      playerId: chartPlayer.id,
+      playerKey: chartPlayer.key,
+      team: chartPlayer.team,
+    }
+    let totalDamage = 0
 
-      players.forEach((player, index) => {
-        row[`player${index}`] = getPlayerWeaponDamage(player, weapon)
-      })
-
-      return row
+    weaponOrder.forEach((weapon) => {
+      const damage = getPlayerWeaponDamage(player, weapon)
+      const accuracy = getPlayerWeaponAccuracy(player, weapon)
+      row[`${weapon}Damage`] = damage
+      row[`${weapon}Accuracy`] = accuracy
+      row[weapon] = damage
+      totalDamage += damage
     })
-    .filter((entry) =>
-      chartPlayers.some((player) => Number(entry[player.key] ?? 0) > 0)
-    )
+
+    return {
+      player: chartPlayer,
+      row,
+      totalDamage,
+    }
+  })
+  const sortedEntries = chartEntries
+    .filter((entry) => entry.totalDamage > 0)
+    .sort((left, right) => {
+      if (sortBy === "team" && left.player.team !== right.player.team) {
+        return left.player.team === "left" ? -1 : 1
+      }
+
+      return right.totalDamage - left.totalDamage
+    })
 
   return {
     config,
-    data,
-    players: chartPlayers,
+    data: sortedEntries.map((entry) => entry.row),
+    players: sortedEntries.map((entry) => entry.player),
   }
 }
 
@@ -412,6 +485,7 @@ function WeaponDamageTooltip({
   config,
   label,
   payload,
+  players,
 }: {
   active?: boolean
   config: ChartConfig
@@ -420,49 +494,67 @@ function WeaponDamageTooltip({
     color?: string
     dataKey?: string | number
     name?: string | number
-    payload?: { icon?: string }
+    payload?: Record<string, number | string | undefined>
     value?: number | string
+  }>
+  players: Array<{
+    countryCode?: string | null
+    id: string
+    key: string
+    label: string
+    personaName: string
   }>
 }) {
   if (!active || !payload?.length) {
     return null
   }
 
+  const player = players.find(
+    (entry) => entry.key === payload[0]?.payload?.playerKey
+  )
+  const items = payload.filter((item) => Number(item.value ?? 0) > 0)
+
   return (
     <div className="min-w-40 rounded-lg border border-border/50 bg-background px-3 py-2 text-xs shadow-xl">
       <div className="mb-2 flex items-center gap-2 font-semibold text-foreground">
-        {payload[0]?.payload?.icon ? (
-          <img
-            alt=""
-            className="size-5 object-contain"
-            src={payload[0].payload.icon}
+        {player ? (
+          <PlayerName
+            country
+            countryClassName="h-3.5 w-3.5"
+            countryCode={player.countryCode}
+            fallbackClassName="inline-block max-w-[11rem] truncate align-bottom"
+            personaName={player.personaName}
           />
-        ) : null}
-        <span>{label}</span>
+        ) : (
+          <span>{label}</span>
+        )}
       </div>
       <div className="grid gap-1.5">
-        {payload.map((item) => {
+        {items.map((item) => {
           const key = String(item.dataKey ?? item.name ?? "")
           const itemConfig = config[key]
-          const value =
-            typeof item.value === "number"
-              ? item.value.toLocaleString()
-              : item.value
+          const meta = weaponMeta[key] ?? {
+            icon: "/icons/quakelive/modified.png",
+            label: key.slice(0, 3),
+          }
+          const damage = Number(item.payload?.[`${key}Damage`] ?? 0)
+          const accuracy = Number(item.payload?.[`${key}Accuracy`] ?? 0)
 
           return (
             <div
               className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2"
               key={key}
             >
-              <span
-                className="size-2.5 rounded-[2px]"
-                style={{ backgroundColor: itemConfig?.color ?? item.color }}
+              <img
+                alt=""
+                className="size-4 object-contain opacity-90"
+                src={meta.icon}
               />
               <span className="text-muted-foreground">
-                {itemConfig?.label ?? key}
+                {itemConfig?.label ?? meta.label}
               </span>
               <span className="font-mono font-medium text-foreground tabular-nums">
-                {value}
+                {formatNumber(damage)} dmg · {accuracy}%
               </span>
             </div>
           )
@@ -472,19 +564,25 @@ function WeaponDamageTooltip({
   )
 }
 
-function WeaponAxisTick({
+function PlayerAxisTick({
   payload,
+  players,
   x,
   y,
 }: {
   payload?: { value?: string }
+  players: Array<{
+    countryCode?: string | null
+    key: string
+    label: string
+    team: "left" | "right"
+  }>
   x?: number
   y?: number
 }) {
-  const value = payload?.value ?? ""
-  const weapon = Object.values(weaponMeta).find(
-    (entry) => entry.label === value
-  )
+  const player = players.find((entry) => entry.key === payload?.value)
+  const flagSrc = getPickupCountryFlagSrc(player?.countryCode)
+  const fill = player ? chartTeamTextColor[player.team] : "#94a3b8"
 
   if (typeof x !== "number" || typeof y !== "number") {
     return null
@@ -492,81 +590,173 @@ function WeaponAxisTick({
 
   return (
     <g transform={`translate(${x},${y})`}>
-      {weapon ? (
+      {flagSrc ? (
         <image
-          height="22"
-          href={weapon.icon}
-          opacity="0.9"
-          width="22"
-          x="-11"
-          y="0"
+          height="26"
+          href={flagSrc}
+          opacity="0.95"
+          width="26"
+          x="-132"
+          y="-13"
         />
       ) : null}
       <text
-        className="fill-muted-foreground text-[10px] font-medium"
-        dy={36}
-        textAnchor="middle"
+        className="text-sm font-semibold"
+        style={{ fill }}
+        textAnchor="start"
+        x={flagSrc ? -96 : -132}
+        y={5}
       >
-        {value}
+        {player?.label ?? payload?.value ?? ""}
       </text>
     </g>
   )
 }
 
 function WeaponDamageChart({ detail }: { detail: PickupMatchDetail }) {
-  const players = [...detail.teams.left, ...detail.teams.right]
-  const chart = buildWeaponDamageChart(players)
+  const [sortBy, setSortBy] = useState<WeaponChartSort>("best")
+  const chart = buildWeaponDamageChart(detail, sortBy)
+  const availableWeapons = weaponOrder.filter((weapon) =>
+    chart.data.some((entry) => Number(entry[weapon] ?? 0) > 0)
+  )
+  const [selectedWeapons, setSelectedWeapons] = useState<string[]>(weaponOrder)
+  const visibleWeapons = availableWeapons.filter((weapon) =>
+    selectedWeapons.includes(weapon)
+  )
 
-  if (chart.data.length === 0) {
+  if (chart.data.length === 0 || availableWeapons.length === 0) {
     return null
   }
 
   return (
     <div className="rounded-xl border border-border bg-card">
-      <div className="border-b border-border px-4 py-3">
-        <h2 className="text-sm font-semibold text-foreground">Weapon Damage</h2>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Damage distribution by weapon and player.
-        </p>
+      <div className="border-b border-border px-6 py-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h2 className="text-base font-semibold text-foreground">
+              Weapon Damage
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Per-player weapon damage.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-muted-foreground">
+                Sort by
+              </span>
+              <Select
+                value={sortBy}
+                onValueChange={(value) => setSortBy(value as WeaponChartSort)}
+              >
+                <SelectTrigger className="h-10 w-[132px] text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="best">Best</SelectItem>
+                  <SelectItem value="team">Team</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="p-4">
-        <ChartContainer className="h-[260px] w-full" config={chart.config}>
-          <BarChart
-            accessibilityLayer
-            barCategoryGap="34%"
-            barGap={3}
-            data={chart.data}
-            margin={{ bottom: 34, left: 0, right: 8, top: 10 }}
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis
-              axisLine={false}
-              dataKey="weapon"
-              height={58}
-              interval={0}
-              tick={<WeaponAxisTick />}
-              tickLine={false}
-            />
-            <YAxis
-              axisLine={false}
-              tickLine={false}
-              tickMargin={8}
-              width={42}
-            />
-            <ChartTooltip
-              content={<WeaponDamageTooltip config={chart.config} />}
-              cursor={false}
-            />
-            {chart.players.map((player) => (
-              <Bar
-                dataKey={player.key}
-                fill={`var(--color-${player.key})`}
-                key={player.key}
-                maxBarSize={18}
-                radius={4}
+      <div className="p-6">
+        <div className="mb-5 flex flex-wrap gap-3">
+          {availableWeapons.map((weapon) => {
+            const meta = weaponMeta[weapon] ?? {
+              icon: "/icons/quakelive/modified.png",
+              label: weapon.slice(0, 3),
+            }
+            const active = selectedWeapons.includes(weapon)
+
+            return (
+              <button
+                aria-pressed={active}
+                className={`inline-flex max-w-full items-center gap-2.5 rounded-md border px-3 py-2 text-xs transition-colors ${
+                  active
+                    ? "border-border bg-muted/30 text-foreground"
+                    : "border-border/60 bg-background text-muted-foreground opacity-55"
+                }`}
+                key={weapon}
+                onClick={() =>
+                  setSelectedWeapons((current) =>
+                    current.includes(weapon)
+                      ? current.filter((entry) => entry !== weapon)
+                      : [...current, weapon]
+                  )
+                }
+                type="button"
+              >
+                <img
+                  alt=""
+                  className={`size-6 shrink-0 object-contain ${
+                    active ? "opacity-100" : "opacity-50"
+                  }`}
+                  src={meta.icon}
+                />
+                <span className="font-semibold">{meta.label}</span>
+              </button>
+            )
+          })}
+        </div>
+        <ChartContainer
+          className="w-full"
+          config={chart.config}
+          style={{ height: `${Math.max(340, chart.data.length * 58)}px` }}
+        >
+          {visibleWeapons.length > 0 ? (
+            <BarChart
+              accessibilityLayer
+              barCategoryGap="20%"
+              data={chart.data}
+              layout="vertical"
+              margin={{ bottom: 12, left: 12, right: 22, top: 12 }}
+            >
+              <CartesianGrid horizontal={false} />
+              <XAxis
+                axisLine={false}
+                tickFormatter={(value) => formatNumber(Number(value))}
+                tick={{ fontSize: 13 }}
+                tickLine={false}
+                type="number"
               />
-            ))}
-          </BarChart>
+              <YAxis
+                axisLine={false}
+                dataKey="playerKey"
+                tick={<PlayerAxisTick players={chart.players} />}
+                tickLine={false}
+                tickMargin={10}
+                type="category"
+                width={150}
+              />
+              <ChartTooltip
+                content={
+                  <WeaponDamageTooltip
+                    config={chart.config}
+                    players={chart.players}
+                  />
+                }
+                cursor={false}
+              />
+              {visibleWeapons.map((weapon) => (
+                <Bar
+                  animationDuration={0}
+                  dataKey={weapon}
+                  fill={`var(--color-${weapon})`}
+                  isAnimationActive={false}
+                  key={weapon}
+                  maxBarSize={38}
+                  radius={0}
+                  stackId="damage"
+                />
+              ))}
+            </BarChart>
+          ) : (
+            <div className="flex h-full items-center justify-center rounded-md border border-dashed border-border/70 bg-muted/10 text-sm text-muted-foreground">
+              Select at least one weapon to render the chart.
+            </div>
+          )}
         </ChartContainer>
       </div>
     </div>
