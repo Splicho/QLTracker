@@ -1,0 +1,52 @@
+name: Deploy Provisioner
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/deploy-provisioner.yml"
+      - "apps/provisioner/**"
+      - "packages/config/**"
+      - "packages/contracts/**"
+      - "packages/crypto/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "turbo.json"
+  workflow_dispatch:
+
+concurrency:
+  group: provisioner-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Start SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PROVISIONER_SSH_PRIVATE_KEY }}
+
+      - name: Configure known hosts
+        shell: bash
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.PROVISIONER_SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Deploy provisioner on VPS
+        shell: bash
+        env:
+          PROVISIONER_SSH_HOST: ${{ secrets.PROVISIONER_SSH_HOST }}
+          PROVISIONER_SSH_PORT: ${{ secrets.PROVISIONER_SSH_PORT }}
+          PROVISIONER_SSH_USER: ${{ secrets.PROVISIONER_SSH_USER }}
+        run: |
+          ssh \
+            -p "${PROVISIONER_SSH_PORT:-22}" \
+            "${PROVISIONER_SSH_USER}@${PROVISIONER_SSH_HOST}" \
+            "sudo /opt/qltracker/apps/provisioner/deploy/bin/deploy-vps.sh"

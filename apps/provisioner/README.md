@@ -48,6 +48,30 @@ What it does:
 
 The script refuses to deploy while any `qltracker-ql@*.service` slot is active unless `FORCE_ACTIVE_SLOT_DEPLOY=1` is set.
 
+## GitHub Actions deploy
+
+The provisioner is intended to deploy straight from GitHub Actions to the VPS via SSH.
+
+Workflow:
+
+- `.github/workflows/deploy-provisioner.yml`
+
+Required repository secrets:
+
+- `PROVISIONER_SSH_HOST`
+- `PROVISIONER_SSH_PORT`
+- `PROVISIONER_SSH_USER`
+- `PROVISIONER_SSH_PRIVATE_KEY`
+- `PROVISIONER_SSH_KNOWN_HOSTS`
+
+The SSH user must be able to run:
+
+```bash
+sudo /opt/qltracker/apps/provisioner/deploy/bin/deploy-vps.sh
+```
+
+without an interactive password prompt.
+
 ## Local commands
 
 ```bash
