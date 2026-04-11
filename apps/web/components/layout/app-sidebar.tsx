@@ -339,10 +339,10 @@ export function AppSidebar({
           </Link>
         </SidebarMenuButton>
         {item.id === "pickup" && hasLivePickupMatch ? (
-          <SidebarMenuBadge className="pointer-events-auto top-1/2 right-2 z-[150] h-6 min-w-6 -translate-y-1/2 gap-1.5 rounded-md border border-emerald-500/30 bg-emerald-500/12 px-2 text-[11px] leading-none font-semibold text-emerald-700 peer-data-[size=default]/menu-button:top-1/2 peer-data-[size=lg]/menu-button:top-1/2 peer-data-[size=sm]/menu-button:top-1/2 dark:text-emerald-300">
+          <SidebarMenuBadge className="pointer-events-auto top-1/2 right-2 z-[150] h-6 min-w-6 -translate-y-1/2 gap-1.5 rounded-md border border-border/70 bg-background/95 px-2 text-[11px] leading-none font-semibold text-foreground peer-data-[size=default]/menu-button:top-1/2 peer-data-[size=lg]/menu-button:top-1/2 peer-data-[size=sm]/menu-button:top-1/2">
             <span className="relative inline-flex size-2 shrink-0">
-              <span className="absolute inset-0 animate-ping rounded-full bg-emerald-400/70" />
-              <span className="relative inline-flex size-2 rounded-full bg-emerald-400" />
+              <span className="absolute inset-0 animate-ping rounded-full bg-red-500/70" />
+              <span className="relative inline-flex size-2 rounded-full bg-red-500" />
             </span>
             <span>LIVE</span>
           </SidebarMenuBadge>
