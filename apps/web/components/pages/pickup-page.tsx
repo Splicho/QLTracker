@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Crown, LoaderCircle, MapPinned } from "lucide-react"
 import { Medal, Steam } from "@/components/icon"
 import { PickupEmptyBackground } from "@/components/pickup/pickup-empty-background"
@@ -568,8 +568,14 @@ export function PickupPage({
 }) {
   const shouldGatePlayAction = guestMode || (!player && !userLoading)
   const activeState = playerState?.stage ?? "idle"
+  const serverClockRef = useRef({
+    localNowMs: Date.now(),
+    serverNowMs: Date.now(),
+  })
   const [countdownNowMs, setCountdownNowMs] = useState(() => Date.now())
   const match = playerState && "match" in playerState ? playerState.match : null
+  const matchServerNow =
+    playerState && "match" in playerState ? playerState.serverNow : null
   const activeCaptainId = match?.veto.currentCaptainPlayerId ?? null
   const canBan =
     match && player && match.status === "veto" && activeCaptainId === player.id
@@ -605,8 +611,22 @@ export function PickupPage({
       return
     }
 
+    const nextServerNowMs = matchServerNow
+      ? new Date(matchServerNow).getTime()
+      : Number.NaN
+    const nextLocalNowMs = Date.now()
+
+    serverClockRef.current = {
+      localNowMs: nextLocalNowMs,
+      serverNowMs: Number.isFinite(nextServerNowMs)
+        ? nextServerNowMs
+        : nextLocalNowMs,
+    }
+    setCountdownNowMs(serverClockRef.current.serverNowMs)
+
     const intervalId = window.setInterval(() => {
-      setCountdownNowMs(Date.now())
+      const { localNowMs, serverNowMs } = serverClockRef.current
+      setCountdownNowMs(serverNowMs + (Date.now() - localNowMs))
     }, 1000)
 
     return () => {
@@ -619,6 +639,7 @@ export function PickupPage({
     match?.readyDeadlineAt,
     match?.status,
     match?.veto.deadlineAt,
+    matchServerNow,
   ])
 
   if (!pickupAvailable) {

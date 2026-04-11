@@ -4,5 +4,6 @@ thunderstruck|hoq_ca
 windowpain|hoq_ca
 deadandgone|hoq_ca
 electrichead|hoq_ca
+hellsgate|hoq_ca
 drunkenmummy|hoq_ca
 smash|hoq_ca
