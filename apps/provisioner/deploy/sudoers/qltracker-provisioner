@@ -1,0 +1,1 @@
+qltracker ALL=(root) NOPASSWD: /usr/bin/systemctl start qltracker-ql@*.service, /usr/bin/systemctl stop qltracker-ql@*.service, /usr/bin/systemctl is-active qltracker-ql@*.service, /usr/bin/systemctl show qltracker-ql@*.service --property=ActiveState --value

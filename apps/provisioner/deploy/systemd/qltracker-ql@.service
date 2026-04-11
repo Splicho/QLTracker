@@ -1,0 +1,18 @@
+[Unit]
+Description=QLTracker Pickup QL Server Slot %i
+After=network-online.target redis-server.service
+Wants=network-online.target
+PartOf=qltracker-provisioner.service
+
+[Service]
+Type=simple
+User=qltracker
+Group=qltracker
+WorkingDirectory=/opt/qltracker-qlds
+ExecStart=/opt/qltracker-provisioner/app/deploy/bin/start-slot.sh %i
+Restart=no
+KillSignal=SIGINT
+TimeoutStopSec=10
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,17 @@
+[Unit]
+Description=QLTracker Pickup Provisioner
+After=network-online.target redis-server.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=qltracker
+Group=qltracker
+WorkingDirectory=/opt/qltracker-provisioner/app
+EnvironmentFile=/opt/qltracker-provisioner/app/.env
+ExecStart=/usr/bin/env node /opt/qltracker-provisioner/app/dist/index.js
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
