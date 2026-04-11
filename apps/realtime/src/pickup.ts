@@ -13,6 +13,7 @@ import { config } from "./config.js";
 import { pool } from "./db.js";
 import { lookupCountry } from "./geolite.js";
 import { createPickupCallbackApi } from "./pickup/callbacks.js";
+import { shouldApplyPickupRating } from "./pickup/match-result.js";
 import { applyPickupMatchStats } from "./pickup/match-stats.js";
 import { defaultDisplayRating } from "./pickup/ratings.js";
 import { chooseBalancedTeams } from "./pickup/matchmaking.js";
@@ -2095,18 +2096,25 @@ export function createPickupService(io: Server) {
     if (!winnerTeam) {
       throw new Error("Result callback must include winnerTeam.");
     }
+    const finalScore =
+      typeof payload.finalScore === "string" ? payload.finalScore : null;
+    const shouldRate = shouldApplyPickupRating(finalScore);
 
     const players = await getMatchPlayers(matchId);
     const left = players.filter((player) => player.team === "left");
     const right = players.filter((player) => player.team === "right");
-    const rated = ratingEnv.rate(
-      [
-        left.map((player) => createRating(player.muBefore, player.sigmaBefore)),
-        right.map((player) => createRating(player.muBefore, player.sigmaBefore)),
-      ],
-      winnerTeam === "left" ? [0, 1] : [1, 0],
-    ) as Rating[][];
-    const [leftRated, rightRated] = rated;
+    const [leftRated, rightRated] = shouldRate
+      ? (ratingEnv.rate(
+          [
+            left.map((player) => createRating(player.muBefore, player.sigmaBefore)),
+            right.map((player) => createRating(player.muBefore, player.sigmaBefore)),
+          ],
+          winnerTeam === "left" ? [0, 1] : [1, 0],
+        ) as Rating[][])
+      : [
+          left.map((player) => createRating(player.muBefore, player.sigmaBefore)),
+          right.map((player) => createRating(player.muBefore, player.sigmaBefore)),
+        ];
 
     const client = await pool.connect();
     try {
@@ -2135,29 +2143,31 @@ export function createPickupService(io: Server) {
           ],
         );
 
-        await client.query(
-          `
-            update "PickupPlayerSeasonRating"
-            set
-              "mu" = $3,
-              "sigma" = $4,
-              "displayRating" = $5,
-              "gamesPlayed" = "gamesPlayed" + 1,
-              "wins" = "wins" + $6,
-              "losses" = "losses" + $7,
-              "updatedAt" = now()
-            where "seasonId" = $1 and "playerId" = $2
-          `,
-          [
-            match.seasonId,
-            player.playerId,
-            rating.mu,
-            rating.sigma,
-            defaultDisplayRating(rating.mu),
-            winnerTeam === "left" ? 1 : 0,
-            winnerTeam === "left" ? 0 : 1,
-          ],
-        );
+        if (shouldRate) {
+          await client.query(
+            `
+              update "PickupPlayerSeasonRating"
+              set
+                "mu" = $3,
+                "sigma" = $4,
+                "displayRating" = $5,
+                "gamesPlayed" = "gamesPlayed" + 1,
+                "wins" = "wins" + $6,
+                "losses" = "losses" + $7,
+                "updatedAt" = now()
+              where "seasonId" = $1 and "playerId" = $2
+            `,
+            [
+              match.seasonId,
+              player.playerId,
+              rating.mu,
+              rating.sigma,
+              defaultDisplayRating(rating.mu),
+              winnerTeam === "left" ? 1 : 0,
+              winnerTeam === "left" ? 0 : 1,
+            ],
+          );
+        }
       }
 
       for (const [index, player] of right.entries()) {
@@ -2183,29 +2193,31 @@ export function createPickupService(io: Server) {
           ],
         );
 
-        await client.query(
-          `
-            update "PickupPlayerSeasonRating"
-            set
-              "mu" = $3,
-              "sigma" = $4,
-              "displayRating" = $5,
-              "gamesPlayed" = "gamesPlayed" + 1,
-              "wins" = "wins" + $6,
-              "losses" = "losses" + $7,
-              "updatedAt" = now()
-            where "seasonId" = $1 and "playerId" = $2
-          `,
-          [
-            match.seasonId,
-            player.playerId,
-            rating.mu,
-            rating.sigma,
-            defaultDisplayRating(rating.mu),
-            winnerTeam === "right" ? 1 : 0,
-            winnerTeam === "right" ? 0 : 1,
-          ],
-        );
+        if (shouldRate) {
+          await client.query(
+            `
+              update "PickupPlayerSeasonRating"
+              set
+                "mu" = $3,
+                "sigma" = $4,
+                "displayRating" = $5,
+                "gamesPlayed" = "gamesPlayed" + 1,
+                "wins" = "wins" + $6,
+                "losses" = "losses" + $7,
+                "updatedAt" = now()
+              where "seasonId" = $1 and "playerId" = $2
+            `,
+            [
+              match.seasonId,
+              player.playerId,
+              rating.mu,
+              rating.sigma,
+              defaultDisplayRating(rating.mu),
+              winnerTeam === "right" ? 1 : 0,
+              winnerTeam === "right" ? 0 : 1,
+            ],
+          );
+        }
       }
 
       await client.query(
@@ -2223,8 +2235,12 @@ export function createPickupService(io: Server) {
         [
           matchId,
           winnerTeam,
-          typeof payload.finalScore === "string" ? payload.finalScore : null,
-          JSON.stringify(payload),
+          finalScore,
+          JSON.stringify({
+            ...payload,
+            rated: shouldRate,
+            unratedReason: shouldRate ? null : "insufficient_rounds",
+          }),
         ],
       );
 

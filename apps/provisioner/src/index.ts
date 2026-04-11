@@ -124,6 +124,24 @@ async function postMatchResult(matchId: string, winnerTeam: "left" | "right", fi
   });
 }
 
+async function postMatchChat(
+  matchId: string,
+  channel: string,
+  message: string,
+  playerName: string,
+  playerSteamId: string | null,
+  sentAt: string | null,
+) {
+  await postRealtimeCallback(config.realtimeLiveCallbackUrl.replace(/\/live$/, "/chat"), "chat", {
+    channel,
+    matchId,
+    message,
+    playerName,
+    playerSteamId,
+    sentAt,
+  });
+}
+
 function getSlotById(slotId: number) {
   return SLOT_DEFINITIONS.find((slot) => slot.id === slotId) ?? null;
 }
@@ -303,6 +321,50 @@ app.post("/internal/slots/:slotId/completed", async (request, response) => {
     }, config.postMatchGraceSeconds * 1000);
   } catch (error) {
     console.error(`[pickup] completed callback failed for slot ${request.params.slotId}:`, error);
+    response.status(400).json({
+      ok: false,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+});
+
+app.post("/internal/slots/:slotId/chat", async (request, response) => {
+  const schema = z.object({
+    channel: z.string().min(1),
+    matchId: z.string().min(1),
+    message: z.string().min(1),
+    playerName: z.string().min(1),
+    playerSteamId: z.string().nullable().optional().default(null),
+    sentAt: z.string().nullable().optional().default(null),
+    token: z.string().min(1),
+  });
+
+  try {
+    const slotId = Number(request.params.slotId);
+    const payload = schema.parse(request.body);
+    const slot = getSlotById(slotId);
+    if (!slot) {
+      response.status(404).json({ ok: false, error: "Unknown slot." });
+      return;
+    }
+
+    const state = readSlotState(slot);
+    if (state.token !== payload.token || state.matchId !== payload.matchId) {
+      response.status(403).json({ ok: false, error: "Invalid slot token." });
+      return;
+    }
+
+    await postMatchChat(
+      payload.matchId,
+      payload.channel,
+      payload.message,
+      payload.playerName,
+      payload.playerSteamId,
+      payload.sentAt,
+    );
+    response.json({ ok: true });
+  } catch (error) {
+    console.error(`[pickup] chat callback failed for slot ${request.params.slotId}:`, error);
     response.status(400).json({
       ok: false,
       error: error instanceof Error ? error.message : String(error),
