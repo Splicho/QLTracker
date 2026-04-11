@@ -1577,17 +1577,30 @@ export function createPickupService(io: Server) {
       return;
     }
 
-    const players = await getMatchPlayers(matchId);
+    const [players, queue] = await Promise.all([
+      getMatchPlayers(matchId),
+      getQueueById(match.queueId),
+    ]);
     const payload = {
       captains: match.balanceSummary?.captainPlayerIds ?? null,
       finalMapKey: match.finalMapKey,
       matchId: match.id,
+      queue: queue
+        ? {
+            id: queue.id,
+            name: queue.name,
+            playerCount: queue.playerCount,
+            slug: queue.slug,
+            teamSize: queue.teamSize,
+          }
+        : undefined,
       queueId: match.queueId,
       seasonId: match.seasonId,
       teams: {
         left: players
           .filter((player) => player.team === "left")
           .map((player) => ({
+            displayRating: player.displayBefore,
             personaName: player.personaName,
             playerId: player.playerId,
             steamId: player.steamId,
@@ -1595,6 +1608,7 @@ export function createPickupService(io: Server) {
         right: players
           .filter((player) => player.team === "right")
           .map((player) => ({
+            displayRating: player.displayBefore,
             personaName: player.personaName,
             playerId: player.playerId,
             steamId: player.steamId,

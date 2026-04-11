@@ -15,9 +15,18 @@ export const pickupPlayerSchema = z.object({
 });
 
 export const pickupProvisionPlayerSchema = z.object({
+  displayRating: z.number().int().nonnegative().optional(),
   personaName: z.string().min(1),
   playerId: z.string().min(1),
   steamId: z.string().min(1),
+});
+
+export const pickupProvisionQueueSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  playerCount: z.number().int().positive(),
+  slug: z.string().min(1),
+  teamSize: z.number().int().positive(),
 });
 
 export const pickupProvisionPayloadSchema = z.object({
@@ -28,6 +37,7 @@ export const pickupProvisionPayloadSchema = z.object({
     })
     .nullable(),
   finalMapKey: z.string().min(1),
+  queue: pickupProvisionQueueSchema.optional(),
   matchId: z.string().min(1),
   queueId: z.string().min(1),
   seasonId: z.string().min(1),

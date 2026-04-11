@@ -24,17 +24,25 @@ export type SlotState = {
   zmqPort: number;
 };
 
+export type SlotMetadataPlayer = {
+  displayRating?: number;
+  personaName: string;
+  playerId: string;
+  steamId: string;
+};
+
 export type SlotMetadata = {
   callbackBaseUrl: string;
   callbackToken: string;
   captains: ProvisionPayload["captains"];
   finalMapKey: string;
   matchId: string;
+  queue?: ProvisionPayload["queue"];
   queueId: string;
   seasonId: string;
   slotId: number;
   teams: {
-    blue: Array<{ personaName: string; playerId: string; steamId: string }>;
-    red: Array<{ personaName: string; playerId: string; steamId: string }>;
+    blue: SlotMetadataPlayer[];
+    red: SlotMetadataPlayer[];
   };
 };
