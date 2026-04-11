@@ -10,7 +10,6 @@ import {
   Cog,
   Discord,
   Eye,
-  Flask,
   GameController,
   HeartOutline,
   Leaderboard,
@@ -28,6 +27,7 @@ import {
   serializeReadNewsSlugsCookie,
 } from "@/lib/news-read-state"
 import {
+  fetchPickupLandingData,
   fetchPickupPublicState,
   isPickupRealtimeConfigured,
   type PickupPlayer,
@@ -192,6 +192,14 @@ export function AppSidebar({
     refetchInterval: 15_000,
     placeholderData: (previous) => previous,
   })
+  const pickupLandingQuery = useQuery({
+    queryKey: ["pickup", "landing", "sidebar"],
+    queryFn: fetchPickupLandingData,
+    enabled: pickupRealtimeAvailable,
+    staleTime: 15_000,
+    refetchInterval: 15_000,
+    placeholderData: (previous) => previous,
+  })
   const readNewsSlugsSnapshot = useSyncExternalStore(
     (onStoreChange) => {
       if (typeof window === "undefined") {
@@ -248,6 +256,7 @@ export function AppSidebar({
       ),
     [pickupPublicStateQuery.data]
   )
+  const hasLivePickupMatch = (pickupLandingQuery.data?.liveMatches?.length ?? 0) > 0
   const currentNewsSlug = useMemo(() => {
     if (!pathname.startsWith("/news/")) {
       return null
@@ -329,10 +338,13 @@ export function AppSidebar({
             </span>
           </Link>
         </SidebarMenuButton>
-        {item.id === "pickup" ? (
-          <SidebarMenuBadge className="pointer-events-auto top-1/2 right-2 z-[150] h-6 min-w-6 -translate-y-1/2 gap-1.5 rounded-md border border-yellow-500/30 bg-yellow-500/12 px-2 text-[11px] leading-none font-semibold text-yellow-700 peer-data-[size=default]/menu-button:top-1/2 peer-data-[size=lg]/menu-button:top-1/2 peer-data-[size=sm]/menu-button:top-1/2 dark:text-yellow-300">
-            <Flask className="size-3" />
-            <span>ALPHA</span>
+        {item.id === "pickup" && hasLivePickupMatch ? (
+          <SidebarMenuBadge className="pointer-events-auto top-1/2 right-2 z-[150] h-6 min-w-6 -translate-y-1/2 gap-1.5 rounded-md border border-emerald-500/30 bg-emerald-500/12 px-2 text-[11px] leading-none font-semibold text-emerald-700 peer-data-[size=default]/menu-button:top-1/2 peer-data-[size=lg]/menu-button:top-1/2 peer-data-[size=sm]/menu-button:top-1/2 dark:text-emerald-300">
+            <span className="relative inline-flex size-2 shrink-0">
+              <span className="absolute inset-0 animate-ping rounded-full bg-emerald-400/70" />
+              <span className="relative inline-flex size-2 rounded-full bg-emerald-400" />
+            </span>
+            <span>LIVE</span>
           </SidebarMenuBadge>
         ) : item.id === "favorites" && favoritesState.servers.length > 0 ? (
           <Tooltip>

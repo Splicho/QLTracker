@@ -9,3 +9,4 @@ coverage/
 .env.*.local
 *.tsbuildinfo
 AGENTS.md
+.codex/
