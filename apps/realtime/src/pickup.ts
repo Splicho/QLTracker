@@ -3,6 +3,8 @@ import {
   pickupQueueAlertsSignatureHeader,
   type PickupQueueAlertPayload,
 } from "@qltracker/contracts";
+import { createSignature } from "@qltracker/crypto";
+import { stripQuakeColors } from "@qltracker/quake";
 import type express from "express";
 import type { Server, Socket } from "socket.io";
 import { Rating, TrueSkill } from "ts-trueskill";
@@ -67,14 +69,6 @@ function hashPickupToken(token: string) {
     .createHmac("sha256", config.sessionSecret)
     .update(`pickup:${token}`)
     .digest("hex");
-}
-
-function createSignature(secret: string, body: string) {
-  return crypto.createHmac("sha256", secret).update(body).digest("hex");
-}
-
-function stripQuakeColors(value: string) {
-  return value.replace(/\^\^/g, "\0").replace(/\^\d/g, "").replace(/\0/g, "^").trim();
 }
 
 function createRating(mu: number, sigma: number) {
@@ -1892,7 +1886,7 @@ export function createPickupService(io: Server) {
         player: {
           avatarUrl: session.player.avatarUrl,
           id: session.player.id,
-          personaName: stripQuakeColors(session.player.personaName),
+          personaName: stripQuakeColors(session.player.personaName).trim(),
           profileUrl: session.player.profileUrl,
           steamId: session.player.steamId,
         },

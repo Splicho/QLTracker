@@ -1,4 +1,5 @@
-import { createHmac, timingSafeEqual } from 'node:crypto';
+import { timingSafeEqual } from 'node:crypto';
+import { createSignature } from '@qltracker/crypto';
 import { createServer, type Server as HttpServer } from 'node:http';
 import {
   pickupQueueAlertPayloadSchema,
@@ -23,10 +24,6 @@ type BotRuntime = {
   readonly bot: BotDefinition;
   readonly client: Client;
 };
-
-function createSignature(secret: string, body: string): string {
-  return createHmac('sha256', secret).update(body).digest('hex');
-}
 
 function hasValidSignature(body: string, signatureHeader: string | undefined): boolean {
   if (!signatureHeader) {

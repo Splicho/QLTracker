@@ -24,6 +24,9 @@ importers:
       '@qltracker/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@qltracker/crypto':
+        specifier: workspace:*
+        version: link:../../packages/crypto
       discord.js:
         specifier: ^14.26.2
         version: 14.26.2
@@ -64,6 +67,9 @@ importers:
       '@qltracker/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@qltracker/crypto':
+        specifier: workspace:*
+        version: link:../../packages/crypto
       dotenv:
         specifier: ^17.2.3
         version: 17.4.1
@@ -107,6 +113,12 @@ importers:
       '@qltracker/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@qltracker/crypto':
+        specifier: workspace:*
+        version: link:../../packages/crypto
+      '@qltracker/quake':
+        specifier: workspace:*
+        version: link:../../packages/quake
       cors:
         specifier: ^2.8.5
         version: 2.8.6
@@ -204,6 +216,12 @@ importers:
       '@prisma/client':
         specifier: ^6.7.0
         version: 6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3)
+      '@qltracker/maps':
+        specifier: workspace:*
+        version: link:../../packages/maps
+      '@qltracker/quake':
+        specifier: workspace:*
+        version: link:../../packages/quake
       '@tanstack/react-query':
         specifier: ^5.96.2
         version: 5.97.0(react@19.2.5)
@@ -406,6 +424,24 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
+  packages/crypto:
+    devDependencies:
+      '@qltracker/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@qltracker/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/node':
+        specifier: ^25.5.2
+        version: 25.6.0
+      eslint:
+        specifier: ^9.39.4
+        version: 9.39.4(jiti@2.6.1)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
   packages/eslint-config:
     dependencies:
       '@eslint/js':
@@ -423,6 +459,42 @@ importers:
       typescript-eslint:
         specifier: ^8.46.2
         version: 8.58.1(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3)
+
+  packages/maps:
+    devDependencies:
+      '@qltracker/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@qltracker/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/node':
+        specifier: ^25.5.2
+        version: 25.6.0
+      eslint:
+        specifier: ^9.39.4
+        version: 9.39.4(jiti@2.6.1)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  packages/quake:
+    devDependencies:
+      '@qltracker/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@qltracker/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/node':
+        specifier: ^25.5.2
+        version: 25.6.0
+      eslint:
+        specifier: ^9.39.4
+        version: 9.39.4(jiti@2.6.1)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
 
   packages/typescript-config: {}
 

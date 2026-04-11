@@ -247,6 +247,8 @@ function calculateAverage(values: Array<number | null | undefined>) {
   );
 }
 
+import { stripQuakeColors } from "@qltracker/quake";
+
 function formatErrorMessage(reason: unknown) {
   if (reason instanceof Error && reason.message.trim().length > 0) {
     return reason.message;
@@ -255,10 +257,6 @@ function formatErrorMessage(reason: unknown) {
   return typeof reason === "string" && reason.trim().length > 0
     ? reason
     : String(reason);
-}
-
-function stripQuakeColors(value: string) {
-  return value.replace(/\^\d/g, "");
 }
 
 function trimTrailingResetColors(value: string) {

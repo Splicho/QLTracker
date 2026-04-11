@@ -17,6 +17,7 @@
   "dependencies": {
     "@qltracker/config": "workspace:*",
     "@qltracker/contracts": "workspace:*",
+    "@qltracker/crypto": "workspace:*",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "zeromq": "^5.3.1",

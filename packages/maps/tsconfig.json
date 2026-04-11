@@ -1,0 +1,9 @@
+{
+  "extends": "@qltracker/typescript-config/node",
+  "compilerOptions": {
+    "declaration": true,
+    "outDir": "dist",
+    "rootDir": "src"
+  },
+  "include": ["src/**/*.ts", "src/**/*.json"]
+}
