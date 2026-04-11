@@ -2,9 +2,10 @@
 set -euo pipefail
 
 export DEBIAN_FRONTEND=noninteractive
-APP_DIR="${APP_DIR:-/opt/qltracker-provisioner/app}"
-REPO_URL="${REPO_URL:-https://github.com/Splicho/qltracker-provisioner.git}"
-BRANCH="${BRANCH:-master}"
+ROOT_DIR="${ROOT_DIR:-/opt/qltracker}"
+APP_DIR="${APP_DIR:-$ROOT_DIR/apps/provisioner}"
+REPO_URL="${REPO_URL:-https://github.com/Splicho/qltracker.git}"
+BRANCH="${BRANCH:-main}"
 
 apt-get update
 apt-get -y --fix-broken install
@@ -38,13 +39,13 @@ if ! id qltracker >/dev/null 2>&1; then
   useradd --system --create-home --shell /bin/bash qltracker
 fi
 
-mkdir -p /opt/qltracker-provisioner /opt/qltracker-qlds /var/lib/qltracker-provisioner/slots
-chown -R qltracker:qltracker /opt/qltracker-provisioner /opt/qltracker-qlds /var/lib/qltracker-provisioner
+mkdir -p "$ROOT_DIR" /opt/qltracker-qlds /var/lib/qltracker-provisioner/slots
+chown -R qltracker:qltracker "$ROOT_DIR" /opt/qltracker-qlds /var/lib/qltracker-provisioner
 
-if [[ ! -d "$APP_DIR/.git" ]]; then
-  mkdir -p "$(dirname "$APP_DIR")"
-  chown -R qltracker:qltracker "$(dirname "$APP_DIR")"
-  runuser -u qltracker -- git clone --branch "$BRANCH" "$REPO_URL" "$APP_DIR"
+if [[ ! -d "$ROOT_DIR/.git" ]]; then
+  mkdir -p "$(dirname "$ROOT_DIR")"
+  chown -R qltracker:qltracker "$(dirname "$ROOT_DIR")"
+  runuser -u qltracker -- git clone --branch "$BRANCH" "$REPO_URL" "$ROOT_DIR"
 fi
 
 if [[ -d "$APP_DIR/deploy/bin" ]]; then

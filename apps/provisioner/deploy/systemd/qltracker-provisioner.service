@@ -7,9 +7,9 @@ Wants=network-online.target
 Type=simple
 User=qltracker
 Group=qltracker
-WorkingDirectory=/opt/qltracker-provisioner/app
-EnvironmentFile=/opt/qltracker-provisioner/app/.env
-ExecStart=/usr/bin/env node /opt/qltracker-provisioner/app/dist/index.js
+WorkingDirectory=/opt/qltracker/apps/provisioner
+EnvironmentFile=/opt/qltracker/apps/provisioner/.env
+ExecStart=/usr/bin/env node /opt/qltracker/apps/provisioner/dist/index.js
 Restart=always
 RestartSec=5
 

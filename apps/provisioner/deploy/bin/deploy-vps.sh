@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_DIR="${APP_DIR:-/opt/qltracker-provisioner/app}"
+ROOT_DIR="${ROOT_DIR:-/opt/qltracker}"
+APP_DIR="${APP_DIR:-$ROOT_DIR/apps/provisioner}"
 APP_USER="${APP_USER:-qltracker}"
 APP_GROUP="${APP_GROUP:-$APP_USER}"
-REPO_URL="${REPO_URL:-https://github.com/Splicho/qltracker-provisioner.git}"
-BRANCH="${1:-${BRANCH:-master}}"
+REPO_URL="${REPO_URL:-https://github.com/Splicho/qltracker.git}"
+BRANCH="${1:-${BRANCH:-main}}"
 QLDS_DIR="${QLDS_DIR:-/opt/qltracker-qlds}"
 PLUGIN_DIR="${PLUGIN_DIR:-$QLDS_DIR/minqlx-plugins}"
 BASEQ3_DIR="${BASEQ3_DIR:-$QLDS_DIR/baseq3}"
@@ -18,6 +19,7 @@ FORCE_ACTIVE_SLOT_DEPLOY="${FORCE_ACTIVE_SLOT_DEPLOY:-0}"
 HEALTH_RETRIES="${HEALTH_RETRIES:-15}"
 HEALTH_RETRY_DELAY_SECONDS="${HEALTH_RETRY_DELAY_SECONDS:-2}"
 REQUIRED_NODE_MAJOR="${REQUIRED_NODE_MAJOR:-20}"
+PNPM_VERSION="${PNPM_VERSION:-10.15.0}"
 
 log() {
   printf '[deploy] %s\n' "$*"
@@ -59,14 +61,18 @@ ensure_supported_node() {
   fi
 }
 
+pnpm_cmd() {
+  as_app_user env COREPACK_ENABLE_DOWNLOAD_PROMPT=0 corepack pnpm "$@"
+}
+
 ensure_repo_checkout() {
-  if [[ -d "$APP_DIR/.git" ]]; then
+  if [[ -d "$ROOT_DIR/.git" ]]; then
     return
   fi
 
-  log "cloning $REPO_URL into $APP_DIR"
-  install -d -o "$APP_USER" -g "$APP_GROUP" "$(dirname "$APP_DIR")"
-  as_app_user git clone --branch "$BRANCH" "$REPO_URL" "$APP_DIR"
+  log "cloning $REPO_URL into $ROOT_DIR"
+  install -d -o "$APP_USER" -g "$APP_GROUP" "$(dirname "$ROOT_DIR")"
+  as_app_user git clone --branch "$BRANCH" "$REPO_URL" "$ROOT_DIR"
 }
 
 ensure_slots_idle() {
@@ -83,17 +89,18 @@ ensure_slots_idle() {
 
 sync_repo() {
   log "syncing repo to origin/$BRANCH"
-  as_app_user git -C "$APP_DIR" fetch --prune origin
-  as_app_user git -C "$APP_DIR" checkout "$BRANCH"
-  as_app_user git -C "$APP_DIR" reset --hard "origin/$BRANCH"
-  as_app_user git -C "$APP_DIR" clean -fdx -e .env
+  as_app_user git -C "$ROOT_DIR" fetch --prune origin
+  as_app_user git -C "$ROOT_DIR" checkout "$BRANCH"
+  as_app_user git -C "$ROOT_DIR" reset --hard "origin/$BRANCH"
+  as_app_user git -C "$ROOT_DIR" clean -fdx -e apps/provisioner/.env
 }
 
 build_app() {
-  log "installing node dependencies"
-  as_app_user npm --prefix "$APP_DIR" ci
+  log "installing workspace dependencies"
+  as_app_user env COREPACK_ENABLE_DOWNLOAD_PROMPT=0 corepack prepare "pnpm@${PNPM_VERSION}" --activate
+  pnpm_cmd install --frozen-lockfile
   log "building provisioner"
-  as_app_user npm --prefix "$APP_DIR" run build
+  pnpm_cmd --filter @qltracker/provisioner build
 }
 
 sync_runtime_assets() {
