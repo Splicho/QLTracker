@@ -1,0 +1,382 @@
+{
+  "navigation": {
+    "serverList": "Serverite nimekiri",
+    "favorites": "Lemmikloomad",
+    "watchlist": "Jälgimine",
+    "notifications": "Teatised",
+    "settings": "Seadistused"
+  },
+  "common": {
+    "updated": "Uuendatud"
+  },
+  "header": {
+    "unknown": "Tundmatu",
+    "theme": {
+      "light": "Valgusteema",
+      "dark": "Tume teema",
+      "system": "Süsteemiteema"
+    }
+  },
+  "sidebar": {
+    "groupLabel": "QLTracker",
+    "about": "QLTrackerist"
+  },
+  "about": {
+    "version": "Versioon",
+    "author": "Arendaja",
+    "socials": "Socials",
+    "stack": "Stack",
+    "repo": "Repo"
+  },
+  "notifications": {
+    "title": "Lahknevusteated",
+    "serviceUnavailable": "Notification service is unavailable in this build. Set `VITE_NOTIFICATION_API_URL` to enable Discord linking and delivery.",
+    "finishBrowser": "Lõpetage ebakõla link oma brauseris.",
+    "loadingStatus": "Lahknevuse teatamise oleku laadimine...",
+    "account": "Konto",
+    "rules": "Reeglid",
+    "rulesSummary": "{{enabled}} active / {{total}} total",
+    "dmRefused": "QLTracker on seotud, kuid Discord keeldus endiselt DM-kontrollist. Proovige installi/linki voolu uuesti DM-ide testimiseks.",
+    "relink": "Relink lahknevus",
+    "retryInstall": "Paigaldamise proovimine",
+    "disconnect": "Lahutage",
+    "noAccount": "Ebakõla kontot pole veel ühendatud.",
+    "installLink": "Ühenda Discord",
+    "dialog": {
+      "editTitle": "Muuda ebakõla märguannet",
+      "createTitle": "Lahknevusteade",
+      "descriptionWithServer": "Configure a Discord DM notification for {{server}}.",
+      "descriptionFallback": "Seadistamine Discordi DM teade selle serveri.",
+      "enabled": "Lubatud",
+      "enabledDescription": "Saada DM-id ainult siis, kui see reegel on lubatud.",
+      "thresholdType": "Künnise liik",
+      "thresholdPlaceholder": "Künnise tüübi valimine",
+      "mode": {
+        "active_free_slots": {
+          "label": "Mänguautomaadid vasakule",
+          "description": "Näitab, kui mäng on nii lähedal, et täita, kasutades kogu aktiivse mängu pesad asemel täis server pesad."
+        },
+        "free_slots": {
+          "label": "Tasuta teenindusajad",
+          "description": "Anna teada, kui serveril on nii palju vabasid pesasid või vähem."
+        },
+        "min_players": {
+          "label": "Ministid",
+          "description": "Anna teada, kui server jõuab vähemalt nii paljude mängijateni."
+        }
+      },
+      "totalPlayingSlots": "Mängupesad kokku",
+      "totalPlayingSlotsDescription": "Kasutage mõlemat meeskonda koos, mitte meeskonna suurust. 4v4 serveri jaoks sisestage 8. 8v8 serveri jaoks sisestage 16. See on eraldi kogu serveri pesade arvust.",
+      "minimumPlayerCount": "Minimaalne mängijate arv",
+      "maximumActiveSlotsLeft": "Maksimaalsed aktiivsed pesad vasakule",
+      "maximumFreeSlots": "Vabade teenindusaegade maksimum",
+      "activeSlotsDescription": "This rule will evaluate against {{count}} total active playing slots.",
+      "serverSupportsDescription": "This server currently supports up to {{count}} players.",
+      "deleteRule": "Kustuta reegel",
+      "saveChanges": "Salvesta muudatused",
+      "createRule": "Reegli loomine"
+    }
+  },
+  "serverList": {
+    "refresh": "Värskenda",
+    "noServersMatch": "Ükski server ei sobi aktiivsete filtritega.",
+    "pageStatus": "Page {{current}} of {{total}}",
+    "table": {
+      "server": "Server",
+      "location": "Asukoht",
+      "mode": "Mode",
+      "players": "Mängijad",
+      "ping": "Ping",
+      "actions": "Tegevused"
+    },
+    "locationUnknown": "Tundmatu",
+    "modeUnknown": "Tundmatu",
+    "pingUnavailable": "EI/A",
+    "passwordSaved": "Salvestatud parool",
+    "passwordRequired": "Nõutav parool",
+    "notificationEnabled": "Lahknevusest teavitamine on lubatud",
+    "actions": {
+      "notificationsPublicOnly": "Teated on saadaval ainult avalikele serveritele.",
+      "connectDiscordFavorites": "Ühendage lahknevus märguannete lehel, et võimaldada märguandeid.",
+      "editNotification": "Lahknevuse märguande muutmine",
+      "notifyDiscord": "Teata ebakõlast",
+      "editFavorite": "Muuda lemmikut",
+      "removeFromFavorites": "Eemalda lemmikutest",
+      "addToFavorites": "Lisa lemmikutele",
+      "copyAddress": "Kopeeri IP:Port"
+    },
+    "drawer": {
+      "play": "Mängi",
+      "map": "Kaart",
+      "avgQeloTooltip": "Keskmine QElo selles serveris",
+      "avgTrueskillTooltip": "Keskmine TSK antud serveris",
+      "topQeloTooltip": "Suurim QElo mängija selles serveris",
+      "topTrueskillTooltip": "Selle serveri kõrgeim TSkill- mängija",
+      "playersHeading": "Mängijad",
+      "player": "Mängija",
+      "points": "Punktid",
+      "qelo": "QElo",
+      "trueskill": "TSkill",
+      "time": "Aeg",
+      "watch": "Jälgi",
+      "trackPlayer": "Jälgi mängijat",
+      "untrackPlayer": "Eemalda jälgimisloendist",
+      "historyTitle": "Ajalugu",
+      "historyWindow": "Viimased 7 päeva",
+      "historyLastSeen": "Viimati nähtud",
+      "historyPeakPlayers": "Suurim mängijate arv",
+      "historyTimePopulated": "Aeg mängijatega",
+      "historyUnavailable": "Serveri ajalugu pole saadaval. Selle kaardi laadimiseks luba reaalaja taustateenus ja juuruta ajaloo lõpp-punkt.",
+      "historyEmpty": "Selle serveri kohta pole veel hiljutist ajalugu saadaval.",
+      "lookupFailed": "Aurumängija otsing nurjus.",
+      "noPlayerData": "Selle serveri mängija andmed puuduvad.",
+      "teams": {
+        "blue": "Sinine meeskond",
+        "free": "Vaba",
+        "players": "Mängijad",
+        "red": "Punane meeskond",
+        "spectators": "Pealtvaatajad",
+        "unassigned": "Määramata"
+      }
+    },
+    "favoriteDialog": {
+      "editTitle": "Muuda lemmikut",
+      "addTitle": "Lisa lemmikutele",
+      "fallbackDescription": "Määra see server ühte oma kohalikest lemmiknimekirjadest.",
+      "selectList": "Vali nimekiri",
+      "listsUnavailable": "Lemmiknimekirju pole saadaval. Looge nimekiri kõigepealt lemmikute lehel.",
+      "remove": "Eemalda",
+      "saveChanges": "Salvesta muudatused",
+      "addToList": "Lisa nimekirja"
+    },
+    "passwordDialog": {
+      "title": "Serveri parool",
+      "descriptionWithServer": "Enter the password for {{server}}.",
+      "fallbackDescription": "Sisesta serveri parool.",
+      "inputPlaceholder": "Sisesta serveri parool",
+      "remember": "Selle parooli salvestamine tulevaste liitumiste jaoks",
+      "join": "Liitu"
+    },
+    "toasts": {
+      "removedFromFavorites": "Eemaldati lemmikutest.",
+      "notificationUpdated": "Teade on ajakohastatud.",
+      "notificationCreated": "Teade on loodud.",
+      "notificationRemoved": "Teade eemaldatud.",
+      "notificationSaveError": "Teatamisreegli salvestamine nurjus.",
+      "notificationRemoveError": "Teatamisreegli eemaldamine nurjus.",
+      "favoriteUpdated": "Lemmik uuendatud.",
+      "addedToFavorites": "Lisatud lemmikutele.",
+      "serverAddressCopied": "IP:Port kopeeritud.",
+      "serverAddressCopyError": "IP:Porti ei saanud kopeerida."
+    }
+  },
+  "settings": {
+    "title": "Seadistused",
+    "startupTitle": "Käivitamine Windowsis",
+    "startupDescription": "QLTrackeri automaatne käivitamine Windowsi sisselogimisel.",
+    "startupSaving": "Käivituseelistuse salvestamine...",
+    "unavailable": "Seade ei ole selles ehituses saadaval.",
+    "languageTitle": "Keel",
+    "languageDescription": "Valige keel, mida QLTracker kasutab kogu rakenduses.",
+    "languagePlaceholder": "Vali keel",
+    "discordPresenceTitle": "Discordi tegevus",
+    "discordPresenceDescription": "Kuva QLTracker sinu Discordi tegevusena, kui sirvid rakendust.",
+    "discordPresenceServerTitle": "Kuva praeguse serveri üksikasjad",
+    "discordPresenceServerDescription": "Kui QLTracker käivitab serveri, lisa serveri nimi, kaart, režiim ja mängijad sinu Discordi tegevusse.",
+    "discordPresenceSteamIdTitle": "SteamID64 aktiivse serveri jälgimiseks",
+    "discordPresenceSteamIdDescription": "Valikuline. Lisa oma SteamID64, et Discord saaks näidata serverit, kus sa päriselt oled, isegi kui vahetad Quake Live'is serverit.",
+    "discordPresenceSteamIdPlaceholder": "7656119...",
+    "sections": {
+      "general": "Kindral",
+      "generalDescription": "Keele ja põhirakenduste eelistused.",
+      "startupTray": "Käivitamine ja salv",
+      "startupTrayDescription": "Käivituskäitumine, salverežiim ja akende käsitsemine.",
+      "desktopAlerts": "Töölaua märguanded",
+      "desktopAlertsDescription": "Algsed märguanded jälgitavate mängijate ja lemmikserverite jaoks.",
+      "notifications": "Märguanded ja ebakõlad",
+      "notificationsDescription": "Discordi konto linkimine ja juurdepääs teavitusreeglitele.",
+      "discordPresence": "Ebakõla olemasolu",
+      "discordPresenceDescription": "Discord rikkalik kohalolek, kui QLTracker on avatud."
+    },
+    "backToApp": "Tagasi rakenduse juurde",
+    "trayModeTitle": "Salve režiim",
+    "trayModeDescription": "Hoidke QLTracker taustal töötamas salveikooni ja kiirete toimingute abil.",
+    "closeToTrayTitle": "Sulgege salve aken",
+    "closeToTrayDescription": "Peaakna sulgemisel peitke QLTracker selle asemel, et sulgeda.",
+    "startMinimizedTitle": "Alusta minimeeritud alusele",
+    "startMinimizedDescription": "Käivitage taustal QLTracker, kuni taastate selle salveikoonilt.",
+    "desktopAlertsTitle": "Töölaua märguanded",
+    "desktopAlertsDescription": "Saatke jälgitavate mängijate ja lemmikserverite jaoks oma töölauateatisi.",
+    "desktopAlertsPausedTitle": "Peatage töölaua märguanded",
+    "desktopAlertsPausedDescription": "Vaigistage ajutiselt kõik töölauateated ilma hoiatusreegleid muutmata.",
+    "trackedPlayerAlertsTitle": "Jälitatud mängija hoiatused",
+    "trackedPlayerAlertsDescription": "Teavita, kui jälgitav mängija ilmub või liigub teise serverisse. Nõuab reaalajas taustaprogrammi.",
+    "favoriteServerAlertsTitle": "Lemmikserveri hoiatused",
+    "favoriteServerAlertsDescription": "Teavitage, kui lemmikserver jõuab teie mängija läveni.",
+    "favoriteServerThresholdTitle": "Lemmikserveri mängija lävi",
+    "favoriteServerThresholdDescription": "Saatke hoiatus, kui lemmikserver ületab selle mängijate arvu.",
+    "favoriteServerThresholdPlaceholder": "Mängijad",
+    "discordLinkTitle": "Discordi konto link",
+    "discordLinkDescription": "Ühendage Discord, et hallata DM-teatiste edastamist ja konto olekut.",
+    "notificationsManageRulesTitle": "Teavitamise reeglid",
+    "notificationsManageRulesDescription": "Serveripõhiseid Discord DM-i reegleid hallatakse serverite loendist.",
+    "notificationsManageRulesHint": "Avage server ja kasutage reegli loomiseks või muutmiseks teavitustoimingut Discord."
+  },
+  "language": {
+    "en": "English",
+    "de": "Deutsch",
+    "bg": "Български",
+    "ru": "Русский",
+    "uk": "Українська",
+    "hr": "Hrvatski",
+    "sr": "Српски",
+    "fr": "Français",
+    "it": "Italiano",
+    "et": "Eesti",
+    "nl": "Nederlands",
+    "fi": "Suomi",
+    "sv": "Svenska",
+    "hu": "Magyar",
+    "da": "Dansk",
+    "lv": "Latviešu",
+    "nb": "Norsk Bokmål",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ka": "ქართული",
+    "zh-Hant": "繁體中文",
+    "zh-Hans": "简体中文",
+    "es": "Español",
+    "pt-BR": "Português (Brasil)",
+    "pl": "Polski",
+    "ro": "Română",
+    "lt": "Lietuvių",
+    "cs": "Čeština"
+  },
+  "favorites": {
+    "lists": "Nimekirjad",
+    "refresh": "Värskenda",
+    "createList": "Loo nimekiri",
+    "createDialogTitle": "Lemmiknimekirja loomine",
+    "createDialogDescription": "Looge nimekiri salvestatud serverite korraldamiseks.",
+    "listNamePlaceholder": "Nimekirja nimi",
+    "playersTooltip": "Hetkel aktiivseid mängijaid kokku",
+    "favoriteServers": "Lemmikserverid",
+    "savedServers_one": "{{count}} saved server",
+    "savedServers_other": "{{count}} saved servers",
+    "noLists": "Nimekirja veel pole. Looge oma esimene nimekiri, et alustada.",
+    "noServers": "Siia nimekirja pole veel salvestatud ühtegi serverit.",
+    "deleteList": "Kustuta nimekiri",
+    "deleteDialogTitle": "Kustuta lemmikute nimekiri",
+    "deleteDialogDescription": "Kas kustutada \"{{list}}\"? Serverid, mis on salvestatud ainult sellesse nimekirja, eemaldatakse lemmikutest.",
+    "deleteDialogCancel": "Loobu",
+    "toasts": {
+      "listDeleted": "\"{{list}}\" kustutati."
+    }
+  },
+  "watchlist": {
+    "title": "Mängijate jälgimisloend",
+    "summary_one": "{{online}} võrgus {{count}} jälgitavast mängijast",
+    "summary_other": "{{online}} võrgus {{count}} jälgitavast mängijast",
+    "onlineCount": "{{count}} võrgus",
+    "serviceUnavailableBadge": "Reaalajas olek pole saadaval",
+    "emptyTitle": "Jälgitavaid mängijaid veel pole",
+    "emptyDescription": "Jälgi mängijaid serveri paneelist, et näha, kus nad mängivad.",
+    "emptyHint": "Ava suvaline server ja kasuta jälgimisnuppu lahendatud SteamID-ga mängija kõrval.",
+    "offline": "Võrgust maas",
+    "updatedUnavailable": "Pole saadaval",
+    "statusOnline": "Võrgus",
+    "statusOffline": "Võrgust maas",
+    "statusUnavailable": "Pole saadaval",
+    "toasts": {
+      "tracked": "{{player}} lisati jälgimisloendisse.",
+      "untracked": "{{player}} eemaldati jälgimisloendist.",
+      "noteSaved": "{{player}} märkus on salvestatud.",
+      "noteCleared": "{{player}} märkus on eemaldatud.",
+      "steamIdCopied": "SteamID kopeeriti.",
+      "steamIdCopyError": "SteamID kopeerimine ebaõnnestus."
+    },
+    "columns": {
+      "player": "Mängija",
+      "status": "Olek",
+      "server": "Server",
+      "map": "Kaart",
+      "mode": "Mode",
+      "actions": "Tegevused"
+    },
+    "noteDialog": {
+      "clear": "Eemalda märkus",
+      "description": "Lisa kohalik märkus mängijale {{player}}.",
+      "hint": "Märkused salvestatakse ainult sellesse seadmesse.",
+      "label": "Märkus",
+      "placeholder": "Lisa selle mängija kohta märkus...",
+      "save": "Salvesta märkus",
+      "title": "Mängija märkus"
+    },
+    "actions": {
+      "copySteamId": "Kopeeri SteamID",
+      "editNote": "Muuda märkust",
+      "viewServer": "Vaata serverit"
+    }
+  },
+  "filters": {
+    "title": "Filtrid",
+    "expand": "Filtrite laiendamine",
+    "collapse": "Korrutusfiltrid",
+    "searchPlaceholder": "Otsinguserveri nimi",
+    "showFull": "Näita täis",
+    "showEmpty": "Tühja näitamine",
+    "showFavorites": "Lemmikute näitamine",
+    "clearAll": "Puhasta",
+    "regions": {
+      "all": "Kõik piirkonnad",
+      "eu": "Euroopa",
+      "na": "Põhja-Ameerika",
+      "sa": "Lõuna-Ameerika",
+      "za": "Lõuna-Aafrika",
+      "apac": "Aasia Vaikse ookeani"
+    },
+    "visibility": {
+      "all": "Kõik serverid",
+      "public": "Avalik",
+      "private": "Eraisik"
+    },
+    "modes": {
+      "all": "Kõik režiimid",
+      "ca": "Clan Arena",
+      "duel": "Duel",
+      "ffa": "Vaba kõigile",
+      "tdm": "Meeskond Surmamatš",
+      "ctf": "CTF",
+      "ad": "Rünnak ja kaitse",
+      "dom": "Domineerimine",
+      "ft": "Paigaldatud silt",
+      "har": "Harvester",
+      "race": "Võidujooks",
+      "rr": "Red Rover"
+    },
+    "rating": {
+      "title": "Reiting",
+      "description": "Filtreeri servereid keskmiselt QElo või TSkill järgi.",
+      "systemPlaceholder": "Reitingusüsteem",
+      "qelo": "QElo",
+      "trueskill": "TSkill"
+    },
+    "maps": {
+      "all": "Kõik kaardid",
+      "selectedCount": "{{count}} maps selected",
+      "searchPlaceholder": "Otsingukaardid...",
+      "empty": "Kaarte ei leitud."
+    },
+    "tags": {
+      "label": "Tags",
+      "selectedCount": "{{count}}+ tags",
+      "none": "Silte pole valitud.",
+      "inputPlaceholder": "Kirjuta silt ja vajuta Enter"
+    }
+  },
+  "releaseNotes": {
+    "title": "Mis on uut versioonis {{version}}",
+    "publishedOn": "Avaldatud {{kuupäev}}",
+    "close": "Sule"
+  }
+}

@@ -1,0 +1,383 @@
+{
+  "navigation": {
+    "serverList": "Popis poslužitelja",
+    "favorites": "Favoriti",
+    "watchlist": "Praćenje",
+    "notifications": "Obavijesti",
+    "settings": "postavke"
+  },
+  "common": {
+    "updated": "Ažurirano"
+  },
+  "header": {
+    "unknown": "Nepoznato",
+    "theme": {
+      "light": "Lagana tema",
+      "dark": "Tamna tema",
+      "system": "Tema sustava"
+    }
+  },
+  "sidebar": {
+    "groupLabel": "QLTracker",
+    "about": "O QLTrackeru"
+  },
+  "about": {
+    "version": "Verzija",
+    "author": "Programer",
+    "socials": "Društvene",
+    "stack": "Stog",
+    "repo": "Repo"
+  },
+  "notifications": {
+    "title": "Discord obavijesti",
+    "serviceUnavailable": "Notification service is unavailable in this build. Set `VITE_NOTIFICATION_API_URL` to enable Discord linking and delivery.",
+    "finishBrowser": "Završite tijek veze na Discord u svom pregledniku.",
+    "loadingStatus": "Učitavanje statusa Discord obavijesti...",
+    "account": "Račun",
+    "rules": "Pravila",
+    "rulesSummary": "{{enabled}} active / {{total}} total",
+    "dmRefused": "QLTracker je povezan, ali Discord je ipak odbio DM provjeru. ",
+    "relink": "Ponovno poveži Discord",
+    "retryInstall": "Ponovo pokušajte provjeriti instalaciju",
+    "disconnect": "Prekini vezu",
+    "noAccount": "Još nije povezan nijedan Discord račun.",
+    "installLink": "Poveži Discord",
+    "dialog": {
+      "editTitle": "Uredi obavijest o Discordu",
+      "createTitle": "!!!>>> Unexpected token '<', \"<html lang\"... is not valid JSON <<<!!!",
+      "descriptionWithServer": "Configure a Discord DM notification for {{server}}.",
+      "descriptionFallback": "Konfigurirajte Discord DM obavijest za ovaj poslužitelj.",
+      "enabled": "Omogućeno",
+      "enabledDescription": "Šaljite samo DM-ove dok je ovo pravilo omogućeno.",
+      "thresholdType": "Vrsta praga",
+      "thresholdPlaceholder": "Odaberite vrstu praga",
+      "mode": {
+        "active_free_slots": {
+          "label": "Igranje automata lijevo",
+          "description": "Obavijestite kada je meč tako blizu popunjenosti, koristeći ukupne aktivne utore za igranje umjesto punih utora na poslužitelju."
+        },
+        "free_slots": {
+          "label": "Slobodni utori",
+          "description": "Obavijesti kada poslužitelj ima ovoliko slobodnih utora ili manje."
+        },
+        "min_players": {
+          "label": "Min igrača",
+          "description": "Obavijesti kada poslužitelj dosegne barem ovoliko igrača."
+        }
+      },
+      "totalPlayingSlots": "Ukupno igranje automata",
+      "totalPlayingSlotsDescription": "Koristite oba tima u kombinaciji, a ne veličinu po timu. ",
+      "minimumPlayerCount": "Minimalni broj igrača",
+      "maximumActiveSlotsLeft": "Preostalo je najviše aktivnih mjesta",
+      "maximumFreeSlots": "Maksimalan broj slobodnih mjesta",
+      "activeSlotsDescription": "This rule will evaluate against {{count}} total active playing slots.",
+      "serverSupportsDescription": "This server currently supports up to {{count}} players.",
+      "deleteRule": "Izbriši pravilo",
+      "saveChanges": "Spremi promjene",
+      "createRule": "Stvori pravilo"
+    }
+  },
+  "serverList": {
+    "refresh": "Osvježiti",
+    "noServersMatch": "Nijedan poslužitelj ne odgovara trenutnim filtrima.",
+    "pageStatus": "Page {{current}} of {{total}}",
+    "table": {
+      "server": "poslužitelj",
+      "location": "Mjesto",
+      "mode": "Način rada",
+      "players": "Igrači",
+      "ping": "Ping",
+      "actions": "Radnje"
+    },
+    "locationUnknown": "Nepoznato",
+    "modeUnknown": "Nepoznato",
+    "pingUnavailable": "N/A",
+    "passwordSaved": "Lozinka spremljena",
+    "passwordRequired": "Potrebna lozinka",
+    "notificationEnabled": "Discord obavijest je omogućena",
+    "actions": {
+      "notificationsPublicOnly": "Obavijesti su dostupne samo za javne poslužitelje.",
+      "connectDiscordFavorites": "Povežite Discord na stranici Obavijesti kako biste omogućili obavijesti.",
+      "editNotification": "Uredi obavijest o Discordu",
+      "notifyDiscord": "Obavijesti o Discordu",
+      "editFavorite": "Uredi omiljeno",
+      "removeFromFavorites": "Ukloni iz favorita",
+      "addToFavorites": "Dodaj u favorite",
+      "copyAddress": "Kopiraj IP:Port"
+    },
+    "drawer": {
+      "play": "Igrati",
+      "map": "Mapa",
+      "avgQeloTooltip": "Prosječni QElo na ovom poslužitelju",
+      "avgTrueskillTooltip": "Prosječna TSkill na ovom poslužitelju",
+      "topQeloTooltip": "Najbolji QElo igrač na ovom poslužitelju",
+      "topTrueskillTooltip": "Najbolji TSkill igrač na ovom poslužitelju",
+      "playersHeading": "Igrači",
+      "player": "Igrač",
+      "points": "Bodovi",
+      "qelo": "QElo",
+      "trueskill": "TSkill",
+      "time": "Vrijeme",
+      "watch": "Prati",
+      "trackPlayer": "Prati igrača",
+      "untrackPlayer": "Ukloni s popisa praćenja",
+      "historyTitle": "Povijest",
+      "historyWindow": "Zadnjih 7 dana",
+      "historyLastSeen": "Zadnji put viđen",
+      "historyPeakPlayers": "Najviše igrača",
+      "historyTimePopulated": "Vrijeme s igračima",
+      "historyUnavailable": "Povijest servera nije dostupna. Omogući realtime pozadinski servis i postavi endpoint za povijest kako bi se ova kartica učitala.",
+      "historyEmpty": "Za ovaj server još nema nedavne povijesti.",
+      "lookupFailed": "Traženje Steam playera nije uspjelo.",
+      "noPlayerData": "Nema podataka o igračima za ovaj poslužitelj.",
+      "teams": {
+        "blue": "Plavi tim",
+        "free": "Besplatno",
+        "players": "Igrači",
+        "red": "Crveni tim",
+        "spectators": "Gledatelji",
+        "unassigned": "Nedodijeljeno"
+      }
+    },
+    "favoriteDialog": {
+      "editTitle": "Uredi Favorite",
+      "addTitle": "Dodaj u favorite",
+      "fallbackDescription": "Dodijelite ovaj poslužitelj jednom od vaših lokalnih popisa favorita.",
+      "selectList": "Odaberite popis",
+      "listsUnavailable": "Nema dostupnih popisa favorita. ",
+      "remove": "Ukloniti",
+      "saveChanges": "Spremi promjene",
+      "addToList": "Dodaj na popis"
+    },
+    "passwordDialog": {
+      "title": "Lozinka poslužitelja",
+      "descriptionWithServer": "Enter the password for {{server}}.",
+      "fallbackDescription": "Unesite lozinku za ovaj poslužitelj.",
+      "inputPlaceholder": "Unesite lozinku poslužitelja",
+      "remember": "Sačuvajte ovu lozinku za buduća pridruživanja",
+      "join": "Pridruži se"
+    },
+    "toasts": {
+      "removedFromFavorites": "Uklonjeno iz favorita.",
+      "notificationUpdated": "Obavijest ažurirana.",
+      "notificationCreated": "Obavijest je stvorena.",
+      "notificationRemoved": "Obavijest uklonjena.",
+      "notificationSaveError": "Nije moguće spremiti pravilo obavijesti.",
+      "notificationRemoveError": "Nije moguće ukloniti pravilo obavijesti.",
+      "favoriteUpdated": "Favorit ažuriran.",
+      "addedToFavorites": "Dodano u favorite.",
+      "serverAddressCopied": "IP:Port kopiran.",
+      "serverAddressCopyError": "IP:Port nije moguće kopirati."
+    }
+  },
+  "settings": {
+    "title": "postavke",
+    "startupTitle": "Pokretanje u sustavu Windows",
+    "startupDescription": "Automatski pokrenite QLTracker kada se prijavite u Windows.",
+    "startupSaving": "Spremanje postavke pokretanja...",
+    "unavailable": "Postavka nije dostupna u ovoj verziji.",
+    "languageTitle": "Jezik",
+    "languageDescription": "Odaberite jezik koji će QLTracker koristiti u cijeloj aplikaciji.",
+    "languagePlaceholder": "Odaberite jezik",
+    "discordPresenceTitle": "Discord prisutnost",
+    "discordPresenceDescription": "Prikaži QLTracker kao svoju Discord aktivnost dok pregledavaš aplikaciju.",
+    "discordPresenceServerTitle": "Prikaži detalje trenutačnog servera",
+    "discordPresenceServerDescription": "Kada QLTracker pokrene server, uključi naziv servera, mapu, način rada i igrače u svoju Discord aktivnost.",
+    "discordPresenceSteamIdTitle": "SteamID64 za praćenje trenutnog servera",
+    "discordPresenceSteamIdDescription": "Neobavezno. Dodaj svoj SteamID64 kako bi Discord mogao prikazati server na kojem stvarno jesi, čak i ako mijenjaš servere unutar Quake Livea.",
+    "discordPresenceSteamIdPlaceholder": "7656119...",
+    "sections": {
+      "general": "generalno",
+      "generalDescription": "Jezik i osnovne postavke aplikacije.",
+      "startupTray": "Pokretanje i ladica",
+      "startupTrayDescription": "Ponašanje pri pokretanju, način ladice i rukovanje prozorom.",
+      "desktopAlerts": "Upozorenja na radnoj površini",
+      "desktopAlertsDescription": "Izvorne obavijesti za praćene igrače i omiljene poslužitelje.",
+      "notifications": "Obavijesti i Discord",
+      "notificationsDescription": "Povezivanje Discord računa i pristup pravilu obavijesti.",
+      "discordPresence": "Prisutnost nesklada",
+      "discordPresenceDescription": "Discord bogata prisutnost dok je QLTracker otvoren."
+    },
+    "backToApp": "Natrag na aplikaciju",
+    "trayModeTitle": "Način ladice",
+    "trayModeDescription": "Neka QLTracker radi u pozadini pomoću ikone na traci i brzih radnji.",
+    "closeToTrayTitle": "Zatvorite prozor na traci",
+    "closeToTrayDescription": "Sakrijte QLTracker umjesto da ga zatvorite kada zatvorite glavni prozor.",
+    "startMinimizedTitle": "Početak minimiziran na ladicu",
+    "startMinimizedDescription": "Pokrenite QLTracker u pozadini dok ga ne vratite iz ikone na traci.",
+    "desktopAlertsTitle": "Upozorenja na radnoj površini",
+    "desktopAlertsDescription": "Šalji izvorne obavijesti radne površine za praćene igrače i omiljene poslužitelje.",
+    "desktopAlertsPausedTitle": "Pauziraj upozorenja na radnoj površini",
+    "desktopAlertsPausedDescription": "Privremeno utišajte sva upozorenja na radnoj površini bez promjene pravila upozorenja.",
+    "trackedPlayerAlertsTitle": "Upozorenja praćenih igrača",
+    "trackedPlayerAlertsDescription": "Obavijesti kada se gledani igrač pojavi ili premjesti na drugi poslužitelj. Zahtijeva backend u stvarnom vremenu.",
+    "favoriteServerAlertsTitle": "Omiljena upozorenja poslužitelja",
+    "favoriteServerAlertsDescription": "Obavijestite kada omiljeni poslužitelj dosegne vaš prag igrača.",
+    "favoriteServerThresholdTitle": "Prag omiljenog poslužiteljskog igrača",
+    "favoriteServerThresholdDescription": "Pošaljite upozorenje kada omiljeni poslužitelj prijeđe ovaj broj igrača.",
+    "favoriteServerThresholdPlaceholder": "Igrači",
+    "discordLinkTitle": "Link Discord računa",
+    "discordLinkDescription": "Povežite Discord za upravljanje isporukom DM obavijesti i statusom računa.",
+    "notificationsManageRulesTitle": "Pravila obavješćivanja",
+    "notificationsManageRulesDescription": "Discord DM pravilima specifičnim za poslužitelj upravlja se s popisa poslužitelja.",
+    "notificationsManageRulesHint": "Otvorite poslužitelj i upotrijebite radnju obavijesti Discord za stvaranje ili uređivanje pravila."
+  },
+  "language": {
+    "en": "English",
+    "de": "Deutsch",
+    "bg": "Български",
+    "ru": "Русский",
+    "uk": "Українська",
+    "hr": "Hrvatski",
+    "sr": "Српски",
+    "fr": "Français",
+    "it": "Italiano",
+    "et": "Eesti",
+    "nl": "Nederlands",
+    "fi": "Suomi",
+    "sv": "Svenska",
+    "hu": "Magyar",
+    "da": "Dansk",
+    "lv": "Latviešu",
+    "nb": "Norsk Bokmål",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ka": "ქართული",
+    "zh-Hant": "繁體中文",
+    "zh-Hans": "简体中文",
+    "es": "Español",
+    "pt-BR": "Português (Brasil)",
+    "pl": "Polski",
+    "ro": "Română",
+    "lt": "Lietuvių",
+    "cs": "Čeština"
+  },
+  "favorites": {
+    "lists": "Popisi",
+    "refresh": "Osvježiti",
+    "createList": "Stvori popis",
+    "createDialogTitle": "Stvorite popis favorita",
+    "createDialogDescription": "Napravite popis za organiziranje spremljenih poslužitelja.",
+    "listNamePlaceholder": "Naziv popisa",
+    "playersTooltip": "Ukupno igrača uživo",
+    "favoriteServers": "Omiljeni poslužitelji",
+    "noLists": "Još nema popisa. ",
+    "noServers": "Na ovom popisu još nema spremljenih poslužitelja.",
+    "savedServers_one": "{{count}} saved server",
+    "savedServers_few": "{{count}} spremljeni poslužitelji",
+    "savedServers_other": "{{count}} saved servers",
+    "deleteList": "Izbriši listu",
+    "deleteDialogTitle": "Izbriši listu favorita",
+    "deleteDialogDescription": "Izbrisati \"{{list}}\"? Serveri spremljeni samo u ovoj listi bit će uklonjeni iz favorita.",
+    "deleteDialogCancel": "Odustani",
+    "toasts": {
+      "listDeleted": "\"{{list}}\" je izbrisana."
+    }
+  },
+  "watchlist": {
+    "title": "Popis praćenih igrača",
+    "summary_one": "{{online}} online od {{count}} praćenog igrača",
+    "summary_other": "{{online}} online od {{count}} praćenih igrača",
+    "onlineCount": "{{count}} online",
+    "serviceUnavailableBadge": "Status uživo nije dostupan",
+    "emptyTitle": "Još nema praćenih igrača",
+    "emptyDescription": "Prati igrače iz prikaza servera kako bi vidio gdje igraju.",
+    "emptyHint": "Otvori bilo koji server i koristi gumb za praćenje pored igrača s razriješenim SteamID-om.",
+    "offline": "Offline",
+    "updatedUnavailable": "Nedostupno",
+    "statusOnline": "Online",
+    "statusOffline": "Offline",
+    "statusUnavailable": "Nedostupno",
+    "toasts": {
+      "tracked": "{{player}} je dodan na popis praćenja.",
+      "untracked": "{{player}} je uklonjen s popisa praćenja.",
+      "noteSaved": "Bilješka za {{player}} je spremljena.",
+      "noteCleared": "Bilješka za {{player}} je uklonjena.",
+      "steamIdCopied": "SteamID je kopiran.",
+      "steamIdCopyError": "SteamID nije moguće kopirati."
+    },
+    "columns": {
+      "player": "Igrač",
+      "status": "Status",
+      "server": "poslužitelj",
+      "map": "Mapa",
+      "mode": "Način rada",
+      "actions": "Radnje"
+    },
+    "noteDialog": {
+      "clear": "Obriši bilješku",
+      "description": "Dodajte lokalnu bilješku za {{player}}.",
+      "hint": "Bilješke se pohranjuju samo na ovom uređaju.",
+      "label": "Bilješka",
+      "placeholder": "Dodajte bilješku o ovom igraču...",
+      "save": "Spremi bilješku",
+      "title": "Bilješka o igraču"
+    },
+    "actions": {
+      "copySteamId": "Kopiraj SteamID",
+      "editNote": "Uredi bilješku",
+      "viewServer": "Prikaži server"
+    }
+  },
+  "filters": {
+    "title": "Filteri",
+    "expand": "Proširi filtre",
+    "collapse": "Sažmi filtre",
+    "searchPlaceholder": "Naziv poslužitelja pretraživanja",
+    "showFull": "Prikaži cijeli",
+    "showEmpty": "Prikaži prazno",
+    "showFavorites": "Prikaži favorite",
+    "clearAll": "Obriši sve",
+    "regions": {
+      "all": "Sve regije",
+      "eu": "Europi",
+      "na": "Sjeverna Amerika",
+      "sa": "Južna Amerika",
+      "za": "Južna Afrika",
+      "apac": "Azija Pacifik"
+    },
+    "visibility": {
+      "all": "Svi poslužitelji",
+      "public": "Javnost",
+      "private": "Privatno"
+    },
+    "modes": {
+      "all": "Svi modovi",
+      "ca": "Clan Arena",
+      "duel": "Dvoboj",
+      "ffa": "Besplatno za sve",
+      "tdm": "Timska smrtna borba",
+      "ctf": "CTF",
+      "ad": "Napadaj i brani se",
+      "dom": "Dominacija",
+      "ft": "Zamrzni oznaku",
+      "har": "kombajn",
+      "race": "utrka",
+      "rr": "Crveni Rover"
+    },
+    "rating": {
+      "title": "Ocjena",
+      "description": "Filtrirajte poslužitelje prema prosječnom QElo ili TSkill.",
+      "systemPlaceholder": "Sustav ocjenjivanja",
+      "qelo": "QElo",
+      "trueskill": "TSkill"
+    },
+    "maps": {
+      "all": "Sve karte",
+      "selectedCount": "{{count}} maps selected",
+      "searchPlaceholder": "Traži karte...",
+      "empty": "Nema pronađenih karata."
+    },
+    "tags": {
+      "label": "oznake",
+      "selectedCount": "{{count}}+ tags",
+      "none": "Nema odabranih oznaka.",
+      "inputPlaceholder": "Upišite tag i pritisnite Enter"
+    }
+  },
+  "releaseNotes": {
+    "title": "Što je novo u {{version}}",
+    "publishedOn": "Objavljeno {{date}}",
+    "close": "Zatvori"
+  }
+}

@@ -1,0 +1,382 @@
+{
+  "navigation": {
+    "serverList": "Статус на сервери",
+    "favorites": "Вибрані",
+    "watchlist": "Відстеження",
+    "notifications": "Повідомлення",
+    "settings": "Налаштування"
+  },
+  "common": {
+    "updated": "Оновлено"
+  },
+  "header": {
+    "unknown": "Невідомо",
+    "theme": {
+      "light": "Світла тема",
+      "dark": "Темна тема",
+      "system": "Тематика системи"
+    }
+  },
+  "sidebar": {
+    "groupLabel": "КЛТрекер",
+    "about": "Про QLTracker"
+  },
+  "about": {
+    "version": "Редагування",
+    "author": "Розробник",
+    "socials": "Веб-сайт",
+    "stack": "Стейк",
+    "repo": "Репо"
+  },
+  "notifications": {
+    "title": "Повідомлення",
+    "serviceUnavailable": "Notification service is unavailable in this build. Set `VITE_NOTIFICATION_API_URL` to enable Discord linking and delivery.",
+    "finishBrowser": "Оздоблення потоку посилання диска в браузері.",
+    "loadingStatus": "Статус на сервери.",
+    "account": "Облік",
+    "rules": "Головна",
+    "rulesSummary": "{{enabled}} active / {{total}} total",
+    "dmRefused": "QLTracker пов'язаний, але Discord все ще відмовився від перевірки DM. Зберігати інсталяцію/посилання на тест DMs знову.",
+    "relink": "Розсилка посилань",
+    "retryInstall": "Ретри Встановіть перевірити",
+    "disconnect": "Відключення",
+    "noAccount": "Немає облікового запису, пов'язаного ще.",
+    "installLink": "Прив’язати Discord",
+    "dialog": {
+      "editTitle": "Редагування повідомлень",
+      "createTitle": "Повідомлення",
+      "descriptionWithServer": "Configure a Discord DM notification for {{server}}.",
+      "descriptionFallback": "Налаштуйте повідомлення Discord DM для цього сервера.",
+      "enabled": "Увімкнути",
+      "enabledDescription": "Тільки надсилайте DM, поки це правило ввімкнено.",
+      "thresholdType": "Тип порожнистого",
+      "thresholdPlaceholder": "Виберіть поріговий тип",
+      "mode": {
+        "active_free_slots": {
+          "label": "Ігрові автомати зліва",
+          "description": "Повідомляти, коли матч це близько до заповнення, використовуючи загальний активний ігровий слот замість повного слота сервера."
+        },
+        "free_slots": {
+          "label": "Безкоштовні слоти",
+          "description": "Повідомляти, коли сервер має це багато вільних слотів або менше."
+        },
+        "min_players": {
+          "label": "Мінімум",
+          "description": "Повідомляти, коли сервер досягає принаймні цього гравця."
+        }
+      },
+      "totalPlayingSlots": "Всього ігрових слотів",
+      "totalPlayingSlotsDescription": "Використовуйте обидві команди, які поєднуються, не за розміром. Для сервера 4v4 введіть 8. Для сервера 8v8 введіть 16. Це відокремлений від повного підрахунку слота сервера.",
+      "minimumPlayerCount": "Мінімальна кількість гравців",
+      "maximumActiveSlotsLeft": "Максимальні активні слоти зліва",
+      "maximumFreeSlots": "Максимальні вільні слоти",
+      "activeSlotsDescription": "This rule will evaluate against {{count}} total active playing slots.",
+      "serverSupportsDescription": "This server currently supports up to {{count}} players.",
+      "deleteRule": "Видалити Рулі",
+      "saveChanges": "Зберегти зміни",
+      "createRule": "Створення Рулі"
+    }
+  },
+  "serverList": {
+    "refresh": "Реверс",
+    "noServersMatch": "Немає серверів, які відповідають поточним фільтрам.",
+    "pageStatus": "Page {{current}} of {{total}}",
+    "table": {
+      "server": "Статус на сервери",
+      "location": "Місцезнаходження",
+      "mode": "Режими",
+      "players": "Гравці",
+      "ping": "Пінг",
+      "actions": "Акції"
+    },
+    "locationUnknown": "Невідомо",
+    "modeUnknown": "Невідомо",
+    "pingUnavailable": "Н/А",
+    "passwordSaved": "Збережений пароль",
+    "passwordRequired": "Необхідний пароль",
+    "notificationEnabled": "Увімкнути сповіщення",
+    "actions": {
+      "notificationsPublicOnly": "Повідомлення доступні тільки для публічних серверів.",
+      "connectDiscordFavorites": "З'єднайте дисконт на сторінці Повідомлення, щоб увімкнути сповіщення.",
+      "editNotification": "Редагувати повідомлення",
+      "notifyDiscord": "Повідомити про Discord",
+      "editFavorite": "Редагувати улюблений",
+      "removeFromFavorites": "Видалити з улюбленців",
+      "addToFavorites": "Додати до обраного",
+      "copyAddress": "Скопіювати IP:Port"
+    },
+    "drawer": {
+      "play": "Грати",
+      "map": "Карта",
+      "avgQeloTooltip": "Середній QElo на цьому сервері",
+      "avgTrueskillTooltip": "Середня навичка на цьому сервері",
+      "topQeloTooltip": "Найвищий QElo-плеєр на цьому сервері",
+      "topTrueskillTooltip": "Найвищий TSkill-плеєр на цьому сервері",
+      "playersHeading": "Гравці",
+      "player": "Гравці",
+      "points": "Твитнуть",
+      "qelo": "Кело",
+      "trueskill": "Навички",
+      "time": "Час",
+      "watch": "Стежити",
+      "trackPlayer": "Стежити за гравцем",
+      "untrackPlayer": "Видалити зі списку відстеження",
+      "historyTitle": "Історія",
+      "historyWindow": "Останні 7 днів",
+      "historyLastSeen": "Востаннє помічений",
+      "historyPeakPlayers": "Пік гравців",
+      "historyTimePopulated": "Час із гравцями",
+      "historyUnavailable": "Історія сервера недоступна. Увімкніть realtime-бекенд і розгорніть endpoint історії, щоб завантажити цю картку.",
+      "historyEmpty": "Для цього сервера ще немає недавньої історії.",
+      "lookupFailed": "Не вдалося подивитись Steam Player.",
+      "noPlayerData": "Немає даних про гравця для цього сервера.",
+      "teams": {
+        "blue": "Синя команда",
+        "free": "Безкоштовно",
+        "players": "Гравці",
+        "red": "Червона команда",
+        "spectators": "Сектори",
+        "unassigned": "Непримітний"
+      }
+    },
+    "favoriteDialog": {
+      "editTitle": "Редагувати",
+      "addTitle": "Додати у обране",
+      "fallbackDescription": "Призначте цей сервер до одного з місцевих улюблених списків.",
+      "selectList": "Виберіть список",
+      "listsUnavailable": "Не доступні улюблені списки. Створіть список на сторінці «Вибрані».",
+      "remove": "Прибрати",
+      "saveChanges": "Зберегти зміни",
+      "addToList": "Додати до списку"
+    },
+    "passwordDialog": {
+      "title": "Статус на сервери",
+      "descriptionWithServer": "Enter the password for {{server}}.",
+      "fallbackDescription": "Введіть пароль для цього сервера.",
+      "inputPlaceholder": "Введіть пароль сервера",
+      "remember": "Збережіть цей пароль для майбутніх приєднується",
+      "join": "Увійти"
+    },
+    "toasts": {
+      "removedFromFavorites": "Зняти з улюбленців.",
+      "notificationUpdated": "Повідомлення оновлено.",
+      "notificationCreated": "Створено повідомлення.",
+      "notificationRemoved": "Видалено сповіщення.",
+      "notificationSaveError": "Не вдалося зберегти правило повідомлення.",
+      "notificationRemoveError": "Не можна видалити правило повідомлення.",
+      "favoriteUpdated": "Оновлено.",
+      "addedToFavorites": "Додати до обраного.",
+      "serverAddressCopied": "IP:Port скопійовано.",
+      "serverAddressCopyError": "Не вдалося скопіювати IP:Port."
+    }
+  },
+  "settings": {
+    "title": "Налаштування",
+    "startupTitle": "Запуск на Windows",
+    "startupDescription": "Автоматично запустіть QLTracker при підписці на Windows.",
+    "startupSaving": "Збереження переваг запуску...",
+    "unavailable": "Налаштування є недоступним у цій будівлі.",
+    "languageTitle": "Українська",
+    "languageDescription": "Виберіть мову, яку QLTracker використовуватиме в усьому застосунку.",
+    "languagePlaceholder": "Виберіть мову",
+    "discordPresenceTitle": "Активність у Discord",
+    "discordPresenceDescription": "Показувати QLTracker як вашу активність у Discord, поки ви переглядаєте застосунок.",
+    "discordPresenceServerTitle": "Показувати відомості про поточний сервер",
+    "discordPresenceServerDescription": "Коли QLTracker запускає сервер, додавайте назву сервера, мапу, режим і гравців до вашої активності у Discord.",
+    "discordPresenceSteamIdTitle": "SteamID64 для відстеження поточного сервера",
+    "discordPresenceSteamIdDescription": "Необов’язково. Додай свій SteamID64, щоб Discord міг показувати сервер, на якому ти зараз перебуваєш, навіть якщо ти змінюєш сервер прямо в Quake Live.",
+    "discordPresenceSteamIdPlaceholder": "7656119...",
+    "sections": {
+      "general": "Загальний",
+      "generalDescription": "Налаштування мови та основної програми.",
+      "startupTray": "Запуск і трей",
+      "startupTrayDescription": "Поведінка при запуску, режим панелі та керування вікном.",
+      "desktopAlerts": "Сповіщення на робочому столі",
+      "desktopAlertsDescription": "Власні сповіщення для відстежуваних гравців і улюблених серверів.",
+      "notifications": "Сповіщення та Discord",
+      "notificationsDescription": "Зв’язування облікових записів Discord і доступ до правил сповіщень.",
+      "discordPresence": "Присутність Discord",
+      "discordPresenceDescription": "Розширена присутність Discord, коли відкрито QLTracker."
+    },
+    "backToApp": "Назад до програми",
+    "trayModeTitle": "Режим лотка",
+    "trayModeDescription": "Забезпечте роботу QLTracker у фоновому режимі за допомогою значка в треї та швидких дій.",
+    "closeToTrayTitle": "Закрити вікно в трей",
+    "closeToTrayDescription": "Приховати QLTracker замість виходу, коли ви закриваєте головне вікно.",
+    "startMinimizedTitle": "Почати згорнуто в трей",
+    "startMinimizedDescription": "Запустіть QLTracker у фоновому режимі, доки ви не відновите його за допомогою значка в треї.",
+    "desktopAlertsTitle": "Сповіщення на робочому столі",
+    "desktopAlertsDescription": "Надсилайте рідні сповіщення на робочому столі для відстежених гравців і улюблених серверів.",
+    "desktopAlertsPausedTitle": "Призупинити сповіщення на робочому столі",
+    "desktopAlertsPausedDescription": "Тимчасово вимкніть усі сповіщення на робочому столі, не змінюючи правил сповіщень.",
+    "trackedPlayerAlertsTitle": "Сповіщення відстежених гравців",
+    "trackedPlayerAlertsDescription": "Повідомляти, коли гравець, за яким стежать, з’являється або переходить на інший сервер. Потрібен бекенд реального часу.",
+    "favoriteServerAlertsTitle": "Сповіщення про улюблений сервер",
+    "favoriteServerAlertsDescription": "Повідомляти, коли улюблений сервер досягає порогової кількості гравців.",
+    "favoriteServerThresholdTitle": "Поріг улюбленого гравця на сервері",
+    "favoriteServerThresholdDescription": "Надсилайте сповіщення, коли улюблений сервер перевищить цю кількість гравців.",
+    "favoriteServerThresholdPlaceholder": "Гравці",
+    "discordLinkTitle": "Посилання на обліковий запис Discord",
+    "discordLinkDescription": "Підключіть Discord, щоб керувати доставкою сповіщень DM і статусом облікового запису.",
+    "notificationsManageRulesTitle": "Правила сповіщення",
+    "notificationsManageRulesDescription": "Спеціальними для сервера правилами Discord DM керуються зі списку серверів.",
+    "notificationsManageRulesHint": "Відкрийте сервер і використовуйте дію сповіщень Discord, щоб створити або відредагувати правило."
+  },
+  "language": {
+    "en": "English",
+    "de": "Deutsch",
+    "bg": "Български",
+    "ru": "Русский",
+    "uk": "Українська",
+    "hr": "Hrvatski",
+    "sr": "Српски",
+    "fr": "Français",
+    "it": "Italiano",
+    "et": "Eesti",
+    "nl": "Nederlands",
+    "fi": "Suomi",
+    "sv": "Svenska",
+    "hu": "Magyar",
+    "da": "Dansk",
+    "lv": "Latviešu",
+    "nb": "Norsk Bokmål",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ka": "ქართული",
+    "zh-Hant": "繁體中文",
+    "zh-Hans": "简体中文",
+    "es": "Español",
+    "pt-BR": "Português (Brasil)",
+    "pl": "Polski",
+    "ro": "Română",
+    "lt": "Lietuvių",
+    "cs": "Čeština"
+  },
+  "favorites": {
+    "lists": "Списки",
+    "refresh": "Реверс",
+    "createList": "Створити список",
+    "createDialogTitle": "Створення списку",
+    "createDialogDescription": "Створення списку для організації збережених серверів.",
+    "listNamePlaceholder": "Назва списку",
+    "playersTooltip": "Всього гравців онлайн",
+    "favoriteServers": "Популярні сервери",
+    "savedServers_one": "{{count}} saved server",
+    "savedServers_other": "{{count}} saved servers",
+    "noLists": "Немає списку. Створіть перший список, щоб розпочати роботу.",
+    "noServers": "Немає серверів, що зберігаються в цьому списку.",
+    "deleteList": "Видалити список",
+    "deleteDialogTitle": "Видалити список обраного",
+    "deleteDialogDescription": "Видалити \"{{list}}\"? Сервери, збережені лише в цьому списку, буде видалено з обраного.",
+    "deleteDialogCancel": "Скасувати",
+    "toasts": {
+      "listDeleted": "«{{list}}» видалено."
+    }
+  },
+  "watchlist": {
+    "title": "Список відстеження гравців",
+    "summary_one": "{{online}} онлайн із {{count}} відстежуваного гравця",
+    "summary_other": "{{online}} онлайн із {{count}} відстежуваних гравців",
+    "onlineCount": "{{count}} онлайн",
+    "serviceUnavailableBadge": "Живий статус недоступний",
+    "emptyTitle": "Поки немає відстежуваних гравців",
+    "emptyDescription": "Стежте за гравцями з панелі сервера, щоб бачити, де вони грають.",
+    "emptyHint": "Відкрийте будь-який сервер і скористайтеся кнопкою відстеження поруч із гравцем із визначеним SteamID.",
+    "offline": "Не в мережі",
+    "updatedUnavailable": "Недоступно",
+    "statusOnline": "Онлайн",
+    "statusOffline": "Не в мережі",
+    "statusUnavailable": "Недоступно",
+    "toasts": {
+      "tracked": "{{player}} додано до списку відстеження.",
+      "untracked": "{{player}} видалено зі списку відстеження.",
+      "noteSaved": "Нотатку для {{player}} збережено.",
+      "noteCleared": "Нотатку для {{player}} видалено.",
+      "steamIdCopied": "SteamID скопійовано.",
+      "steamIdCopyError": "Не вдалося скопіювати SteamID."
+    },
+    "columns": {
+      "player": "Гравці",
+      "status": "Статус",
+      "server": "Статус на сервери",
+      "map": "Карта",
+      "mode": "Режими",
+      "actions": "Акції"
+    },
+    "noteDialog": {
+      "clear": "Очистити нотатку",
+      "description": "Додайте локальну нотатку для {{player}}.",
+      "hint": "Нотатки зберігаються лише на цьому пристрої.",
+      "label": "Нотатка",
+      "placeholder": "Додайте нотатку про цього гравця...",
+      "save": "Зберегти нотатку",
+      "title": "Нотатка про гравця"
+    },
+    "actions": {
+      "copySteamId": "Скопіювати SteamID",
+      "editNote": "Редагувати нотатку",
+      "viewServer": "Відкрити сервер"
+    }
+  },
+  "filters": {
+    "title": "Фільтри",
+    "expand": "Витратні фільтри",
+    "collapse": "Фільтри згортання",
+    "searchPlaceholder": "Ім'я сервера",
+    "showFull": "Показати повну",
+    "showEmpty": "Показати Empty",
+    "showFavorites": "Показати вподобання",
+    "clearAll": "Очистити всі",
+    "regions": {
+      "all": "Усі регіони",
+      "eu": "Європа",
+      "na": "Північна Америка",
+      "sa": "Південна Америка",
+      "za": "Південна Африка",
+      "apac": "Азія Тихий"
+    },
+    "visibility": {
+      "all": "Всі сервери",
+      "public": "Громадські",
+      "private": "Приват"
+    },
+    "modes": {
+      "all": "Всі режими",
+      "ca": "Clan Арена",
+      "duel": "Дуель",
+      "ffa": "Безкоштовно для всіх",
+      "tdm": "Командний Смертьматч",
+      "ctf": "КФТ",
+      "ad": "Атак & Захисник",
+      "dom": "Домінування",
+      "ft": "Freeze теги",
+      "har": "Жилети",
+      "race": "Пробіг",
+      "rr": "Червоноград"
+    },
+    "rating": {
+      "title": "Рейтинг",
+      "description": "Фільтр серверів в середньому QElo або TSkill.",
+      "systemPlaceholder": "Рейтингова система",
+      "qelo": "Кело",
+      "trueskill": "Навички"
+    },
+    "maps": {
+      "all": "Всі карти",
+      "selectedCount": "{{count}} maps selected",
+      "searchPlaceholder": "Пошук карт.",
+      "empty": "Не знайдено карти."
+    },
+    "tags": {
+      "label": "Панчохи",
+      "selectedCount": "{{count}}+ tags",
+      "none": "Не вибрано теги.",
+      "inputPlaceholder": "Тип тегу і натисніть Enter"
+    }
+  },
+  "releaseNotes": {
+    "title": "Що нового в {{version}}",
+    "publishedOn": "Опубліковано {{дата}}",
+    "close": "Закрити"
+  }
+}

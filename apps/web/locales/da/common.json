@@ -1,0 +1,382 @@
+{
+  "navigation": {
+    "serverList": "Serverliste",
+    "favorites": "Favoritter",
+    "watchlist": "Overvågning",
+    "notifications": "Meddelelser",
+    "settings": "Indstillinger"
+  },
+  "common": {
+    "updated": "Opdateret"
+  },
+  "header": {
+    "unknown": "Ukendt",
+    "theme": {
+      "light": "Lys tema",
+      "dark": "Mørkt tema",
+      "system": "Systemtema"
+    }
+  },
+  "sidebar": {
+    "groupLabel": "QLTracker",
+    "about": "Om QLTracker"
+  },
+  "about": {
+    "version": "Version",
+    "author": "Udvikler",
+    "socials": "Samfund",
+    "stack": "Stack",
+    "repo": "Repo"
+  },
+  "notifications": {
+    "title": "Discord meddelelser",
+    "serviceUnavailable": "Notification service is unavailable in this build. Set `VITE_NOTIFICATION_API_URL` to enable Discord linking and delivery.",
+    "finishBrowser": "Afslut Discord link flow i din browser.",
+    "loadingStatus": "Indlæser Discord notifikationsstatus...",
+    "account": "Konto",
+    "rules": "Regler",
+    "rulesSummary": "{{enabled}} active / {{total}} total",
+    "dmRefused": "QLTracker er forbundet, men Discord nægtede stadig DM-check. Prøv installations- / link-strømmen igen for at teste DMs.",
+    "relink": "Relink- discord",
+    "retryInstall": "Prøv at installere igen",
+    "disconnect": "Afbryd forbindelse",
+    "noAccount": "Ingen Discord konto knyttet endnu.",
+    "installLink": "Forbind Discord",
+    "dialog": {
+      "editTitle": "Redigér diskurdmeddelelse",
+      "createTitle": "Discord meddelelse",
+      "descriptionWithServer": "Configure a Discord DM notification for {{server}}.",
+      "descriptionFallback": "Indstil en Discord DM meddelelse for denne server.",
+      "enabled": "Aktiveret",
+      "enabledDescription": "Send kun sms 'er, mens denne regel er aktiveret.",
+      "thresholdType": "Tærskelværdi",
+      "thresholdPlaceholder": "Vælg en tærskeltype",
+      "mode": {
+        "active_free_slots": {
+          "label": "Afspilning af pladser tilbage",
+          "description": "Advisér når en kamp er så tæt på påfyldning, ved hjælp af den samlede aktive spille slots i stedet for fuld server slots."
+        },
+        "free_slots": {
+          "label": "Gratis slots",
+          "description": "Advisér når serveren har så mange gratis slots eller færre."
+        },
+        "min_players": {
+          "label": "Mine spillere",
+          "description": "Advisér når serveren når mindst så mange spillere."
+        }
+      },
+      "totalPlayingSlots": "Samlede spillemaskiner",
+      "totalPlayingSlotsDescription": "Brug begge hold kombineret, ikke per- team størrelse. For en 4v4 server, indtast 8. For en 8v8 server, indtast 16. Dette er adskilt fra den fulde server slot tæller.",
+      "minimumPlayerCount": "Mindste antal spillere",
+      "maximumActiveSlotsLeft": "Maksimal aktive slots tilbage",
+      "maximumFreeSlots": "Maksimalt frie slots",
+      "activeSlotsDescription": "This rule will evaluate against {{count}} total active playing slots.",
+      "serverSupportsDescription": "This server currently supports up to {{count}} players.",
+      "deleteRule": "Slet regel",
+      "saveChanges": "Gem ændringer",
+      "createRule": "Opret regel"
+    }
+  },
+  "serverList": {
+    "refresh": "Genopfrisk",
+    "noServersMatch": "Ingen servere matcher de nuværende filtre.",
+    "pageStatus": "Page {{current}} of {{total}}",
+    "table": {
+      "server": "Server",
+      "location": "Sted",
+      "mode": "Tilstand",
+      "players": "Spillere",
+      "ping": "Ping",
+      "actions": "Handlinger"
+    },
+    "locationUnknown": "Ukendt",
+    "modeUnknown": "Ukendt",
+    "pingUnavailable": "IKKE RELEVANT",
+    "passwordSaved": "Adgangskode gemt",
+    "passwordRequired": "Adgangskode påkrævet",
+    "notificationEnabled": "Diskord meddelelse aktiveret",
+    "actions": {
+      "notificationsPublicOnly": "Anmeldelser er kun tilgængelige for offentlige servere.",
+      "connectDiscordFavorites": "Connect Discord på siden Meddelelser for at aktivere meddelelser.",
+      "editNotification": "Redigér Discord meddelelse",
+      "notifyDiscord": "Underret om uenighed",
+      "editFavorite": "Redigér favorit",
+      "removeFromFavorites": "Fjern fra favoritter",
+      "addToFavorites": "Tilføj til favoritter",
+      "copyAddress": "Kopiér IP:Port"
+    },
+    "drawer": {
+      "play": "Spil",
+      "map": "Kort",
+      "avgQeloTooltip": "Gennemsnitlig QElo på denne server",
+      "avgTrueskillTooltip": "Gennemsnitlig TSkill på denne server",
+      "topQeloTooltip": "Højeste QElo-afspiller på denne server",
+      "topTrueskillTooltip": "Højeste TSkill-afspiller på denne server",
+      "playersHeading": "Spillere",
+      "player": "Spiller",
+      "points": "Point",
+      "qelo": "QElo",
+      "trueskill": "TSkill",
+      "time": "Tid",
+      "watch": "Følg",
+      "trackPlayer": "Følg spiller",
+      "untrackPlayer": "Fjern fra overvågning",
+      "historyTitle": "Historik",
+      "historyWindow": "Seneste 7 dage",
+      "historyLastSeen": "Sidst set",
+      "historyPeakPlayers": "Flest spillere",
+      "historyTimePopulated": "Tid med spillere",
+      "historyUnavailable": "Serverhistorik er ikke tilgængelig. Aktivér realtime-backenden og deploy historik-endpointet for at indlæse dette kort.",
+      "historyEmpty": "Der er endnu ingen nyere historik for denne server.",
+      "lookupFailed": "Steam-spillerens opslag mislykkedes.",
+      "noPlayerData": "Ingen spillerdata for denne server.",
+      "teams": {
+        "blue": "Blue Team",
+        "free": "Fri",
+        "players": "Spillere",
+        "red": "Red Team",
+        "spectators": "Spektatorer",
+        "unassigned": "Ikke tildelt"
+      }
+    },
+    "favoriteDialog": {
+      "editTitle": "Redigér favorit",
+      "addTitle": "Tilføj til favoritter",
+      "fallbackDescription": "Tildel denne server til en af dine lokale favoritlister.",
+      "selectList": "Vælg en liste",
+      "listsUnavailable": "Ingen favoritlister. Opret en liste på siden med favoritter først.",
+      "remove": "Fjern",
+      "saveChanges": "Gem ændringer",
+      "addToList": "Tilføj til liste"
+    },
+    "passwordDialog": {
+      "title": "Serveradgangskode",
+      "descriptionWithServer": "Enter the password for {{server}}.",
+      "fallbackDescription": "Indtast adgangskoden for denne server.",
+      "inputPlaceholder": "Indtast server- adgangskode",
+      "remember": "Gem denne adgangskode til fremtidige tilmeldinger",
+      "join": "Deltag"
+    },
+    "toasts": {
+      "removedFromFavorites": "Fjernet fra favoritter.",
+      "notificationUpdated": "Anmeldelse opdateret.",
+      "notificationCreated": "Anmeldelse oprettet.",
+      "notificationRemoved": "Anmeldelse fjernet.",
+      "notificationSaveError": "Kunne ikke gemme notifikationsreglen.",
+      "notificationRemoveError": "Kunne ikke fjerne notifikationsreglen.",
+      "favoriteUpdated": "Favorit opdateret.",
+      "addedToFavorites": "Tilføjet favoritter.",
+      "serverAddressCopied": "IP:Port kopieret.",
+      "serverAddressCopyError": "Kunne ikke kopiere IP:Port."
+    }
+  },
+  "settings": {
+    "title": "Indstillinger",
+    "startupTitle": "Start på Windows",
+    "startupDescription": "Start automatisk QLTracker når du logger på Windows.",
+    "startupSaving": "Gemmer opstartspræference...",
+    "unavailable": "Sætning er ikke tilgængelig i denne bygning.",
+    "languageTitle": "Sprog",
+    "languageDescription": "Vælg det sprog, som QLTracker skal bruge i hele appen.",
+    "languagePlaceholder": "Vælg sprog",
+    "discordPresenceTitle": "Discord-status",
+    "discordPresenceDescription": "Vis QLTracker som din Discord-aktivitet, mens du bruger appen.",
+    "discordPresenceServerTitle": "Vis detaljer om nuværende server",
+    "discordPresenceServerDescription": "Når QLTracker starter en server, skal servernavn, map, tilstand og spillere vises i din Discord-aktivitet.",
+    "discordPresenceSteamIdTitle": "SteamID64 til sporing af aktiv server",
+    "discordPresenceSteamIdDescription": "Valgfrit. Tilføj dit SteamID64, så Discord kan vise den server, du faktisk er på, også når du skifter server inde i Quake Live.",
+    "discordPresenceSteamIdPlaceholder": "7656119...",
+    "sections": {
+      "general": "Generelt",
+      "generalDescription": "Sprog og kerneapppræferencer.",
+      "startupTray": "Opstart & Bakke",
+      "startupTrayDescription": "Opstartsadfærd, bakketilstand og vindueshåndtering.",
+      "desktopAlerts": "Desktop-advarsler",
+      "desktopAlertsDescription": "Native notifikationer for sporede spillere og yndlingsservere.",
+      "notifications": "Meddelelser og uenighed",
+      "notificationsDescription": "Discord-kontotilknytning og meddelelsesregleradgang.",
+      "discordPresence": "Discord tilstedeværelse",
+      "discordPresenceDescription": "Discord rig tilstedeværelse, mens QLTracker er åben."
+    },
+    "backToApp": "Tilbage til app",
+    "trayModeTitle": "Bakketilstand",
+    "trayModeDescription": "Hold QLTracker kørende i baggrunden med et bakkeikon og hurtige handlinger.",
+    "closeToTrayTitle": "Luk vindue til bakke",
+    "closeToTrayDescription": "Skjul QLTracker i stedet for at afslutte, når du lukker hovedvinduet.",
+    "startMinimizedTitle": "Start minimeret til bakke",
+    "startMinimizedDescription": "Start QLTracker i baggrunden, indtil du gendanner det fra bakkeikonet.",
+    "desktopAlertsTitle": "Desktop-advarsler",
+    "desktopAlertsDescription": "Send native desktop notifikationer til sporede spillere og yndlingsservere.",
+    "desktopAlertsPausedTitle": "Sæt skrivebordsadvarsler på pause",
+    "desktopAlertsPausedDescription": "Sluk midlertidigt alle skrivebordsadvarsler uden at ændre dine underretningsregler.",
+    "trackedPlayerAlertsTitle": "Sporede spilleradvarsler",
+    "trackedPlayerAlertsDescription": "Giv besked, når en overvåget spiller dukker op eller flytter til en anden server. Kræver realtime backend.",
+    "favoriteServerAlertsTitle": "Favoritserveradvarsler",
+    "favoriteServerAlertsDescription": "Giv besked, når en favoritserver når din spillertærskel.",
+    "favoriteServerThresholdTitle": "Tærskelværdi for favoritserverspiller",
+    "favoriteServerThresholdDescription": "Send en advarsel, når en favoritserver krydser dette spillerantal.",
+    "favoriteServerThresholdPlaceholder": "Spillere",
+    "discordLinkTitle": "Discord-kontolink",
+    "discordLinkDescription": "Tilslut Discord for at administrere levering af DM-meddelelser og kontostatus.",
+    "notificationsManageRulesTitle": "Underretningsregler",
+    "notificationsManageRulesDescription": "Serverspecifikke Discord DM-regler administreres fra serverlisten.",
+    "notificationsManageRulesHint": "Åbn en server, og brug Discord-meddelelseshandlingen til at oprette eller redigere en regel."
+  },
+  "language": {
+    "en": "English",
+    "de": "Deutsch",
+    "bg": "Български",
+    "ru": "Русский",
+    "uk": "Українська",
+    "hr": "Hrvatski",
+    "sr": "Српски",
+    "fr": "Français",
+    "it": "Italiano",
+    "et": "Eesti",
+    "nl": "Nederlands",
+    "fi": "Suomi",
+    "sv": "Svenska",
+    "hu": "Magyar",
+    "da": "Dansk",
+    "lv": "Latviešu",
+    "nb": "Norsk Bokmål",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ka": "ქართული",
+    "zh-Hant": "繁體中文",
+    "zh-Hans": "简体中文",
+    "es": "Español",
+    "pt-BR": "Português (Brasil)",
+    "pl": "Polski",
+    "ro": "Română",
+    "lt": "Lietuvių",
+    "cs": "Čeština"
+  },
+  "favorites": {
+    "lists": "Lister",
+    "refresh": "Genopfrisk",
+    "createList": "Opret liste",
+    "createDialogTitle": "Opret favoritliste",
+    "createDialogDescription": "Opret en liste til at organisere dine gemte servere.",
+    "listNamePlaceholder": "Listenavn",
+    "playersTooltip": "Live spillere i alt",
+    "favoriteServers": "Favoritservere",
+    "savedServers_one": "{{count}} saved server",
+    "savedServers_other": "{{count}} saved servers",
+    "noLists": "Ingen lister endnu. Opret din første liste for at komme i gang.",
+    "noServers": "Ingen servere gemt i denne liste endnu.",
+    "deleteList": "Slet liste",
+    "deleteDialogTitle": "Slet favoritliste",
+    "deleteDialogDescription": "Slet \"{{list}}\"? Servere, der kun er gemt i denne liste, fjernes fra Favoritter.",
+    "deleteDialogCancel": "Annuller",
+    "toasts": {
+      "listDeleted": "\"{{list}}\" blev slettet."
+    }
+  },
+  "watchlist": {
+    "title": "Spillerovervågning",
+    "summary_one": "{{online}} online ud af {{count}} overvåget spiller",
+    "summary_other": "{{online}} online ud af {{count}} overvågede spillere",
+    "onlineCount": "{{count}} online",
+    "serviceUnavailableBadge": "Live-status er utilgængelig",
+    "emptyTitle": "Ingen overvågede spillere endnu",
+    "emptyDescription": "Følg spillere fra serverpanelet for at holde øje med, hvor de spiller.",
+    "emptyHint": "Åbn en vilkårlig server, og brug følg-knappen ved siden af en spiller med løst SteamID.",
+    "offline": "Offline",
+    "updatedUnavailable": "Utilgængelig",
+    "statusOnline": "Online",
+    "statusOffline": "Offline",
+    "statusUnavailable": "Utilgængelig",
+    "toasts": {
+      "tracked": "{{player}} blev tilføjet til overvågningen.",
+      "untracked": "{{player}} blev fjernet fra overvågningen.",
+      "noteSaved": "Noten for {{player}} blev gemt.",
+      "noteCleared": "Noten for {{player}} blev fjernet.",
+      "steamIdCopied": "SteamID kopieret.",
+      "steamIdCopyError": "SteamID kunne ikke kopieres."
+    },
+    "columns": {
+      "player": "Spiller",
+      "status": "Status",
+      "server": "Server",
+      "map": "Kort",
+      "mode": "Tilstand",
+      "actions": "Handlinger"
+    },
+    "noteDialog": {
+      "clear": "Ryd note",
+      "description": "Tilføj en lokal note for {{player}}.",
+      "hint": "Noter gemmes kun på denne enhed.",
+      "label": "Note",
+      "placeholder": "Tilføj en note om denne spiller...",
+      "save": "Gem note",
+      "title": "Spillernote"
+    },
+    "actions": {
+      "copySteamId": "Kopiér SteamID",
+      "editNote": "Rediger note",
+      "viewServer": "Vis server"
+    }
+  },
+  "filters": {
+    "title": "Filtre",
+    "expand": "Udvid filtre",
+    "collapse": "Kollaps filtre",
+    "searchPlaceholder": "Name",
+    "showFull": "Vis fuld",
+    "showEmpty": "Vis tom",
+    "showFavorites": "Vis favoritter",
+    "clearAll": "Ryd alle",
+    "regions": {
+      "all": "Alle regioner",
+      "eu": "Europa",
+      "na": "Nordamerika",
+      "sa": "Sydamerika",
+      "za": "Sydafrika",
+      "apac": "Asien Stillehavet"
+    },
+    "visibility": {
+      "all": "Alle servere",
+      "public": "Offentlig",
+      "private": "Privat"
+    },
+    "modes": {
+      "all": "Alle tilstande",
+      "ca": "Clan Arena",
+      "duel": "Duel",
+      "ffa": "Gratis for alle",
+      "tdm": "Team Deathmatch",
+      "ctf": "CTF",
+      "ad": "Angrib & forsvar",
+      "dom": "Domination",
+      "ft": "Frys mærke",
+      "har": "Høststed",
+      "race": "Race",
+      "rr": "Red Rover"
+    },
+    "rating": {
+      "title": "Bedømmelse",
+      "description": "Filtrer servere efter gennemsnitlig QElo eller TSkill.",
+      "systemPlaceholder": "Rating system",
+      "qelo": "QElo",
+      "trueskill": "TSkill"
+    },
+    "maps": {
+      "all": "Alle kort",
+      "selectedCount": "{{count}} maps selected",
+      "searchPlaceholder": "Søg kort...",
+      "empty": "Ingen kort fundet."
+    },
+    "tags": {
+      "label": "Mærker",
+      "selectedCount": "{{count}}+ tags",
+      "none": "Ingen mærker valgt.",
+      "inputPlaceholder": "Skriv mærke og tryk på Enter"
+    }
+  },
+  "releaseNotes": {
+    "title": "Hvad er nyt i {{version}}",
+    "publishedOn": "Udgivet {{dato}}",
+    "close": "Luk"
+  }
+}

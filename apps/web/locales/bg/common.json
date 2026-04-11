@@ -1,0 +1,382 @@
+{
+  "navigation": {
+    "serverList": "Списък със сървъри",
+    "favorites": "Любими",
+    "watchlist": "Наблюдение",
+    "notifications": "Уведомления",
+    "settings": "Настройки"
+  },
+  "common": {
+    "updated": "Обновено"
+  },
+  "header": {
+    "unknown": "Неизвестно",
+    "theme": {
+      "light": "Light тема",
+      "dark": "Тъмна тема",
+      "system": "Системна тема"
+    }
+  },
+  "sidebar": {
+    "groupLabel": "QLTracker",
+    "about": "За QLTracker"
+  },
+  "about": {
+    "version": "Версия",
+    "author": "Разработчик",
+    "socials": "Социално осигуряване",
+    "stack": "Стак",
+    "repo": "Repo"
+  },
+  "notifications": {
+    "title": "Несъгласувани уведомления",
+    "serviceUnavailable": "Notification service is unavailable in this build. Set `VITE_NOTIFICATION_API_URL` to enable Discord linking and delivery.",
+    "finishBrowser": "Завършете потока Discord връзка в браузъра си.",
+    "loadingStatus": "Зареждане на статуса на уведомление за несъгласие...",
+    "account": "Партида",
+    "rules": "Правила",
+    "rulesSummary": "{{enabled}} active / {{total}} total",
+    "dmRefused": "QLTracker е свързан, но Discord все още отказа DM проверка. Ретриция на дебита на инсталацията/линковете за изпитване на DM отново.",
+    "relink": "Превключване на раздор",
+    "retryInstall": "Проверка за инсталиране на данни",
+    "disconnect": "Изключване",
+    "noAccount": "Все още няма разногласие.",
+    "installLink": "Свържи Discord",
+    "dialog": {
+      "editTitle": "Редактиране на уведомление за несъгласие",
+      "createTitle": "Нотификация за несъгласие",
+      "descriptionWithServer": "Configure a Discord DM notification for {{server}}.",
+      "descriptionFallback": "Настройване на Discord DM уведомление за този сървър.",
+      "enabled": "Включване",
+      "enabledDescription": "Пратете DM-та само докато това правило е включено.",
+      "thresholdType": "Вид праг",
+      "thresholdPlaceholder": "Избор на тип праг",
+      "mode": {
+        "active_free_slots": {
+          "label": "Играене на слотове наляво",
+          "description": "Уведомете, когато мач е толкова близо до попълване, като използвате общите активни слотове за игра, вместо пълни сървърни слотове."
+        },
+        "free_slots": {
+          "label": "Безплатни слотове",
+          "description": "Уведомете, когато сървърът има толкова много свободни слотове или по-малко."
+        },
+        "min_players": {
+          "label": "Минни играчи",
+          "description": "Уведомете, когато сървърът достигне поне толкова играчи."
+        }
+      },
+      "totalPlayingSlots": "Общо игрални слотове",
+      "totalPlayingSlotsDescription": "Използвайте двата отбора заедно, а не размера на екипа. За 4v4 сървър, въведете 8. За 8v8 сървър, въведете 16. Това е отделно от броя на сървърите.",
+      "minimumPlayerCount": "Минимален брой играчи",
+      "maximumActiveSlotsLeft": "Максимално активни слотове останали",
+      "maximumFreeSlots": "Максимално свободни слотове",
+      "activeSlotsDescription": "This rule will evaluate against {{count}} total active playing slots.",
+      "serverSupportsDescription": "This server currently supports up to {{count}} players.",
+      "deleteRule": "Изтриване на правило",
+      "saveChanges": "Запис на промените",
+      "createRule": "Създаване на правило"
+    }
+  },
+  "serverList": {
+    "refresh": "Обновяване",
+    "noServersMatch": "Няма сървъри, отговарящи на текущите филтри.",
+    "pageStatus": "Page {{current}} of {{total}}",
+    "table": {
+      "server": "Сървър",
+      "location": "Местоположение",
+      "mode": "Режим",
+      "players": "Играчи",
+      "ping": "Пинг",
+      "actions": "Действия"
+    },
+    "locationUnknown": "Неизвестно",
+    "modeUnknown": "Неизвестно",
+    "pingUnavailable": "НЕ Е ПРИЛОЖИМО",
+    "passwordSaved": "Запис на паролата",
+    "passwordRequired": "Изисква се парола",
+    "notificationEnabled": "Разрешаване на уведомление за несъгласие",
+    "actions": {
+      "notificationsPublicOnly": "Нотификациите са достъпни само за обществени сървъри.",
+      "connectDiscordFavorites": "Свържете Разногласие на страницата Нотификации, за да се даде възможност за уведомления.",
+      "editNotification": "Редактиране на уведомление за несъгласие",
+      "notifyDiscord": "Уведоми за несъгласието",
+      "editFavorite": "Редактиране на любимото",
+      "removeFromFavorites": "Премахване от фаворити",
+      "addToFavorites": "Добавяне към любимите",
+      "copyAddress": "Копирай IP:Port"
+    },
+    "drawer": {
+      "play": "Игра",
+      "map": "Карта",
+      "avgQeloTooltip": "Средно QElo на този сървър",
+      "avgTrueskillTooltip": "Среден TSkill на този сървър",
+      "topQeloTooltip": "Най-високият QElo плейър на този сървър",
+      "topTrueskillTooltip": "Най-високият играч на TSkill на този сървър",
+      "playersHeading": "Играчи",
+      "player": "Играч",
+      "points": "Точки",
+      "qelo": "QElo",
+      "trueskill": "TSkill",
+      "time": "Време",
+      "watch": "Следи",
+      "trackPlayer": "Следи играч",
+      "untrackPlayer": "Премахни от списъка за следене",
+      "historyTitle": "История",
+      "historyWindow": "Последните 7 дни",
+      "historyLastSeen": "Последно видян",
+      "historyPeakPlayers": "Пиков брой играчи",
+      "historyTimePopulated": "Време с играчи",
+      "historyUnavailable": "Историята на сървъра не е налична. Активирай realtime бекенда и пусни history endpoint-а, за да се зареди тази карта.",
+      "historyEmpty": "Все още няма скорошна история за този сървър.",
+      "lookupFailed": "Прегледът на Steam плейъра се провали.",
+      "noPlayerData": "Няма данни за този сървър.",
+      "teams": {
+        "blue": "Син екип",
+        "free": "Свободно",
+        "players": "Играчи",
+        "red": "Червен екип",
+        "spectators": "Зрители",
+        "unassigned": "Неназначен"
+      }
+    },
+    "favoriteDialog": {
+      "editTitle": "Редактиране на фаворита",
+      "addTitle": "Добавяне към любими",
+      "fallbackDescription": "Подпишете този сървър в един от любимите си местни списъци.",
+      "selectList": "Избор на списък",
+      "listsUnavailable": "Няма любими списъци. Създаване на списък на страницата Любими първо.",
+      "remove": "Премахване",
+      "saveChanges": "Запис на промените",
+      "addToList": "Добавяне към списъка"
+    },
+    "passwordDialog": {
+      "title": "Парола на сървъра",
+      "descriptionWithServer": "Enter the password for {{server}}.",
+      "fallbackDescription": "Въведете паролата за сървъра.",
+      "inputPlaceholder": "Въведете парола на сървъра",
+      "remember": "Запис на паролата за бъдещи присъединявания",
+      "join": "Присъединяване"
+    },
+    "toasts": {
+      "removedFromFavorites": "Премахнат от любимите.",
+      "notificationUpdated": "Нотификацията е актуализирана.",
+      "notificationCreated": "Нотификация създадена.",
+      "notificationRemoved": "Нотификацията е отменена.",
+      "notificationSaveError": "Правилото за уведомяване не може да бъде запазено.",
+      "notificationRemoveError": "Правилото за уведомяване не може да бъде премахнато.",
+      "favoriteUpdated": "Любимо обновяване.",
+      "addedToFavorites": "Добавено към любимите.",
+      "serverAddressCopied": "IP:Port е копиран.",
+      "serverAddressCopyError": "IP:Port не можа да бъде копиран."
+    }
+  },
+  "settings": {
+    "title": "Настройки",
+    "startupTitle": "Стартиране на Windows",
+    "startupDescription": "Автоматично стартиране на QLTracker, когато влезете в Windows.",
+    "startupSaving": "Запис на предпочитанията за стартиране...",
+    "unavailable": "Настройката не е достъпна в тази сграда.",
+    "languageTitle": "Език",
+    "languageDescription": "Изберете езика, който QLTracker ще използва в цялото приложение.",
+    "languagePlaceholder": "Избор на език",
+    "discordPresenceTitle": "Discord активност",
+    "discordPresenceDescription": "Показвай QLTracker като твоя Discord активност, докато разглеждаш приложението.",
+    "discordPresenceServerTitle": "Показвай данните за текущия сървър",
+    "discordPresenceServerDescription": "Когато QLTracker стартира сървър, включвай името на сървъра, картата, режима и играчите в твоята Discord активност.",
+    "discordPresenceSteamIdTitle": "SteamID64 за проследяване на текущия сървър",
+    "discordPresenceSteamIdDescription": "По желание. Добави своя SteamID64, за да може Discord да показва в кой сървър си в момента, дори ако сменяш сървърите в Quake Live.",
+    "discordPresenceSteamIdPlaceholder": "7656119...",
+    "sections": {
+      "general": "генерал",
+      "generalDescription": "Предпочитания за език и основни приложения.",
+      "startupTray": "Стартиране и тава",
+      "startupTrayDescription": "Поведение при стартиране, режим на област и работа с прозорец.",
+      "desktopAlerts": "Сигнали на работния плот",
+      "desktopAlertsDescription": "Родни известия за проследени играчи и любими сървъри.",
+      "notifications": "Известия и Discord",
+      "notificationsDescription": "Свързване на Discord акаунт и достъп до правило за известяване.",
+      "discordPresence": "Присъствие на Discord",
+      "discordPresenceDescription": "Богато присъствие на Discord, докато QLTracker е отворен."
+    },
+    "backToApp": "Назад към приложението",
+    "trayModeTitle": "Режим тава",
+    "trayModeDescription": "Поддържайте QLTracker да работи във фонов режим с икона в панела и бързи действия.",
+    "closeToTrayTitle": "Затворете прозореца в трея",
+    "closeToTrayDescription": "Скрийте QLTracker вместо да излезете, когато затворите главния прозорец.",
+    "startMinimizedTitle": "Старт минимизиран в трея",
+    "startMinimizedDescription": "Стартирайте QLTracker във фонов режим, докато не го възстановите от иконата в трея.",
+    "desktopAlertsTitle": "Сигнали на работния плот",
+    "desktopAlertsDescription": "Изпращайте собствени известия на работния плот за проследени играчи и любими сървъри.",
+    "desktopAlertsPausedTitle": "Поставете на пауза предупрежденията на работния плот",
+    "desktopAlertsPausedDescription": "Временно заглушете всички предупреждения на работния плот, без да променяте правилата си за предупреждения.",
+    "trackedPlayerAlertsTitle": "Сигнали за проследени играчи",
+    "trackedPlayerAlertsDescription": "Уведомявайте, когато наблюдаван играч се появи или се премести на друг сървър. Изисква бекенда в реално време.",
+    "favoriteServerAlertsTitle": "Сигнали за любим сървър",
+    "favoriteServerAlertsDescription": "Уведомете, когато любим сървър достигне вашия праг на играч.",
+    "favoriteServerThresholdTitle": "Праг на любим сървърен играч",
+    "favoriteServerThresholdDescription": "Изпратете предупреждение, когато любим сървър надхвърли този брой играчи.",
+    "favoriteServerThresholdPlaceholder": "Играчи",
+    "discordLinkTitle": "Връзка към Discord акаунт",
+    "discordLinkDescription": "Свържете Discord, за да управлявате доставката на DM известия и състоянието на акаунта.",
+    "notificationsManageRulesTitle": "Правила за уведомяване",
+    "notificationsManageRulesDescription": "Специфичните за сървъра правила на Discord DM се управляват от списъка със сървъри.",
+    "notificationsManageRulesHint": "Отворете сървър и използвайте действието за известяване на Discord, за да създадете или редактирате правило."
+  },
+  "language": {
+    "en": "English",
+    "de": "Deutsch",
+    "bg": "Български",
+    "ru": "Русский",
+    "uk": "Українська",
+    "hr": "Hrvatski",
+    "sr": "Српски",
+    "fr": "Français",
+    "it": "Italiano",
+    "et": "Eesti",
+    "nl": "Nederlands",
+    "fi": "Suomi",
+    "sv": "Svenska",
+    "hu": "Magyar",
+    "da": "Dansk",
+    "lv": "Latviešu",
+    "nb": "Norsk Bokmål",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ka": "ქართული",
+    "zh-Hant": "繁體中文",
+    "zh-Hans": "简体中文",
+    "es": "Español",
+    "pt-BR": "Português (Brasil)",
+    "pl": "Polski",
+    "ro": "Română",
+    "lt": "Lietuvių",
+    "cs": "Čeština"
+  },
+  "favorites": {
+    "lists": "Списък",
+    "refresh": "Обновяване",
+    "createList": "Създаване на списък",
+    "createDialogTitle": "Създаване на любим списък",
+    "createDialogDescription": "Създаване на списък за организиране на записаните сървъри.",
+    "listNamePlaceholder": "Име на списъка",
+    "playersTooltip": "Общо играчи на живо",
+    "favoriteServers": "Любими сървъри",
+    "savedServers_one": "{{count}} saved server",
+    "savedServers_other": "{{count}} saved servers",
+    "noLists": "Все още няма списъци. Създаване на първия си списък, за да започнете.",
+    "noServers": "Все още няма записани сървъри в този списък.",
+    "deleteList": "Изтрий списъка",
+    "deleteDialogTitle": "Изтрий списъка с любими",
+    "deleteDialogDescription": "Да се изтрие ли \"{{list}}\"? Сървърите, запазени само в този списък, ще бъдат премахнати от Любими.",
+    "deleteDialogCancel": "Отказ",
+    "toasts": {
+      "listDeleted": "\"{{list}}\" е изтрит."
+    }
+  },
+  "watchlist": {
+    "title": "Списък за следене на играчи",
+    "summary_one": "{{online}} онлайн от {{count}} следен играч",
+    "summary_other": "{{online}} онлайн от {{count}} следени играчи",
+    "onlineCount": "{{count}} онлайн",
+    "serviceUnavailableBadge": "Статусът на живо не е наличен",
+    "emptyTitle": "Все още няма следени играчи",
+    "emptyDescription": "Следи играчи от панела на сървъра, за да виждаш къде играят.",
+    "emptyHint": "Отвори който и да е сървър и използвай бутона за следене до играч с разпознат SteamID.",
+    "offline": "Офлайн",
+    "updatedUnavailable": "Недостъпно",
+    "statusOnline": "Онлайн",
+    "statusOffline": "Офлайн",
+    "statusUnavailable": "Недостъпно",
+    "toasts": {
+      "tracked": "{{player}} е добавен в списъка за следене.",
+      "untracked": "{{player}} е премахнат от списъка за следене.",
+      "noteSaved": "Бележката за {{player}} е запазена.",
+      "noteCleared": "Бележката за {{player}} е премахната.",
+      "steamIdCopied": "SteamID е копиран.",
+      "steamIdCopyError": "SteamID не можа да бъде копиран."
+    },
+    "columns": {
+      "player": "Играч",
+      "status": "Статус",
+      "server": "Сървър",
+      "map": "Карта",
+      "mode": "Режим",
+      "actions": "Действия"
+    },
+    "noteDialog": {
+      "clear": "Изчисти бележката",
+      "description": "Добавете локална бележка за {{player}}.",
+      "hint": "Бележките се съхраняват само на това устройство.",
+      "label": "Бележка",
+      "placeholder": "Добавете бележка за този играч...",
+      "save": "Запази бележката",
+      "title": "Бележка за играч"
+    },
+    "actions": {
+      "copySteamId": "Копирай SteamID",
+      "editNote": "Редактирай бележката",
+      "viewServer": "Покажи сървъра"
+    }
+  },
+  "filters": {
+    "title": "Филтри",
+    "expand": "Разширяване на филтрите",
+    "collapse": "Сгъваеми филтри",
+    "searchPlaceholder": "Име на сървъра за търсене",
+    "showFull": "Показване на пълния",
+    "showEmpty": "Показване на празни",
+    "showFavorites": "Показване на любими",
+    "clearAll": "Изчистване на всичко",
+    "regions": {
+      "all": "Всички региони",
+      "eu": "Европа",
+      "na": "Северна Америка",
+      "sa": "Южна Америка",
+      "za": "Южна Африка",
+      "apac": "Азия Тихи океан"
+    },
+    "visibility": {
+      "all": "Всички сървъри",
+      "public": "Публично",
+      "private": "Частен"
+    },
+    "modes": {
+      "all": "Всички режими",
+      "ca": "Клан Арена",
+      "duel": "Дуел",
+      "ffa": "Свободен за всички",
+      "tdm": "Отбор Deathmatch",
+      "ctf": "CTF",
+      "ad": "Атака и защита",
+      "dom": "Доминация",
+      "ft": "Замръзнете таг",
+      "har": "Harvester",
+      "race": "Състезание",
+      "rr": "Red Rover"
+    },
+    "rating": {
+      "title": "Рейтинг",
+      "description": "Филтрирайте сървърите със средно QElo или TSkill.",
+      "systemPlaceholder": "Рейтингова система",
+      "qelo": "QElo",
+      "trueskill": "TSkill"
+    },
+    "maps": {
+      "all": "Всички карти",
+      "selectedCount": "{{count}} maps selected",
+      "searchPlaceholder": "Търсене на карти...",
+      "empty": "Не са открити карти."
+    },
+    "tags": {
+      "label": "Етикети",
+      "selectedCount": "{{count}}+ tags",
+      "none": "Няма избрани етикети.",
+      "inputPlaceholder": "Въведете таг и натиснете Enter"
+    }
+  },
+  "releaseNotes": {
+    "title": "Какво е новото във {{version}}",
+    "publishedOn": "Публикувано {{date}}",
+    "close": "затвори"
+  }
+}

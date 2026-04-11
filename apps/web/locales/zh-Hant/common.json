@@ -1,0 +1,382 @@
+{
+  "navigation": {
+    "serverList": "伺服器清單",
+    "favorites": "有喜好者",
+    "watchlist": "關注清單",
+    "notifications": "通知",
+    "settings": "設定值"
+  },
+  "common": {
+    "updated": "更新"
+  },
+  "header": {
+    "unknown": "未知",
+    "theme": {
+      "light": "有光主題",
+      "dark": "黑暗主題",
+      "system": "系統主題"
+    }
+  },
+  "sidebar": {
+    "groupLabel": "QLT快取器",
+    "about": "关于 QLTracker (快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取快取 (% % % % % %% % % % % % %%%%%%%% %%%%"
+  },
+  "about": {
+    "version": "版本",
+    "author": "開發者",
+    "socials": "社會",
+    "stack": "堆疊",
+    "repo": "收起"
+  },
+  "notifications": {
+    "title": "分解通知",
+    "serviceUnavailable": "Notification service is unavailable in this build. Set `VITE_NOTIFICATION_API_URL` to enable Discord linking and delivery.",
+    "finishBrowser": "在您的瀏覽器中完成 Discord 連接流 .",
+    "loadingStatus": "正在載入 Discord 通知狀態...",
+    "account": "帳號",
+    "rules": "第 二 章",
+    "rulesSummary": "{{enabled}} active / {{total}} total",
+    "dmRefused": "但是Discord仍然拒絕了DM檢查 。 重試安裝/ 連接相關流程以再試取 DMs .",
+    "relink": "重新連接迪斯克",
+    "retryInstall": "重試安裝檢查",
+    "disconnect": "斷接",
+    "noAccount": "Discord 帳號尚未連接 .",
+    "installLink": "連結 Discord",
+    "dialog": {
+      "editTitle": "編輯分解通知",
+      "createTitle": "分解通知",
+      "descriptionWithServer": "Configure a Discord DM notification for {{server}}.",
+      "descriptionFallback": "为此伺服器配置 Discord DM 通知 .",
+      "enabled": "已開啟",
+      "enabledDescription": "在啟用此規則時只發出 DMs .",
+      "thresholdType": "下限型態",
+      "thresholdPlaceholder": "選擇入限型態",
+      "mode": {
+        "active_free_slots": {
+          "label": "在左邊播放槽",
+          "description": "在相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相關相."
+        },
+        "free_slots": {
+          "label": "空位",
+          "description": "在伺服器有這麼多空位或更少時通知 ."
+        },
+        "min_players": {
+          "label": "最小玩家",
+          "description": "當伺服器到達至少多個玩家時通知 ."
+        }
+      },
+      "totalPlayingSlots": "全部播放槽",
+      "totalPlayingSlotsDescription": "就用兩隊相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相接相相接相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相相 对于 4v4 伺服器, 請輸入 8 。 对于 8v8 伺服器, 請輸入 16. 這與伺服器完整位數相隔了 .",
+      "minimumPlayerCount": "最小玩家數量",
+      "maximumActiveSlotsLeft": "剩餘最大作用中位數",
+      "maximumFreeSlots": "最大空間",
+      "activeSlotsDescription": "This rule will evaluate against {{count}} total active playing slots.",
+      "serverSupportsDescription": "This server currently supports up to {{count}} players.",
+      "deleteRule": "刪除規則",
+      "saveChanges": "儲存變更",
+      "createRule": "建立規則"
+    }
+  },
+  "serverList": {
+    "refresh": "刷新",
+    "noServersMatch": "沒有伺服器能符合目前的過程 .",
+    "pageStatus": "Page {{current}} of {{total}}",
+    "table": {
+      "server": "伺服器",
+      "location": "位置",
+      "mode": "模式",
+      "players": "玩家",
+      "ping": "小平",
+      "actions": "動作"
+    },
+    "locationUnknown": "未知",
+    "modeUnknown": "未知",
+    "pingUnavailable": "有/有",
+    "passwordSaved": "密碼已儲存",
+    "passwordRequired": "需要密碼",
+    "notificationEnabled": "已啟用分解通知",
+    "actions": {
+      "notificationsPublicOnly": "通知只提供公共伺服器.",
+      "connectDiscordFavorites": "在通知頁面上連接 Discord以啟用通知 .",
+      "editNotification": "編輯 Discord 通知",
+      "notifyDiscord": "在分解上通知",
+      "editFavorite": "編輯最愛的",
+      "removeFromFavorites": "从最愛取出",
+      "addToFavorites": "添加到最愛",
+      "copyAddress": "複製 IP:Port"
+    },
+    "drawer": {
+      "play": "播放",
+      "map": "地圖",
+      "avgQeloTooltip": "此伺服器上的平均 QElo",
+      "avgTrueskillTooltip": "此伺服器上的平均 TSkill",
+      "topQeloTooltip": "此伺服器上最高的 QElo 播放器",
+      "topTrueskillTooltip": "此伺服器上最高的 TSkill 播放器",
+      "playersHeading": "玩家",
+      "player": "玩家",
+      "points": "點",
+      "qelo": "QEL",
+      "trueskill": "TSkill (通訊錄)",
+      "time": "時間",
+      "watch": "關注",
+      "trackPlayer": "關注玩家",
+      "untrackPlayer": "從關注清單移除",
+      "historyTitle": "歷史",
+      "historyWindow": "最近 7 天",
+      "historyLastSeen": "最後出現",
+      "historyPeakPlayers": "玩家峰值",
+      "historyTimePopulated": "有玩家的時間",
+      "historyUnavailable": "伺服器歷史記錄無法使用。請啟用即時後端並部署歷史記錄端點來載入這張卡片。",
+      "historyEmpty": "這個伺服器目前還沒有最近的歷史記錄。",
+      "lookupFailed": "Steam 播放器找取失敗 .",
+      "noPlayerData": "此伺服器沒有玩家資料 .",
+      "teams": {
+        "blue": "藍色小組",
+        "free": "自由",
+        "players": "玩家",
+        "red": "紅隊",
+        "spectators": "有目擊者",
+        "unassigned": "未指定"
+      }
+    },
+    "favoriteDialog": {
+      "editTitle": "編輯最愛的",
+      "addTitle": "添加到最愛",
+      "fallbackDescription": "將此伺服器指定为您所最喜歡的清單 .",
+      "selectList": "選擇清單",
+      "listsUnavailable": "沒有最愛的清單 。 在相關頁面上先建立清單 .",
+      "remove": "移除",
+      "saveChanges": "儲存變更",
+      "addToList": "新增到清單"
+    },
+    "passwordDialog": {
+      "title": "伺服器密碼",
+      "descriptionWithServer": "Enter the password for {{server}}.",
+      "fallbackDescription": "輸入此伺服器的密碼 .",
+      "inputPlaceholder": "輸入伺服器密碼",
+      "remember": "儲存此密碼供未來加入",
+      "join": "加入"
+    },
+    "toasts": {
+      "removedFromFavorites": "从最愛取出 .",
+      "notificationUpdated": "通知已更新.",
+      "notificationCreated": "有通知了.",
+      "notificationRemoved": "通知被取出.",
+      "notificationSaveError": "無法儲存通知規則 .",
+      "notificationRemoveError": "無法移除通知規則 .",
+      "favoriteUpdated": "有最愛了 有更新了.",
+      "addedToFavorites": "被加入了最愛.",
+      "serverAddressCopied": "已複製 IP:Port。",
+      "serverAddressCopyError": "無法複製 IP:Port。"
+    }
+  },
+  "settings": {
+    "title": "設定值",
+    "startupTitle": "在視窗上啟動",
+    "startupDescription": "在您簽署到 Windows 后自動啟用 QLTracker .",
+    "startupSaving": "正在儲存啟動偏好...",
+    "unavailable": "此建築中無法設定 .",
+    "languageTitle": "語言",
+    "languageDescription": "選擇 QLTracker 在整個應用程式中使用的語言。",
+    "languagePlaceholder": "選擇語言",
+    "discordPresenceTitle": "Discord 狀態",
+    "discordPresenceDescription": "在瀏覽應用程式時，將 QLTracker 顯示為你的 Discord 活動。",
+    "discordPresenceServerTitle": "顯示目前伺服器詳細資訊",
+    "discordPresenceServerDescription": "當 QLTracker 啟動伺服器時，在你的 Discord 活動中包含伺服器名稱、地圖、模式和玩家資訊。",
+    "discordPresenceSteamIdTitle": "用於即時伺服器追蹤的 SteamID64",
+    "discordPresenceSteamIdDescription": "可選。加入你的 SteamID64，這樣 Discord 就能顯示你目前實際所在的伺服器，即使你在 Quake Live 裡切換伺服器也一樣。",
+    "discordPresenceSteamIdPlaceholder": "7656119...",
+    "sections": {
+      "general": "一般",
+      "generalDescription": "語言和核心應用程式首選項。",
+      "startupTray": "啟動和托盤",
+      "startupTrayDescription": "啟動行為、托盤模式和視窗處理。",
+      "desktopAlerts": "桌面警報",
+      "desktopAlertsDescription": "用於追蹤的玩家和喜愛的伺服器的本機通知。",
+      "notifications": "通知和不和諧",
+      "notificationsDescription": "Discord 帳戶連結和通知規則存取。",
+      "discordPresence": "不和諧存在",
+      "discordPresenceDescription": "QLTracker 打開時，Discord 豐富的存在。"
+    },
+    "backToApp": "返回應用程式",
+    "trayModeTitle": "托盤模式",
+    "trayModeDescription": "透過托盤圖示和快速操作讓 QLTracker 在背景運行。",
+    "closeToTrayTitle": "關閉托盤視窗",
+    "closeToTrayDescription": "當您關閉主視窗時，隱藏 QLTracker 而不是退出。",
+    "startMinimizedTitle": "開始最小化到托盤",
+    "startMinimizedDescription": "在背景啟動 QLTracker，直到您從托盤圖示恢復它。",
+    "desktopAlertsTitle": "桌面警報",
+    "desktopAlertsDescription": "為追蹤的玩家和喜愛的伺服器發送本機桌面通知。",
+    "desktopAlertsPausedTitle": "暫停桌面警報",
+    "desktopAlertsPausedDescription": "暫時使所有桌面警報靜音，而不更改警報規則。",
+    "trackedPlayerAlertsTitle": "追蹤玩家警報",
+    "trackedPlayerAlertsDescription": "當觀看的玩家出現或移動到另一個伺服器時發出通知。需要實時後端。",
+    "favoriteServerAlertsTitle": "最喜歡的伺服器警報",
+    "favoriteServerAlertsDescription": "當最喜歡的伺服器達到您的玩家閾值時發出通知。",
+    "favoriteServerThresholdTitle": "最喜歡的伺服器玩家閾值",
+    "favoriteServerThresholdDescription": "當喜愛的伺服器超過此玩家數量時發送警報。",
+    "favoriteServerThresholdPlaceholder": "玩家",
+    "discordLinkTitle": "不和諧帳戶鏈接",
+    "discordLinkDescription": "連結 Discord 來管理 DM 通知傳遞和帳戶狀態。",
+    "notificationsManageRulesTitle": "通知規則",
+    "notificationsManageRulesDescription": "伺服器特定的 Discord DM 規則透過伺服器清單進行管理。",
+    "notificationsManageRulesHint": "開啟伺服器並使用 Discord 通知操作來建立或編輯規則。"
+  },
+  "language": {
+    "en": "English",
+    "de": "Deutsch",
+    "bg": "Български",
+    "ru": "Русский",
+    "uk": "Українська",
+    "hr": "Hrvatski",
+    "sr": "Српски",
+    "fr": "Français",
+    "it": "Italiano",
+    "et": "Eesti",
+    "nl": "Nederlands",
+    "fi": "Suomi",
+    "sv": "Svenska",
+    "hu": "Magyar",
+    "da": "Dansk",
+    "lv": "Latviešu",
+    "nb": "Norsk Bokmål",
+    "ja": "日本語",
+    "ko": "한국어",
+    "ka": "ქართული",
+    "zh-Hant": "繁體中文",
+    "zh-Hans": "简体中文",
+    "es": "Español",
+    "pt-BR": "Português (Brasil)",
+    "pl": "Polski",
+    "ro": "Română",
+    "lt": "Lietuvių",
+    "cs": "Čeština"
+  },
+  "favorites": {
+    "lists": "列表",
+    "refresh": "刷新",
+    "createList": "建立列表",
+    "createDialogTitle": "建立最愛清單",
+    "createDialogDescription": "建立列表以整理您已儲存的伺服器 .",
+    "listNamePlaceholder": "列表名",
+    "playersTooltip": "即時玩家總數",
+    "favoriteServers": "最愛的伺服器",
+    "savedServers_one": "{{count}} saved server",
+    "savedServers_other": "{{count}} saved servers",
+    "noLists": "還沒有清單。建立您的第一個清單以開始使用。",
+    "noServers": "此清單中尚未儲存伺服器 .",
+    "deleteList": "刪除清單",
+    "deleteDialogTitle": "刪除最愛清單",
+    "deleteDialogDescription": "刪除「{{list}}」？只儲存在此清單中的伺服器也會從最愛中移除。",
+    "deleteDialogCancel": "取消",
+    "toasts": {
+      "listDeleted": "已刪除「{{list}}」。"
+    }
+  },
+  "watchlist": {
+    "title": "玩家關注清單",
+    "summary_one": "已關注 {{count}} 名玩家，其中 {{online}} 名在線",
+    "summary_other": "已關注 {{count}} 名玩家，其中 {{online}} 名在線",
+    "onlineCount": "{{count}} 在線",
+    "serviceUnavailableBadge": "即時狀態無法使用",
+    "emptyTitle": "還沒有關注的玩家",
+    "emptyDescription": "在伺服器詳細面板中關注玩家，方便查看他們目前在哪裡遊玩。",
+    "emptyHint": "打開任意伺服器，然後使用已解析 SteamID 的玩家旁邊的關注按鈕。",
+    "offline": "離線",
+    "updatedUnavailable": "無法使用",
+    "statusOnline": "在線",
+    "statusOffline": "離線",
+    "statusUnavailable": "無法使用",
+    "toasts": {
+      "tracked": "{{player}} 已加入關注清單。",
+      "untracked": "{{player}} 已從關注清單移除。",
+      "noteSaved": "已儲存 {{player}} 的備註。",
+      "noteCleared": "已移除 {{player}} 的備註。",
+      "steamIdCopied": "SteamID 已複製。",
+      "steamIdCopyError": "無法複製 SteamID。"
+    },
+    "columns": {
+      "player": "玩家",
+      "status": "狀態",
+      "server": "伺服器",
+      "map": "地圖",
+      "mode": "模式",
+      "actions": "動作"
+    },
+    "noteDialog": {
+      "clear": "清除備註",
+      "description": "為 {{player}} 新增本機備註。",
+      "hint": "備註只會儲存在這台裝置上。",
+      "label": "備註",
+      "placeholder": "為這位玩家新增備註...",
+      "save": "儲存備註",
+      "title": "玩家備註"
+    },
+    "actions": {
+      "copySteamId": "複製 SteamID",
+      "editNote": "編輯備註",
+      "viewServer": "檢視伺服器"
+    }
+  },
+  "filters": {
+    "title": "分頁",
+    "expand": "展開滤波器",
+    "collapse": "折叠滤取器",
+    "searchPlaceholder": "搜尋伺服器名稱",
+    "showFull": "顯示完整",
+    "showEmpty": "顯示空",
+    "showFavorites": "顯示喜好",
+    "clearAll": "清除全部",
+    "regions": {
+      "all": "所有区域",
+      "eu": "歐洲",
+      "na": "北美",
+      "sa": "南美洲",
+      "za": "南非",
+      "apac": "太平洋"
+    },
+    "visibility": {
+      "all": "所有伺服器",
+      "public": "公共",
+      "private": "私人"
+    },
+    "modes": {
+      "all": "所有模式",
+      "ca": "克蘭花",
+      "duel": "決鬥",
+      "ffa": "为所有人提供自由",
+      "tdm": "死亡相爭隊",
+      "ctf": "CTF 通訊錄",
+      "ad": "攻擊防守( P)",
+      "dom": "二. 支配地位",
+      "ft": "停放標籤",
+      "har": "收割者",
+      "race": "种族",
+      "rr": "有紅色漫游"
+    },
+    "rating": {
+      "title": "分等",
+      "description": "以平均 QElo 或 TSkill 过滤伺服器 .",
+      "systemPlaceholder": "2. 评级制度",
+      "qelo": "QEL",
+      "trueskill": "TSkill (通訊錄)"
+    },
+    "maps": {
+      "all": "所有地圖",
+      "selectedCount": "{{count}} maps selected",
+      "searchPlaceholder": "搜尋地圖...",
+      "empty": "找不到地圖 ."
+    },
+    "tags": {
+      "label": "標籤",
+      "selectedCount": "{{count}}+ tags",
+      "none": "沒有選擇標籤 .",
+      "inputPlaceholder": "輸入"
+    }
+  },
+  "releaseNotes": {
+    "title": "{{version}} 中的新功能",
+    "publishedOn": "发布日期：{{date}}",
+    "close": "關閉"
+  }
+}
