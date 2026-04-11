@@ -18,6 +18,16 @@
     "typecheck": "turbo run typecheck"
   },
   "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "esbuild",
+      "msw",
+      "prisma",
+      "sharp",
+      "unrs-resolver",
+      "zeromq"
+    ],
     "overrides": {
       "@types/react": "19.2.14",
       "@types/react-dom": "19.2.3"
