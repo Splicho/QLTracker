@@ -218,6 +218,16 @@ export type PickupMatchKillEventDto = {
 }
 
 export type PickupMatchDetailDto = {
+  chat: Array<{
+    channel: string
+    createdAt: string
+    id: string
+    message: string
+    personaName: string
+    playerId: string | null
+    sentAt: string
+    steamId: string | null
+  }>
   kills: PickupMatchKillEventDto[]
   match: {
     completedAt: string | null

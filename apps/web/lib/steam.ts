@@ -71,10 +71,39 @@ export type RealtimeServerSnapshot = {
   version?: string | null
 }
 
+function sanitizeServerCounts(players: number, maxPlayers: number, playersInfoCount: number) {
+  const safeMaxPlayers = Math.max(
+    1,
+    Math.min(64, Number.isFinite(maxPlayers) ? Math.trunc(maxPlayers) : 16)
+  )
+  const safePlayers = Math.max(
+    0,
+    Math.min(
+      safeMaxPlayers,
+      playersInfoCount > 0
+        ? Math.min(Number.isFinite(players) ? Math.trunc(players) : 0, playersInfoCount)
+        : Number.isFinite(players)
+          ? Math.trunc(players)
+          : 0
+    )
+  )
+
+  return {
+    maxPlayers: safeMaxPlayers,
+    players: safePlayers,
+  }
+}
+
 export function mergeSteamServerSnapshot(
   server: SteamServer,
   snapshot: RealtimeServerSnapshot
 ): SteamServer {
+  const counts = sanitizeServerCounts(
+    snapshot.players,
+    snapshot.maxPlayers,
+    snapshot.playersInfo.length
+  )
+
   return {
     ...server,
     avg_qelo: snapshot.avgQelo ?? server.avg_qelo ?? null,
@@ -89,8 +118,8 @@ export function mergeSteamServerSnapshot(
     game_mode: snapshot.gameMode ?? server.game_mode ?? null,
     app_id: snapshot.appId ?? server.app_id,
     ip: snapshot.ip ?? server.ip ?? null,
-    players: snapshot.players,
-    max_players: snapshot.maxPlayers,
+    players: counts.players,
+    max_players: counts.maxPlayers,
     bots: snapshot.bots ?? server.bots,
     ping_ms: snapshot.pingMs ?? server.ping_ms,
     region: snapshot.region ?? server.region,
@@ -195,6 +224,12 @@ async function fetchRealtimeSnapshot(addr: string) {
 }
 
 export function toSteamServer(snapshot: RealtimeServerSnapshot): SteamServer {
+  const counts = sanitizeServerCounts(
+    snapshot.players,
+    snapshot.maxPlayers,
+    snapshot.playersInfo.length
+  )
+
   return {
     addr: snapshot.addr,
     avg_qelo: snapshot.avgQelo ?? null,
@@ -209,8 +244,8 @@ export function toSteamServer(snapshot: RealtimeServerSnapshot): SteamServer {
     game_mode: snapshot.gameMode ?? null,
     app_id: snapshot.appId ?? steamAppId,
     ip: snapshot.ip ?? null,
-    players: snapshot.players,
-    max_players: snapshot.maxPlayers,
+    players: counts.players,
+    max_players: counts.maxPlayers,
     bots: snapshot.bots ?? 0,
     ping_ms: snapshot.pingMs ?? null,
     region: snapshot.region ?? null,

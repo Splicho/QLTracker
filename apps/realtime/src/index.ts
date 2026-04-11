@@ -54,6 +54,26 @@ let playerPresenceBySteamId = new Map<string, PlayerPresence>();
 let snapshotsByAddr = new Map<string, ServerSnapshot>();
 let lastHistorySampleAt: string | null = null;
 
+function sanitizeSnapshotCounts(snapshot: ServerSnapshot): ServerSnapshot {
+  const rawMaxPlayers = Number.isFinite(snapshot.maxPlayers) ? snapshot.maxPlayers : 16;
+  const maxPlayers = Math.max(1, Math.min(64, Math.trunc(rawMaxPlayers)));
+  const playersInfoCount = Array.isArray(snapshot.playersInfo) ? snapshot.playersInfo.length : 0;
+  const rawPlayers = Number.isFinite(snapshot.players) ? snapshot.players : 0;
+  const players = Math.max(
+    0,
+    Math.min(maxPlayers, playersInfoCount > 0 ? Math.min(rawPlayers, playersInfoCount) : rawPlayers),
+  );
+  const rawBots = Number.isFinite(snapshot.bots ?? 0) ? (snapshot.bots ?? 0) : 0;
+  const bots = Math.max(0, Math.min(maxPlayers, Math.trunc(rawBots)));
+
+  return {
+    ...snapshot,
+    bots,
+    maxPlayers,
+    players,
+  };
+}
+
 function getRoomName(addr: string) {
   return `server:${addr}`;
 }
@@ -73,7 +93,7 @@ function normalizeStringArray(input: unknown) {
 
 async function upsertServerSnapshot(snapshot: ServerSnapshot) {
   const normalizedSnapshot = {
-    ...snapshot,
+    ...sanitizeSnapshotCounts(snapshot),
     updatedAt: snapshot.updatedAt ?? new Date().toISOString(),
   };
 
