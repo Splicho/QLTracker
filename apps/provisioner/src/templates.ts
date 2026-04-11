@@ -20,6 +20,10 @@ const PICKUP_WORKSHOP_IDS = [
 function formatQueueLabel(queueId: string, teamSize: number) {
   const normalized = queueId.trim().toLowerCase();
 
+  if (normalized.includes("1v1") && normalized.includes("ca")) {
+    return "1v1 CA";
+  }
+
   if (normalized.includes("2v2") && normalized.includes("ca")) {
     return "2v2 CA";
   }
@@ -37,6 +41,10 @@ function formatQueueLabel(queueId: string, teamSize: number) {
 }
 
 function getMapPoolFile(teamSize: number) {
+  if (teamSize <= 1) {
+    return "mappool_capickup_1v1.txt";
+  }
+
   if (teamSize <= 2) {
     return "mappool_capickup_2v2.txt";
   }
