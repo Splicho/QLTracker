@@ -1,12 +1,16 @@
 node_modules/
 .pnpm-store/
 .turbo/
+.devenv*
+.direnv/
 dist/
 .next/
 coverage/
 .env
 .env.local
 .env.*.local
+devenv.local.nix
+devenv.local.yaml
 *.tsbuildinfo
 AGENTS.md
 .codex/
