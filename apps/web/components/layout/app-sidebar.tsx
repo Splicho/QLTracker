@@ -3,18 +3,16 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { ArrowLeft, Cookie, Shield } from "lucide-react"
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react"
-import packageJson from "../../package.json"
+import { useEffect, useMemo, useSyncExternalStore } from "react"
 import { useQuery } from "@tanstack/react-query"
+import { AboutSidebarItem } from "@/components/layout/about-sidebar-item"
 import {
   Cog,
   Discord,
   Eye,
   Flask,
   GameController,
-  Github,
   HeartOutline,
-  InfoCircle,
   Leaderboard,
   Medal,
   News,
@@ -45,14 +43,6 @@ import {
 } from "@/lib/settings-navigation"
 import type { NewsArticleDto } from "@/lib/server/news"
 import { openExternalUrl } from "@/lib/open-url"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import {
   Sidebar,
@@ -155,7 +145,6 @@ export function AppSidebar({
 }) {
   const lastAppPathStorageKey = "qltracker-last-app-path"
   const pathname = usePathname() ?? "/servers"
-  const [aboutOpen, setAboutOpen] = useState(false)
   const { state: favoritesState } = useFavorites()
   const { players: trackedPlayers } = useTrackedPlayers()
   const { servers: liveServers } = useLiveServers()
@@ -584,107 +573,42 @@ export function AppSidebar({
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
-        <Dialog onOpenChange={setAboutOpen} open={aboutOpen}>
-          <SidebarMenu>
-            <SidebarMenuItem className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
-              <SidebarMenuButton
-                asChild
-                className="cursor-pointer group-data-[collapsible=icon]:!size-10 group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!p-0 [&_svg]:size-5!"
-                isActive={pathname.startsWith("/privacy-policy")}
-                size="lg"
-                tooltip="Privacy Policy"
-              >
-                <Link href="/privacy-policy">
-                  <Shield className="size-5" />
-                  <span className="group-data-[collapsible=icon]:hidden">
-                    Privacy Policy
-                  </span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
-              <SidebarMenuButton
-                asChild
-                className="cursor-pointer group-data-[collapsible=icon]:!size-10 group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!p-0 [&_svg]:size-5!"
-                isActive={pathname.startsWith("/cookie-policy")}
-                size="lg"
-                tooltip="Cookie Policy"
-              >
-                <Link href="/cookie-policy">
-                  <Cookie className="size-5" />
-                  <span className="group-data-[collapsible=icon]:hidden">
-                    Cookie Policy
-                  </span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-          <div className="border-t border-sidebar-border" />
-          <SidebarMenu>
-            <SidebarMenuItem className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
-              <SidebarMenuButton
-                asChild
-                className="cursor-pointer group-data-[collapsible=icon]:!size-10 group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!p-0 [&_svg]:size-5!"
-                size="lg"
-              >
-                <DialogTrigger asChild>
-                  <button type="button">
-                    <InfoCircle />
-                    <span className="group-data-[collapsible=icon]:hidden">
-                      About
-                    </span>
-                  </button>
-                </DialogTrigger>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader className="items-center text-center sm:items-center sm:text-center">
-              <img
-                alt="QLTracker app icon"
-                className="size-14 rounded-xl object-contain"
-                src="/images/appicon.png"
-              />
-              <DialogTitle>QLTracker</DialogTitle>
-              <DialogDescription>
-                Quake Live server browser and pickup platform.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-3 rounded-lg border border-border p-4 text-sm">
-              <div className="flex items-center justify-between gap-4">
-                <span className="text-muted-foreground">Version</span>
-                <span className="font-medium text-foreground">
-                  v{packageJson.version}
+        <SidebarMenu>
+          <SidebarMenuItem className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
+            <SidebarMenuButton
+              asChild
+              className="cursor-pointer group-data-[collapsible=icon]:!size-10 group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!p-0 [&_svg]:size-5!"
+              isActive={pathname.startsWith("/privacy-policy")}
+              size="lg"
+              tooltip="Privacy Policy"
+            >
+              <Link href="/privacy-policy">
+                <Shield className="size-5" />
+                <span className="group-data-[collapsible=icon]:hidden">
+                  Privacy Policy
                 </span>
-              </div>
-              <div className="flex items-center justify-between gap-4">
-                <span className="text-muted-foreground">Socials</span>
-                <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <button
-                    className="flex size-7 cursor-pointer items-center justify-center rounded-md border border-border hover:bg-muted"
-                    onClick={() =>
-                      openExternalUrl("https://discord.gg/qltracker")
-                    }
-                    type="button"
-                  >
-                    <Discord className="size-4" />
-                  </button>
-                  <button
-                    className="flex size-7 cursor-pointer items-center justify-center rounded-md border border-border hover:bg-muted"
-                    onClick={() =>
-                      openExternalUrl(
-                        "https://github.com/Splicho/qltracker-web"
-                      )
-                    }
-                    type="button"
-                  >
-                    <Github className="size-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
+            <SidebarMenuButton
+              asChild
+              className="cursor-pointer group-data-[collapsible=icon]:!size-10 group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!p-0 [&_svg]:size-5!"
+              isActive={pathname.startsWith("/cookie-policy")}
+              size="lg"
+              tooltip="Cookie Policy"
+            >
+              <Link href="/cookie-policy">
+                <Cookie className="size-5" />
+                <span className="group-data-[collapsible=icon]:hidden">
+                  Cookie Policy
+                </span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+        <div className="border-t border-sidebar-border" />
+        <AboutSidebarItem />
       </SidebarFooter>
     </Sidebar>
   )
