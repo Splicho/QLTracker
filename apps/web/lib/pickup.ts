@@ -278,7 +278,19 @@ export type PickupMatchKillEvent = {
   weapon: string | null
 }
 
+export type PickupMatchChatEvent = {
+  channel: string
+  createdAt: string
+  id: string
+  message: string
+  personaName: string
+  playerId: string | null
+  sentAt: string
+  steamId: string | null
+}
+
 export type PickupMatchDetail = {
+  chat: PickupMatchChatEvent[]
   kills: PickupMatchKillEvent[]
   match: {
     completedAt: string | null

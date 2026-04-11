@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timezone
 import urllib.request
 import urllib.error
 
@@ -15,6 +16,7 @@ class pickup_bridge(minqlx.Plugin):
         self.add_hook("game_start", self.handle_game_start)
         self.add_hook("game_end", self.handle_game_end)
         self.add_hook("round_start", self.handle_round_start)
+        self.add_hook("chat", self.handle_chat)
         self.add_hook("console_print", self.handle_console_print)
 
         self.ready_reported = False
@@ -116,6 +118,36 @@ class pickup_bridge(minqlx.Plugin):
 
     def handle_round_start(self, _round_number):
         self.report_live("round_start")
+
+    @minqlx.thread
+    def report_chat(self, player, message, channel_name):
+        steam_id = self.parse_steam_id(player)
+        if not message:
+            return
+
+        prefix = self.get_cvar("qlx_commandPrefix") or "!"
+        if message.startswith(prefix):
+            return
+
+        try:
+            self.post_json(
+                "chat",
+                {
+                    "channel": channel_name,
+                    "message": message,
+                    "playerName": player.clean_name,
+                    "playerSteamId": str(steam_id) if steam_id is not None else None,
+                    "sentAt": datetime.now(timezone.utc).isoformat(),
+                },
+            )
+        except urllib.error.URLError as error:
+            self.logger.error("failed to post chat event: %s", error)
+        except Exception as error:
+            self.logger.error("failed to post chat event: %s", error)
+
+    def handle_chat(self, player, msg, channel):
+        channel_name = getattr(channel, "name", None) or str(channel)
+        self.report_chat(player, msg.strip(), channel_name)
 
     def handle_player_connect(self, player):
         steam_id = self.parse_steam_id(player)

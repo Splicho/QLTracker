@@ -1,7 +1,8 @@
 import crypto from "node:crypto";
 import {
+  type PickupDiscordWebhookPayload,
+  type PickupMatchReportPayload,
   pickupQueueAlertsSignatureHeader,
-  type PickupQueueAlertPayload,
 } from "@qltracker/contracts";
 import { createSignature } from "@qltracker/crypto";
 import { stripQuakeColors } from "@qltracker/quake";
@@ -83,8 +84,8 @@ export function createPickupService(io: Server) {
   const queueDisconnectTimers = new Map<string, NodeJS.Timeout>();
   const connectedPickupSocketsByPlayerId = new Map<string, Set<string>>();
 
-  async function notifyQueueOpened(
-    payload: PickupQueueAlertPayload,
+  async function notifyDiscordWebhook(
+    payload: PickupDiscordWebhookPayload,
   ): Promise<void> {
     if (!config.pickupQueueAlertsWebhookUrl || !config.pickupQueueAlertsWebhookSecret) {
       return;
@@ -111,6 +112,49 @@ export function createPickupService(io: Server) {
     } catch (error) {
       console.warn("Failed to deliver pickup queue alert webhook", error);
     }
+  }
+
+  async function notifyMatchCompleted(
+    match: PickupMatchRow,
+    players: readonly PickupMatchPlayerRow[],
+  ): Promise<void> {
+    const queue = await getQueueById(match.queueId);
+    if (!queue || !match.completedAt || !match.winnerTeam) {
+      return;
+    }
+
+    const toPayloadPlayer = (player: PickupMatchPlayerRow) => ({
+      avatarUrl: player.avatarUrl,
+      displayAfter: player.displayAfter,
+      displayBefore: player.displayBefore,
+      id: player.id,
+      personaName: stripQuakeColors(player.personaName).trim(),
+      profileUrl: player.profileUrl,
+      steamId: player.steamId,
+      won: player.won,
+    });
+
+    const payload: PickupMatchReportPayload = {
+      completedAt: match.completedAt.toISOString(),
+      finalMapKey: match.finalMapKey,
+      finalScore: match.finalScore,
+      matchId: match.id,
+      queue: {
+        id: queue.id,
+        name: queue.name,
+        playerCount: queue.playerCount,
+        slug: queue.slug,
+        teamSize: queue.teamSize,
+      },
+      teams: {
+        left: players.filter((player) => player.team === "left").map(toPayloadPlayer),
+        right: players.filter((player) => player.team === "right").map(toPayloadPlayer),
+      },
+      type: "pickup.match_report",
+      winnerTeam: match.winnerTeam,
+    };
+
+    await notifyDiscordWebhook(payload);
   }
 
   async function ensureBootstrapData() {
@@ -1893,7 +1937,7 @@ export function createPickupService(io: Server) {
       const currentPlayers = queueCountBeforeJoin + 1;
       const action = queueCountBeforeJoin === 0 ? "opened" : "joined";
 
-      void notifyQueueOpened({
+      void notifyDiscordWebhook({
         action,
         currentPlayers,
         joinedAt: new Date().toISOString(),
@@ -2192,10 +2236,17 @@ export function createPickupService(io: Server) {
       client.release();
     }
 
+    const completedMatch = await getLatestMatchById(matchId);
+
     for (const player of players) {
       await emitPlayerState(player.playerId);
     }
     await broadcastPublicState();
+
+    if (completedMatch) {
+      const completedPlayers = await getMatchPlayers(matchId);
+      void notifyMatchCompleted(completedMatch, completedPlayers);
+    }
   }
 
   async function applyMatchStats(
@@ -2208,6 +2259,77 @@ export function createPickupService(io: Server) {
     }
 
     await applyPickupMatchStats(matchId, payload, getMatchPlayers);
+  }
+
+  async function applyMatchChat(
+    matchId: string,
+    payload: Record<string, unknown>,
+  ) {
+    const match = await getLatestMatchById(matchId);
+    if (!match || match.status === "cancelled") {
+      return;
+    }
+
+    const message =
+      typeof payload.message === "string" ? payload.message.trim() : "";
+    const personaName =
+      typeof payload.playerName === "string" ? payload.playerName.trim() : "";
+    if (!message || !personaName) {
+      return;
+    }
+
+    const steamId =
+      typeof payload.playerSteamId === "string" ? payload.playerSteamId.trim() : "";
+    const channel =
+      typeof payload.channel === "string" && payload.channel.trim().length > 0
+        ? payload.channel.trim()
+        : "chat";
+    const sentAt =
+      typeof payload.sentAt === "string" && !Number.isNaN(Date.parse(payload.sentAt))
+        ? new Date(payload.sentAt)
+        : new Date();
+
+    let playerId: string | null = null;
+    if (steamId) {
+      const playerResult = await pool.query<{ id: string }>(
+        `
+          select "id"
+          from "PickupPlayer"
+          where "steamId" = $1
+          limit 1
+        `,
+        [steamId],
+      );
+      playerId = playerResult.rows[0]?.id ?? null;
+    }
+
+    await pool.query(
+      `
+        insert into "PickupMatchChatEvent" (
+          "id",
+          "matchId",
+          "playerId",
+          "steamId",
+          "personaName",
+          "channel",
+          "message",
+          "sentAt",
+          "createdAt"
+        )
+        values (
+          gen_random_uuid()::text,
+          $1,
+          $2,
+          $3,
+          $4,
+          $5,
+          $6,
+          $7,
+          now()
+        )
+      `,
+      [matchId, playerId, steamId || null, personaName, channel, message, sentAt],
+    );
   }
 
   async function emitSocketState(socket: Socket, session: PickupSessionIdentity | null) {
@@ -2259,6 +2381,7 @@ export function createPickupService(io: Server) {
     }
   }
   const callbackApi = createPickupCallbackApi({
+    applyMatchChat,
     applyMatchLive,
     applyMatchResult,
     applyMatchStats,
@@ -2270,6 +2393,7 @@ export function createPickupService(io: Server) {
     getPlayerState,
   });
   const {
+    handleChatCallback,
     getPlayerStateByToken,
     handleLiveCallback,
     handleProvisionCallback,
@@ -2407,6 +2531,9 @@ export function createPickupService(io: Server) {
     },
     async handleProvisionCallback(request: RawBodyRequest, response: express.Response) {
       return handleProvisionCallback(request, response);
+    },
+    async handleChatCallback(request: RawBodyRequest, response: express.Response) {
+      return handleChatCallback(request, response);
     },
     async handleLiveCallback(request: RawBodyRequest, response: express.Response) {
       return handleLiveCallback(request, response);

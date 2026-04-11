@@ -1,4 +1,5 @@
 import type {
+  PickupMatchChatEvent,
   PickupKillEvent,
   PickupMapPool,
   PickupMatch,
@@ -562,6 +563,19 @@ function toPickupMatchKillEventDto(
     victimName: event.victimName ?? null,
     victimPlayerId: event.victimPlayerId ?? null,
     weapon: event.weapon ?? null,
+  }
+}
+
+function toPickupMatchChatEventDto(event: PickupMatchChatEvent) {
+  return {
+    channel: event.channel,
+    createdAt: event.createdAt.toISOString(),
+    id: event.id,
+    message: event.message,
+    personaName: event.personaName,
+    playerId: event.playerId ?? null,
+    sentAt: event.sentAt.toISOString(),
+    steamId: event.steamId ?? null,
   }
 }
 
@@ -1176,6 +1190,9 @@ export async function getPickupMatchDetail(
       id: matchId,
     },
     include: {
+      chatEvents: {
+        orderBy: [{ sentAt: "asc" }, { createdAt: "asc" }],
+      },
       killEvents: {
         orderBy: [{ eventIndex: "asc" }],
       },
@@ -1257,6 +1274,7 @@ export async function getPickupMatchDetail(
   }
 
   return {
+    chat: match.chatEvents.map(toPickupMatchChatEventDto),
     kills: match.killEvents.map(toPickupMatchKillEventDto),
     match: {
       completedAt: match.completedAt?.toISOString() ?? null,

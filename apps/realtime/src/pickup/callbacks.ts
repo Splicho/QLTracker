@@ -6,6 +6,7 @@ import type {
 } from "./types.js";
 
 type PickupCallbackDeps = {
+  applyMatchChat: (matchId: string, payload: Record<string, unknown>) => Promise<void>;
   applyMatchLive: (matchId: string, payload: Record<string, unknown>) => Promise<void>;
   applyMatchResult: (matchId: string, payload: Record<string, unknown>) => Promise<void>;
   applyMatchStats: (matchId: string, payload: Record<string, unknown>) => Promise<void>;
@@ -152,7 +153,31 @@ export function createPickupCallbackApi(deps: PickupCallbackDeps) {
     }
   }
 
+  async function handleChatCallback(
+    request: RawBodyRequest,
+    response: express.Response,
+  ) {
+    try {
+      const matchId =
+        typeof request.body?.matchId === "string" ? request.body.matchId.trim() : "";
+      if (!matchId) {
+        response.status(400).json({ ok: false, error: "matchId is required." });
+        return;
+      }
+
+      await verifyCallbackSignature(matchId, request);
+      await deps.applyMatchChat(matchId, request.body as Record<string, unknown>);
+      response.json({ ok: true });
+    } catch (error) {
+      response.status(400).json({
+        ok: false,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
   return {
+    handleChatCallback,
     getPlayerStateByToken,
     handleLiveCallback,
     handleProvisionCallback,

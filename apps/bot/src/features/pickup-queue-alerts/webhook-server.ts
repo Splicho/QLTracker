@@ -2,7 +2,7 @@ import { timingSafeEqual } from 'node:crypto';
 import { createSignature } from '@qltracker/crypto';
 import { createServer, type Server as HttpServer } from 'node:http';
 import {
-  pickupQueueAlertPayloadSchema,
+  pickupDiscordWebhookPayloadSchema,
   pickupQueueAlertsPath,
   pickupQueueAlertsSignatureHeader,
 } from '@qltracker/contracts';
@@ -16,8 +16,10 @@ import {
 
 import { env } from '../../config/env.js';
 import { logger } from '../../shared/logger.js';
+import { formatPickupPlayerName } from '../../shared/pickup-player-name.js';
 
 import type { BotDefinition } from '../../bots/types.js';
+import type { PickupDiscordWebhookPayload, PickupMatchReportPayload } from '@qltracker/contracts';
 const MAX_BODY_SIZE_BYTES = 64 * 1024;
 
 type BotRuntime = {
@@ -123,6 +125,98 @@ async function postQueueOpenedAlert(
   await sendableChannel.send(messagePayload);
 }
 
+function formatTeamLines(
+  players: PickupMatchReportPayload['teams']['left'],
+): string {
+  if (players.length === 0) {
+    return 'No players';
+  }
+
+  return players
+    .map((player) => {
+      const name = formatPickupPlayerName(player.personaName) || 'Player';
+      const rating = typeof player.displayAfter === 'number' ? ` (${player.displayAfter})` : '';
+      return `• ${name}${rating}`;
+    })
+    .join('\n');
+}
+
+async function postMatchReportAlert(
+  client: Client,
+  payload: PickupMatchReportPayload,
+): Promise<void> {
+  const channel = await client.channels.fetch(env.PICKUP_QUEUE_ALERTS_CHANNEL_ID ?? '');
+
+  if (!channel || !channel.isTextBased() || !('send' in channel)) {
+    throw new Error('Configured pickup queue alerts channel is not a sendable text channel.');
+  }
+
+  const sendableChannel = channel as typeof channel & {
+    send: (options: {
+      components: ActionRowBuilder<ButtonBuilder>[];
+      embeds: EmbedBuilder[];
+    }) => Promise<unknown>;
+  };
+
+  const winningTeamLabel = payload.winnerTeam === 'left' ? 'Red' : 'Blue';
+  const losingTeamLabel = payload.winnerTeam === 'left' ? 'Blue' : 'Red';
+  const mapLabel = payload.finalMapKey?.trim() || 'Unknown';
+  const scoreLabel = payload.finalScore?.trim() || 'Unknown';
+
+  const embed = new EmbedBuilder()
+    .setColor(payload.winnerTeam === 'left' ? 0xef4444 : 0x3b82f6)
+    .setTitle(`${payload.queue.name} match report`)
+    .setDescription(`${winningTeamLabel} won ${scoreLabel} on ${mapLabel}.`)
+    .setTimestamp(new Date(payload.completedAt))
+    .addFields(
+      {
+        name: 'Map',
+        value: mapLabel,
+        inline: true,
+      },
+      {
+        name: 'Score',
+        value: scoreLabel,
+        inline: true,
+      },
+      {
+        name: 'Winner',
+        value: `${winningTeamLabel} Team`,
+        inline: true,
+      },
+      {
+        name: 'Red Team',
+        value: formatTeamLines(payload.teams.left),
+        inline: true,
+      },
+      {
+        name: 'Blue Team',
+        value: formatTeamLines(payload.teams.right),
+        inline: true,
+      },
+      {
+        name: 'Match',
+        value: payload.matchId,
+        inline: false,
+      },
+    )
+    .setFooter({
+      text: `${losingTeamLabel} Team lost`,
+    });
+
+  await sendableChannel.send({
+    components: [
+      new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+          .setLabel('View match')
+          .setStyle(ButtonStyle.Link)
+          .setURL(new URL(`/matches/${payload.matchId}`, env.PUBLIC_APP_URL).toString()),
+      ),
+    ],
+    embeds: [embed],
+  });
+}
+
 export function startPickupQueueAlertsWebhook(runtimes: readonly BotRuntime[]): HttpServer | null {
   if (!env.PICKUP_QUEUE_ALERTS_CHANNEL_ID || !env.PICKUP_QUEUE_ALERTS_WEBHOOK_SECRET) {
     logger.info('Pickup queue alerts webhook disabled');
@@ -179,17 +273,22 @@ export function startPickupQueueAlertsWebhook(runtimes: readonly BotRuntime[]): 
         return;
       }
 
-      let parsedPayload: import('@qltracker/contracts').PickupQueueAlertPayload;
+      let parsedPayload: PickupDiscordWebhookPayload;
 
       try {
-        parsedPayload = pickupQueueAlertPayloadSchema.parse(JSON.parse(rawBody));
+        parsedPayload = pickupDiscordWebhookPayloadSchema.parse(JSON.parse(rawBody));
       } catch (error) {
         logger.warn({ err: error }, 'Rejected invalid pickup queue alert payload');
         response.writeHead(400).end('Invalid payload');
         return;
       }
 
-      void postQueueOpenedAlert(secondaryRuntime.client, parsedPayload)
+      const postAlert =
+        parsedPayload.type === 'pickup.match_report'
+          ? postMatchReportAlert(secondaryRuntime.client, parsedPayload)
+          : postQueueOpenedAlert(secondaryRuntime.client, parsedPayload);
+
+      void postAlert
         .then(() => {
           response.writeHead(204).end();
         })
@@ -198,6 +297,7 @@ export function startPickupQueueAlertsWebhook(runtimes: readonly BotRuntime[]): 
             {
               err: error,
               channelId: env.PICKUP_QUEUE_ALERTS_CHANNEL_ID,
+              eventType: parsedPayload.type,
               queueSlug: parsedPayload.queue.slug,
             },
             'Failed to post pickup queue alert to Discord',

@@ -82,7 +82,45 @@ export const pickupQueueAlertPayloadSchema = z.object({
   type: z.literal("pickup.queue_opened"),
 });
 
+export const pickupMatchReportPlayerSchema = z.object({
+  avatarUrl: z.string().url().nullable(),
+  displayAfter: z.number().int().nonnegative().nullable().optional(),
+  displayBefore: z.number().int().nonnegative().nullable().optional(),
+  id: z.string().min(1),
+  personaName: z.string().min(1),
+  profileUrl: z.string().url().nullable(),
+  steamId: z.string().min(1),
+  won: z.boolean().nullable().optional(),
+});
+
+export const pickupMatchReportPayloadSchema = z.object({
+  completedAt: z.string().datetime(),
+  finalMapKey: z.string().min(1).nullable(),
+  finalScore: z.string().min(1).nullable(),
+  matchId: z.string().min(1),
+  queue: z.object({
+    id: z.string().min(1),
+    name: z.string().min(1),
+    playerCount: z.number().int().positive(),
+    slug: z.string().min(1),
+    teamSize: z.number().int().positive(),
+  }),
+  teams: z.object({
+    left: z.array(pickupMatchReportPlayerSchema),
+    right: z.array(pickupMatchReportPlayerSchema),
+  }),
+  type: z.literal("pickup.match_report"),
+  winnerTeam: z.enum(["left", "right"]),
+});
+
+export const pickupDiscordWebhookPayloadSchema = z.discriminatedUnion("type", [
+  pickupQueueAlertPayloadSchema,
+  pickupMatchReportPayloadSchema,
+]);
+
 export type PickupProvisionPayload = z.infer<typeof pickupProvisionPayloadSchema>;
+export type PickupDiscordWebhookPayload = z.infer<typeof pickupDiscordWebhookPayloadSchema>;
+export type PickupMatchReportPayload = z.infer<typeof pickupMatchReportPayloadSchema>;
 export type PickupQueueAlertPayload = z.infer<typeof pickupQueueAlertPayloadSchema>;
 export type PickupStatsRelayEvent = z.infer<typeof pickupStatsRelayEventSchema>;
 export type PickupStatsRelayPayload = z.infer<typeof pickupStatsRelayPayloadSchema>;

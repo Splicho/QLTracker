@@ -189,6 +189,7 @@ model PickupPlayer {
   killEventsAsVictim PickupKillEvent[]       @relation("PickupKillEventVictim")
   linkSessions     PickupLinkSession[]
   discordLinks     PickupDiscordLink[]
+  chatEvents       PickupMatchChatEvent[]
   matchStatLines   PickupPlayerMatchStat[]
   queueMemberships PickupQueueMember[]
   matchPlayers     PickupMatchPlayer[]
@@ -341,6 +342,7 @@ model PickupMatch {
   finalScore                String?
   createdAt                 DateTime          @default(now())
   updatedAt                 DateTime          @updatedAt
+  chatEvents                PickupMatchChatEvent[]
   killEvents                PickupKillEvent[]
   players                   PickupMatchPlayer[]
   provisionEvents           PickupProvisionEvent[]
@@ -353,6 +355,24 @@ model PickupMatch {
 
   @@index([queueId, status])
   @@index([seasonId, status])
+}
+
+model PickupMatchChatEvent {
+  id         String       @id @default(cuid())
+  matchId    String
+  playerId   String?
+  steamId    String?
+  personaName String
+  channel    String
+  message    String
+  sentAt     DateTime
+  createdAt  DateTime     @default(now())
+  match      PickupMatch  @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player     PickupPlayer? @relation(fields: [playerId], references: [id], onDelete: SetNull)
+
+  @@index([matchId, sentAt])
+  @@index([playerId, sentAt])
+  @@index([steamId, sentAt])
 }
 
 model PickupMatchPlayer {

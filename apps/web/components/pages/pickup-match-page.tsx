@@ -84,6 +84,19 @@ function TeamColumn({
   )
 }
 
+function formatChatTimestamp(value: string) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) {
+    return null
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).format(date)
+}
+
 export function PickupMatchPage({
   initialData,
   matchId,
@@ -203,6 +216,40 @@ export function PickupMatchPage({
           toneClassName="text-red-400"
         />
       </div>
+
+      {detail.chat.length > 0 ? (
+        <div className="px-6 pb-6">
+          <div className="rounded-xl border border-border bg-card">
+            <div className="border-b border-border px-4 py-3">
+              <h2 className="text-sm font-semibold text-foreground">Match Chat</h2>
+            </div>
+            <div className="max-h-80 space-y-2 overflow-y-auto px-4 py-4">
+              {detail.chat.map((entry) => (
+                <div
+                  className="rounded-md border border-border/70 bg-muted/30 px-3 py-2"
+                  key={entry.id}
+                >
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span className="font-medium uppercase tracking-wide">
+                      {entry.channel.replace(/_/g, " ")}
+                    </span>
+                    {formatChatTimestamp(entry.sentAt) ? (
+                      <span>{formatChatTimestamp(entry.sentAt)}</span>
+                    ) : null}
+                  </div>
+                  <div className="mt-1 text-sm text-foreground">
+                    <span className="font-semibold">{entry.personaName}</span>
+                    <span className="text-muted-foreground">:</span>{" "}
+                    <span className="whitespace-pre-wrap break-words">
+                      {entry.message}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   )
 }
