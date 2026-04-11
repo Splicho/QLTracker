@@ -19,6 +19,7 @@ const envSchema = z
     PICKUP_QUEUE_ALERTS_CHANNEL_ID: z.string().min(1).optional(),
     PICKUP_QUEUE_ALERTS_ROLE_ID: z.string().min(1).optional(),
     PICKUP_QUEUE_ALERTS_WEBHOOK_SECRET: z.string().min(16).optional(),
+    LOG_FORMAT: z.enum(['pretty', 'json']).default('pretty'),
     LOG_LEVEL: z
       .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])
       .default('info')

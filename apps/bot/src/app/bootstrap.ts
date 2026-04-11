@@ -33,14 +33,10 @@ function logStartupPlan(runtimes: readonly BotRuntime[]): void {
   logger.info(
     {
       botCount: runtimes.length,
-      bots: runtimes.map((runtime) => ({
-        botId: runtime.bot.id,
-        botName: runtime.bot.displayName,
-        commandCount: runtime.bot.commands.length,
-        commands: commandNames(runtime.bot),
-        guildScope: runtime.bot.guildId ?? 'global',
-        pickupCommandsEnabled: hasPickupCommands(runtime.bot)
-      })),
+      bots: runtimes.map(
+        (runtime) =>
+          `${runtime.bot.id}:${commandNames(runtime.bot).join(',')} scope=${runtime.bot.guildId ?? 'global'} pickup=${hasPickupCommands(runtime.bot)}`
+      ),
       pickupDatabaseConfigured: isDatabaseConfigured()
     },
     'Discord bot startup plan loaded'
