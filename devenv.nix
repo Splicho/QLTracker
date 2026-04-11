@@ -16,6 +16,8 @@ in
   packages = with pkgs; [
     bash
     coreutils
+    nodePackages.eslint
+    nodePackages.typescript
     git
     gnugrep
     nodejs_20
