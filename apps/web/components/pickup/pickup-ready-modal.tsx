@@ -111,8 +111,8 @@ export function PickupReadyModal({
   const tickAudioRef = useRef<HTMLAudioElement | null>(null)
   const playedReadyCheckMatchIdRef = useRef<string | null>(null)
   const serverClockRef = useRef({
-    localNowMs: Date.now(),
-    serverNowMs: Date.now(),
+    localNowMs: 0,
+    serverNowMs: 0,
   })
   const readyCheckCountRef = useRef<{ count: number; matchId: string | null }>({
     count: 0,

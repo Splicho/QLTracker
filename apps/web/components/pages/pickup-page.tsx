@@ -566,8 +566,8 @@ export function PickupPage({
   const shouldGatePlayAction = guestMode || (!player && !userLoading)
   const activeState = playerState?.stage ?? "idle"
   const serverClockRef = useRef({
-    localNowMs: Date.now(),
-    serverNowMs: Date.now(),
+    localNowMs: 0,
+    serverNowMs: 0,
   })
   const [countdownNowMs, setCountdownNowMs] = useState(() => Date.now())
   const match = playerState && "match" in playerState ? playerState.match : null
