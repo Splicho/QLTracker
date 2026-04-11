@@ -21,6 +21,8 @@ import type {
   SlotState,
   SlotsResponse,
 } from "@/lib/client/pickup-admin-types"
+import { navigateToUrl } from "@/lib/open-url"
+import { buildSteamConnectUrl } from "@/lib/server-utils"
 
 function timeAgo(iso: string) {
   const seconds = Math.floor((Date.now() - new Date(iso).getTime()) / 1000)
@@ -225,16 +227,50 @@ function PlayerRow({
   )
 }
 
-function MetadataSection({ slotId }: { slotId: number }) {
+function MetadataSection({
+  slot,
+  slotId,
+}: {
+  slot: SlotState | null
+  slotId: number
+}) {
   const [metadata, setMetadata] = useState<SlotMetadata | null>(null)
+  const activePickupMatchId =
+    slot &&
+    slot.state !== "idle" &&
+    slot.matchId &&
+    slot.queueId &&
+    !slot.matchId.startsWith("manual-")
+      ? slot.matchId
+      : null
 
   useEffect(() => {
-    requestJson<SlotMetadata>(`/api/pickup/admin/servers/${slotId}/metadata`)
-      .then(setMetadata)
-      .catch(() => {})
-  }, [slotId])
+    if (!activePickupMatchId) {
+      return
+    }
 
-  if (!metadata) return null
+    let isCancelled = false
+    requestJson<SlotMetadata>(`/api/pickup/admin/servers/${slotId}/metadata`)
+      .then((nextMetadata) => {
+        if (!isCancelled && nextMetadata.matchId === activePickupMatchId) {
+          setMetadata(nextMetadata)
+        }
+      })
+      .catch(() => {
+        if (!isCancelled) {
+          setMetadata(null)
+        }
+      })
+
+    return () => {
+      isCancelled = true
+    }
+  }, [activePickupMatchId, slotId])
+
+  const visibleMetadata =
+    metadata?.matchId === activePickupMatchId ? metadata : null
+
+  if (!visibleMetadata) return null
 
   return (
     <div className="rounded-3xl border border-white/10 bg-[#0d0d0d] p-5">
@@ -244,33 +280,37 @@ function MetadataSection({ slotId }: { slotId: number }) {
       <div className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <span className="text-xs text-white/40">Map</span>
-          <p className="text-white">{metadata.finalMapKey}</p>
+          <p className="text-white">{visibleMetadata.finalMapKey}</p>
         </div>
         <div>
           <span className="text-xs text-white/40">Match ID</span>
-          <p className="font-mono text-xs text-white/70">{metadata.matchId}</p>
+          <p className="font-mono text-xs text-white/70">
+            {visibleMetadata.matchId}
+          </p>
         </div>
         <div>
           <span className="text-xs text-white/40">Queue</span>
-          <p className="text-white">{metadata.queueId}</p>
+          <p className="text-white">{visibleMetadata.queueId}</p>
         </div>
         <div>
           <span className="text-xs text-white/40">Season</span>
-          <p className="text-white">{metadata.seasonId}</p>
+          <p className="text-white">{visibleMetadata.seasonId}</p>
         </div>
-        {metadata.teams.red.length > 0 && (
+        {visibleMetadata.teams.red.length > 0 && (
           <div className="sm:col-span-2">
             <span className="text-xs text-red-400">Red Team</span>
             <p className="text-white/80">
-              {metadata.teams.red.map((p) => p.personaName).join(", ")}
+              {visibleMetadata.teams.red.map((p) => p.personaName).join(", ")}
             </p>
           </div>
         )}
-        {metadata.teams.blue.length > 0 && (
+        {visibleMetadata.teams.blue.length > 0 && (
           <div className="sm:col-span-2">
             <span className="text-xs text-blue-400">Blue Team</span>
             <p className="text-white/80">
-              {metadata.teams.blue.map((p) => p.personaName).join(", ")}
+              {visibleMetadata.teams.blue
+                .map((p) => p.personaName)
+                .join(", ")}
             </p>
           </div>
         )}
@@ -479,6 +519,8 @@ export function PickupAdminSlotDetail({ slotId }: { slotId: number }) {
   }
 
   const isActive = slot && slot.state !== "idle"
+  const joinUrl =
+    isActive && slot.joinAddress ? buildSteamConnectUrl(slot.joinAddress) : null
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-6 py-10 text-white">
@@ -527,9 +569,20 @@ export function PickupAdminSlotDetail({ slotId }: { slotId: number }) {
           </div>
         </div>
         {isActive && (
-          <Button variant="danger" size="sm" onPress={stopModal.open}>
-            Stop Server
-          </Button>
+          <div className="flex items-center gap-2">
+            {joinUrl && (
+              <Button
+                variant="outline"
+                size="sm"
+                onPress={() => navigateToUrl(joinUrl)}
+              >
+                Join Server
+              </Button>
+            )}
+            <Button variant="danger" size="sm" onPress={stopModal.open}>
+              Stop Server
+            </Button>
+          </div>
         )}
       </header>
 
@@ -552,10 +605,6 @@ export function PickupAdminSlotDetail({ slotId }: { slotId: number }) {
                 <h2 className="text-sm font-semibold tracking-[0.18em] text-white/40 uppercase">
                   Live Events
                 </h2>
-                <p className="mt-1 text-xs text-white/35">
-                  Gameplay events only. Raw console commands do not echo output
-                  here.
-                </p>
               </div>
               <ConsolePanel events={events} errorMessage={eventsError} />
             </div>
@@ -626,7 +675,7 @@ export function PickupAdminSlotDetail({ slotId }: { slotId: number }) {
           </div>
 
           {/* Metadata */}
-          <MetadataSection slotId={slotId} />
+          <MetadataSection slot={slot} slotId={slotId} />
         </>
       )}
 

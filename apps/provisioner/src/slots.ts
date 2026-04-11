@@ -23,9 +23,14 @@ function metadataFile(slotId: number) {
 
 export const RCON_BASE_PORT = 19000;
 
+function clearSlotMetadata(slotId: number) {
+  fs.rmSync(metadataFile(slotId), { force: true });
+}
+
 function defaultSlotState(slot: SlotDefinition): SlotState {
   return {
     gamePort: slot.gamePort,
+    joinAddress: `${config.publicIp}:${slot.gamePort}`,
     matchId: null,
     queueId: null,
     rconPort: null,
@@ -69,6 +74,7 @@ export function readSlotState(slot: SlotDefinition): SlotState {
   const parsed = JSON.parse(fs.readFileSync(file, "utf8")) as SlotState;
   const {
     gamePort: _gamePort,
+    joinAddress: _joinAddress,
     redisDb: _redisDb,
     slotId: _slotId,
     zmqPort: _zmqPort,
@@ -104,10 +110,12 @@ export async function reconcileSlots() {
       serviceState === "deactivating";
 
     if (state.state === "idle" && !serviceRunning) {
+      clearSlotMetadata(slot.id);
       continue;
     }
 
     if (state.state === "idle" && serviceRunning) {
+      clearSlotMetadata(slot.id);
       writeSlotState(slot.id, {
         ...state,
         matchId: null,
@@ -120,6 +128,7 @@ export async function reconcileSlots() {
     }
 
     if (state.state !== "idle" && !serviceRunning) {
+      clearSlotMetadata(slot.id);
       writeSlotState(slot.id, {
         ...state,
         matchId: null,
@@ -223,6 +232,7 @@ export function releaseSlot(slotId: number) {
     return;
   }
 
+  clearSlotMetadata(slotId);
   writeSlotState(slotId, defaultSlotState(slot));
 }
 
@@ -240,6 +250,7 @@ export function prepareManualSlot(slotId: number, map: string, teamSize = 4) {
   const rconToken = randomToken();
   const rconPort = RCON_BASE_PORT + slot.id;
   const currentDir = slotDir(slot.id);
+  clearSlotMetadata(slotId);
   fs.writeFileSync(
     path.join(currentDir, "home", "baseq3", "pickup-server.cfg"),
     `${buildManualServerCfg(currentDir, slot, map, teamSize, rconPort, rconToken)}\n`,

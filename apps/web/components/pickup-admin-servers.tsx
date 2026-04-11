@@ -15,6 +15,8 @@ import {
 } from "@/components/pickup-admin-ui"
 import { requestJson } from "@/lib/client/request-json"
 import type { SlotState, SlotsResponse } from "@/lib/client/pickup-admin-types"
+import { navigateToUrl } from "@/lib/open-url"
+import { buildSteamConnectUrl } from "@/lib/server-utils"
 
 type PendingAction = `start:${number}` | `stop:${number}` | null
 
@@ -50,6 +52,8 @@ function SlotCard({
   onStop: (slotId: number) => void
 }) {
   const isIdle = slot.state === "idle"
+  const joinUrl =
+    !isIdle && slot.joinAddress ? buildSteamConnectUrl(slot.joinAddress) : null
 
   return (
     <div className="rounded-3xl border border-white/10 bg-[#0d0d0d] p-5">
@@ -92,6 +96,15 @@ function SlotCard({
           </Button>
         ) : (
           <>
+            {joinUrl && (
+              <Button
+                variant="outline"
+                size="sm"
+                onPress={() => navigateToUrl(joinUrl)}
+              >
+                Join Server
+              </Button>
+            )}
             <Button
               isPending={pendingAction === `stop:${slot.slotId}`}
               variant="danger"

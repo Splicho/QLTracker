@@ -18,8 +18,14 @@ async function getProvisionerConfig() {
   }
 }
 
-async function provisionerFetch(path: string, init?: RequestInit) {
-  const config = await getProvisionerConfig()
+type ProvisionerConfig = Awaited<ReturnType<typeof getProvisionerConfig>>
+
+async function provisionerFetch(
+  path: string,
+  init?: RequestInit,
+  provisionerConfig?: ProvisionerConfig
+) {
+  const config = provisionerConfig ?? (await getProvisionerConfig())
   const url = `${config.baseUrl}${path}`
 
   const headers: Record<string, string> = {
@@ -45,11 +51,20 @@ async function provisionerFetch(path: string, init?: RequestInit) {
 }
 
 export async function getProvisionerSlots() {
-  const data = await provisionerFetch("/healthz")
+  const config = await getProvisionerConfig()
+  const data = await provisionerFetch("/healthz", undefined, config)
+  const fallbackHost = new URL(config.baseUrl).hostname
 
   return (data.slots as Array<Record<string, unknown>>).map((slot) => {
     const sanitized = { ...slot }
     delete sanitized.token
+    if (
+      !sanitized.joinAddress &&
+      typeof sanitized.gamePort === "number" &&
+      fallbackHost
+    ) {
+      sanitized.joinAddress = `${fallbackHost}:${sanitized.gamePort}`
+    }
     return sanitized
   })
 }

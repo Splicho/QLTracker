@@ -6,7 +6,14 @@ import { requirePickupAdminSession } from "@/lib/server/pickup-auth"
 import { adminStartManualSlot } from "@/lib/server/provisioner"
 
 const bodySchema = z.object({
-  map: z.string().trim().min(1, "Map name is required."),
+  map: z
+    .string()
+    .trim()
+    .min(1, "Map name is required.")
+    .regex(
+      /^[A-Za-z0-9_-]+$/,
+      "Map name can only contain letters, numbers, underscores, and hyphens."
+    ),
   teamSize: z.number().int().min(1).max(8).default(4),
 })
 

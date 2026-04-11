@@ -457,7 +457,11 @@ app.post("/api/admin/slots/:slotId/stop", async (request, response) => {
 
 app.post("/api/admin/slots/:slotId/start-manual", async (request, response) => {
   const bodySchema = z.object({
-    map: z.string().trim().min(1),
+    map: z
+      .string()
+      .trim()
+      .min(1)
+      .regex(/^[A-Za-z0-9_-]+$/, "Map must contain only letters, numbers, underscores, or hyphens."),
     teamSize: z.number().int().min(1).max(8).default(4),
   });
 

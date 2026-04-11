@@ -2,6 +2,7 @@ export type SlotStatus = "idle" | "provisioning" | "busy"
 
 export type SlotState = {
   gamePort: number
+  joinAddress?: string
   matchId: string | null
   queueId: string | null
   redisDb: number

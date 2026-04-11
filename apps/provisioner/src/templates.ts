@@ -161,5 +161,6 @@ export function buildManualServerCfg(
     `set qlx_rconPort "${rconPort}"`,
     `set qlx_rconToken "${rconToken}"`,
     `set serverstartup "map ${map} hoq_ca"`,
+    `map ${map} hoq_ca`,
   ].join("\n");
 }

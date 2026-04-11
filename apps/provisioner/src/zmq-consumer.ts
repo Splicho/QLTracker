@@ -99,13 +99,20 @@ function readZmqCredentials(slotId: number) {
   }
 
   const separatorIndex = line.indexOf("=");
-  const username = line.slice(0, separatorIndex).trim();
+  const identity = line.slice(0, separatorIndex).trim();
   const password = line.slice(separatorIndex + 1).trim();
-  if (!username || !password) {
+  if (!identity || !password) {
     return null;
   }
 
-  return { password, username };
+  const identityParts = identity.split("_");
+  const username = identityParts.pop()?.trim() ?? "";
+  const domain = identityParts.join("_").trim() || username;
+  if (!domain || !username) {
+    return null;
+  }
+
+  return { domain, password, username };
 }
 
 function syncMatchContext(slot: SlotDefinition, buffer: SlotBuffer) {
@@ -286,13 +293,15 @@ function attachSocket(slotId: number, zmqPort: number) {
 
   const socket = zmq.socket("sub");
   const authSocket = socket as unknown as {
-    plainPassword?: string;
-    plainUsername?: string;
+    plain_password?: string;
+    plain_username?: string;
+    zap_domain?: string;
   };
 
   if (credentials) {
-    authSocket.plainUsername = credentials.username;
-    authSocket.plainPassword = credentials.password;
+    authSocket.plain_username = credentials.username;
+    authSocket.plain_password = credentials.password;
+    authSocket.zap_domain = credentials.domain;
   }
 
   socket.connect(`tcp://127.0.0.1:${zmqPort}`);
@@ -305,10 +314,41 @@ function attachSocket(slotId: number, zmqPort: number) {
   socket.on("error", (error: Error) => {
     console.error(`[zmq] slot ${slotId} error:`, error.message);
   });
+  socket.on("connect", (_eventValue, endpoint) => {
+    console.info(`[zmq] slot ${slotId} monitor connected to ${endpoint}`);
+  });
+  socket.on("connect_delay", (_eventValue, endpoint) => {
+    console.info(`[zmq] slot ${slotId} monitor connect delayed for ${endpoint}`);
+  });
+  socket.on("connect_retry", (eventValue, endpoint) => {
+    console.info(
+      `[zmq] slot ${slotId} monitor connect retry for ${endpoint} in ${eventValue}ms`,
+    );
+  });
+  socket.on("disconnect", (_eventValue, endpoint) => {
+    console.info(`[zmq] slot ${slotId} monitor disconnected from ${endpoint}`);
+  });
+  socket.on("monitor_error", (error) => {
+    console.error(`[zmq] slot ${slotId} monitor error:`, error.message);
+  });
+
+  try {
+    socket.monitor(500, 0);
+  } catch (error) {
+    console.warn(
+      `[zmq] slot ${slotId} monitor unavailable: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+  }
 
   buffer.socket = socket;
   console.info(
-    `[zmq] connected to slot ${slotId} on 127.0.0.1:${zmqPort}${credentials ? " with auth" : ""}`,
+    `[zmq] connected to slot ${slotId} on 127.0.0.1:${zmqPort}${
+      credentials
+        ? ` with auth domain=${credentials.domain} username=${credentials.username}`
+        : ""
+    }`,
   );
 }
 

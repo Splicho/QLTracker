@@ -11,6 +11,7 @@ export type SlotStatus = "busy" | "idle" | "provisioning";
 
 export type SlotState = {
   gamePort: number;
+  joinAddress: string;
   matchId: string | null;
   queueId: string | null;
   rconPort: number | null;
