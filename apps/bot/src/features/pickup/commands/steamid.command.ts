@@ -92,7 +92,7 @@ export const steamIdCommand: SlashCommand = {
     const playerName = formatPickupPlayerName(player.personaName) || 'Player';
 
     await interaction.editReply(
-      `${interaction.user} you successfully linked your Discord account to [${playerName}](${steamProfileUrl(player)}).`
+      `${interaction.user} successfully linked your Discord account to [${playerName}](${steamProfileUrl(player)}).`
     );
   }
 };
