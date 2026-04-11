@@ -83,6 +83,7 @@ export function createPlayerStateApi(deps: PlayerStateDeps) {
   async function getPlayerState(
     player: PickupPlayerIdentity,
   ): Promise<PickupPlayerState> {
+    const serverNow = new Date().toISOString();
     const match = await deps.getLatestPlayerActiveMatch(player.id);
 
     if (match) {
@@ -98,6 +99,7 @@ export function createPlayerStateApi(deps: PlayerStateDeps) {
         publicState,
         rating: ratingToState(rating),
         ratings: ratings.map(activeRatingToState),
+        serverNow,
         stage: match.status as Exclude<PickupMatchRow["status"], "cancelled">,
         viewer: player,
       };
@@ -129,6 +131,7 @@ export function createPlayerStateApi(deps: PlayerStateDeps) {
         },
         rating: ratingToState(rating),
         ratings: ratings.map(activeRatingToState),
+        serverNow,
         stage: "queue",
         viewer: player,
       };
@@ -146,6 +149,7 @@ export function createPlayerStateApi(deps: PlayerStateDeps) {
         publicState,
         rating: ratingToState(rating),
         ratings: ratings.map(activeRatingToState),
+        serverNow,
         stage: "completed",
         viewer: player,
       };
@@ -168,6 +172,7 @@ export function createPlayerStateApi(deps: PlayerStateDeps) {
       publicState,
       rating: ratingToState(rating),
       ratings: ratings.map(activeRatingToState),
+      serverNow,
       stage: "idle",
       viewer: player,
     };

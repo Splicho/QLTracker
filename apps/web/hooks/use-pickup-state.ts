@@ -204,6 +204,7 @@ export function usePickupState(
   ): PickupPlayerState => ({
     publicState: nextPublicState,
     rating,
+    serverNow: new Date().toISOString(),
     stage: "idle",
     viewer: nextViewer,
   })

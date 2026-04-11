@@ -253,6 +253,7 @@ export type PickupPlayerState =
       publicState: PickupPublicState;
       rating: PickupPlayerRatingState;
       ratings: PickupActiveRatingState[];
+      serverNow: string;
       stage: "idle";
       viewer: PickupPlayerIdentity;
     }
@@ -266,6 +267,7 @@ export type PickupPlayerState =
       };
       rating: PickupPlayerRatingState;
       ratings: PickupActiveRatingState[];
+      serverNow: string;
       stage: "queue";
       viewer: PickupPlayerIdentity;
     }
@@ -274,6 +276,7 @@ export type PickupPlayerState =
       publicState: PickupPublicState;
       rating: PickupPlayerRatingState;
       ratings: PickupActiveRatingState[];
+      serverNow: string;
       stage:
         | "ready_check"
         | "veto"

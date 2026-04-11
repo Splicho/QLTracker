@@ -195,6 +195,12 @@ export function RootChrome({
     pickupState.playerState.match.status === "ready_check"
       ? pickupState.playerState.match
       : null
+  const readyCheckPlayerState =
+    pickupState.playerState &&
+    "match" in pickupState.playerState &&
+    pickupState.playerState.match.status === "ready_check"
+      ? pickupState.playerState
+      : null
 
   if (!isPublicShellPath(pathname)) {
     return <>{children}</>
@@ -211,6 +217,7 @@ export function RootChrome({
               match={readyCheckMatch}
               onReadyUp={pickupState.readyUp}
               readyActionPending={pickupState.readyActionPending}
+              serverNow={readyCheckPlayerState?.serverNow ?? new Date().toISOString()}
             />
           ) : null}
         </>

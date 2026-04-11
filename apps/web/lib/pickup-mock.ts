@@ -364,11 +364,13 @@ export function createMockPickupState(
 ): PickupPlayerState {
   const safeViewer = createViewer(viewer)
   const rating = createMockRating()
+  const serverNow = new Date().toISOString()
 
   if (stage === "idle") {
     return {
       publicState: createPublicState(0, safeViewer),
       rating,
+      serverNow,
       stage: "idle",
       viewer: safeViewer,
     }
@@ -384,6 +386,7 @@ export function createMockPickupState(
         queueSlug: "4v4-ca",
       },
       rating,
+      serverNow,
       stage: "queue",
       viewer: safeViewer,
     }
@@ -393,6 +396,7 @@ export function createMockPickupState(
     match: createBaseMatch(stage, safeViewer),
     publicState: createPublicState(8, safeViewer),
     rating,
+    serverNow,
     stage,
     viewer: safeViewer,
   }

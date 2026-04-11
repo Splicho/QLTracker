@@ -99,15 +99,21 @@ export function PickupReadyModal({
   match,
   onReadyUp,
   readyActionPending = false,
+  serverNow,
 }: {
   currentPlayerId: string | null
   match: PickupMatchState
   onReadyUp: () => void
   readyActionPending?: boolean
+  serverNow: string
 }) {
   const fogHornAudioRef = useRef<HTMLAudioElement | null>(null)
   const tickAudioRef = useRef<HTMLAudioElement | null>(null)
   const playedReadyCheckMatchIdRef = useRef<string | null>(null)
+  const serverClockRef = useRef({
+    localNowMs: Date.now(),
+    serverNowMs: Date.now(),
+  })
   const readyCheckCountRef = useRef<{ count: number; matchId: string | null }>({
     count: 0,
     matchId: null,
@@ -130,8 +136,22 @@ export function PickupReadyModal({
     null
 
   useEffect(() => {
+    const nextServerNowMs = new Date(serverNow).getTime()
+    const nextLocalNowMs = Date.now()
+
+    serverClockRef.current = {
+      localNowMs: nextLocalNowMs,
+      serverNowMs: Number.isFinite(nextServerNowMs)
+        ? nextServerNowMs
+        : nextLocalNowMs,
+    }
+    setCountdownNowMs(serverClockRef.current.serverNowMs)
+  }, [match.id, serverNow])
+
+  useEffect(() => {
     const intervalId = window.setInterval(() => {
-      setCountdownNowMs(Date.now())
+      const { localNowMs, serverNowMs } = serverClockRef.current
+      setCountdownNowMs(serverNowMs + (Date.now() - localNowMs))
     }, 1000)
 
     return () => {

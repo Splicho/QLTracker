@@ -344,6 +344,7 @@ export type PickupPlayerState =
   | {
       publicState: PickupPublicState
       rating: PickupRating | null
+      serverNow: string
       stage: "idle"
       viewer: PickupPlayer
     }
@@ -357,6 +358,7 @@ export type PickupPlayerState =
         queueSlug: string
       }
       rating: PickupRating | null
+      serverNow: string
       stage: "queue"
       viewer: PickupPlayer
     }
@@ -364,6 +366,7 @@ export type PickupPlayerState =
       match: PickupMatchState
       publicState: PickupPublicState
       rating: PickupRating | null
+      serverNow: string
       stage:
         | "ready_check"
         | "veto"
