@@ -1,5 +1,12 @@
-import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  EmbedBuilder,
+  SlashCommandBuilder,
+} from 'discord.js';
 
+import { env } from '../../../config/env.js';
 import type { SlashCommand } from '../../../discord/types.js';
 import { queryRows } from '../../../shared/database.js';
 import { formatPickupPlayerName } from '../../../shared/pickup-player-name.js';
@@ -63,7 +70,7 @@ function truncateCell(value: string, maxWidth: number) {
 
 function buildDisplayRows(rows: LeaderboardRow[]): LeaderboardDisplayRow[] {
   return rows.map((row, index) => {
-    const name = truncateCell(formatPickupPlayerName(row.personaName) || 'Player', 16);
+    const name = truncateCell(formatPickupPlayerName(row.personaName) || 'Player', 20);
     return {
       rank: String(index + 1),
       name,
@@ -78,7 +85,7 @@ function buildDisplayRows(rows: LeaderboardRow[]): LeaderboardDisplayRow[] {
 function buildTable(rows: LeaderboardDisplayRow[]) {
   const columns = [
     { key: 'rank', label: '#', minWidth: 2, align: 'right' },
-    { key: 'name', label: 'Player', minWidth: 20, align: 'left' },
+    { key: 'name', label: 'Player', minWidth: 22, align: 'left' },
     { key: 'rating', label: 'Rating', minWidth: 6, align: 'right' },
     { key: 'wins', label: 'W', minWidth: 1, align: 'right' },
     { key: 'losses', label: 'L', minWidth: 1, align: 'right' },
@@ -171,6 +178,16 @@ export const ratingsCommand: SlashCommand = {
       .setDescription(buildTable(displayRows));
 
     await interaction.editReply({
+      components: env.PUBLIC_APP_URL
+        ? [
+            new ActionRowBuilder<ButtonBuilder>().addComponents(
+              new ButtonBuilder()
+                .setLabel('View full ratings')
+                .setStyle(ButtonStyle.Link)
+                .setURL(new URL('/leaderboards', env.PUBLIC_APP_URL).toString())
+            ),
+          ]
+        : [],
       embeds: [embed]
     });
   }
