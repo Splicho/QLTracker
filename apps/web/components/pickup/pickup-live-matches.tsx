@@ -91,7 +91,7 @@ export function PickupLiveMatches({
                           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500/70" />
                           <span className="relative inline-flex size-2 rounded-full bg-red-500" />
                         </span>
-                        {match.status === "live" ? "Live" : "Server Ready"}
+                        Live
                       </Badge>
                     </div>
 
@@ -102,7 +102,7 @@ export function PickupLiveMatches({
                         ) : (
                           <>
                             <Spinner className="size-3.5" />
-                            <span>Round in progress</span>
+                            <span>Match in progress</span>
                           </>
                         )}
                       </div>
