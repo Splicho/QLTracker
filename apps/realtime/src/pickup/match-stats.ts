@@ -104,6 +104,23 @@ function normalizeTeam(value: unknown): "left" | "right" | null {
   return null;
 }
 
+function normalizeWinningTeam(value: unknown): "red" | "blue" | null {
+  const normalized = readString(value)?.toLowerCase();
+  if (!normalized) {
+    return null;
+  }
+
+  if (["1", "left", "red"].includes(normalized)) {
+    return "red";
+  }
+
+  if (["2", "right", "blue"].includes(normalized)) {
+    return "blue";
+  }
+
+  return null;
+}
+
 function buildMatchPlayerIndex(players: PickupMatchPlayerRow[]): MatchPlayerIndex {
   return {
     bySteamId: new Map(
@@ -399,6 +416,9 @@ function getKillEventSignature(event: MatchStatsEvent) {
 
 function parseSummaryUpdate(event: MatchStatsEvent) {
   const data = event.data;
+  const teamWon = normalizeWinningTeam(
+    pickFirst(data.TEAM_WON, data.teamWon, data.WINNER, data.winner),
+  );
 
   return {
     blueRounds: readNumber(
@@ -425,6 +445,7 @@ function parseSummaryUpdate(event: MatchStatsEvent) {
     startedAt: ["MATCH_STARTED", "QLTRACKER_SUPPLEMENTAL_START"].includes(event.type)
       ? parseEventAt(event.eventAt)
       : null,
+    teamWon,
   };
 }
 
@@ -474,6 +495,33 @@ async function upsertStatsSummary(
   event: MatchStatsEvent,
 ) {
   const summary = parseSummaryUpdate(event);
+  const previousResult = await client.query<{
+    blueRounds: number | null;
+    redRounds: number | null;
+    sourceEventIndex: number | null;
+  }>(
+    `
+      select "blueRounds", "redRounds", "sourceEventIndex"
+      from "PickupMatchStatsSummary"
+      where "matchId" = $1
+      limit 1
+    `,
+    [matchId],
+  );
+  const previous = previousResult.rows[0] ?? null;
+  const shouldDeriveRoundScore =
+    event.type === "ROUND_OVER" &&
+    summary.redRounds == null &&
+    summary.blueRounds == null &&
+    summary.teamWon != null &&
+    (previous?.sourceEventIndex == null ||
+      event.eventIndex > previous.sourceEventIndex);
+  const redRounds = shouldDeriveRoundScore
+    ? (previous?.redRounds ?? 0) + (summary.teamWon === "red" ? 1 : 0)
+    : summary.redRounds;
+  const blueRounds = shouldDeriveRoundScore
+    ? (previous?.blueRounds ?? 0) + (summary.teamWon === "blue" ? 1 : 0)
+    : summary.blueRounds;
 
   await client.query(
     `
@@ -531,8 +579,8 @@ async function upsertStatsSummary(
       summary.factory,
       summary.mapKey,
       summary.roundsPlayed,
-      summary.redRounds,
-      summary.blueRounds,
+      redRounds,
+      blueRounds,
       summary.matchDurationSeconds,
       summary.startedAt,
       summary.endedAt,
