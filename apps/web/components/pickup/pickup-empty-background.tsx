@@ -133,7 +133,7 @@ export function PickupEmptyBackground({
 }) {
   const enabledQueues = queues.filter((queue) => queue.enabled)
   const groupedQueues = buildQueueGroups(enabledQueues)
-  const shouldShowQueuePreview = !guestMode && !isQueued
+  const shouldShowQueuePreview = !isQueued
 
   return (
     <div className="relative h-[26rem] w-full overflow-hidden">
