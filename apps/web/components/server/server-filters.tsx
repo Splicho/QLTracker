@@ -9,7 +9,6 @@ import {
   X,
 } from "lucide-react"
 import {
-  RegionAll,
   RegionApac,
   RegionEurope,
   RegionNorthAmerica,
@@ -58,7 +57,7 @@ import {
 import { useTranslation } from "react-i18next"
 
 const regionOptions = [
-  { value: "all", labelKey: "filters.regions.all", icon: RegionAll },
+  { value: "all", labelKey: "filters.regions.all", icon: null },
   { value: "eu", labelKey: "filters.regions.eu", icon: RegionEurope },
   { value: "na", labelKey: "filters.regions.na", icon: RegionNorthAmerica },
   { value: "sa", labelKey: "filters.regions.sa", icon: RegionSouthAmerica },
@@ -194,7 +193,9 @@ export function ServerFilters({
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Region">
                         <span className="flex items-center gap-2">
-                          <SelectedRegionIcon className="size-4 shrink-0" />
+                          {SelectedRegionIcon ? (
+                            <SelectedRegionIcon className="size-4 shrink-0" />
+                          ) : null}
                           <span>{t(selectedRegion.labelKey)}</span>
                         </span>
                       </SelectValue>
@@ -202,7 +203,9 @@ export function ServerFilters({
                     <SelectContent>
                       {regionOptions.map((option) => (
                         <SelectItem key={option.value} value={option.value}>
-                          <option.icon className="size-4 shrink-0" />
+                          {option.icon ? (
+                            <option.icon className="size-4 shrink-0" />
+                          ) : null}
                           <span className="flex items-center gap-2">
                             <span>{t(option.labelKey)}</span>
                           </span>
