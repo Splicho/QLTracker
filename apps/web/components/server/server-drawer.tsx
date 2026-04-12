@@ -382,7 +382,7 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
     playersQuery.isPending ||
     (playersQuery.fetchStatus === "fetching" && !playersQuery.data) ||
     ratingsQuery.isPending
-  const playerPanelFrameClass = "min-h-[20rem]"
+  const playerPanelFrameClass = "min-h-[20rem] min-w-0"
 
   const columns = useMemo<ColumnDef<DrawerPlayer>[]>(
     () => [
@@ -630,8 +630,8 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
         <div className="text-xs tracking-[0.12em] text-muted-foreground uppercase">
           {t("serverList.drawer.playersHeading")}
         </div>
-        <div className="overflow-hidden rounded-lg border border-border">
-          <Table>
+        <div className="overflow-x-auto rounded-lg border border-border">
+          <Table className="min-w-[42rem]">
             <TableHeader>
               <TableRow className="border-b border-border hover:bg-transparent">
                 {Array.from({ length: 6 }).map((_, index) => (
@@ -698,8 +698,8 @@ function QlStatsPlayersPanel({ serverAddress }: { serverAddress: string }) {
       <div className="text-xs tracking-[0.12em] text-muted-foreground uppercase">
         {t("serverList.drawer.playersHeading")}
       </div>
-      <div className="overflow-hidden rounded-lg border border-border">
-        <Table>
+      <div className="overflow-x-auto rounded-lg border border-border">
+        <Table className="min-w-[42rem]">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow
@@ -1054,7 +1054,7 @@ export function ServerDrawer({
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <TooltipProvider>
-        <DrawerContent className="h-[85vh] max-h-[85vh] w-full overflow-hidden rounded-t-2xl !border-0 shadow-none">
+        <DrawerContent className="h-[92dvh] max-h-[92dvh] w-full overflow-hidden rounded-t-2xl !border-0 shadow-none sm:h-[85vh] sm:max-h-[85vh]">
           {server ? (
             <>
               <div className="relative overflow-hidden border-b border-border">
@@ -1078,12 +1078,12 @@ export function ServerDrawer({
                     <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-background to-transparent" />
                   </div>
                 ) : null}
-                <div className="relative z-10 h-40">
-                  <div className="pointer-events-none absolute inset-x-0 top-11 text-center text-[11px] tracking-[0.14em] text-muted-foreground/80 uppercase">
+                <div className="relative z-10 h-60 sm:h-40">
+                  <div className="pointer-events-none absolute inset-x-0 top-10 px-4 text-center text-[11px] tracking-[0.14em] text-muted-foreground/80 uppercase sm:top-11">
                     {selectedMap?.name ?? server.map}
                   </div>
                   {teamScore ? (
-                    <div className="pointer-events-none absolute inset-x-0 top-16 flex items-center justify-center gap-4">
+                    <div className="pointer-events-none absolute inset-x-0 top-15 flex items-center justify-center gap-4 sm:top-16">
                       <div className="text-3xl font-semibold tracking-tight text-blue-400 drop-shadow-[0_1px_10px_rgba(0,0,0,0.55)]">
                         {teamScore.blue}
                       </div>
@@ -1095,7 +1095,7 @@ export function ServerDrawer({
                       </div>
                     </div>
                   ) : null}
-                  <div className="absolute inset-x-5 bottom-5 flex items-end justify-between gap-4">
+                  <div className="absolute inset-x-4 bottom-4 flex flex-col items-stretch gap-3 sm:inset-x-5 sm:bottom-5 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
                     <div className="min-w-0 flex-1">
                       <div className="flex min-w-0 items-center gap-2">
                         <div className="truncate text-left text-lg leading-tight font-semibold text-foreground drop-shadow-[0_1px_10px_rgba(0,0,0,0.55)]">
@@ -1128,7 +1128,7 @@ export function ServerDrawer({
                     {canJoin ? (
                       <Button
                         type="button"
-                        className="h-9 shrink-0 gap-2 bg-success text-success-foreground shadow-[0_0_28px_color-mix(in_oklch,var(--color-success)_28%,transparent)] hover:bg-success-hover hover:shadow-[0_0_34px_color-mix(in_oklch,var(--color-success-hover)_34%,transparent)]"
+                        className="h-9 w-full shrink-0 gap-2 bg-success text-success-foreground shadow-[0_0_28px_color-mix(in_oklch,var(--color-success)_28%,transparent)] hover:bg-success-hover hover:shadow-[0_0_34px_color-mix(in_oklch,var(--color-success-hover)_34%,transparent)] sm:w-auto"
                         onClick={() => onJoin(server)}
                       >
                         <Play className="size-4" />
@@ -1139,7 +1139,7 @@ export function ServerDrawer({
                 </div>
               </div>
               <div className="min-h-0 flex-1 overflow-y-auto">
-                <div className="space-y-4 px-5 py-4">
+                <div className="min-w-0 space-y-4 px-3 py-4 sm:px-5">
                   <QlStatsPlayersPanel serverAddress={server.addr} />
                   <ServerHistoryCard serverAddress={server.addr} />
                 </div>

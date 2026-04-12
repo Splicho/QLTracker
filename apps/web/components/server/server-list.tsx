@@ -1499,8 +1499,11 @@ export function ServerList({
             {t("serverList.refresh")}
           </Button>
         </div>
-        <div className="relative min-h-[24rem] flex-1">
-          <Table containerClassName="overflow-x-clip overflow-y-visible">
+        <div className="relative min-h-[24rem] flex-1 overflow-x-auto overflow-y-visible lg:overflow-x-clip">
+          <Table
+            className="min-w-[46rem] lg:min-w-0"
+            containerClassName="overflow-visible"
+          >
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow
@@ -1510,7 +1513,7 @@ export function ServerList({
                   {headerGroup.headers.map((header) => (
                     <TableHead
                       key={header.id}
-                      className={`sticky top-14 z-20 h-9 bg-background px-3 text-xs tracking-[0.12em] text-muted-foreground uppercase ${
+                      className={`h-9 bg-background px-3 text-xs tracking-[0.12em] text-muted-foreground uppercase lg:sticky lg:top-14 lg:z-20 ${
                         header.column.id === "actions" ? "text-right" : ""
                       }`}
                     >
