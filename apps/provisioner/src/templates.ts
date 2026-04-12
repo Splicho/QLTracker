@@ -111,6 +111,7 @@ export function buildServerCfg(
     `set teamsize "${teamSize}"`,
     `set sv_maxclients "${maxClients}"`,
     `set sv_mapPoolFile "${getMapPoolFile(teamSize)}"`,
+    `set g_voteFlags "2056"`,
     `set qlx_owner "${config.qlxOwnerSteamId}"`,
     `set qlx_plugins "plugin_manager,essentials,ban,permission,workshop,branding,pickup_bridge,qltracker_stats_bridge,qltracker_sort,qltracker_ratings,qltracker_admins,qltracker_rcon"`,
     `set qlx_database "Redis"`,
@@ -128,6 +129,7 @@ export function buildServerCfg(
     `set qlx_pickupBridgeToken "${metadata.callbackToken}"`,
     `set qlx_pickupMatchId "${metadata.matchId}"`,
     `set qlx_pickupStatsUrl "${metadata.callbackBaseUrl}/stats-supplemental"`,
+    `mappool_reload`,
     `set serverstartup "map ${metadata.finalMapKey} hoq_ca"`,
   ].join("\n");
 }

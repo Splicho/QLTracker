@@ -4,6 +4,12 @@ import type {
   PickupRatingRow,
 } from "./types.js";
 
+type RatedPickupQueueMember = PickupQueueMemberRow & {
+  balanceRating: number;
+  balanceRatingSource: "pickup" | "qlstats";
+  rating: PickupRatingRow;
+};
+
 function combinations<T>(values: T[], size: number): T[][] {
   if (size === 0) {
     return [[]];
@@ -25,11 +31,11 @@ function combinations<T>(values: T[], size: number): T[][] {
 }
 
 function compareByRating(
-  left: PickupQueueMemberRow & { rating: PickupRatingRow },
-  right: PickupQueueMemberRow & { rating: PickupRatingRow },
+  left: RatedPickupQueueMember,
+  right: RatedPickupQueueMember,
 ) {
-  if (right.rating.displayRating !== left.rating.displayRating) {
-    return right.rating.displayRating - left.rating.displayRating;
+  if (right.balanceRating !== left.balanceRating) {
+    return right.balanceRating - left.balanceRating;
   }
 
   if (left.joinedAt.getTime() !== right.joinedAt.getTime()) {
@@ -41,7 +47,7 @@ function compareByRating(
 
 export function chooseBalancedTeams(
   teamSize: number,
-  members: Array<PickupQueueMemberRow & { rating: PickupRatingRow }>,
+  members: RatedPickupQueueMember[],
 ) {
   const seeded = [...members].sort(compareByRating);
   const leftSeed = seeded[0]!;
@@ -51,8 +57,8 @@ export function chooseBalancedTeams(
   const splits = combinations(remaining, leftSlots);
   let best: {
     delta: number;
-    left: Array<PickupQueueMemberRow & { rating: PickupRatingRow }>;
-    right: Array<PickupQueueMemberRow & { rating: PickupRatingRow }>;
+    left: RatedPickupQueueMember[];
+    right: RatedPickupQueueMember[];
   } | null = null;
 
   for (const leftCombo of splits) {
@@ -63,11 +69,11 @@ export function chooseBalancedTeams(
       ...remaining.filter((member) => !leftIds.has(member.playerId)),
     ];
     const leftRating = left.reduce(
-      (total, member) => total + member.rating.displayRating,
+      (total, member) => total + member.balanceRating,
       0,
     );
     const rightRating = right.reduce(
-      (total, member) => total + member.rating.displayRating,
+      (total, member) => total + member.balanceRating,
       0,
     );
     const delta = Math.abs(leftRating - rightRating);
@@ -98,17 +104,22 @@ export function chooseBalancedTeams(
         left: leftCaptain.playerId,
         right: rightCaptain.playerId,
       },
+      ratingSource: members.some(
+        (member) => member.balanceRatingSource === "qlstats",
+      )
+        ? "qlstats"
+        : "pickup",
       ratingDelta: best.delta,
       teamRatings: {
         left: Math.round(
           best.left.reduce(
-            (total, member) => total + member.rating.displayRating,
+            (total, member) => total + member.balanceRating,
             0,
           ) / best.left.length,
         ),
         right: Math.round(
           best.right.reduce(
-            (total, member) => total + member.rating.displayRating,
+            (total, member) => total + member.balanceRating,
             0,
           ) / best.right.length,
         ),

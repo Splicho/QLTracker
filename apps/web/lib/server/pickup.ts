@@ -584,6 +584,84 @@ function toPickupMatchWeaponStatDto(
   }
 }
 
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value != null && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null
+}
+
+function pickFirst<T>(...values: Array<T | null | undefined>) {
+  for (const value of values) {
+    if (value != null) {
+      return value
+    }
+  }
+
+  return null
+}
+
+function readString(value: unknown) {
+  if (typeof value !== "string") {
+    return null
+  }
+
+  const trimmed = value.trim()
+  return trimmed.length > 0 ? trimmed : null
+}
+
+function readNumber(value: unknown) {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value
+  }
+
+  if (typeof value === "string" && value.trim().length > 0) {
+    const parsed = Number(value)
+    return Number.isFinite(parsed) ? parsed : null
+  }
+
+  return null
+}
+
+function getPersistedKillSignature(event: PickupKillEvent) {
+  const raw = asRecord(event.raw)
+  const matchGuid = readString(pickFirst(raw?.MATCH_GUID, raw?.matchGuid)) ?? ""
+  const round = readNumber(pickFirst(raw?.ROUND, raw?.round))
+  const time = readNumber(pickFirst(raw?.TIME, raw?.time))
+  const killer =
+    event.killerPlayerId ?? event.killerSteamId ?? event.killerName ?? ""
+  const victim =
+    event.victimPlayerId ?? event.victimSteamId ?? event.victimName ?? ""
+  const weapon = event.mod ?? event.weapon ?? ""
+
+  return [
+    matchGuid.trim().toLowerCase(),
+    round ?? `event:${event.eventIndex}`,
+    time ?? `event:${event.eventIndex}`,
+    killer.trim().toLowerCase(),
+    victim.trim().toLowerCase(),
+    weapon.trim().toLowerCase(),
+    event.teamKill ? "tk" : "",
+    event.suicide ? "suicide" : "",
+  ].join("|")
+}
+
+function dedupePickupKillEvents(events: PickupKillEvent[]) {
+  const seen = new Set<string>()
+  const deduped: PickupKillEvent[] = []
+
+  for (const event of events) {
+    const signature = getPersistedKillSignature(event)
+    if (seen.has(signature)) {
+      continue
+    }
+
+    seen.add(signature)
+    deduped.push(event)
+  }
+
+  return deduped
+}
+
 function toPickupMatchKillEventDto(
   event: PickupKillEvent
 ): PickupMatchKillEventDto {
@@ -1323,7 +1401,9 @@ export async function getPickupMatchDetail(
     chat: match.chatEvents.map((event) =>
       toPickupMatchChatEventDto(event, playerById)
     ),
-    kills: match.killEvents.map(toPickupMatchKillEventDto),
+    kills: dedupePickupKillEvents(match.killEvents).map(
+      toPickupMatchKillEventDto
+    ),
     match: {
       completedAt: match.completedAt?.toISOString() ?? null,
       finalMapKey: match.finalMapKey ?? null,

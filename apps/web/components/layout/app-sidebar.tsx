@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { ArrowLeft, Cookie, Shield } from "lucide-react"
+import { ArrowLeft, ChevronRight, Cookie, Shield } from "lucide-react"
 import { useEffect, useMemo, useSyncExternalStore } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { AboutSidebarItem } from "@/components/layout/about-sidebar-item"
@@ -33,6 +33,7 @@ import {
   type PickupPlayer,
   type PickupPublicState,
 } from "@/lib/pickup"
+import { PlayerAvatar } from "@/components/pickup/player-avatar"
 import {
   fetchRealtimePlayerPresenceLookup,
   isRealtimeEnabled,
@@ -43,7 +44,13 @@ import {
 } from "@/lib/settings-navigation"
 import type { NewsArticleDto } from "@/lib/server/news"
 import { openExternalUrl } from "@/lib/open-url"
+import { stripQuakeColors } from "@/lib/quake"
 import { Badge } from "@/components/ui/badge"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import {
   Sidebar,
   SidebarContent,
@@ -97,6 +104,134 @@ const competitiveNavigationItems: readonly NavItem[] = [
 ] as const
 
 const NEWS_READ_STATE_EVENT = "qltracker-news-read-state"
+
+function getQueuePlayerName(personaName: string) {
+  const strippedName = stripQuakeColors(personaName).trim()
+  return strippedName.length > 0 ? strippedName : "Unknown player"
+}
+
+function PickupQueueAvatarStack({
+  players,
+}: {
+  players: PickupPublicState["queues"][number]["players"]
+}) {
+  const visiblePlayers = players.slice(0, 8)
+  const hiddenCount = Math.max(0, players.length - visiblePlayers.length)
+
+  if (players.length === 0) {
+    return (
+      <span className="text-xs text-muted-foreground">No players queued.</span>
+    )
+  }
+
+  return (
+    <div className="flex items-center">
+      {visiblePlayers.map((player, index) => (
+        <Tooltip key={player.id}>
+          <TooltipTrigger asChild>
+            <div
+              className="relative rounded-full bg-popover ring-2 ring-popover"
+              style={{
+                marginLeft: index === 0 ? 0 : -8,
+                zIndex: visiblePlayers.length - index,
+              }}
+            >
+              <PlayerAvatar
+                avatarUrl={player.avatarUrl}
+                className="border border-border/70"
+                fallbackClassName="bg-muted text-foreground"
+                personaName={player.personaName}
+                size="sm"
+              />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            {getQueuePlayerName(player.personaName)}
+          </TooltipContent>
+        </Tooltip>
+      ))}
+      {hiddenCount > 0 ? (
+        <div
+          className="relative flex size-7 items-center justify-center rounded-full border border-border/70 bg-muted text-[11px] font-semibold text-foreground ring-2 ring-popover"
+          style={{ marginLeft: -8, zIndex: 0 }}
+        >
+          +{hiddenCount}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
+function PickupQueuePopover({
+  count,
+  queues,
+}: {
+  count: number
+  queues: PickupPublicState["queues"]
+}) {
+  const queuesWithPlayers = queues.filter((queue) => queue.currentPlayers > 0)
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          aria-label="Show pickup queue players"
+          className="flex min-w-0 cursor-pointer items-center gap-2 border-l border-sidebar-border px-3 py-2 text-left transition hover:bg-sidebar-accent/70"
+          type="button"
+        >
+          <Medal className="size-3.5 shrink-0 text-muted-foreground" />
+          <span className="text-sm leading-none font-semibold text-foreground tabular-nums">
+            {count}
+          </span>
+          <span className="relative inline-flex size-2 shrink-0">
+            <span className="absolute inset-0 animate-ping rounded-full bg-emerald-400/70" />
+            <span className="relative inline-flex size-2 rounded-full bg-emerald-400" />
+          </span>
+          <ChevronRight className="ml-auto size-3.5 shrink-0 text-muted-foreground" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-72 p-3" side="right">
+        <div className="space-y-3">
+          <div>
+            <div className="text-sm font-semibold text-foreground">
+              Pickup queue
+            </div>
+            <div className="text-xs text-muted-foreground">
+              Players currently waiting for a match.
+            </div>
+          </div>
+          {queuesWithPlayers.length > 0 ? (
+            <div className="space-y-3">
+              {queuesWithPlayers.map((queue) => (
+                <div
+                  className="rounded-md border border-border/70 bg-muted/35 p-2"
+                  key={queue.id}
+                >
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <span className="truncate text-xs font-semibold text-foreground">
+                      {queue.name}
+                    </span>
+                    <Badge
+                      className="h-5 shrink-0 rounded-md px-1.5 text-[11px] tabular-nums"
+                      variant="outline"
+                    >
+                      {queue.currentPlayers}/{queue.playerCount}
+                    </Badge>
+                  </div>
+                  <PickupQueueAvatarStack players={queue.players} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-md border border-border/70 bg-muted/35 p-3 text-xs text-muted-foreground">
+              No players currently queued.
+            </div>
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
+  )
+}
 
 function readNewsSlugsCookieSnapshot() {
   if (typeof document === "undefined") {
@@ -486,23 +621,10 @@ export function AppSidebar({
                     Players on Quake Live servers
                   </TooltipContent>
                 </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="flex min-w-0 items-center gap-2 border-l border-sidebar-border px-3 py-2">
-                      <Medal className="size-3.5 shrink-0 text-muted-foreground" />
-                      <span className="text-sm leading-none font-semibold text-foreground tabular-nums">
-                        {pickupQueueCount ?? 0}
-                      </span>
-                      <span className="relative inline-flex size-2 shrink-0">
-                        <span className="absolute inset-0 animate-ping rounded-full bg-emerald-400/70" />
-                        <span className="relative inline-flex size-2 rounded-full bg-emerald-400" />
-                      </span>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent side="top">
-                    Players currently in pickup queue
-                  </TooltipContent>
-                </Tooltip>
+                <PickupQueuePopover
+                  count={pickupQueueCount ?? 0}
+                  queues={pickupPublicStateQuery.data?.queues ?? []}
+                />
               </div>
             </div>
             <SidebarGroup>

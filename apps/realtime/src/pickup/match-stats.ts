@@ -353,6 +353,50 @@ function parseKillEvent(index: MatchPlayerIndex, event: MatchStatsEvent) {
   };
 }
 
+function getKillEventActorSignature(source: Record<string, unknown> | null) {
+  return (
+    readString(
+      pickFirst(source?.STEAM_ID, source?.steamId, source?.steam_id),
+    ) ??
+    readString(pickFirst(source?.NAME, source?.name)) ??
+    ""
+  )
+    .trim()
+    .toLowerCase();
+}
+
+function getKillEventSignature(event: MatchStatsEvent) {
+  const killerSource =
+    asObject(pickFirst(event.data.KILLER, event.data.killer, event.data.ATTACKER)) ??
+    asObject(event.data);
+  const victimSource =
+    asObject(pickFirst(event.data.VICTIM, event.data.victim, event.data.TARGET)) ??
+    asObject(event.data);
+  const matchGuid =
+    readString(pickFirst(event.data.MATCH_GUID, event.data.matchGuid)) ?? "";
+  const round = readNumber(pickFirst(event.data.ROUND, event.data.round)) ?? "";
+  const time = readNumber(pickFirst(event.data.TIME, event.data.time)) ?? "";
+  const weapon =
+    readString(
+      pickFirst(event.data.MOD, event.data.mod, event.data.WEAPON, event.data.weapon),
+    ) ?? "";
+  const teamKill =
+    readBoolean(pickFirst(event.data.TEAMKILL, event.data.teamkill)) ?? false;
+  const suicide =
+    readBoolean(pickFirst(event.data.SUICIDE, event.data.suicide)) ?? false;
+
+  return [
+    matchGuid.trim().toLowerCase(),
+    round,
+    time,
+    getKillEventActorSignature(killerSource),
+    getKillEventActorSignature(victimSource),
+    weapon.trim().toLowerCase(),
+    teamKill ? "tk" : "",
+    suicide ? "suicide" : "",
+  ].join("|");
+}
+
 function parseSummaryUpdate(event: MatchStatsEvent) {
   const data = event.data;
 
@@ -745,6 +789,11 @@ export async function applyPickupMatchStats(
 
   const players = await getMatchPlayers(matchId);
   const index = buildMatchPlayerIndex(players);
+  const playerKillSignatures = new Set(
+    parsed.events
+      .filter((event) => event.type === "PLAYER_KILL")
+      .map(getKillEventSignature),
+  );
 
   const client = await pool.connect();
   try {
@@ -769,7 +818,11 @@ export async function applyPickupMatchStats(
         await upsertPlayerStats(client, matchId, event, index);
       }
 
-      if (["PLAYER_DEATH", "PLAYER_KILL"].includes(event.type)) {
+      if (
+        event.type === "PLAYER_KILL" ||
+        (event.type === "PLAYER_DEATH" &&
+          !playerKillSignatures.has(getKillEventSignature(event)))
+      ) {
         await insertKillEvent(client, matchId, event, index);
       }
     }

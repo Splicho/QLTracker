@@ -19,6 +19,7 @@ import { applyPickupMatchStats } from "./pickup/match-stats.js";
 import { defaultDisplayRating } from "./pickup/ratings.js";
 import { chooseBalancedTeams } from "./pickup/matchmaking.js";
 import { createPlayerStateApi } from "./pickup/player-state.js";
+import { fetchPickupQlStatsElo } from "./pickup/qlstats-elo.js";
 import { parseJson, queueToPublicState } from "./pickup/state.js";
 import type {
   PickupActiveRatingRow,
@@ -1150,9 +1151,8 @@ export function createPickupService(io: Server) {
     }
 
     const ratedMembers = await Promise.all(
-      members.map(async (member) => ({
-        ...member,
-        rating: await getOrCreatePlayerSeasonRating(
+      members.map(async (member) => {
+        const rating = await getOrCreatePlayerSeasonRating(
           {
             avatarUrl: member.avatarUrl,
             countryCode: member.countryCode,
@@ -1162,8 +1162,21 @@ export function createPickupService(io: Server) {
             steamId: member.steamId,
           },
           season,
-        ),
-      })),
+        );
+        const qlstatsElo = await fetchPickupQlStatsElo({
+          queueName: queue.name,
+          queueSlug: queue.slug,
+          steamId: member.steamId,
+        });
+
+        return {
+          ...member,
+          balanceRating: qlstatsElo ?? rating.displayRating,
+          balanceRatingSource:
+            qlstatsElo != null ? ("qlstats" as const) : ("pickup" as const),
+          rating,
+        };
+      }),
     );
     const teams = chooseBalancedTeams(queue.teamSize, ratedMembers);
     const readyDeadlineAt = new Date(

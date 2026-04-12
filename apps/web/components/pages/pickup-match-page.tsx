@@ -1025,20 +1025,17 @@ function MatchStatsSection({ detail }: { detail: PickupMatchDetail }) {
   )
 }
 
-function formatChatTimestamp(value: string) {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) {
-    return null
-  }
-
-  return new Intl.DateTimeFormat(undefined, {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  }).format(date)
+function formatChatTimestamp(value: string, startedAt: string | null) {
+  return formatKillTime(value, startedAt)
 }
 
-function MatchChatSection({ chat }: { chat: PickupMatchDetail["chat"] }) {
+function MatchChatSection({
+  chat,
+  startedAt,
+}: {
+  chat: PickupMatchDetail["chat"]
+  startedAt: string | null
+}) {
   if (chat.length === 0) {
     return null
   }
@@ -1052,7 +1049,7 @@ function MatchChatSection({ chat }: { chat: PickupMatchDetail["chat"] }) {
         <Table containerClassName="max-h-80 overflow-auto">
           <TableHeader className="sticky top-0 z-10 bg-card">
             <TableRow>
-              <TableHead className="w-24">Time</TableHead>
+              <TableHead className="w-20">Time</TableHead>
               <TableHead className="w-56">Player</TableHead>
               <TableHead>Message</TableHead>
             </TableRow>
@@ -1061,7 +1058,7 @@ function MatchChatSection({ chat }: { chat: PickupMatchDetail["chat"] }) {
             {chat.map((entry) => (
               <TableRow key={entry.id}>
                 <TableCell className="font-mono text-xs text-muted-foreground tabular-nums">
-                  {formatChatTimestamp(entry.sentAt) ?? "-"}
+                  {formatChatTimestamp(entry.sentAt, startedAt)}
                 </TableCell>
                 <TableCell>
                   <PlayerName
@@ -1343,7 +1340,10 @@ export function PickupMatchPage({
 
       <MatchStatsSection detail={detail} />
 
-      <MatchChatSection chat={detail.chat} />
+      <MatchChatSection
+        chat={detail.chat}
+        startedAt={detail.statsSummary?.startedAt ?? detail.match.liveStartedAt}
+      />
     </section>
   )
 }

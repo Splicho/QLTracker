@@ -88,6 +88,7 @@ export type PickupBalanceSummary = {
     right: string;
   };
   ratingDelta: number;
+  ratingSource?: "pickup" | "qlstats";
   teamRatings: {
     left: number;
     right: number;
