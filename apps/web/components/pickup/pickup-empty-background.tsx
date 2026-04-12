@@ -1,6 +1,5 @@
 import { ChevronDown } from "lucide-react"
 import { Play, Spinner, Steam } from "@/components/icon"
-import { PlayerAvatar } from "@/components/pickup/player-avatar"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -11,13 +10,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import type { PickupQueueSummary } from "@/lib/pickup"
-import { stripQuakeColors } from "@/lib/quake"
 
 const pickupQueueGroupLabels: Record<string, string> = {
   ca: "Clan Arena",
@@ -56,66 +49,6 @@ function buildQueueGroups(queues: PickupQueueSummary[]) {
   }))
 }
 
-function getDisplayName(personaName: string) {
-  const strippedName = stripQuakeColors(personaName).trim()
-  return strippedName.length > 0 ? strippedName : "Unknown player"
-}
-
-function QueuePreview({ queue }: { queue: PickupQueueSummary | null }) {
-  const players = queue?.players ?? []
-  const visiblePlayers = players.slice(0, 8)
-  const hiddenCount = Math.max(0, players.length - visiblePlayers.length)
-
-  if (players.length === 0) {
-    return null
-  }
-
-  return (
-    <div className="mt-5 flex flex-col items-center gap-3">
-      <div className="text-xs font-semibold tracking-[0.18em] text-foreground/70 uppercase">
-        Currently in queue
-      </div>
-      <div
-        aria-label={`${players.length} player${players.length === 1 ? "" : "s"} currently in queue`}
-        className="flex items-center justify-center"
-      >
-        {visiblePlayers.map((player, index) => (
-          <Tooltip key={player.id}>
-            <TooltipTrigger asChild>
-              <div
-                className="relative rounded-full bg-background/80 ring-2 ring-background"
-                style={{
-                  marginLeft: index === 0 ? 0 : -10,
-                  zIndex: visiblePlayers.length - index,
-                }}
-              >
-                <PlayerAvatar
-                  avatarUrl={player.avatarUrl}
-                  className="border border-white/10 shadow-[0_8px_22px_rgba(0,0,0,0.35)]"
-                  fallbackClassName="bg-muted text-foreground"
-                  personaName={player.personaName}
-                  size="lg"
-                />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="bottom">
-              {getDisplayName(player.personaName)}
-            </TooltipContent>
-          </Tooltip>
-        ))}
-        {hiddenCount > 0 ? (
-          <div
-            className="relative flex size-10 items-center justify-center rounded-full border border-white/10 bg-muted text-xs font-semibold text-foreground shadow-[0_8px_22px_rgba(0,0,0,0.35)] ring-2 ring-background"
-            style={{ marginLeft: -10, zIndex: 0 }}
-          >
-            +{hiddenCount}
-          </div>
-        ) : null}
-      </div>
-    </div>
-  )
-}
-
 export function PickupEmptyBackground({
   guestMode,
   isQueued,
@@ -133,7 +66,6 @@ export function PickupEmptyBackground({
 }) {
   const enabledQueues = queues.filter((queue) => queue.enabled)
   const groupedQueues = buildQueueGroups(enabledQueues)
-  const shouldShowQueuePreview = !isQueued
 
   return (
     <div className="relative h-[26rem] w-full overflow-hidden">
@@ -254,7 +186,6 @@ export function PickupEmptyBackground({
               </DropdownMenu>
             )}
           </div>
-          {shouldShowQueuePreview ? <QueuePreview queue={selectedQueue} /> : null}
         </div>
       </div>
     </div>
