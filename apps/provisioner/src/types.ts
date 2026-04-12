@@ -32,6 +32,13 @@ export type SlotMetadataPlayer = {
   steamId: string;
 };
 
+export type SlotMetadataRating = {
+  displayRating: number;
+  personaName: string;
+  playerId: string;
+  steamId: string;
+};
+
 export type SlotMetadata = {
   callbackBaseUrl: string;
   callbackToken: string;
@@ -40,6 +47,7 @@ export type SlotMetadata = {
   matchId: string;
   queue?: ProvisionPayload["queue"];
   queueId: string;
+  ratings?: SlotMetadataRating[];
   seasonId: string;
   slotId: number;
   teams: {

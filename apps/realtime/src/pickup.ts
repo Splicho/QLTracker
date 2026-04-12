@@ -1638,6 +1638,24 @@ export function createPickupService(io: Server) {
       getMatchPlayers(matchId),
       getQueueById(match.queueId),
     ]);
+    const ratingRows = await pool.query<{
+      displayRating: number;
+      personaName: string;
+      playerId: string;
+      steamId: string;
+    }>(
+      `
+        select
+          r."displayRating",
+          p."personaName",
+          p."id" as "playerId",
+          p."steamId"
+        from "PickupPlayerSeasonRating" r
+        inner join "PickupPlayer" p on p."id" = r."playerId"
+        where r."seasonId" = $1 and r."queueId" = $2
+      `,
+      [match.seasonId, match.queueId],
+    );
     const payload = {
       captains: match.balanceSummary?.captainPlayerIds ?? null,
       finalMapKey: match.finalMapKey,
@@ -1652,6 +1670,12 @@ export function createPickupService(io: Server) {
           }
         : undefined,
       queueId: match.queueId,
+      ratings: ratingRows.rows.map((row) => ({
+        displayRating: row.displayRating,
+        personaName: row.personaName,
+        playerId: row.playerId,
+        steamId: row.steamId,
+      })),
       seasonId: match.seasonId,
       teams: {
         left: players

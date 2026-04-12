@@ -10,6 +10,7 @@ class qltracker_ratings(minqlx.Plugin):
     def __init__(self):
         super().__init__()
         self.metadata = {}
+        self.ratings_by_steam_id = {}
         self.roster_by_steam_id = {}
         self.teams = {"red": [], "blue": []}
         self.add_command("rating", self.cmd_rating)
@@ -49,6 +50,10 @@ class qltracker_ratings(minqlx.Plugin):
 
         return rating
 
+    @staticmethod
+    def clean_player_name(value):
+        return minqlx.Plugin.clean_text(str(value or "")).strip().lower()
+
     def load_metadata(self):
         metadata_file = self.get_cvar("qlx_pickupMetadataFile")
         if not metadata_file:
@@ -64,8 +69,27 @@ class qltracker_ratings(minqlx.Plugin):
 
     def refresh_metadata(self):
         self.metadata = self.load_metadata()
+        self.ratings_by_steam_id = {}
         self.roster_by_steam_id = {}
         self.teams = {"red": [], "blue": []}
+
+        metadata_ratings = self.metadata.get("ratings", [])
+        if isinstance(metadata_ratings, list):
+            for player in metadata_ratings:
+                if not isinstance(player, dict):
+                    continue
+
+                steam_id = self.normalize_steam_id(player.get("steamId"))
+                if steam_id is None:
+                    continue
+
+                rating_player = {
+                    "display_rating": self.parse_rating(player.get("displayRating")),
+                    "name": str(player.get("personaName") or steam_id),
+                    "steam_id": steam_id,
+                    "team": None,
+                }
+                self.ratings_by_steam_id[steam_id] = rating_player
 
         metadata_teams = self.metadata.get("teams", {})
         if not isinstance(metadata_teams, dict):
@@ -90,6 +114,7 @@ class qltracker_ratings(minqlx.Plugin):
                     "steam_id": steam_id,
                     "team": team,
                 }
+                self.ratings_by_steam_id[steam_id] = roster_player
                 self.roster_by_steam_id[steam_id] = roster_player
                 self.teams[team].append(roster_player)
 
@@ -124,29 +149,91 @@ class qltracker_ratings(minqlx.Plugin):
     def format_player_rating(self, player):
         return f'{player["name"]} {self.format_rating(player)}'
 
+    def find_connected_player(self, query):
+        raw_query = str(query or "").strip()
+        if not raw_query:
+            return None, None
+
+        if raw_query.isdigit():
+            client_id = int(raw_query)
+            for connected_player in self.players():
+                if connected_player.id == client_id:
+                    return connected_player, None
+
+            return None, f"No connected player found with client ID {client_id}."
+
+        normalized_query = self.clean_player_name(raw_query)
+        if not normalized_query:
+            return None, "Player name is empty."
+
+        connected_players = list(self.players())
+        exact_matches = [
+            connected_player
+            for connected_player in connected_players
+            if self.clean_player_name(connected_player.name) == normalized_query
+        ]
+        if len(exact_matches) == 1:
+            return exact_matches[0], None
+
+        prefix_matches = [
+            connected_player
+            for connected_player in connected_players
+            if self.clean_player_name(connected_player.name).startswith(normalized_query)
+        ]
+        if len(prefix_matches) == 1:
+            return prefix_matches[0], None
+
+        substring_matches = [
+            connected_player
+            for connected_player in connected_players
+            if normalized_query in self.clean_player_name(connected_player.name)
+        ]
+        if len(substring_matches) == 1:
+            return substring_matches[0], None
+
+        matches = exact_matches or prefix_matches or substring_matches
+        if len(matches) > 1:
+            names = ", ".join(f"{match.id}: {match.clean_name}" for match in matches[:5])
+            return None, f"Multiple players matched '{raw_query}': {names}."
+
+        return None, f"No connected player matched '{raw_query}'."
+
+    def resolve_rating_target(self, player, msg):
+        if len(msg) <= 1:
+            return player, None
+
+        return self.find_connected_player(" ".join(msg[1:]))
+
     def reply(self, channel, message):
         try:
             channel.reply(message)
         except Exception:
             self.msg(message)
 
-    def cmd_rating(self, player, _msg, channel):
+    def cmd_rating(self, player, msg, channel):
         self.refresh_metadata()
-        steam_id = self.parse_steam_id(player)
-        if steam_id is None:
-            player.tell(f"{PREFIX}Could not resolve your Steam ID.")
+        target_player, error = self.resolve_rating_target(player, msg)
+        if error is not None:
+            player.tell(f"{PREFIX}{error}")
             return minqlx.RET_STOP_ALL
 
-        roster_player = self.roster_by_steam_id.get(steam_id)
-        if roster_player is None:
-            player.tell(f"{PREFIX}No pickup rating is available for you on this server.")
+        steam_id = self.parse_steam_id(target_player)
+        if steam_id is None:
+            player.tell(f"{PREFIX}Could not resolve that player's Steam ID.")
+            return minqlx.RET_STOP_ALL
+
+        rating_player = self.ratings_by_steam_id.get(steam_id)
+        if rating_player is None:
+            player.tell(
+                f"{PREFIX}No pickup rating is available for that player on this server."
+            )
             return minqlx.RET_STOP_ALL
 
         self.reply(
             channel,
             (
-                f"{PREFIX}{roster_player['name']} current "
-                f"{self.rating_queue_label()} rating is {self.format_rating(roster_player)}"
+                f"{PREFIX}{rating_player['name']} current "
+                f"{self.rating_queue_label()} rating is {self.format_rating(rating_player)}"
             ),
         )
         return minqlx.RET_STOP_ALL

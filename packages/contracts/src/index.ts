@@ -29,6 +29,13 @@ export const pickupProvisionQueueSchema = z.object({
   teamSize: z.number().int().positive(),
 });
 
+export const pickupProvisionRatingSchema = z.object({
+  displayRating: z.number().int().nonnegative(),
+  personaName: z.string().min(1),
+  playerId: z.string().min(1),
+  steamId: z.string().min(1),
+});
+
 export const pickupProvisionPayloadSchema = z.object({
   captains: z
     .object({
@@ -40,6 +47,7 @@ export const pickupProvisionPayloadSchema = z.object({
   queue: pickupProvisionQueueSchema.optional(),
   matchId: z.string().min(1),
   queueId: z.string().min(1),
+  ratings: z.array(pickupProvisionRatingSchema).optional(),
   seasonId: z.string().min(1),
   teams: z.object({
     left: z.array(pickupProvisionPlayerSchema).min(1),

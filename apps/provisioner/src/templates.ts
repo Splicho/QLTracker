@@ -65,6 +65,7 @@ export function buildSlotMetadata(
     matchId: payload.matchId,
     queue: payload.queue,
     queueId: payload.queueId,
+    ratings: payload.ratings?.map((player) => ({ ...player })),
     seasonId: payload.seasonId,
     slotId: slot.id,
     teams: {
