@@ -7,6 +7,7 @@ import {
 import { createSignature } from "@qltracker/crypto";
 import { stripQuakeColors } from "@qltracker/quake";
 import type express from "express";
+import type { QueryResult } from "pg";
 import type { Server, Socket } from "socket.io";
 import { Rating, TrueSkill } from "ts-trueskill";
 import { config } from "./config.js";
@@ -1634,28 +1635,50 @@ export function createPickupService(io: Server) {
       return;
     }
 
-    const [players, queue] = await Promise.all([
-      getMatchPlayers(matchId),
-      getQueueById(match.queueId),
-    ]);
-    const ratingRows = await pool.query<{
+    let players: PickupMatchPlayerRow[];
+    let queue: PickupQueueRow | null;
+    let ratingRows: QueryResult<{
       displayRating: number;
       personaName: string;
       playerId: string;
       steamId: string;
-    }>(
-      `
-        select
-          r."displayRating",
-          p."personaName",
-          p."id" as "playerId",
-          p."steamId"
-        from "PickupPlayerSeasonRating" r
-        inner join "PickupPlayer" p on p."id" = r."playerId"
-        where r."seasonId" = $1 and r."queueId" = $2
-      `,
-      [match.seasonId, match.queueId],
-    );
+    }>;
+
+    try {
+      [players, queue] = await Promise.all([
+        getMatchPlayers(matchId),
+        getQueueById(match.queueId),
+      ]);
+      ratingRows = await pool.query<{
+        displayRating: number;
+        personaName: string;
+        playerId: string;
+        steamId: string;
+      }>(
+        `
+          select
+            r."displayRating",
+            p."personaName",
+            p."id" as "playerId",
+            p."steamId"
+          from "PickupPlayerSeasonRating" r
+          inner join "PickupPlayer" p on p."id" = r."playerId"
+          where r."seasonId" = $1
+        `,
+        [match.seasonId],
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      await recordProvisionEvent(matchId, "provision-error", {
+        error: message,
+        stage: "build-payload",
+      });
+      await failProvision("provision-payload-error", {
+        error: message,
+      });
+      return;
+    }
+
     const payload = {
       captains: match.balanceSummary?.captainPlayerIds ?? null,
       finalMapKey: match.finalMapKey,
