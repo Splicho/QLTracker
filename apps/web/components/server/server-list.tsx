@@ -321,6 +321,15 @@ function getQlStatsPlayerProfileUrl(steamId: string) {
   return `https://qlstats.net/player/${steamId}`
 }
 
+async function copyServerAddress(addr: string) {
+  try {
+    await navigator.clipboard.writeText(addr)
+    toast.success("Copied server address.")
+  } catch {
+    toast.error("Could not copy server address.")
+  }
+}
+
 function ServerPlayerCountPill({
   players,
   maxPlayers,
@@ -1580,6 +1589,10 @@ export function ServerList({
                         onOpenServer?.(
                           createServerInteractionContext(row.original)
                         )
+                      }}
+                      onContextMenu={(event) => {
+                        event.preventDefault()
+                        void copyServerAddress(row.original.addr)
                       }}
                     >
                       {row.getVisibleCells().map((cell) => (
