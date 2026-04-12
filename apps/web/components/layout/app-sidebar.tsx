@@ -404,7 +404,11 @@ export function AppSidebar({
     >
       <SidebarHeader>
         <div className="relative h-14 px-2">
-          <div className="absolute inset-y-0 left-2 flex items-center group-data-[collapsible=icon]:hidden">
+          <Link
+            href="/"
+            aria-label="Go to QLTracker home"
+            className="absolute inset-y-0 left-2 flex items-center group-data-[collapsible=icon]:hidden"
+          >
             <img
               alt="QLTracker"
               className="h-8 w-auto object-contain dark:hidden"
@@ -415,12 +419,18 @@ export function AppSidebar({
               className="hidden h-8 w-auto object-contain dark:block"
               src="/images/logo.png"
             />
-          </div>
-          <img
-            alt="QLTracker app icon"
-            className="absolute top-1/2 left-1/2 size-8 -translate-x-1/2 -translate-y-1/2 object-contain opacity-0 transition-opacity duration-200 ease-linear group-data-[collapsible=icon]:opacity-100"
-            src="/images/appicon.png"
-          />
+          </Link>
+          <Link
+            href="/"
+            aria-label="Go to QLTracker home"
+            className="absolute top-1/2 left-1/2 size-8 -translate-x-1/2 -translate-y-1/2 opacity-0 transition-opacity duration-200 ease-linear group-data-[collapsible=icon]:opacity-100"
+          >
+            <img
+              alt="QLTracker app icon"
+              className="size-8 object-contain"
+              src="/images/appicon.png"
+            />
+          </Link>
         </div>
       </SidebarHeader>
       <SidebarContent>

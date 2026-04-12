@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { ArrowDownLeft, ArrowUpRight, Check, X } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
@@ -92,6 +93,10 @@ const chartTeamTextColor = {
   right: "#f87171",
 } as const
 
+function getPlayerProfileHref(player: { id: string; steamId?: string | null }) {
+  return `/players/${encodeURIComponent(player.steamId || player.id)}`
+}
+
 function LoadingState() {
   return (
     <section className="flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -118,6 +123,7 @@ function TeamColumn({
       countryCode?: string | null
       id: string
       personaName: string
+      steamId?: string | null
     }
     result: "loss" | "win" | null
   }>
@@ -141,14 +147,17 @@ function TeamColumn({
               />
               <div className="min-w-0 flex-1">
                 <div className="flex min-w-0 items-center gap-2">
-                  <div className="min-w-0 truncate text-sm font-medium text-foreground">
+                  <Link
+                    className="min-w-0 truncate text-sm font-medium text-foreground transition-colors hover:text-primary"
+                    href={getPlayerProfileHref(entry.player)}
+                  >
                     <PlayerName
                       country
                       countryCode={entry.player.countryCode}
                       fallbackClassName="inline-block max-w-full truncate align-bottom"
                       personaName={entry.player.personaName}
                     />
-                  </div>
+                  </Link>
                   <span className="inline-flex h-6 shrink-0 items-center gap-1 rounded-md border border-border/70 bg-muted px-2 text-xs font-semibold text-foreground">
                     <Medal className="size-3.5 text-amber-400" />
                     {entry.displayAfter ?? entry.displayBefore}
@@ -307,14 +316,17 @@ function PlayerStatsCard({ player }: { player: PickupMatchPlayerStats }) {
           size="sm"
         />
         <div className="min-w-0">
-          <div className="truncate text-sm font-semibold text-foreground">
+          <Link
+            className="truncate text-sm font-semibold text-foreground transition-colors hover:text-primary"
+            href={getPlayerProfileHref(player.player)}
+          >
             <PlayerName
               country
               countryCode={player.player.countryCode}
               fallbackClassName="inline-block max-w-full truncate align-bottom"
               personaName={player.player.personaName}
             />
-          </div>
+          </Link>
           <div className="text-xs text-muted-foreground">
             {player.result === "win"
               ? "Winner"
