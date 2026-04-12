@@ -70,6 +70,12 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -1574,43 +1580,51 @@ export function ServerList({
               >
                 <AnimatePresence initial={false}>
                   {table.getPaginationRowModel().rows.map((row) => (
-                    <motion.tr
-                      key={row.id}
-                      layout="position"
-                      transition={serverListRowTransition}
-                      className="h-11 cursor-pointer border-b border-border transition-colors duration-150 hover:bg-muted/35"
-                      onFocus={() => {
-                        prefetchServerDrawerData(row.original.addr)
-                      }}
-                      onMouseEnter={() => {
-                        prefetchServerDrawerData(row.original.addr)
-                      }}
-                      onClick={() => {
-                        onOpenServer?.(
-                          createServerInteractionContext(row.original)
-                        )
-                      }}
-                      onContextMenu={(event) => {
-                        event.preventDefault()
-                        void copyServerAddress(row.original.addr)
-                      }}
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell
-                          key={cell.id}
-                          className={
-                            cell.column.id === "map"
-                              ? "relative h-11 p-0 align-middle"
-                              : "h-11 px-3 py-0 align-middle"
-                          }
+                    <ContextMenu key={row.id}>
+                      <ContextMenuTrigger asChild>
+                        <motion.tr
+                          layout="position"
+                          transition={serverListRowTransition}
+                          className="h-11 cursor-pointer border-b border-border transition-colors duration-150 hover:bg-muted/35"
+                          onFocus={() => {
+                            prefetchServerDrawerData(row.original.addr)
+                          }}
+                          onMouseEnter={() => {
+                            prefetchServerDrawerData(row.original.addr)
+                          }}
+                          onClick={() => {
+                            onOpenServer?.(
+                              createServerInteractionContext(row.original)
+                            )
+                          }}
                         >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </TableCell>
-                      ))}
-                    </motion.tr>
+                          {row.getVisibleCells().map((cell) => (
+                            <TableCell
+                              key={cell.id}
+                              className={
+                                cell.column.id === "map"
+                                  ? "relative h-11 p-0 align-middle"
+                                  : "h-11 px-3 py-0 align-middle"
+                              }
+                            >
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext()
+                              )}
+                            </TableCell>
+                          ))}
+                        </motion.tr>
+                      </ContextMenuTrigger>
+                      <ContextMenuContent>
+                        <ContextMenuItem
+                          onSelect={() => {
+                            void copyServerAddress(row.original.addr)
+                          }}
+                        >
+                          Copy IP:port
+                        </ContextMenuItem>
+                      </ContextMenuContent>
+                    </ContextMenu>
                   ))}
                 </AnimatePresence>
               </motion.tbody>
