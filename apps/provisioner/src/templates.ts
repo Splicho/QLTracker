@@ -105,6 +105,7 @@ export function buildServerCfg(
   const metadataFile = path.join(slotDir, "match.json");
   const queueLabel = formatQueueLabel(metadata.queueId, teamSize);
   const pickupBrandName = `^1QLTracker^7 Pickup`;
+  const customSpawnsFile = path.join(config.qldsBaseDir, "baseq3", "custom_spawns.json");
 
   return [
     `set sv_hostname "QLTracker Pickup | discord.gg/qltracker"`,
@@ -112,8 +113,9 @@ export function buildServerCfg(
     `set sv_maxclients "${maxClients}"`,
     `set sv_mapPoolFile "${getMapPoolFile(teamSize)}"`,
     `set g_voteFlags "2056"`,
+    `set qlx_customSpawnsFile "${customSpawnsFile}"`,
     `set qlx_owner "${config.qlxOwnerSteamId}"`,
-    `set qlx_plugins "plugin_manager,essentials,ban,permission,workshop,branding,pickup_bridge,qltracker_stats_bridge,qltracker_sort,qltracker_ratings,qltracker_admins,qltracker_rcon"`,
+    `set qlx_plugins "plugin_manager,essentials,ban,permission,workshop,branding,pickup_bridge,qltracker_stats_bridge,qltracker_sort,qltracker_spawns,qltracker_ratings,qltracker_admins,qltracker_rcon"`,
     `set qlx_database "Redis"`,
     `set qlx_redisAddress "127.0.0.1"`,
     `set qlx_redisDatabase "${slot.redisDb}"`,
@@ -145,14 +147,16 @@ export function buildManualServerCfg(
   const maxClients = teamSize * 2 + 2;
   const manualLabel = `${teamSize}v${teamSize} CA`;
   const manualBrandName = "^1QLTracker^7 | Clan Arena";
+  const customSpawnsFile = path.join(config.qldsBaseDir, "baseq3", "custom_spawns.json");
 
   return [
     `set sv_hostname "QLTracker | discord.gg/qltracker"`,
     `set teamsize "${teamSize}"`,
     `set sv_maxclients "${maxClients}"`,
     `set sv_mapPoolFile "${getMapPoolFile(teamSize)}"`,
+    `set qlx_customSpawnsFile "${customSpawnsFile}"`,
     `set qlx_owner "${config.qlxOwnerSteamId}"`,
-    `set qlx_plugins "plugin_manager,essentials,ban,permission,workshop,branding,qltracker_admins,qltracker_rcon"`,
+    `set qlx_plugins "plugin_manager,essentials,ban,permission,workshop,branding,qltracker_spawns,qltracker_admins,qltracker_rcon"`,
     `set qlx_database "Redis"`,
     `set qlx_redisAddress "127.0.0.1"`,
     `set qlx_redisDatabase "${slot.redisDb}"`,

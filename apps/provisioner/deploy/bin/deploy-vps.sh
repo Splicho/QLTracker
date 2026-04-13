@@ -119,6 +119,7 @@ sync_runtime_assets() {
   install -o "$APP_USER" -g "$APP_GROUP" -m 0644 "$APP_DIR"/deploy/plugins/*.py "$PLUGIN_DIR"/
   install -o "$APP_USER" -g "$APP_GROUP" -m 0644 "$APP_DIR"/deploy/factories/*.factories "$BASEQ3_DIR/scripts"/
   install -o "$APP_USER" -g "$APP_GROUP" -m 0644 "$APP_DIR"/deploy/baseq3/*.txt "$BASEQ3_DIR"/
+  install -o "$APP_USER" -g "$APP_GROUP" -m 0644 "$APP_DIR"/deploy/baseq3/*.json "$BASEQ3_DIR"/
 
   install -m 0440 "$APP_DIR/deploy/sudoers/qltracker-provisioner" /etc/sudoers.d/qltracker-provisioner
   visudo -cf /etc/sudoers.d/qltracker-provisioner >/dev/null
