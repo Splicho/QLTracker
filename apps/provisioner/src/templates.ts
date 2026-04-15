@@ -1,8 +1,9 @@
+import fs from "node:fs";
 import path from "node:path";
 import { config, type SlotDefinition } from "./config.js";
 import type { ProvisionPayload, SlotMetadata } from "./types.js";
 
-const PICKUP_WORKSHOP_IDS = [
+const DEFAULT_PICKUP_WORKSHOP_IDS = [
   "1804795751",
   "1804815655",
   "3463480024",
@@ -10,12 +11,34 @@ const PICKUP_WORKSHOP_IDS = [
   "3463000025",
   "2806460799",
   "3694724670",
-  "3146629108",
+  "3147966392",
   "3008771992",
   "3008846662",
   "3287948013",
   "3460015022",
 ] as const;
+
+function loadPickupWorkshopIds() {
+  const workshopFile = new URL("../deploy/baseq3/workshop.txt", import.meta.url);
+
+  try {
+    const contents = fs.readFileSync(workshopFile, "utf8");
+    const workshopIds = contents
+      .split(/\r?\n/)
+      .map((line) => line.replace(/#.*$/, "").trim())
+      .filter((line) => line.length > 0);
+
+    if (workshopIds.length > 0) {
+      return workshopIds;
+    }
+  } catch {
+    // Fall back to the in-code defaults when the deploy asset is unavailable.
+  }
+
+  return [...DEFAULT_PICKUP_WORKSHOP_IDS];
+}
+
+const PICKUP_WORKSHOP_IDS = loadPickupWorkshopIds();
 
 function formatQueueLabel(queueId: string, teamSize: number) {
   const normalized = queueId.trim().toLowerCase();

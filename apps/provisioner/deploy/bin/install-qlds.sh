@@ -53,5 +53,6 @@ cp "$CUSTOM_PLUGIN_DIR"/*.py "$QLDS_DIR/minqlx-plugins/"
 cp "$CUSTOM_FACTORY_DIR"/*.factories "$QLDS_DIR/baseq3/scripts/"
 cp "$CUSTOM_BASEQ3_DIR"/*.txt "$QLDS_DIR/baseq3/"
 cp "$CUSTOM_BASEQ3_DIR"/*.json "$QLDS_DIR/baseq3/"
+"$SCRIPT_DIR/sync-workshop-maps.sh"
 
 chown -R qltracker:qltracker "$QLDS_DIR"

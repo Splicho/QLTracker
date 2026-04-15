@@ -10,6 +10,7 @@ BRANCH="${1:-${BRANCH:-main}}"
 QLDS_DIR="${QLDS_DIR:-/opt/qltracker-qlds}"
 PLUGIN_DIR="${PLUGIN_DIR:-$QLDS_DIR/minqlx-plugins}"
 BASEQ3_DIR="${BASEQ3_DIR:-$QLDS_DIR/baseq3}"
+STEAMCMD_DIR="${STEAMCMD_DIR:-/opt/steamcmd}"
 SLOTS_GLOB="${SLOTS_GLOB:-qltracker-ql@*.service}"
 PROVISIONER_SERVICE="${PROVISIONER_SERVICE:-qltracker-provisioner.service}"
 SYSTEMD_DIR="${SYSTEMD_DIR:-/etc/systemd/system}"
@@ -120,6 +121,7 @@ sync_runtime_assets() {
   install -o "$APP_USER" -g "$APP_GROUP" -m 0644 "$APP_DIR"/deploy/factories/*.factories "$BASEQ3_DIR/scripts"/
   install -o "$APP_USER" -g "$APP_GROUP" -m 0644 "$APP_DIR"/deploy/baseq3/*.txt "$BASEQ3_DIR"/
   install -o "$APP_USER" -g "$APP_GROUP" -m 0644 "$APP_DIR"/deploy/baseq3/*.json "$BASEQ3_DIR"/
+  APP_USER="$APP_USER" APP_GROUP="$APP_GROUP" QLDS_DIR="$QLDS_DIR" BASEQ3_DIR="$BASEQ3_DIR" STEAMCMD_DIR="$STEAMCMD_DIR" "$APP_DIR/deploy/bin/sync-workshop-maps.sh"
 
   install -m 0440 "$APP_DIR/deploy/sudoers/qltracker-provisioner" /etc/sudoers.d/qltracker-provisioner
   visudo -cf /etc/sudoers.d/qltracker-provisioner >/dev/null

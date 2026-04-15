@@ -8,3 +8,4 @@ hellsgate|hoq_ca
 drunkenmummy|hoq_ca
 smash|hoq_ca
 hardwire|hoq_ca
+countermeasure|hoq_ca

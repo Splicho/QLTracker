@@ -2,6 +2,7 @@
   {
     "cvars": {
       "roundlimit": "10",
+      "roundtimelimit": "70",
       "dmflags": "28",
       "g_startingWeapons": "255",
       "g_startingArmor": "100",
