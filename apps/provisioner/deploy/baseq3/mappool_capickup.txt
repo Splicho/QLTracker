@@ -6,3 +6,4 @@ ra3map7c|hoq_ca
 ra3map9|hoq_ca
 quarantine|hoq_ca
 servituderedux|hoq_ca
+hardwire|hoq_ca

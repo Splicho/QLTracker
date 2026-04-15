@@ -7,3 +7,4 @@ electrichead|hoq_ca
 drunkenmummy|hoq_ca
 smash|hoq_ca
 hellsgate|hoq_ca
+hardwire|hoq_ca
