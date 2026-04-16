@@ -104,11 +104,7 @@ export function chooseBalancedTeams(
         left: leftCaptain.playerId,
         right: rightCaptain.playerId,
       },
-      ratingSource: members.some(
-        (member) => member.balanceRatingSource === "qlstats",
-      )
-        ? "qlstats"
-        : "pickup",
+      ratingSource: "pickup",
       ratingDelta: best.delta,
       teamRatings: {
         left: Math.round(

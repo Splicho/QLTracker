@@ -19,7 +19,6 @@ import { applyPickupMatchStats } from "./pickup/match-stats.js";
 import { defaultDisplayRating } from "./pickup/ratings.js";
 import { chooseBalancedTeams } from "./pickup/matchmaking.js";
 import { createPlayerStateApi } from "./pickup/player-state.js";
-import { fetchPickupQlStatsElo } from "./pickup/qlstats-elo.js";
 import { parseJson, queueToPublicState } from "./pickup/state.js";
 import type {
   PickupActiveRatingRow,
@@ -1163,17 +1162,11 @@ export function createPickupService(io: Server) {
           },
           season,
         );
-        const qlstatsElo = await fetchPickupQlStatsElo({
-          queueName: queue.name,
-          queueSlug: queue.slug,
-          steamId: member.steamId,
-        });
 
         return {
           ...member,
-          balanceRating: qlstatsElo ?? rating.displayRating,
-          balanceRatingSource:
-            qlstatsElo != null ? ("qlstats" as const) : ("pickup" as const),
+          balanceRating: rating.displayRating,
+          balanceRatingSource: "pickup" as const,
           rating,
         };
       }),
