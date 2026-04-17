@@ -28,7 +28,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
-import { Drawer, DrawerContent } from "@/components/ui/drawer"
+import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -107,17 +107,55 @@ function getQlStatsPlayerProfileUrl(steamId: string) {
   return `https://qlstats.net/player/${steamId}`
 }
 
-function getTeamScoreSummary(server: SteamServer) {
-  const redPlayers = server.players_info.filter((player) => player.team === 1)
-  const bluePlayers = server.players_info.filter((player) => player.team === 2)
+const scoreDisplayModes = new Set(["ca", "ctf", "tdm"])
+const nonLiveGameStates = new Set([
+  "COUNT_DOWN",
+  "INTERMISSION",
+  "PRE_GAME",
+  "WARMUP",
+])
 
-  if (redPlayers.length === 0 && bluePlayers.length === 0) {
+function formatGameStateLabel(gameState: string) {
+  return gameState
+    .trim()
+    .replace(/[_-]+/g, " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (match) => match.toUpperCase())
+}
+
+function getGameStateToneClassName(gameState: string) {
+  const normalized = gameState.trim().toUpperCase()
+  if (nonLiveGameStates.has(normalized)) {
+    return "border-amber-500/40 bg-amber-500/10 text-amber-300"
+  }
+
+  return "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
+}
+
+function isLiveScoreGameState(gameState: string | null | undefined) {
+  if (typeof gameState !== "string") {
+    return false
+  }
+
+  return !nonLiveGameStates.has(gameState.trim().toUpperCase())
+}
+
+function getLiveTeamScore(server: SteamServer) {
+  if (!server.game_mode || !scoreDisplayModes.has(server.game_mode)) {
+    return null
+  }
+
+  if (!isLiveScoreGameState(server.game_state)) {
+    return null
+  }
+
+  if (server.red_score == null || server.blue_score == null) {
     return null
   }
 
   return {
-    blue: bluePlayers.reduce((total, player) => total + player.score, 0),
-    red: redPlayers.reduce((total, player) => total + player.score, 0),
+    blue: server.blue_score,
+    red: server.red_score,
   }
 }
 
@@ -1049,7 +1087,11 @@ export function ServerDrawer({
 }: ServerDrawerProps) {
   const { t } = useTranslation()
   const selectedMap = server ? getMapEntry(server.map) : null
-  const teamScore = server ? getTeamScoreSummary(server) : null
+  const teamScore = server ? getLiveTeamScore(server) : null
+  const gameStateLabel =
+    typeof server?.game_state === "string" && server.game_state.trim().length > 0
+      ? formatGameStateLabel(server.game_state)
+      : null
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -1057,6 +1099,9 @@ export function ServerDrawer({
         <DrawerContent className="h-[92dvh] max-h-[92dvh] w-full overflow-hidden rounded-t-2xl !border-0 shadow-none sm:h-[85vh] sm:max-h-[85vh]">
           {server ? (
             <>
+              <DrawerTitle className="sr-only">
+                {stripQuakeColors(server.name)}
+              </DrawerTitle>
               <div className="relative overflow-hidden border-b border-border">
                 {selectedMap ? (
                   <div className="pointer-events-none absolute inset-0">
@@ -1101,6 +1146,16 @@ export function ServerDrawer({
                         <div className="truncate text-left text-lg leading-tight font-semibold text-foreground drop-shadow-[0_1px_10px_rgba(0,0,0,0.55)]">
                           {stripQuakeColors(server.name)}
                         </div>
+                        {gameStateLabel ? (
+                          <Badge
+                            variant="outline"
+                            className={`h-5 shrink-0 rounded-md px-1.5 text-[10px] font-medium ${getGameStateToneClassName(
+                              server.game_state ?? ""
+                            )}`}
+                          >
+                            {gameStateLabel}
+                          </Badge>
+                        ) : null}
                         {requiresPassword ? (
                           <Tooltip>
                             <TooltipTrigger asChild>

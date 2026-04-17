@@ -10,6 +10,7 @@ export type SteamServer = {
   addr: string
   avg_qelo?: number | null
   avg_trueskill?: number | null
+  blue_score?: number | null
   steamid: string | null
   country_code?: string | null
   country_name?: string | null
@@ -18,12 +19,14 @@ export type SteamServer = {
   game_directory: string
   game_description: string
   game_mode?: string | null
+  game_state?: string | null
   app_id: number
   ip?: string | null
   players: number
   max_players: number
   bots: number
   ping_ms: number | null
+  red_score?: number | null
   region: number | null
   requires_password?: boolean | null
   version: string | null
@@ -42,6 +45,7 @@ export type RealtimeServerSnapshot = {
   steamid?: string | null
   avgQelo?: number | null
   avgTrueskill?: number | null
+  blueScore?: number | null
   countryCode?: string | null
   countryName?: string | null
   ip?: string | null
@@ -53,6 +57,7 @@ export type RealtimeServerSnapshot = {
   gameDescription?: string
   gameDirectory?: string
   gameMode?: string | null
+  gameState?: string | null
   keywords?: string | null
   maxPlayers: number
   pingMs?: number | null
@@ -68,6 +73,7 @@ export type RealtimeServerSnapshot = {
   }>
   region?: number | null
   requiresPassword?: boolean | null
+  redScore?: number | null
   updatedAt?: string
   version?: string | null
 }
@@ -116,6 +122,7 @@ export function mergeSteamServerSnapshot(
     ...server,
     avg_qelo: snapshot.avgQelo ?? server.avg_qelo ?? null,
     avg_trueskill: snapshot.avgTrueskill ?? server.avg_trueskill ?? null,
+    blue_score: snapshot.blueScore ?? server.blue_score ?? null,
     steamid: snapshot.steamid ?? server.steamid,
     country_code: snapshot.countryCode ?? server.country_code ?? null,
     country_name: snapshot.countryName ?? server.country_name ?? null,
@@ -124,12 +131,14 @@ export function mergeSteamServerSnapshot(
     game_directory: snapshot.gameDirectory || server.game_directory,
     game_description: snapshot.gameDescription || server.game_description,
     game_mode: snapshot.gameMode ?? server.game_mode ?? null,
+    game_state: snapshot.gameState ?? server.game_state ?? null,
     app_id: snapshot.appId ?? server.app_id,
     ip: snapshot.ip ?? server.ip ?? null,
     players: counts.players,
     max_players: counts.maxPlayers,
     bots: snapshot.bots ?? server.bots,
     ping_ms: snapshot.pingMs ?? server.ping_ms,
+    red_score: snapshot.redScore ?? server.red_score ?? null,
     region: snapshot.region ?? server.region,
     requires_password:
       snapshot.requiresPassword ?? server.requires_password ?? null,
@@ -247,6 +256,7 @@ export function toSteamServer(snapshot: RealtimeServerSnapshot): SteamServer {
     addr: snapshot.addr,
     avg_qelo: snapshot.avgQelo ?? null,
     avg_trueskill: snapshot.avgTrueskill ?? null,
+    blue_score: snapshot.blueScore ?? null,
     steamid: snapshot.steamid ?? null,
     country_code: snapshot.countryCode ?? null,
     country_name: snapshot.countryName ?? null,
@@ -255,12 +265,14 @@ export function toSteamServer(snapshot: RealtimeServerSnapshot): SteamServer {
     game_directory: snapshot.gameDirectory ?? "baseq3",
     game_description: snapshot.gameDescription ?? "Quake Live",
     game_mode: snapshot.gameMode ?? null,
+    game_state: snapshot.gameState ?? null,
     app_id: snapshot.appId ?? steamAppId,
     ip: snapshot.ip ?? null,
     players: counts.players,
     max_players: counts.maxPlayers,
     bots: snapshot.bots ?? 0,
     ping_ms: snapshot.pingMs ?? null,
+    red_score: snapshot.redScore ?? null,
     region: snapshot.region ?? null,
     requires_password: snapshot.requiresPassword ?? null,
     version: snapshot.version ?? null,
