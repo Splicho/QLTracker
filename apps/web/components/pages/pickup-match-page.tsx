@@ -413,16 +413,19 @@ function getPlayerWeaponAccuracy(
 
 function buildWeaponDamageChart(
   detail: PickupMatchDetail,
-  sortBy: WeaponChartSort
+  sortBy: WeaponChartSort,
+  rankingWeapons: string[] = weaponOrder
 ): {
   config: ChartConfig
   data: Array<Record<string, number | string>>
   players: Array<{
+    avatarUrl?: string | null
     countryCode?: string | null
     id: string
     key: string
     label: string
     personaName: string
+    steamId?: string | null
     team: "left" | "right"
   }>
 } {
@@ -446,11 +449,13 @@ function buildWeaponDamageChart(
   const chartEntries = combinedPlayers.map(({ player, team }, index) => {
     const fallbackName = stripQuakeColors(player.player.personaName).trim()
     const chartPlayer = {
+      avatarUrl: player.player.avatarUrl,
       countryCode: player.player.countryCode,
       id: player.player.id,
       key: `player${index}`,
       label: fallbackName || `Player ${index + 1}`,
       personaName: player.player.personaName,
+      steamId: player.player.steamId,
       team,
     }
     const row: Record<string, number | string> = {
@@ -458,6 +463,7 @@ function buildWeaponDamageChart(
       playerKey: chartPlayer.key,
       team: chartPlayer.team,
     }
+    let rankDamage = 0
     let totalDamage = 0
 
     weaponOrder.forEach((weapon) => {
@@ -467,10 +473,14 @@ function buildWeaponDamageChart(
       row[`${weapon}Accuracy`] = accuracy
       row[weapon] = damage
       totalDamage += damage
+      if (rankingWeapons.includes(weapon)) {
+        rankDamage += damage
+      }
     })
 
     return {
       player: chartPlayer,
+      rankDamage,
       row,
       totalDamage,
     }
@@ -482,7 +492,7 @@ function buildWeaponDamageChart(
         return left.player.team === "left" ? -1 : 1
       }
 
-      return right.totalDamage - left.totalDamage
+      return right.rankDamage - left.rankDamage
     })
 
   return {
@@ -495,12 +505,14 @@ function buildWeaponDamageChart(
 function WeaponDamageTooltip({
   active,
   config,
+  hoveredWeapon,
   label,
   payload,
   players,
 }: {
   active?: boolean
   config: ChartConfig
+  hoveredWeapon?: string | null
   label?: string
   payload?: Array<{
     color?: string
@@ -553,19 +565,31 @@ function WeaponDamageTooltip({
           const accuracy = Number(item.payload?.[`${key}Accuracy`] ?? 0)
 
           return (
-            <div
-              className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2"
-              key={key}
-            >
+              <div
+                className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-md px-1.5 py-1"
+                key={key}
+              >
               <img
                 alt=""
                 className="size-4 object-contain opacity-90"
                 src={meta.icon}
               />
-              <span className="text-muted-foreground">
+              <span
+                className={
+                  hoveredWeapon === key
+                    ? "font-medium text-amber-100"
+                    : "text-muted-foreground"
+                }
+              >
                 {itemConfig?.label ?? meta.label}
               </span>
-              <span className="font-mono font-medium text-foreground tabular-nums">
+              <span
+                className={`font-mono font-medium tabular-nums ${
+                  hoveredWeapon === key
+                    ? "text-amber-200"
+                    : "text-foreground"
+                }`}
+              >
                 {formatNumber(damage)} dmg · {accuracy}%
               </span>
             </div>
@@ -584,9 +608,13 @@ function PlayerAxisTick({
 }: {
   payload?: { value?: string }
   players: Array<{
+    avatarUrl?: string | null
     countryCode?: string | null
+    id: string
     key: string
     label: string
+    personaName: string
+    steamId?: string | null
     team: "left" | "right"
   }>
   x?: number
@@ -595,6 +623,17 @@ function PlayerAxisTick({
   const player = players.find((entry) => entry.key === payload?.value)
   const flagSrc = getPickupCountryFlagSrc(player?.countryCode)
   const fill = player ? chartTeamTextColor[player.team] : "#94a3b8"
+  const initials =
+    player?.personaName
+      ? stripQuakeColors(player.personaName)
+          .trim()
+          .split(/\s+/)
+          .map((part) => part[0] ?? "")
+          .join("")
+          .slice(0, 2)
+          .toUpperCase()
+      : ""
+  const profileHref = player ? getPlayerProfileHref(player) : null
 
   if (typeof x !== "number" || typeof y !== "number") {
     return null
@@ -602,38 +641,82 @@ function PlayerAxisTick({
 
   return (
     <g transform={`translate(${x},${y})`}>
-      {flagSrc ? (
-        <image
-          height="26"
-          href={flagSrc}
-          opacity="0.95"
-          width="26"
-          x="-132"
-          y="-13"
+      <a href={profileHref ?? undefined}>
+        <rect
+          fill="transparent"
+          height="34"
+          rx="6"
+          width={150}
+          x="-136"
+          y="-17"
         />
-      ) : null}
-      <text
-        className="text-sm font-semibold"
-        style={{ fill }}
-        textAnchor="start"
-        x={flagSrc ? -96 : -132}
-        y={5}
-      >
-        {player?.label ?? payload?.value ?? ""}
-      </text>
+        {player?.avatarUrl ? (
+          <image
+            height="28"
+            href={player.avatarUrl}
+            preserveAspectRatio="xMidYMid slice"
+            width="28"
+            x="-132"
+            y="-14"
+          />
+        ) : (
+          <>
+            <circle
+              cx={-118}
+              cy={0}
+              fill="rgb(38 38 38)"
+              r="14"
+            />
+            <text
+              className="text-[10px] font-semibold"
+              fill="rgb(229 229 229)"
+              textAnchor="middle"
+              x={-118}
+              y={3.5}
+            >
+              {initials}
+            </text>
+          </>
+        )}
+        {flagSrc ? (
+          <image
+            height="20"
+            href={flagSrc}
+            opacity="0.95"
+            width="20"
+            x="-95"
+            y="-10"
+          />
+        ) : null}
+        <text
+          className="cursor-pointer text-sm font-semibold"
+          style={{ fill }}
+          textAnchor="start"
+          x={flagSrc ? -67 : -95}
+          y={5}
+        >
+          {player?.label ?? payload?.value ?? ""}
+        </text>
+      </a>
     </g>
   )
 }
 
 function WeaponDamageChart({ detail }: { detail: PickupMatchDetail }) {
   const [sortBy, setSortBy] = useState<WeaponChartSort>("best")
-  const chart = buildWeaponDamageChart(detail, sortBy)
+  const [hoveredWeapon, setHoveredWeapon] = useState<string | null>(null)
+  const availableChart = buildWeaponDamageChart(detail, sortBy)
   const availableWeapons = weaponOrder.filter((weapon) =>
-    chart.data.some((entry) => Number(entry[weapon] ?? 0) > 0)
+    availableChart.data.some((entry) => Number(entry[weapon] ?? 0) > 0)
   )
   const [selectedWeapons, setSelectedWeapons] = useState<string[]>(weaponOrder)
   const visibleWeapons = availableWeapons.filter((weapon) =>
     selectedWeapons.includes(weapon)
+  )
+  const chart = buildWeaponDamageChart(
+    detail,
+    sortBy,
+    sortBy === "best" ? visibleWeapons : weaponOrder
   )
 
   if (chart.data.length === 0 || availableWeapons.length === 0) {
@@ -724,6 +807,7 @@ function WeaponDamageChart({ detail }: { detail: PickupMatchDetail }) {
               data={chart.data}
               layout="vertical"
               margin={{ bottom: 12, left: 12, right: 22, top: 12 }}
+              onMouseLeave={() => setHoveredWeapon(null)}
             >
               <CartesianGrid horizontal={false} />
               <XAxis
@@ -746,10 +830,13 @@ function WeaponDamageChart({ detail }: { detail: PickupMatchDetail }) {
                 content={
                   <WeaponDamageTooltip
                     config={chart.config}
+                    hoveredWeapon={hoveredWeapon}
                     players={chart.players}
                   />
                 }
                 cursor={false}
+                animationDuration={300}
+                isAnimationActive
               />
               {visibleWeapons.map((weapon) => (
                 <Bar
@@ -759,6 +846,7 @@ function WeaponDamageChart({ detail }: { detail: PickupMatchDetail }) {
                   isAnimationActive={false}
                   key={weapon}
                   maxBarSize={38}
+                  onMouseMove={() => setHoveredWeapon(weapon)}
                   radius={0}
                   stackId="damage"
                 />
