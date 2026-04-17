@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const serverSnapshotSchema = z.object({
   addr: z.string().min(3),
+  blueScore: z.number().int().nullable().optional(),
   steamid: z.string().nullable().optional(),
   countryCode: z.string().nullable().optional(),
   countryName: z.string().nullable().optional(),
@@ -13,6 +14,7 @@ export const serverSnapshotSchema = z.object({
   connectUrl: z.string().optional(),
   gameDescription: z.string().optional(),
   gameDirectory: z.string().optional(),
+  gameState: z.string().nullable().optional(),
   players: z.number().int().nonnegative(),
   maxPlayers: z.number().int().positive(),
   gameMode: z.string().nullable().optional(),
@@ -22,6 +24,7 @@ export const serverSnapshotSchema = z.object({
   region: z.number().int().nullable().optional(),
   avgQelo: z.number().nullable().optional(),
   avgTrueskill: z.number().nullable().optional(),
+  redScore: z.number().int().nullable().optional(),
   version: z.string().nullable().optional(),
   updatedAt: z.string().datetime().optional(),
   playersInfo: z

@@ -89,6 +89,7 @@ async function buildSnapshot(server: SteamServerRecord): Promise<ServerSnapshot>
 
   return {
     addr: server.addr,
+    blueScore: null,
     countryCode: country.countryCode,
     countryName: country.countryName,
     steamid: server.steamid ?? null,
@@ -101,11 +102,13 @@ async function buildSnapshot(server: SteamServerRecord): Promise<ServerSnapshot>
     gameDescription: "Quake Live",
     gameDirectory: server.gamedir ?? "baseq3",
     gameMode: normalizeGameMode(mergedKeywords),
+    gameState: null,
     keywords: mergedKeywords,
     maxPlayers: server.max_players ?? 16,
     pingMs: null,
     players: server.players ?? 0,
     playersInfo: [],
+    redScore: null,
     region: server.region ?? null,
     requiresPassword: null,
     updatedAt: new Date().toISOString(),
