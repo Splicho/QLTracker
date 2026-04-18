@@ -1,4 +1,5 @@
 import { queryServerPlayers, type A2sPlayer } from "./a2s.js";
+import { queryServerRules } from "./a2s-rules.js";
 import { config } from "./config.js";
 import type { ServerSnapshot } from "./types.js";
 
@@ -36,6 +37,16 @@ type ScoredMatchCandidate = {
 
 const trueskillCache = new Map<string, CachedTrueskill>();
 const trueskillTtlMs = 1000 * 60 * 5;
+const teamGameModes = new Set([
+  "ad",
+  "ca",
+  "ctf",
+  "dom",
+  "ft",
+  "har",
+  "rr",
+  "tdm",
+]);
 
 function qlstatsValueAsString(
   value: Record<string, unknown>,
@@ -101,6 +112,27 @@ function extractRatingNumber(input: string) {
   }
 
   return extractFirstPlausibleNumber(lowered);
+}
+
+function normalizeGameMode(gameMode: string | null | undefined) {
+  if (typeof gameMode !== "string") {
+    return null;
+  }
+
+  const normalized = gameMode.trim().toLowerCase();
+  return normalized.length > 0 ? normalized : null;
+}
+
+function shouldQueryRules(
+  snapshot: ServerSnapshot,
+  previousSnapshot: ServerSnapshot | null
+) {
+  if (snapshot.players <= 0) {
+    return false;
+  }
+
+  const gameMode = normalizeGameMode(snapshot.gameMode ?? previousSnapshot?.gameMode);
+  return gameMode != null && teamGameModes.has(gameMode);
 }
 
 function isUsefulRatingValue(value: number) {
@@ -245,6 +277,15 @@ function calculateAverage(values: Array<number | null | undefined>) {
   return Math.round(
     numbers.reduce((total, value) => total + value, 0) / numbers.length
   );
+}
+
+function parseRuleScore(value: string | undefined) {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const parsed = Number(value.trim());
+  return Number.isInteger(parsed) ? parsed : null;
 }
 
 import { stripQuakeColors } from "@qltracker/quake";
@@ -515,14 +556,31 @@ async function enrichSnapshot(
   snapshot: ServerSnapshot,
   previousSnapshot: ServerSnapshot | null
 ) {
-  if (snapshot.players <= 0) {
-    return snapshot;
+  const shouldFetchRules = shouldQueryRules(snapshot, previousSnapshot);
+  const [
+    rulesResult,
+    livePlayersResult,
+    qlstatsPayloadResult,
+  ] = await Promise.allSettled([
+    shouldFetchRules ? queryServerRules(snapshot.addr) : Promise.resolve(null),
+    snapshot.players > 0 ? queryServerPlayers(snapshot.addr) : Promise.resolve([]),
+    snapshot.players > 0
+      ? fetch(
+          `${config.qlstatsApiUrl}/server/${encodeURIComponent(snapshot.addr)}/players`
+        )
+      : Promise.resolve(null),
+  ]);
+
+  const rules = rulesResult.status === "fulfilled" ? rulesResult.value : null;
+  if (shouldFetchRules && rulesResult.status === "rejected") {
+    console.warn(
+      `A2S rules query failed for ${snapshot.addr}: ${formatErrorMessage(
+        rulesResult.reason
+      )}`
+    );
   }
 
-  const [livePlayersResult, qlstatsPayloadResult] = await Promise.allSettled([
-    queryServerPlayers(snapshot.addr),
-    fetch(`${config.qlstatsApiUrl}/server/${encodeURIComponent(snapshot.addr)}/players`),
-  ]);
+  const cachedState = shouldFetchRules ? previousSnapshot : null;
 
   const livePlayers =
     livePlayersResult.status === "fulfilled" ? livePlayersResult.value : [];
@@ -537,7 +595,7 @@ async function enrichSnapshot(
   let qlstatsPayload: QlStatsServerResponse | null = null;
   if (qlstatsPayloadResult.status === "fulfilled") {
     const response = qlstatsPayloadResult.value;
-    if (response.ok) {
+    if (response && response.ok) {
       qlstatsPayload = (await response.json()) as QlStatsServerResponse;
     }
   } else {
@@ -568,8 +626,11 @@ async function enrichSnapshot(
     avgTrueskill: calculateAverage(
       playersWithTrueskill.map((player) => player.trueskill)
     ),
+    blueScore: parseRuleScore(rules?.g_blueScore) ?? cachedState?.blueScore ?? null,
     gameMode: qlstatsPayload?.serverinfo?.gt ?? snapshot.gameMode ?? null,
+    gameState: rules?.g_gameState?.trim() || (cachedState?.gameState ?? null),
     playersInfo: playersWithTrueskill,
+    redScore: parseRuleScore(rules?.g_redScore) ?? cachedState?.redScore ?? null,
   };
 }
 
