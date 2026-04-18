@@ -135,7 +135,7 @@ create table if not exists "PickupQueue" (
 
 create table if not exists "PickupSettings" (
   "id" text primary key default 'default',
-  "readyCheckDurationSeconds" integer not null default 30,
+  "readyCheckDurationSeconds" integer not null default 60,
   "vetoTurnDurationSeconds" integer not null default 20,
   "provisionApiUrl" text,
   "provisionAuthToken" text,

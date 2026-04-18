@@ -35,7 +35,7 @@ const DEFAULT_PICKUP_QUEUE = {
 
 const DEFAULT_PICKUP_SETTINGS = {
   id: "default",
-  readyCheckDurationSeconds: 30,
+  readyCheckDurationSeconds: 60,
   vetoTurnDurationSeconds: 20,
   provisionApiUrl: null,
   provisionAuthToken: null,

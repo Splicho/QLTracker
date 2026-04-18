@@ -30,7 +30,7 @@ const mockQueue: PickupQueueSummary = {
   name: "4v4 CA",
   playerCount: 8,
   players: [],
-  readyCheckDurationSeconds: 30,
+  readyCheckDurationSeconds: 60,
   slug: "4v4-ca",
   teamSize: 4,
   vetoTurnDurationSeconds: 20,
@@ -295,7 +295,7 @@ function createBaseMatch(
     queueId: MOCK_QUEUE_ID,
     readyDeadlineAt:
       stage === "ready_check"
-        ? new Date(Date.now() + 30_000).toISOString()
+        ? new Date(Date.now() + 60_000).toISOString()
         : null,
     seasonId: MOCK_SEASON_ID,
     server: {

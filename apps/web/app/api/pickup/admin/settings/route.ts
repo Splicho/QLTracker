@@ -76,7 +76,7 @@ export async function PATCH(request: Request) {
         callbackSecret: normalizeOptional(patch.callbackSecret),
         provisionApiUrl: normalizeOptional(patch.provisionApiUrl),
         provisionAuthToken: normalizeOptional(patch.provisionAuthToken),
-        readyCheckDurationSeconds: patch.readyCheckDurationSeconds ?? 30,
+        readyCheckDurationSeconds: patch.readyCheckDurationSeconds ?? 60,
         r2AccountId: normalizeOptional(patch.r2AccountId),
         r2AccessKeyId: normalizeOptional(patch.r2AccessKeyId),
         r2BucketName: normalizeOptional(patch.r2BucketName),

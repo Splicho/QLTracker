@@ -50,7 +50,7 @@ const DEFAULT_SETTINGS = {
   id: "default",
   provisionApiUrl: null,
   provisionAuthToken: null,
-  readyCheckDurationSeconds: 30,
+  readyCheckDurationSeconds: 60,
   vetoTurnDurationSeconds: 20,
 };
 

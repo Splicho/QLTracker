@@ -8,6 +8,7 @@ import {
   useState,
 } from "react"
 import {
+  Columns3,
   Bold,
   Heading1,
   Heading2,
@@ -19,11 +20,24 @@ import {
   ListOrdered,
   Minus,
   Palette,
+  Plus,
+  Rows3,
+  Table2,
+  Trash2,
   Type,
   Underline,
 } from "lucide-react"
+import { KEYS } from "platejs"
 import type { PlateEditor } from "platejs/react"
 import { toggleBulletedList, toggleNumberedList } from "@platejs/list-classic"
+import {
+  deleteColumn,
+  deleteRow,
+  deleteTable,
+  insertTable,
+  insertTableColumn,
+  insertTableRow,
+} from "@platejs/table"
 import { HexColorInput, HexColorPicker } from "react-colorful"
 
 import { Button } from "@/components/ui/button"
@@ -109,6 +123,52 @@ function ToolbarButton({
   )
 }
 
+function TableCountControl({
+  icon,
+  label,
+  onDecrement,
+  onIncrement,
+  value,
+}: {
+  icon: ReactNode
+  label: string
+  onDecrement: () => void
+  onIncrement: () => void
+  value: number
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2">
+      <div className="flex items-center gap-2 text-sm text-white/80">
+        {icon}
+        <span>{label}</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <Button
+          className="h-8 w-8 border-white/10 px-0 text-white/80 hover:bg-white/[0.06] hover:text-white"
+          size="sm"
+          type="button"
+          variant="outline"
+          onClick={onDecrement}
+        >
+          <Minus className="size-4" />
+        </Button>
+        <span className="w-6 text-center text-sm font-medium text-white">
+          {value}
+        </span>
+        <Button
+          className="h-8 w-8 border-white/10 px-0 text-white/80 hover:bg-white/[0.06] hover:text-white"
+          size="sm"
+          type="button"
+          variant="outline"
+          onClick={onIncrement}
+        >
+          <Plus className="size-4" />
+        </Button>
+      </div>
+    </div>
+  )
+}
+
 export function PlateNewsEditorToolbar({
   activeColor,
   activeFontSize,
@@ -117,7 +177,9 @@ export function PlateNewsEditorToolbar({
   disabled,
   editor,
   isUploadingImage,
+  onFocusEditor,
   onOpenLinkDialog,
+  onRestoreSelection,
   onStoreSelection,
   onUploadImage,
 }: {
@@ -128,13 +190,18 @@ export function PlateNewsEditorToolbar({
   disabled?: boolean
   editor: PlateEditor
   isUploadingImage?: boolean
+  onFocusEditor: () => void
   onOpenLinkDialog: () => void
+  onRestoreSelection: () => void
   onStoreSelection: () => void
   onUploadImage: (file: File) => void
 }) {
   const imageInputRef = useRef<HTMLInputElement | null>(null)
   const [colorOpen, setColorOpen] = useState(false)
   const [fontSizeOpen, setFontSizeOpen] = useState(false)
+  const [tableOpen, setTableOpen] = useState(false)
+  const [tableRows, setTableRows] = useState(3)
+  const [tableColumns, setTableColumns] = useState(3)
   const [colorDraft, setColorDraft] = useState(normalizeHexColor(activeColor))
   const isBusy = disabled || isUploadingImage
   const selectedColor = useMemo(() => {
@@ -146,6 +213,12 @@ export function PlateNewsEditorToolbar({
       ? activeColor
       : null
   }, [activeColor])
+  const hasActiveTable = Boolean(
+    editor.api.block({
+      above: true,
+      match: { type: editor.getType(KEYS.table) },
+    })
+  )
 
   const run =
     (callback: () => void) => (event: MouseEvent<HTMLButtonElement>) => {
@@ -156,6 +229,22 @@ export function PlateNewsEditorToolbar({
 
       callback()
     }
+  const runTableAction = (
+    callback: () => void,
+    { close = true }: { close?: boolean } = {}
+  ) => {
+    if (isBusy) {
+      return
+    }
+
+    onRestoreSelection()
+    callback()
+    onFocusEditor()
+
+    if (close) {
+      setTableOpen(false)
+    }
+  }
 
   const handleInsertImageMouseDown = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault()
@@ -497,6 +586,177 @@ export function PlateNewsEditorToolbar({
             />
           </ToolbarButton>
         </ToggleGroup>
+
+        <Popover
+          open={tableOpen}
+          onOpenChange={(open) => {
+            if (open) {
+              onStoreSelection()
+            }
+
+            setTableOpen(open)
+          }}
+        >
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <PopoverTrigger asChild>
+                <button
+                  aria-label="Table tools"
+                  className={cn(
+                    toggleVariants({ size: "sm", variant: "outline" }),
+                    "px-2 text-white/75 hover:bg-white/[0.06] hover:text-white"
+                  )}
+                  disabled={isBusy}
+                  type="button"
+                >
+                  <Table2 className="size-4" />
+                </button>
+              </PopoverTrigger>
+            </TooltipTrigger>
+            <TooltipContent>Table tools</TooltipContent>
+          </Tooltip>
+          <PopoverContent className="w-72 border-white/10 bg-[#111111] p-3 text-white">
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Table</p>
+                <p className="text-xs text-white/50">
+                  Insert a markdown table and manage rows or columns.
+                </p>
+              </div>
+
+              <div className="grid gap-2">
+                <TableCountControl
+                  icon={<Rows3 className="size-4" />}
+                  label="Rows"
+                  value={tableRows}
+                  onDecrement={() =>
+                    setTableRows((current) => Math.max(2, current - 1))
+                  }
+                  onIncrement={() =>
+                    setTableRows((current) => Math.min(8, current + 1))
+                  }
+                />
+                <TableCountControl
+                  icon={<Columns3 className="size-4" />}
+                  label="Columns"
+                  value={tableColumns}
+                  onDecrement={() =>
+                    setTableColumns((current) => Math.max(2, current - 1))
+                  }
+                  onIncrement={() =>
+                    setTableColumns((current) => Math.min(6, current + 1))
+                  }
+                />
+              </div>
+
+              <Button
+                className="w-full border-white/10 text-white/80 hover:bg-white/[0.06] hover:text-white"
+                size="sm"
+                type="button"
+                variant="outline"
+                onClick={() =>
+                  runTableAction(() => {
+                    insertTable(editor, {
+                      colCount: tableColumns,
+                      header: true,
+                      rowCount: tableRows,
+                    })
+                  })
+                }
+              >
+                <Table2 className="size-4" />
+                Insert table
+              </Button>
+
+              {hasActiveTable ? (
+                <>
+                  <div className="border-t border-white/10 pt-3">
+                    <p className="mb-2 text-xs font-medium tracking-[0.14em] text-white/45 uppercase">
+                      Current table
+                    </p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        className="justify-start border-white/10 text-white/80 hover:bg-white/[0.06] hover:text-white"
+                        size="sm"
+                        type="button"
+                        variant="outline"
+                        onClick={() =>
+                          runTableAction(
+                            () => insertTableRow(editor, {}),
+                            { close: false }
+                          )
+                        }
+                      >
+                        <Rows3 className="size-4" />
+                        Add row
+                      </Button>
+                      <Button
+                        className="justify-start border-white/10 text-white/80 hover:bg-white/[0.06] hover:text-white"
+                        size="sm"
+                        type="button"
+                        variant="outline"
+                        onClick={() =>
+                          runTableAction(
+                            () => insertTableColumn(editor, {}),
+                            { close: false }
+                          )
+                        }
+                      >
+                        <Columns3 className="size-4" />
+                        Add column
+                      </Button>
+                      <Button
+                        className="justify-start border-white/10 text-white/80 hover:bg-white/[0.06] hover:text-white"
+                        size="sm"
+                        type="button"
+                        variant="outline"
+                        onClick={() =>
+                          runTableAction(
+                            () => deleteRow(editor),
+                            { close: false }
+                          )
+                        }
+                      >
+                        <Minus className="size-4" />
+                        Remove row
+                      </Button>
+                      <Button
+                        className="justify-start border-white/10 text-white/80 hover:bg-white/[0.06] hover:text-white"
+                        size="sm"
+                        type="button"
+                        variant="outline"
+                        onClick={() =>
+                          runTableAction(
+                            () => deleteColumn(editor),
+                            { close: false }
+                          )
+                        }
+                      >
+                        <Minus className="size-4" />
+                        Remove column
+                      </Button>
+                    </div>
+                  </div>
+
+                  <Button
+                    className="w-full border-rose-500/20 text-rose-200 hover:bg-rose-500/10 hover:text-rose-100"
+                    size="sm"
+                    type="button"
+                    variant="outline"
+                    onClick={() =>
+                      runTableAction(() => {
+                        deleteTable(editor)
+                      })
+                    }
+                  >
+                    <Trash2 className="size-4" />
+                    Delete table
+                  </Button>
+                </>
+              ) : null}
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
     </TooltipProvider>
   )

@@ -46,6 +46,12 @@ import {
 } from "@platejs/markdown"
 import { insertImage } from "@platejs/media"
 import { ImagePlugin } from "@platejs/media/react"
+import {
+  TableCellHeaderPlugin,
+  TableCellPlugin,
+  TablePlugin,
+  TableRowPlugin,
+} from "@platejs/table/react"
 import remarkGfm from "remark-gfm"
 
 import { PlateNewsEditorLinkModal } from "@/components/news-editor/plate-news-editor-link-modal"
@@ -174,6 +180,50 @@ function ImageElement(props: PlateElementProps<TMediaElement>) {
   )
 }
 
+function TableElement({ children, ...props }: PlateElementProps) {
+  return (
+    <div className="my-4 overflow-x-auto rounded-xl border border-white/10 bg-black/20">
+      <PlateElement
+        {...props}
+        as="table"
+        className="min-w-full border-collapse text-sm text-white/88"
+      >
+        <tbody>{children}</tbody>
+      </PlateElement>
+    </div>
+  )
+}
+
+function TableRowElement(props: PlateElementProps) {
+  return (
+    <PlateElement
+      {...props}
+      as="tr"
+      className="border-b border-white/10 last:border-b-0"
+    />
+  )
+}
+
+function TableCellElement(props: PlateElementProps) {
+  return (
+    <PlateElement
+      {...props}
+      as="td"
+      className="min-w-[8rem] border-r border-white/10 px-3 py-2 align-top last:border-r-0 [&_p]:mb-0"
+    />
+  )
+}
+
+function TableCellHeaderElement(props: PlateElementProps) {
+  return (
+    <PlateElement
+      {...props}
+      as="th"
+      className="min-w-[8rem] border-r border-b border-white/10 bg-white/[0.04] px-3 py-2 text-left font-semibold text-white last:border-r-0 [&_p]:mb-0"
+    />
+  )
+}
+
 function createEditorPlugins() {
   return [
     ParagraphPlugin.withComponent(ParagraphElement),
@@ -221,6 +271,19 @@ function createEditorPlugins() {
         node: ImageElement,
       },
     }),
+    TablePlugin.configure({
+      node: {
+        component: TableElement,
+      },
+      options: {
+        disableMerge: true,
+        initialTableWidth: 720,
+        minColumnWidth: 128,
+      },
+    }),
+    TableRowPlugin.withComponent(TableRowElement),
+    TableCellPlugin.withComponent(TableCellElement),
+    TableCellHeaderPlugin.withComponent(TableCellHeaderElement),
     MarkdownPlugin.configure({
       options: {
         remarkPlugins: newsRemarkPlugins,
@@ -372,7 +435,9 @@ export const PlateNewsEditor = forwardRef<
           disabled={disabled}
           editor={editor}
           isUploadingImage={isUploadingImage}
+          onFocusEditor={() => contentRef.current?.focus()}
           onOpenLinkDialog={() => setIsLinkModalOpen(true)}
+          onRestoreSelection={restoreSelection}
           onStoreSelection={storeSelection}
           onUploadImage={handleImageUpload}
         />

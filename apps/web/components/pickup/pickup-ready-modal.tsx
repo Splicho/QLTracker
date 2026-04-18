@@ -241,7 +241,7 @@ export function PickupReadyModal({
             </p>
             <p className="text-xs tracking-[0.16em] text-muted-foreground uppercase">
               {viewerReady
-                ? `Ready confirmed | ${countdownLabel} remaining`
+                ? `${countdownLabel} remaining`
                 : readyExpired
                   ? "Ready check expired"
                   : `Accept within ${countdownLabel}`}
