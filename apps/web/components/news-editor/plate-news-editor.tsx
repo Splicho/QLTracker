@@ -51,7 +51,7 @@ import {
 } from "@platejs/markdown"
 import { insertImage } from "@platejs/media"
 import { ImagePlugin } from "@platejs/media/react"
-import { Resizable, ResizeHandle } from "@platejs/resizable"
+import { Resizable, ResizableProvider, ResizeHandle } from "@platejs/resizable"
 import {
   TableCellHeaderPlugin,
   TableCellPlugin,
@@ -233,25 +233,27 @@ function ImageElement(props: PlateElementProps<TMediaElement>) {
 
   return (
     <PlateElement {...props} as="div" className="my-4">
-      <Resizable
-        className="group relative max-w-full"
-        contentEditable={false}
-        options={{ maxWidth: "100%", minWidth: 180 }}
-      >
-        <NewsResizeHandle
-          direction="left"
-          className="absolute top-0 bottom-0 left-0 z-10 w-4 -translate-x-1/2 cursor-ew-resize touch-none after:absolute after:top-6 after:bottom-6 after:left-1/2 after:w-1 after:-translate-x-1/2 after:rounded-full after:bg-white/80 after:opacity-0 after:shadow-[0_0_18px_rgba(255,255,255,0.3)] after:transition-opacity group-hover:after:opacity-100 hover:after:opacity-100"
-        />
-        <img
-          alt={getImageCaptionText(element.caption)}
-          className="max-h-[28rem] w-full rounded-2xl border border-white/10 object-cover"
-          src={props.element.url}
-        />
-        <NewsResizeHandle
-          direction="right"
-          className="absolute top-0 right-0 bottom-0 z-10 w-4 translate-x-1/2 cursor-ew-resize touch-none after:absolute after:top-6 after:bottom-6 after:left-1/2 after:w-1 after:-translate-x-1/2 after:rounded-full after:bg-white/80 after:opacity-0 after:shadow-[0_0_18px_rgba(255,255,255,0.3)] after:transition-opacity group-hover:after:opacity-100 hover:after:opacity-100"
-        />
-      </Resizable>
+      <ResizableProvider>
+        <Resizable
+          className="group relative max-w-full"
+          contentEditable={false}
+          options={{ maxWidth: "100%", minWidth: 180 }}
+        >
+          <NewsResizeHandle
+            direction="left"
+            className="absolute top-0 bottom-0 left-0 z-10 w-4 -translate-x-1/2 cursor-ew-resize touch-none after:absolute after:top-6 after:bottom-6 after:left-1/2 after:w-1 after:-translate-x-1/2 after:rounded-full after:bg-white/80 after:opacity-0 after:shadow-[0_0_18px_rgba(255,255,255,0.3)] after:transition-opacity group-hover:after:opacity-100 hover:after:opacity-100"
+          />
+          <img
+            alt={getImageCaptionText(element.caption)}
+            className="max-h-[28rem] w-full rounded-2xl border border-white/10 object-cover"
+            src={props.element.url}
+          />
+          <NewsResizeHandle
+            direction="right"
+            className="absolute top-0 right-0 bottom-0 z-10 w-4 translate-x-1/2 cursor-ew-resize touch-none after:absolute after:top-6 after:bottom-6 after:left-1/2 after:w-1 after:-translate-x-1/2 after:rounded-full after:bg-white/80 after:opacity-0 after:shadow-[0_0_18px_rgba(255,255,255,0.3)] after:transition-opacity group-hover:after:opacity-100 hover:after:opacity-100"
+          />
+        </Resizable>
+      </ResizableProvider>
       {props.children}
     </PlateElement>
   )
