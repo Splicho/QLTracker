@@ -4,7 +4,6 @@ import Link from "next/link"
 import { useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
-import { remarkMdx } from "@platejs/markdown"
 import ReactMarkdown from "react-markdown"
 import rehypeRaw from "rehype-raw"
 import remarkBreaks from "remark-breaks"
@@ -113,6 +112,154 @@ function normalizeArticleImageWidth(width?: number | string) {
 
   const trimmedWidth = width.trim()
   return trimmedWidth.length > 0 ? trimmedWidth : undefined
+}
+
+function countMarkdownTablePipes(line: string) {
+  return line.match(/\|/g)?.length ?? 0
+}
+
+function isMarkdownTableSeparator(line: string) {
+  return /^\|\s*:?-{3,}[\s|:-]*\|?\s*$/.test(line)
+}
+
+function parseMarkdownTableRow(line: string) {
+  const trimmedLine = line.trim()
+
+  if (!trimmedLine.startsWith("|")) {
+    return null
+  }
+
+  const normalizedLine = trimmedLine.endsWith("|")
+    ? trimmedLine.slice(1, -1)
+    : trimmedLine.slice(1)
+
+  return normalizedLine.split("|").map((cell) => cell.trim())
+}
+
+function stringifyMarkdownTableRow(cells: string[]) {
+  return `| ${cells.join(" | ")} |`
+}
+
+function isBrokenImageOnlyCell(cell: string) {
+  const normalizedCell = cell
+    .replaceAll("&#xA;", "")
+    .replaceAll("<br/>", "")
+    .replaceAll("<br />", "")
+    .trim()
+
+  return normalizedCell.startsWith("<img")
+}
+
+function normalizeMergedImageCell(cell: string) {
+  return cell
+    .replaceAll("&#xA;", " ")
+    .replace(/(?:<br\s*\/?>\s*)+/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+}
+
+function normalizeMarkdownTableRows(rows: string[]) {
+  const normalizedRows: string[] = []
+
+  for (let index = 0; index < rows.length; index += 1) {
+    const currentCells = parseMarkdownTableRow(rows[index]!)
+    const nextCells = parseMarkdownTableRow(rows[index + 1] ?? "")
+
+    if (
+      currentCells &&
+      nextCells &&
+      currentCells.length === nextCells.length &&
+      currentCells[0] &&
+      currentCells.slice(1).every((cell) => cell.length === 0) &&
+      isBrokenImageOnlyCell(nextCells[0] ?? "") &&
+      nextCells.slice(1).some((cell) => cell.length > 0)
+    ) {
+      const normalizedImageCell = normalizeMergedImageCell(nextCells[0] ?? "")
+      const mergedCells = currentCells.map((cell, cellIndex) => {
+        if (cellIndex === 0) {
+          return `${cell}${normalizedImageCell ? ` ${normalizedImageCell}` : ""}`.trim()
+        }
+
+        return cell || nextCells[cellIndex] || ""
+      })
+
+      normalizedRows.push(stringifyMarkdownTableRow(mergedCells))
+      index += 1
+      continue
+    }
+
+    normalizedRows.push(rows[index]!)
+  }
+
+  return normalizedRows
+}
+
+function normalizeArticleMarkdown(content: string) {
+  const lines = content.split(/\r?\n/)
+  const normalizedLines: string[] = []
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index]
+    const trimmedLine = line.trim()
+    const nextTrimmedLine = lines[index + 1]?.trim()
+
+    if (
+      trimmedLine.startsWith("|") &&
+      nextTrimmedLine &&
+      isMarkdownTableSeparator(nextTrimmedLine)
+    ) {
+      const expectedPipeCount = countMarkdownTablePipes(trimmedLine)
+
+      normalizedLines.push(trimmedLine)
+      index += 1
+      normalizedLines.push(lines[index]!.trim())
+      const tableRows: string[] = []
+
+      while (index + 1 < lines.length) {
+        const nextLine = lines[index + 1]!
+        const nextTableLine = nextLine.trim()
+
+        if (!nextTableLine || !nextTableLine.startsWith("|")) {
+          break
+        }
+
+        index += 1
+        let row = lines[index]!.trim()
+
+        while (
+          countMarkdownTablePipes(row) < expectedPipeCount &&
+          index + 1 < lines.length
+        ) {
+          const continuationLine = lines[index + 1]!.trim()
+
+          if (!continuationLine) {
+            break
+          }
+
+          index += 1
+          row = `${row} ${continuationLine}`
+        }
+
+        tableRows.push(row)
+      }
+
+      normalizedLines.push(...normalizeMarkdownTableRows(tableRows))
+
+      continue
+    }
+
+    normalizedLines.push(line)
+  }
+
+  return normalizedLines.join("\n")
+}
+
+function withoutNodeProp<T extends { node?: unknown }>(
+  props: T
+): Omit<T, "node"> {
+  const { node, ...rest } = props
+  void node
+  return rest
 }
 
 function NewsTabs({ activeCategory }: { activeCategory: CategoryFilter }) {
@@ -402,6 +549,8 @@ function NewsArticleInner({
     return null
   }
 
+  const renderedArticleContent = normalizeArticleMarkdown(article.content)
+
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
       <Button
@@ -434,10 +583,10 @@ function NewsArticleInner({
         <div className="mt-6 flex flex-col gap-2">
           <ReactMarkdown
             rehypePlugins={[rehypeRaw]}
-            remarkPlugins={[remarkGfm, remarkBreaks, remarkMdx]}
+            remarkPlugins={[remarkGfm, remarkBreaks]}
             components={{
               a(props) {
-                const { children, className, ...rest } = props
+                const { children, className, ...rest } = withoutNodeProp(props)
                 return (
                   <a
                     {...rest}
@@ -454,7 +603,7 @@ function NewsArticleInner({
                 return (
                   <h1
                     className="mt-4 w-full text-2xl font-semibold text-foreground"
-                    {...props}
+                    {...withoutNodeProp(props)}
                   />
                 )
               },
@@ -462,7 +611,7 @@ function NewsArticleInner({
                 return (
                   <h2
                     className="mt-4 w-full text-xl font-semibold text-foreground"
-                    {...props}
+                    {...withoutNodeProp(props)}
                   />
                 )
               },
@@ -470,7 +619,7 @@ function NewsArticleInner({
                 return (
                   <h3
                     className="mt-3 w-full text-lg font-semibold text-foreground"
-                    {...props}
+                    {...withoutNodeProp(props)}
                   />
                 )
               },
@@ -478,7 +627,7 @@ function NewsArticleInner({
                 return (
                   <p
                     className="w-full text-base leading-relaxed text-muted-foreground"
-                    {...props}
+                    {...withoutNodeProp(props)}
                   />
                 )
               },
@@ -486,7 +635,7 @@ function NewsArticleInner({
                 return (
                   <ul
                     className="w-full list-disc space-y-1 pl-6 text-base leading-relaxed text-muted-foreground"
-                    {...props}
+                    {...withoutNodeProp(props)}
                   />
                 )
               },
@@ -494,18 +643,24 @@ function NewsArticleInner({
                 return (
                   <ol
                     className="w-full list-decimal space-y-1 pl-6 text-base leading-relaxed text-muted-foreground"
-                    {...props}
+                    {...withoutNodeProp(props)}
                   />
                 )
               },
               li(props) {
-                return <li className="leading-relaxed" {...props} />
+                return (
+                  <li
+                    className="leading-relaxed"
+                    {...withoutNodeProp(props)}
+                  />
+                )
               },
-              code({ className, ...props }) {
+              code(props) {
+                const { className, ...rest } = withoutNodeProp(props)
                 return (
                   <code
                     className={`rounded bg-muted px-1.5 py-0.5 text-[0.9em] text-foreground ${className ?? ""}`.trim()}
-                    {...props}
+                    {...rest}
                   />
                 )
               },
@@ -513,25 +668,81 @@ function NewsArticleInner({
                 return (
                   <pre
                     className="w-full overflow-x-auto rounded-xl border border-border bg-muted/40 p-4 text-sm text-foreground"
-                    {...props}
+                    {...withoutNodeProp(props)}
                   />
                 )
               },
-              img({ alt, src, width }) {
+              img(props) {
+                const { alt, src, width } = withoutNodeProp(props)
                 const imageWidth = normalizeArticleImageWidth(width)
+                const parsedWidth = imageWidth
+                  ? Number.parseFloat(imageWidth)
+                  : Number.NaN
+                const isInlineSizedImage =
+                  Number.isFinite(parsedWidth) && parsedWidth <= 128
 
                 return src ? (
                   <img
                     alt={alt ?? ""}
-                    className="mx-auto max-w-full rounded-2xl object-cover"
+                    className={cn(
+                      "max-w-full rounded-2xl object-cover",
+                      isInlineSizedImage
+                        ? "inline-block align-middle"
+                        : "mx-auto block"
+                    )}
                     src={src}
                     style={{ width: imageWidth ?? "100%" }}
                   />
                 ) : null
               },
+              table(props) {
+                return (
+                  <div className="my-5 overflow-x-auto rounded-2xl border border-border bg-muted/20">
+                    <table
+                      className="min-w-full border-collapse text-sm text-muted-foreground"
+                      {...withoutNodeProp(props)}
+                    />
+                  </div>
+                )
+              },
+              thead(props) {
+                return (
+                  <thead
+                    className="bg-white/[0.04]"
+                    {...withoutNodeProp(props)}
+                  />
+                )
+              },
+              tbody(props) {
+                return <tbody {...withoutNodeProp(props)} />
+              },
+              tr(props) {
+                return (
+                  <tr
+                    className="border-b border-border last:border-b-0"
+                    {...withoutNodeProp(props)}
+                  />
+                )
+              },
+              th(props) {
+                return (
+                  <th
+                    className="border-r border-border px-4 py-3 text-left font-semibold text-foreground last:border-r-0 [&_p]:mb-0 [&_span]:text-foreground"
+                    {...withoutNodeProp(props)}
+                  />
+                )
+              },
+              td(props) {
+                return (
+                  <td
+                    className="border-r border-border px-4 py-3 align-top text-muted-foreground last:border-r-0 [&_img]:my-0 [&_img]:rounded-xl [&_p]:mb-0 [&_span]:text-inherit"
+                    {...withoutNodeProp(props)}
+                  />
+                )
+              },
             }}
           >
-            {article.content}
+            {renderedArticleContent}
           </ReactMarkdown>
         </div>
       </div>

@@ -15,17 +15,55 @@ export type NewsArticleDto = {
 
 const markdownImagePattern = /!\[[^\]]*]\(([^)\s]+)(?:\s+"[^"]*")?\)/g
 const htmlImagePattern = /<img[^>]*src=(["'])(.*?)\1/gi
+const htmlTagPattern = /<\/?[^>]+>/g
+const htmlBreakPattern = /<br\s*\/?>/gi
+const htmlEntityPattern =
+  /&(nbsp|amp|quot|apos|lt|gt|#39|#x27|#x2F|#xA|#10|ZeroWidthSpace);/gi
 
 function normalizeOptional(value: string | null | undefined) {
   const trimmed = value?.trim()
   return trimmed ? trimmed : null
 }
 
+function decodeExcerptEntity(entity: string) {
+  switch (entity.toLowerCase()) {
+    case "nbsp":
+      return " "
+    case "amp":
+      return "&"
+    case "quot":
+      return '"'
+    case "apos":
+    case "#39":
+    case "#x27":
+      return "'"
+    case "lt":
+      return "<"
+    case "gt":
+      return ">"
+    case "#x2f":
+      return "/"
+    case "#xa":
+    case "#10":
+    case "zerowidthspace":
+      return " "
+    default:
+      return " "
+  }
+}
+
 function stripMarkdown(value: string) {
   return value
     .replace(/!\[[^\]]*]\([^)]+\)/g, " ")
+    .replace(htmlImagePattern, " ")
+    .replace(htmlBreakPattern, " ")
+    .replace(htmlTagPattern, " ")
+    .replace(
+      htmlEntityPattern,
+      (_match, entity: string) => decodeExcerptEntity(entity)
+    )
     .replace(/\[([^\]]+)]\([^)]+\)/g, "$1")
-    .replace(/[`*_>#~-]/g, " ")
+    .replace(/[`*_>#~|-]/g, " ")
     .replace(/\s+/g, " ")
     .trim()
 }
