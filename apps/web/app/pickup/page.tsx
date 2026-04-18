@@ -6,10 +6,10 @@ import { createPageMetadata } from "@/lib/seo"
 
 export const runtime = "nodejs"
 export const metadata: Metadata = createPageMetadata({
-  title: "Pickup",
+  title: "Matchmaking",
   path: "/pickup",
   description:
-    "Join live QLTracker pickup queues, track active matches, and follow the latest completed Quake Live pickup games.",
+    "Join live QLTracker matchmaking queues, track active matches, and follow the latest completed Quake Live matches.",
 })
 
 export default async function PickupRoutePage() {

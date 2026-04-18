@@ -42,7 +42,7 @@ function getHeaderState(pathname: string) {
   }
 
   if (pathname.startsWith("/pickup")) {
-    return { pageTitle: "Pickup" }
+    return { pageTitle: "Matchmaking" }
   }
 
   if (pathname.startsWith("/leaderboards")) {
