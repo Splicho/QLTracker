@@ -7,6 +7,7 @@ import type {
   PickupMatchPlayer,
   PickupMatchStatsSummary,
   PickupPlayer,
+  PickupPlayerLock,
   PickupPlayerSeasonRating,
   PickupPlayerWeaponStat,
   PickupQueue,
@@ -306,6 +307,24 @@ export type PickupAdminSettingsDto = {
   viewer: PickupPlayerDto
 }
 
+export type PickupPlayerLockDto = {
+  active: boolean
+  createdAt: string
+  createdBySteamId: string | null
+  expiresAt: string | null
+  id: string
+  player: PickupPlayerDto
+  reason: string | null
+  revokedAt: string | null
+  revokedBySteamId: string | null
+  updatedAt: string
+}
+
+export type PickupAdminLocksDto = {
+  locks: PickupPlayerLockDto[]
+  viewer: PickupPlayerDto
+}
+
 function getPickupAvatarUrl(player: PickupPlayer) {
   return player.customAvatarUrl ?? player.avatarUrl ?? null
 }
@@ -549,6 +568,26 @@ export function toPickupRankDto(rank: PickupRank): PickupRankDto {
     minRating: rank.minRating,
     sortOrder: rank.sortOrder,
     title: rank.title,
+  }
+}
+
+export function toPickupPlayerLockDto(
+  lock: PickupPlayerLock & { player: PickupPlayer },
+  now = new Date()
+): PickupPlayerLockDto {
+  return {
+    active:
+      lock.revokedAt == null &&
+      (lock.expiresAt == null || lock.expiresAt.getTime() > now.getTime()),
+    createdAt: lock.createdAt.toISOString(),
+    createdBySteamId: lock.createdBySteamId ?? null,
+    expiresAt: lock.expiresAt?.toISOString() ?? null,
+    id: lock.id,
+    player: toPickupPlayerDto(lock.player),
+    reason: lock.reason ?? null,
+    revokedAt: lock.revokedAt?.toISOString() ?? null,
+    revokedBySteamId: lock.revokedBySteamId ?? null,
+    updatedAt: lock.updatedAt.toISOString(),
   }
 }
 
@@ -1120,6 +1159,24 @@ export async function getPickupAdminSettings(
 
   return {
     settings: toPickupSettingsDto(settings),
+    viewer: toPickupPlayerDto(viewer),
+  }
+}
+
+export async function getPickupAdminLocks(
+  viewer: PickupPlayer
+): Promise<PickupAdminLocksDto> {
+  const locks = await getPrisma().pickupPlayerLock.findMany({
+    include: {
+      player: true,
+    },
+    orderBy: [{ revokedAt: "asc" }, { createdAt: "desc" }],
+    take: 100,
+  })
+  const now = new Date()
+
+  return {
+    locks: locks.map((lock) => toPickupPlayerLockDto(lock, now)),
     viewer: toPickupPlayerDto(viewer),
   }
 }

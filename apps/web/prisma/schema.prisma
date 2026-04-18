@@ -190,6 +190,7 @@ model PickupPlayer {
   linkSessions     PickupLinkSession[]
   discordLinks     PickupDiscordLink[]
   chatEvents       PickupMatchChatEvent[]
+  locks            PickupPlayerLock[]
   matchStatLines   PickupPlayerMatchStat[]
   queueMemberships PickupQueueMember[]
   matchPlayers     PickupMatchPlayer[]
@@ -333,6 +334,22 @@ model PickupQueueMember {
 
   @@unique([queueId, playerId])
   @@index([queueId, joinedAt])
+}
+
+model PickupPlayerLock {
+  id               String       @id @default(cuid())
+  playerId         String
+  reason           String?
+  expiresAt        DateTime?
+  revokedAt        DateTime?
+  createdBySteamId String?
+  revokedBySteamId String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  player           PickupPlayer @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([playerId, revokedAt, expiresAt])
+  @@index([createdAt])
 }
 
 model PickupMatch {

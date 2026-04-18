@@ -26,6 +26,7 @@ import type {
   PickupMatchPlayerRow,
   PickupMatchRow,
   PickupPlayerIdentity,
+  PickupPlayerLockRow,
   PickupQueueMemberRow,
   PickupQueueRow,
   PickupPublicState,
@@ -471,6 +472,36 @@ export function createPickupService(io: Server) {
     return result.rows[0] ?? null;
   }
 
+  async function getActivePlayerLock(playerId: string) {
+    const result = await pool.query<PickupPlayerLockRow>(
+      `
+        select
+          "id",
+          "reason",
+          "expiresAt"
+        from "PickupPlayerLock"
+        where
+          "playerId" = $1
+          and "revokedAt" is null
+          and ("expiresAt" is null or "expiresAt" > now())
+        order by "createdAt" desc
+        limit 1
+      `,
+      [playerId],
+    );
+
+    return result.rows[0] ?? null;
+  }
+
+  function formatLockMessage(lock: PickupPlayerLockRow) {
+    const until = lock.expiresAt
+      ? ` until ${lock.expiresAt.toISOString()}`
+      : " permanently";
+    const reason = lock.reason?.trim() ? ` Reason: ${lock.reason.trim()}` : "";
+
+    return `This account is locked from matchmaking${until}.${reason}`;
+  }
+
   async function authenticatePickupSession(token: string) {
     const result = await pool.query<
       PickupSessionIdentity & {
@@ -542,7 +573,16 @@ export function createPickupService(io: Server) {
           p."steamId"
         from "PickupQueueMember" qm
         inner join "PickupPlayer" p on p."id" = qm."playerId"
-        where qm."queueId" = $1
+        where
+          qm."queueId" = $1
+          and not exists (
+            select 1
+            from "PickupPlayerLock" pl
+            where
+              pl."playerId" = qm."playerId"
+              and pl."revokedAt" is null
+              and (pl."expiresAt" is null or pl."expiresAt" > now())
+          )
         order by qm."joinedAt" asc
         ${limitClause}
       `,
@@ -797,7 +837,16 @@ export function createPickupService(io: Server) {
           q."enabled"
         from "PickupQueueMember" qm
         inner join "PickupQueue" q on q."id" = qm."queueId"
-        where qm."playerId" = $1
+        where
+          qm."playerId" = $1
+          and not exists (
+            select 1
+            from "PickupPlayerLock" pl
+            where
+              pl."playerId" = qm."playerId"
+              and pl."revokedAt" is null
+              and (pl."expiresAt" is null or pl."expiresAt" > now())
+          )
         limit 1
       `,
       [playerId],
@@ -816,9 +865,17 @@ export function createPickupService(io: Server) {
       getPickupSettings(),
       pool.query<{ count: string; queueId: string }>(
         `
-          select "queueId", count(*)::text as count
-          from "PickupQueueMember"
-          group by "queueId"
+          select qm."queueId", count(*)::text as count
+          from "PickupQueueMember" qm
+          where not exists (
+            select 1
+            from "PickupPlayerLock" pl
+            where
+              pl."playerId" = qm."playerId"
+              and pl."revokedAt" is null
+              and (pl."expiresAt" is null or pl."expiresAt" > now())
+          )
+          group by qm."queueId"
         `,
       ),
       Promise.all(queues.map((queue) => getActiveSeason(queue.id))),
@@ -1187,6 +1244,25 @@ export function createPickupService(io: Server) {
     await emitQueueCleanupResult(reason, result.rows);
   }
 
+  async function cleanupLockedQueueMembers(reason: string) {
+    const result = await pool.query<{ playerId: string; queueId: string }>(
+      `
+        delete from "PickupQueueMember" qm
+        where exists (
+          select 1
+          from "PickupPlayerLock" pl
+          where
+            pl."playerId" = qm."playerId"
+            and pl."revokedAt" is null
+            and (pl."expiresAt" is null or pl."expiresAt" > now())
+        )
+        returning "playerId", "queueId"
+      `,
+    );
+
+    await emitQueueCleanupResult(reason, result.rows);
+  }
+
   async function cleanupDisconnectedPreexistingQueueMembers() {
     const result = await pool.query<{ playerId: string; queueId: string }>(
       `
@@ -1227,6 +1303,9 @@ export function createPickupService(io: Server) {
       ),
     );
     queueMemberCleanupInterval = setInterval(() => {
+      void cleanupLockedQueueMembers("locked").catch((error) => {
+        console.error("Failed to clean locked pickup queue members:", error);
+      });
       void cleanupExpiredQueueMembers("max-age").catch((error) => {
         console.error("Failed to clean expired pickup queue members:", error);
       });
@@ -1354,7 +1433,16 @@ export function createPickupService(io: Server) {
             p."steamId"
           from "PickupQueueMember" qm
           inner join "PickupPlayer" p on p."id" = qm."playerId"
-          where qm."queueId" = $1
+          where
+            qm."queueId" = $1
+            and not exists (
+              select 1
+              from "PickupPlayerLock" pl
+              where
+                pl."playerId" = qm."playerId"
+                and pl."revokedAt" is null
+                and (pl."expiresAt" is null or pl."expiresAt" > now())
+            )
           order by qm."joinedAt" asc
           for update
           limit $2
@@ -1363,6 +1451,18 @@ export function createPickupService(io: Server) {
       );
 
       if (lockedMembers.rows.length < queue.playerCount) {
+        await client.query("rollback");
+        return null;
+      }
+
+      const expectedQueueMemberIds = new Set(
+        members.map((member) => member.queueMemberId),
+      );
+      if (
+        lockedMembers.rows.some(
+          (member) => !expectedQueueMemberIds.has(member.queueMemberId),
+        )
+      ) {
         await client.query("rollback");
         return null;
       }
@@ -1517,11 +1617,18 @@ export function createPickupService(io: Server) {
             "playerId",
             "joinedAt"
           )
-          values (
+          select
             gen_random_uuid()::text,
             $1,
             $2,
             $3
+          where not exists (
+            select 1
+            from "PickupPlayerLock" pl
+            where
+              pl."playerId" = $2
+              and pl."revokedAt" is null
+              and (pl."expiresAt" is null or pl."expiresAt" > now())
           )
           on conflict ("playerId") do nothing
         `,
@@ -2121,10 +2228,16 @@ export function createPickupService(io: Server) {
       throw new Error("No active pickup season is configured.");
     }
 
-    const [activeMatch, membership] = await Promise.all([
+    const [activeMatch, membership, activeLock] = await Promise.all([
       getLatestPlayerActiveMatch(session.player.id),
       getQueueMembership(session.player.id),
+      getActivePlayerLock(session.player.id),
     ]);
+    if (activeLock) {
+      await leaveQueueByPlayerId(session.player.id);
+      throw new Error(formatLockMessage(activeLock));
+    }
+
     if (activeMatch || membership) {
       return getPlayerState(session.player);
     }
@@ -2655,6 +2768,7 @@ export function createPickupService(io: Server) {
     },
     async hydrate() {
       await ensureBootstrapData();
+      await cleanupLockedQueueMembers("startup-locked");
       await cleanupExpiredQueueMembers("startup-max-age");
       await hydrateTimers();
       startQueueMemberCleanupLoop();

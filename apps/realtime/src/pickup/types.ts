@@ -73,6 +73,12 @@ export type PickupQueueMemberRow = PickupPlayerIdentity & {
   queueMemberId: string;
 };
 
+export type PickupPlayerLockRow = {
+  expiresAt: Date | null;
+  id: string;
+  reason: string | null;
+};
+
 export type PickupVetoTurn = {
   captainPlayerId: string;
   mapKey: string;

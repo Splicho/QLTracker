@@ -10,6 +10,7 @@ import {
   Newspaper,
   Server,
   Settings2,
+  ShieldX,
   Trophy,
 } from "lucide-react"
 
@@ -36,6 +37,7 @@ import {
 const NAV_ITEMS = [
   { href: "/admin", icon: LayoutDashboard, label: "Queues" },
   { href: "/admin/ranks", icon: Trophy, label: "Ranks" },
+  { href: "/admin/locks", icon: ShieldX, label: "Locks" },
   { href: "/admin/news", icon: Newspaper, label: "News" },
   { href: "/admin/notices", icon: BellRing, label: "Notices" },
   { href: "/admin/servers", icon: Server, label: "Servers" },
