@@ -33,7 +33,9 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       player: toPickupPlayerDto(player),
-      rating: rating ? toPickupRatingDto(rating) : null,
+      rating: rating
+        ? toPickupRatingDto(rating, rating.season.queue.ranks)
+        : null,
       ratings: ratings.map(toPickupActiveRatingDto),
     })
   } catch (error) {

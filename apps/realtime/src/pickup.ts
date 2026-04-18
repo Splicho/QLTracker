@@ -78,7 +78,6 @@ function createRating(mu: number, sigma: number) {
   return ratingEnv.createRating(mu, sigma);
 }
 
-const DEFAULT_PICKUP_DISPLAY_RATING = 1000;
 const QUEUE_MEMBER_CLEANUP_MIN_INTERVAL_MS = 60_000;
 const QUEUE_MEMBER_CLEANUP_MAX_INTERVAL_MS = 5 * 60_000;
 const QUEUE_RESTART_CLEANUP_MIN_DELAY_MS = 30_000;
@@ -310,6 +309,7 @@ export function createPickupService(io: Server) {
             "name",
             "status",
             "durationPreset",
+            "startingRating",
             "startsAt",
             "endsAt",
             "createdAt",
@@ -321,6 +321,7 @@ export function createPickupService(io: Server) {
             'Launch Season',
             'active',
             'one_month',
+            1000,
             now(),
             now() + interval '1 month',
             now(),
@@ -456,6 +457,7 @@ export function createPickupService(io: Server) {
           "name",
           "status",
           "durationPreset",
+          "startingRating",
           "startsAt",
           "endsAt"
         from "PickupSeason"
@@ -554,6 +556,7 @@ export function createPickupService(io: Server) {
     player: PickupPlayerIdentity,
     season: PickupSeasonRow,
   ) {
+    const startingRating = season.startingRating;
     const existing = await pool.query<PickupRatingRow>(
       `
         select
@@ -571,45 +574,45 @@ export function createPickupService(io: Server) {
       [season.id, player.id],
     );
 
-  if (existing.rows[0]) {
-    const rating = existing.rows[0];
-    if (
-      rating.gamesPlayed === 0 &&
-      (rating.displayRating !== DEFAULT_PICKUP_DISPLAY_RATING ||
-        rating.mu !== ratingEnv.mu ||
-        rating.sigma !== ratingEnv.sigma)
-    ) {
-      const normalized = await pool.query<PickupRatingRow>(
-        `
-          update "PickupPlayerSeasonRating"
-          set
-            "mu" = $3,
-            "sigma" = $4,
-            "displayRating" = $5,
-            "seededFrom" = 'default-baseline',
-            "updatedAt" = now()
-          where "seasonId" = $1 and "playerId" = $2
-          returning
-            "playerId",
-            "mu",
-            "sigma",
-            "displayRating",
-            "gamesPlayed",
-            "wins",
-            "losses"
-        `,
-        [season.id, player.id, ratingEnv.mu, ratingEnv.sigma, DEFAULT_PICKUP_DISPLAY_RATING],
-      );
+    if (existing.rows[0]) {
+      const rating = existing.rows[0];
+      if (
+        rating.gamesPlayed === 0 &&
+        (rating.displayRating !== startingRating ||
+          rating.mu !== startingRating ||
+          rating.sigma !== ratingEnv.sigma)
+      ) {
+        const normalized = await pool.query<PickupRatingRow>(
+          `
+            update "PickupPlayerSeasonRating"
+            set
+              "mu" = $3,
+              "sigma" = $4,
+              "displayRating" = $5,
+              "seededFrom" = 'season-starting-rating',
+              "updatedAt" = now()
+            where "seasonId" = $1 and "playerId" = $2
+            returning
+              "playerId",
+              "mu",
+              "sigma",
+              "displayRating",
+              "gamesPlayed",
+              "wins",
+              "losses"
+          `,
+          [season.id, player.id, startingRating, ratingEnv.sigma, startingRating],
+        );
 
-      return normalized.rows[0] ?? rating;
+        return normalized.rows[0] ?? rating;
+      }
+
+      return rating;
     }
 
-    return rating;
-  }
-
-  const mu = ratingEnv.mu;
-  const sigma = ratingEnv.sigma;
-  const insert = await pool.query<PickupRatingRow>(
+    const mu = startingRating;
+    const sigma = ratingEnv.sigma;
+    const insert = await pool.query<PickupRatingRow>(
       `
         insert into "PickupPlayerSeasonRating" (
           "id",
@@ -655,8 +658,8 @@ export function createPickupService(io: Server) {
         player.id,
         mu,
         sigma,
-        DEFAULT_PICKUP_DISPLAY_RATING,
-        "default-baseline",
+        startingRating,
+        "season-starting-rating",
       ],
     );
 
@@ -694,10 +697,29 @@ export function createPickupService(io: Server) {
           r."displayRating",
           r."gamesPlayed",
           r."wins",
-          r."losses"
+          r."losses",
+          rank."id" as "rankId",
+          rank."title" as "rankTitle",
+          rank."badgeUrl" as "rankBadgeUrl",
+          rank."minRating" as "rankMinRating"
         from "PickupPlayerSeasonRating" r
         inner join "PickupSeason" s
           on s."id" = r."seasonId"
+        inner join "PickupQueue" q
+          on q."id" = s."queueId"
+        left join lateral (
+          select
+            pr."id",
+            pr."title",
+            pr."badgeUrl",
+            pr."minRating"
+          from "PickupRank" pr
+          where pr."queueId" = q."id"
+            and pr."active" = true
+            and pr."minRating" <= r."displayRating"
+          order by pr."minRating" desc, pr."sortOrder" asc, pr."createdAt" asc
+          limit 1
+        ) rank on true
         where r."playerId" = $1
           and s."status" = 'active'
         order by r."updatedAt" desc, s."startsAt" desc
@@ -724,12 +746,29 @@ export function createPickupService(io: Server) {
           s."name" as "seasonName",
           q."id" as "queueId",
           q."slug" as "queueSlug",
-          q."name" as "queueName"
+          q."name" as "queueName",
+          rank."id" as "rankId",
+          rank."title" as "rankTitle",
+          rank."badgeUrl" as "rankBadgeUrl",
+          rank."minRating" as "rankMinRating"
         from "PickupPlayerSeasonRating" r
         inner join "PickupSeason" s
           on s."id" = r."seasonId"
         inner join "PickupQueue" q
           on q."id" = s."queueId"
+        left join lateral (
+          select
+            pr."id",
+            pr."title",
+            pr."badgeUrl",
+            pr."minRating"
+          from "PickupRank" pr
+          where pr."queueId" = q."id"
+            and pr."active" = true
+            and pr."minRating" <= r."displayRating"
+          order by pr."minRating" desc, pr."sortOrder" asc, pr."createdAt" asc
+          limit 1
+        ) rank on true
         where r."playerId" = $1
           and s."status" = 'active'
         order by r."displayRating" desc, r."updatedAt" desc, s."startsAt" desc

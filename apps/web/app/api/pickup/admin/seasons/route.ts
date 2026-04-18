@@ -12,6 +12,7 @@ const bodySchema = z.object({
   name: z.string().trim().min(1).max(120),
   queueId: z.string().min(1),
   startsAt: z.string().datetime(),
+  startingRating: z.coerce.number().int().min(0).max(10000).default(1000),
   status: z.enum(["draft", "active", "completed"]).default("draft"),
 })
 
@@ -69,6 +70,7 @@ export async function POST(request: Request) {
           name: body.name,
           queueId: body.queueId,
           startsAt,
+          startingRating: body.startingRating,
           status: body.status,
         },
       })

@@ -152,6 +152,18 @@ export function PlayerProfileOverviewPane({
                 variant="outline"
               >
                 <span className="text-foreground/70">{rating.queueName}</span>
+                <span className="inline-flex h-6 items-center gap-1 rounded-sm border border-border/70 bg-background px-1.5 text-foreground/80">
+                  {rating.rank?.badgeUrl ? (
+                    <img
+                      alt=""
+                      className="size-3.5 rounded-xs object-contain"
+                      src={rating.rank.badgeUrl}
+                    />
+                  ) : null}
+                  {rating.isPlaced
+                    ? (rating.rank?.title ?? "Unranked")
+                    : `Unranked ${rating.placementGamesPlayed}/${rating.placementGamesRequired}`}
+                </span>
                 <span className="inline-flex h-6 items-center gap-1 rounded-sm border border-border/70 bg-background px-1.5 font-semibold text-foreground">
                   <Medal className="size-3 text-amber-400" />
                   {rating.displayRating}

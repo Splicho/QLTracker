@@ -118,8 +118,13 @@ function createMockRating(): PickupRating {
   return {
     displayRating: 1000,
     gamesPlayed: 0,
+    isPlaced: false,
     losses: 0,
     mu: 1000,
+    placementGamesPlayed: 0,
+    placementGamesRemaining: 10,
+    placementGamesRequired: 10,
+    rank: null,
     sigma: 150,
     wins: 0,
   }

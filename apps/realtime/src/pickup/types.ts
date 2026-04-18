@@ -25,6 +25,7 @@ export type PickupSeasonRow = {
   name: string;
   status: "draft" | "active" | "completed";
   durationPreset: "one_month" | "three_month" | "custom";
+  startingRating: number;
   startsAt: Date;
   endsAt: Date;
 };
@@ -50,6 +51,10 @@ export type PickupRatingRow = {
   losses: number;
   mu: number;
   playerId: string;
+  rankBadgeUrl?: string | null;
+  rankId?: string | null;
+  rankMinRating?: number | null;
+  rankTitle?: string | null;
   sigma: number;
   wins: number;
 };
@@ -93,6 +98,13 @@ export type PickupBalanceSummary = {
     left: number;
     right: number;
   };
+};
+
+export type PickupRankState = {
+  badgeUrl: string | null;
+  id: string;
+  minRating: number;
+  title: string;
 };
 
 export type PickupMatchRow = {
@@ -179,8 +191,13 @@ export type PickupPublicState = {
 export type PickupPlayerRatingState = {
   displayRating: number;
   gamesPlayed: number;
+  isPlaced: boolean;
   losses: number;
   mu: number;
+  placementGamesPlayed: number;
+  placementGamesRemaining: number;
+  placementGamesRequired: number;
+  rank: PickupRankState | null;
   sigma: number;
   wins: number;
 } | null;
@@ -188,11 +205,16 @@ export type PickupPlayerRatingState = {
 export type PickupActiveRatingState = {
   displayRating: number;
   gamesPlayed: number;
+  isPlaced: boolean;
   losses: number;
   mu: number;
+  placementGamesPlayed: number;
+  placementGamesRemaining: number;
+  placementGamesRequired: number;
   queueId: string;
   queueName: string;
   queueSlug: string;
+  rank: PickupRankState | null;
   seasonId: string;
   seasonName: string;
   sigma: number;

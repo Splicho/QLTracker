@@ -234,6 +234,11 @@ export function PlayerProfilePage({
     )
   }
   const resolvedPlayer = player
+  const bestActiveRank =
+    [...profile.ratings]
+      .filter((rating) => rating.isPlaced && rating.rank)
+      .sort((left, right) => right.displayRating - left.displayRating)[0]
+      ?.rank ?? null
 
   return (
     <section className="flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -299,6 +304,7 @@ export function PlayerProfilePage({
               countryClassName="h-5 w-5 rounded-sm"
               personaName={resolvedPlayer.personaName}
               countryCode={resolvedPlayer.countryCode}
+              rank={bestActiveRank}
             />
             {activeServer ? (
               <div className="inline-flex items-center gap-1 text-sm text-muted-foreground">

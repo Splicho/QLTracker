@@ -92,7 +92,9 @@ export async function getInitialPickupBrowserState(options?: {
     player: toPickupPlayerDto(session.player),
     playerState: playerStatePayload?.state ?? null,
     publicState: publicStatePayload?.state ?? null,
-    rating: preferredRating ? toPickupRatingDto(preferredRating) : null,
+    rating: preferredRating
+      ? toPickupRatingDto(preferredRating, preferredRating.season.queue.ranks)
+      : null,
     ratings: ratings.map(toPickupActiveRatingDto),
     sessionToken: session.token,
   }

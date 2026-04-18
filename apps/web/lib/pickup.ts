@@ -24,10 +24,24 @@ export type PickupPlayer = {
 export type PickupRating = {
   displayRating: number
   gamesPlayed: number
+  isPlaced: boolean
   losses: number
   mu: number
+  placementGamesPlayed: number
+  placementGamesRemaining: number
+  placementGamesRequired: number
+  rank: PickupRank | null
   sigma: number
   wins: number
+}
+
+export type PickupRank = {
+  active: boolean
+  badgeUrl: string | null
+  id: string
+  minRating: number
+  sortOrder: number
+  title: string
 }
 
 export type PickupSeasonalRating = PickupRating & {
@@ -175,6 +189,7 @@ export type PickupLeaderboardEntry = {
   losses: number
   player: PickupPlayer
   rank: number
+  ratingRank: PickupRank | null
   rating: number
   winRate: number | null
   wins: number
@@ -188,6 +203,7 @@ export type PickupLeaderboardQueue = {
     id: string
     name: string
     startsAt: string
+    startingRating: number
     status: string
   }
 }
@@ -218,6 +234,7 @@ export type PickupProfileMatch = {
     id: string
     name: string
     startsAt: string
+    startingRating: number
     status: string
   }
   team: "left" | "right" | null
@@ -304,6 +321,7 @@ export type PickupMatchDetail = {
       id: string
       name: string
       startsAt: string
+      startingRating: number
       status: string
     }
     status:

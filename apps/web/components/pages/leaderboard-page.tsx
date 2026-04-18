@@ -84,7 +84,7 @@ function LeaderboardTable({
           </p>
           <p className="text-sm text-muted-foreground">
             {queue.queue.name} has an active season, but no leaderboard entries
-            yet.
+            yet. Players appear here after 10 rated placement games.
           </p>
         </div>
       </div>
@@ -162,6 +162,7 @@ function LeaderboardTable({
                       countryCode={entry.player.countryCode}
                       fallbackClassName="inline-block max-w-full truncate align-bottom"
                       personaName={entry.player.personaName}
+                      rank={entry.ratingRank}
                     />
                   </div>
                 </div>

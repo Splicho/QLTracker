@@ -10,6 +10,7 @@ import type {
   PickupPlayerSeasonRating,
   PickupPlayerWeaponStat,
   PickupQueue,
+  PickupRank,
   PickupSettings,
   PickupSeason,
 } from "@prisma/client"
@@ -21,6 +22,7 @@ import { isPickupAdminSteamId } from "@/lib/server/pickup-auth"
 import type { PickupMatchState, PickupProfileMatch } from "@/lib/pickup"
 
 export const DEFAULT_PICKUP_QUEUE_SLUG = "4v4-ca"
+export const PICKUP_PLACEMENT_GAMES_REQUIRED = 10
 
 const DEFAULT_PICKUP_QUEUE = {
   slug: DEFAULT_PICKUP_QUEUE_SLUG,
@@ -87,7 +89,17 @@ export type PickupSeasonDto = {
   id: string
   name: string
   startsAt: string
+  startingRating: number
   status: PickupSeason["status"]
+}
+
+export type PickupRankDto = {
+  active: boolean
+  badgeUrl: string | null
+  id: string
+  minRating: number
+  sortOrder: number
+  title: string
 }
 
 export type PickupMapPoolDto = {
@@ -101,8 +113,13 @@ export type PickupMapPoolDto = {
 export type PickupRatingDto = {
   displayRating: number
   gamesPlayed: number
+  isPlaced: boolean
   losses: number
   mu: number
+  placementGamesPlayed: number
+  placementGamesRemaining: number
+  placementGamesRequired: number
+  rank: PickupRankDto | null
   sigma: number
   wins: number
 }
@@ -126,6 +143,7 @@ export type PickupLeaderboardEntryDto = {
   losses: number
   player: PickupPlayerDto
   rank: number
+  ratingRank: PickupRankDto | null
   rating: number
   winRate: number | null
   wins: number
@@ -274,6 +292,7 @@ export type PickupAdminQueueOverviewDto = {
   activeSeason: PickupSeasonDto | null
   maps: PickupMapPoolDto[]
   queue: PickupQueueDto
+  ranks: PickupRankDto[]
   seasons: PickupSeasonDto[]
 }
 
@@ -517,7 +536,19 @@ export function toPickupSeasonDto(season: PickupSeason): PickupSeasonDto {
     id: season.id,
     name: season.name,
     startsAt: season.startsAt.toISOString(),
+    startingRating: season.startingRating,
     status: season.status,
+  }
+}
+
+export function toPickupRankDto(rank: PickupRank): PickupRankDto {
+  return {
+    active: rank.active,
+    badgeUrl: rank.badgeUrl ?? null,
+    id: rank.id,
+    minRating: rank.minRating,
+    sortOrder: rank.sortOrder,
+    title: rank.title,
   }
 }
 
@@ -532,16 +563,48 @@ export function toPickupMapPoolDto(map: PickupMapPool): PickupMapPoolDto {
 }
 
 export function toPickupRatingDto(
-  rating: PickupPlayerSeasonRating
+  rating: PickupPlayerSeasonRating,
+  ranks: PickupRank[] = []
 ): PickupRatingDto {
+  const placementGamesPlayed = Math.min(
+    rating.gamesPlayed,
+    PICKUP_PLACEMENT_GAMES_REQUIRED
+  )
+  const placementGamesRemaining = Math.max(
+    0,
+    PICKUP_PLACEMENT_GAMES_REQUIRED - rating.gamesPlayed
+  )
+  const isPlaced = rating.gamesPlayed >= PICKUP_PLACEMENT_GAMES_REQUIRED
+
   return {
     displayRating: rating.displayRating,
     gamesPlayed: rating.gamesPlayed,
+    isPlaced,
     losses: rating.losses,
     mu: rating.mu,
+    placementGamesPlayed,
+    placementGamesRemaining,
+    placementGamesRequired: PICKUP_PLACEMENT_GAMES_REQUIRED,
+    rank: isPlaced ? resolvePickupRank(ranks, rating.displayRating) : null,
     sigma: rating.sigma,
     wins: rating.wins,
   }
+}
+
+function resolvePickupRank(
+  ranks: PickupRank[],
+  displayRating: number
+): PickupRankDto | null {
+  const rank = ranks
+    .filter((entry) => entry.active && entry.minRating <= displayRating)
+    .sort(
+      (left, right) =>
+        right.minRating - left.minRating ||
+        left.sortOrder - right.sortOrder ||
+        left.createdAt.getTime() - right.createdAt.getTime()
+    )[0]
+
+  return rank ? toPickupRankDto(rank) : null
 }
 
 function toPickupMatchWeaponStatDto(
@@ -854,12 +917,16 @@ function toPickupLandingMatchState(
 export function toPickupActiveRatingDto(
   rating: PickupPlayerSeasonRating & {
     season: PickupSeason & {
-      queue: PickupQueue
+      queue: PickupQueue & {
+        ranks?: PickupRank[]
+      }
     }
   }
 ): PickupActiveRatingDto {
+  const ranks = rating.season.queue.ranks ?? []
+
   return {
-    ...toPickupRatingDto(rating),
+    ...toPickupRatingDto(rating, ranks),
     queueId: rating.season.queue.id,
     queueName: rating.season.queue.name,
     queueSlug: rating.season.queue.slug,
@@ -991,6 +1058,7 @@ export async function ensurePickupBootstrapData() {
         name: "Launch Season",
         queueId: queue.id,
         startsAt,
+        startingRating: 1000,
         status: "active",
       },
     })
@@ -1018,6 +1086,9 @@ export async function getPickupAdminOverview(
       mapPool: {
         orderBy: [{ sortOrder: "asc" }, { label: "asc" }],
       },
+      ranks: {
+        orderBy: [{ minRating: "asc" }, { sortOrder: "asc" }, { title: "asc" }],
+      },
       seasons: {
         orderBy: [{ startsAt: "desc" }, { createdAt: "desc" }],
       },
@@ -1034,6 +1105,7 @@ export async function getPickupAdminOverview(
           seasons.find((season) => season.status === "active") ?? null,
         maps: queue.mapPool.map(toPickupMapPoolDto),
         queue: toPickupQueueDto(queue),
+        ranks: queue.ranks.map(toPickupRankDto),
         seasons,
       }
     }),
@@ -1072,6 +1144,26 @@ export async function getPreferredPickupPlayerRating(playerId: string) {
         status: "active",
       },
     },
+    include: {
+      season: {
+        include: {
+          queue: {
+            include: {
+              ranks: {
+                where: {
+                  active: true,
+                },
+                orderBy: [
+                  { minRating: "desc" },
+                  { sortOrder: "asc" },
+                  { createdAt: "asc" },
+                ],
+              },
+            },
+          },
+        },
+      },
+    },
     orderBy: [
       {
         updatedAt: "desc",
@@ -1096,7 +1188,20 @@ export async function getPickupPlayerActiveRatings(playerId: string) {
     include: {
       season: {
         include: {
-          queue: true,
+          queue: {
+            include: {
+              ranks: {
+                where: {
+                  active: true,
+                },
+                orderBy: [
+                  { minRating: "desc" },
+                  { sortOrder: "asc" },
+                  { createdAt: "asc" },
+                ],
+              },
+            },
+          },
         },
       },
     },
@@ -1429,6 +1534,16 @@ export async function getPickupLeaderboards(): Promise<PickupLeaderboardsDto> {
       enabled: true,
     },
     include: {
+      ranks: {
+        where: {
+          active: true,
+        },
+        orderBy: [
+          { minRating: "desc" },
+          { sortOrder: "asc" },
+          { createdAt: "asc" },
+        ],
+      },
       seasons: {
         where: {
           status: "active",
@@ -1439,6 +1554,11 @@ export async function getPickupLeaderboards(): Promise<PickupLeaderboardsDto> {
         take: 1,
         include: {
           ratings: {
+            where: {
+              gamesPlayed: {
+                gte: PICKUP_PLACEMENT_GAMES_REQUIRED,
+              },
+            },
             include: {
               player: true,
             },
@@ -1475,6 +1595,7 @@ export async function getPickupLeaderboards(): Promise<PickupLeaderboardsDto> {
             losses: entry.losses,
             player: toPickupPlayerDto(entry.player),
             rank: index + 1,
+            ratingRank: resolvePickupRank(queue.ranks, entry.displayRating),
             rating: entry.displayRating,
             winRate: getPickupWinRate(entry.wins, entry.gamesPlayed),
             wins: entry.wins,

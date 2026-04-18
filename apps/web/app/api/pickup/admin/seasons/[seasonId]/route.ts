@@ -15,8 +15,11 @@ const patchSchema = z.object({
   endsAt: z.string().datetime().optional(),
   name: z.string().trim().min(1).max(120).optional(),
   startsAt: z.string().datetime().optional(),
+  startingRating: z.coerce.number().int().min(0).max(10000).optional(),
   status: z.enum(["draft", "active", "completed"]).optional(),
 })
+
+const PICKUP_STARTING_RATING_SIGMA = 150
 
 function resolveSeasonEndDate(
   startsAt: Date,
@@ -84,7 +87,7 @@ export async function PATCH(
         })
       }
 
-      return tx.pickupSeason.update({
+      const season = await tx.pickupSeason.update({
         where: {
           id: existingSeason.id,
         },
@@ -93,9 +96,27 @@ export async function PATCH(
           endsAt,
           name: patch.name,
           startsAt,
+          startingRating: patch.startingRating,
           status: patch.status,
         },
       })
+
+      if (patch.startingRating !== undefined) {
+        await tx.pickupPlayerSeasonRating.updateMany({
+          where: {
+            gamesPlayed: 0,
+            seasonId: existingSeason.id,
+          },
+          data: {
+            displayRating: patch.startingRating,
+            mu: patch.startingRating,
+            seededFrom: "season-starting-rating",
+            sigma: PICKUP_STARTING_RATING_SIGMA,
+          },
+        })
+      }
+
+      return season
     })
 
     return NextResponse.json({

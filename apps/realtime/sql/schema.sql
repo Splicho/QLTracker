@@ -150,17 +150,38 @@ create table if not exists "PickupSeason" (
   "name" text not null,
   "status" "PickupSeasonStatus" not null default 'draft',
   "durationPreset" "PickupSeasonDurationPreset" not null default 'custom',
+  "startingRating" integer not null default 1000,
   "startsAt" timestamptz not null,
   "endsAt" timestamptz not null,
   "createdAt" timestamptz not null default now(),
   "updatedAt" timestamptz not null default now()
 );
 
+alter table "PickupSeason"
+  add column if not exists "startingRating" integer not null default 1000;
+
 create index if not exists "PickupSeason_queueId_status_idx"
   on "PickupSeason" ("queueId", "status");
 
 create index if not exists "PickupSeason_startsAt_endsAt_idx"
   on "PickupSeason" ("startsAt", "endsAt");
+
+create table if not exists "PickupRank" (
+  "id" text primary key,
+  "queueId" text not null references "PickupQueue"("id") on delete cascade,
+  "title" text not null,
+  "badgeUrl" text,
+  "minRating" integer not null,
+  "sortOrder" integer not null default 0,
+  "active" boolean not null default true,
+  "createdAt" timestamptz not null default now(),
+  "updatedAt" timestamptz not null default now(),
+  unique ("queueId", "minRating"),
+  unique ("queueId", "title")
+);
+
+create index if not exists "PickupRank_queueId_active_minRating_idx"
+  on "PickupRank" ("queueId", "active", "minRating");
 
 create table if not exists "PickupMapPool" (
   "id" text primary key,

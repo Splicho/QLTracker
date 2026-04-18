@@ -253,6 +253,7 @@ model PickupQueue {
   mapPool                  PickupMapPool[]
   matches                  PickupMatch[]
   queueMembers             PickupQueueMember[]
+  ranks                    PickupRank[]
   seasons                  PickupSeason[]
 }
 
@@ -278,6 +279,7 @@ model PickupSeason {
   name           String
   status         PickupSeasonStatus         @default(draft)
   durationPreset PickupSeasonDurationPreset @default(custom)
+  startingRating Int                        @default(1000)
   startsAt       DateTime
   endsAt         DateTime
   createdAt      DateTime                   @default(now())
@@ -288,6 +290,23 @@ model PickupSeason {
 
   @@index([queueId, status])
   @@index([startsAt, endsAt])
+}
+
+model PickupRank {
+  id        String      @id @default(cuid())
+  queueId   String
+  title     String
+  badgeUrl  String?
+  minRating Int
+  sortOrder Int         @default(0)
+  active    Boolean     @default(true)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  queue     PickupQueue @relation(fields: [queueId], references: [id], onDelete: Cascade)
+
+  @@unique([queueId, minRating])
+  @@unique([queueId, title])
+  @@index([queueId, active, minRating])
 }
 
 model PickupMapPool {

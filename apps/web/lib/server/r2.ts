@@ -174,6 +174,22 @@ export async function uploadPickupProfileImageToR2(params: {
   })
 }
 
+export async function uploadPickupRankBadgeToR2(params: {
+  file: File
+  queueId: string
+  title: string
+}) {
+  const { file, queueId, title } = params
+  const extension = extensionForContentType(file.type)
+  const stem = sanitizeFileStem(title) || "rank-badge"
+  const objectKey = `pickup/ranks/${queueId}/${stem}-${Date.now()}.${extension}`
+
+  return uploadImageToR2({
+    file,
+    objectKey,
+  })
+}
+
 export async function deletePickupImagesFromR2(imageUrls: string[]) {
   if (imageUrls.length === 0) {
     return
