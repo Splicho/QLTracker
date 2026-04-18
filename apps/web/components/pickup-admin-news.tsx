@@ -32,7 +32,7 @@ type PendingAction =
 
 const categoryOptions = [
   { label: "Launcher", value: "launcher" },
-  { label: "Pickup", value: "pickup" },
+  { label: "Matchmaking", value: "pickup" },
   { label: "Infrastructure", value: "infrastructure" },
   { label: "Community", value: "community" },
 ] as const

@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils"
 const categoryOrder = [
   "All",
   "Launcher",
-  "Pickup",
+  "Matchmaking",
   "Infrastructure",
   "Community",
 ] as const
@@ -43,7 +43,7 @@ function toLabel(
     case "launcher":
       return "Launcher"
     case "pickup":
-      return "Pickup"
+      return "Matchmaking"
   }
 }
 
@@ -114,7 +114,7 @@ function NewsTabs({ activeCategory }: { activeCategory: CategoryFilter }) {
         router.push(
           category === "All"
             ? "/news"
-            : `/news?category=${category.toLowerCase()}`
+            : `/news?category=${category === "Matchmaking" ? "pickup" : category.toLowerCase()}`
         )
       }}
     >

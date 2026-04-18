@@ -10,7 +10,7 @@ export const metadata: Metadata = createPageMetadata({
   title: "News",
   path: "/news",
   description:
-    "Read the latest QLTracker pickup, infrastructure, and community updates.",
+    "Read the latest QLTracker matchmaking, infrastructure, and community updates.",
 })
 
 function toCategoryFilter(value: string | undefined) {
@@ -21,8 +21,9 @@ function toCategoryFilter(value: string | undefined) {
       return "Infrastructure"
     case "launcher":
       return "Launcher"
+    case "matchmaking":
     case "pickup":
-      return "Pickup"
+      return "Matchmaking"
     default:
       return "All"
   }
