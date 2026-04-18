@@ -175,7 +175,7 @@ function PickupQueuePopover({
     <Popover>
       <PopoverTrigger asChild>
         <button
-          aria-label="Show pickup queue players"
+          aria-label="Show matchmaking queue players"
           className="flex min-w-0 cursor-pointer items-center gap-2 border-l border-sidebar-border px-3 py-2 text-left transition hover:bg-sidebar-accent/70"
           type="button"
         >
@@ -194,7 +194,7 @@ function PickupQueuePopover({
         <div className="space-y-3">
           <div>
             <div className="text-sm font-semibold text-foreground">
-              Pickup queue
+              Matchmaking queue
             </div>
             <div className="text-xs text-muted-foreground">
               Players currently waiting for a match.

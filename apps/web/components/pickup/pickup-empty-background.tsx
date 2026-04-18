@@ -84,7 +84,7 @@ export function PickupEmptyBackground({
       <div className="relative z-10 flex h-full items-center justify-center px-8 text-center sm:px-10">
         <div className="max-w-2xl">
           <h1 className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-            Step into the next pickup.
+            Step into the next match.
           </h1>
           <p className="mt-3 text-sm leading-7 text-foreground/72 sm:text-base">
             Queue up, lock in, and launch straight into balanced Clan Arena

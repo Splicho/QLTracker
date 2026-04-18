@@ -271,8 +271,8 @@ export function PickupLiveMatches({
               </EmptyMedia>
               <EmptyTitle>No live matches right now</EmptyTitle>
               <EmptyDescription>
-                Active pickup matches will show up here once the live match feed
-                is wired.
+                Active matchmaking matches will show up here once the live
+                match feed is wired.
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
