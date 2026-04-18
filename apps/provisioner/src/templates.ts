@@ -6,6 +6,8 @@ import type { ProvisionPayload, SlotMetadata } from "./types.js";
 const DEFAULT_PICKUP_WORKSHOP_IDS = [
   "1804795751",
   "1804815655",
+  "1804919988",
+  "1805006465",
   "3463480024",
   "3444408828",
   "3463000025",
@@ -16,6 +18,7 @@ const DEFAULT_PICKUP_WORKSHOP_IDS = [
   "3008846662",
   "3287948013",
   "3460015022",
+  "3101188892",
 ] as const;
 
 function loadPickupWorkshopIds() {
