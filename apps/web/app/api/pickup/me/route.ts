@@ -6,11 +6,13 @@ import { requirePickupAppSession } from "@/lib/server/pickup-auth"
 import { getPrisma } from "@/lib/server/prisma"
 import {
   ensurePickupBootstrapData,
+  getActivePickupPlayerLock,
   getPickupPlayerActiveRatings,
   getPreferredPickupPlayerRating,
   refreshPickupPlayerIfStale,
   toPickupActiveRatingDto,
   toPickupPlayerDto,
+  toPickupPlayerLockNoticeDto,
   toPickupRatingDto,
 } from "@/lib/server/pickup"
 
@@ -26,12 +28,14 @@ export async function GET(request: Request) {
       PICKUP_PROFILE_REFRESH_MAX_AGE_MS
     )
     await ensurePickupBootstrapData()
-    const [rating, ratings] = await Promise.all([
+    const [rating, ratings, activeLock] = await Promise.all([
       getPreferredPickupPlayerRating(player.id),
       getPickupPlayerActiveRatings(player.id),
+      getActivePickupPlayerLock(player.id),
     ])
 
     return NextResponse.json({
+      activeLock: activeLock ? toPickupPlayerLockNoticeDto(activeLock) : null,
       player: toPickupPlayerDto(player),
       rating: rating
         ? toPickupRatingDto(rating, rating.season.queue.ranks)

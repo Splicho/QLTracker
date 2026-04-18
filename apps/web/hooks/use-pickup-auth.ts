@@ -17,6 +17,7 @@ import {
   isPickupApiConfigured,
   logoutPickupSession,
   PickupApiError,
+  type PickupPlayerLock,
   type PickupPlayer,
   type PickupRating,
   type PickupSeasonalRating,
@@ -24,6 +25,7 @@ import {
 import { setRealtimePickupToken } from "@/lib/realtime"
 
 export type InitialPickupAuthState = {
+  activeLock?: PickupPlayerLock | null
   player: PickupPlayer | null
   rating: PickupRating | null
   ratings: PickupSeasonalRating[]
@@ -100,6 +102,7 @@ export function usePickupAuth(initialState?: InitialPickupAuthState) {
       initialState.sessionToken === sessionToken &&
       initialState.player
         ? {
+            activeLock: initialState.activeLock ?? null,
             player: initialState.player,
             rating: initialState.rating,
             ratings: initialState.ratings,
@@ -111,6 +114,7 @@ export function usePickupAuth(initialState?: InitialPickupAuthState) {
       }
       return failureCount < 2
     },
+    refetchInterval: 60_000,
   })
 
   useEffect(() => {
@@ -273,6 +277,7 @@ export function usePickupAuth(initialState?: InitialPickupAuthState) {
       linkSessionQuery.fetchStatus === "fetching" ||
       linkSessionId !== null,
     pickupAvailable,
+    activeLock: meQuery.data?.activeLock ?? initialState?.activeLock ?? null,
     player: meQuery.data?.player ?? null,
     rating: meQuery.data?.rating ?? null,
     ratings,

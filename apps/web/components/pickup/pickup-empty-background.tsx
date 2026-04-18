@@ -10,7 +10,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import type { PickupQueueSummary } from "@/lib/pickup"
+import type { PickupPlayerLock, PickupQueueSummary } from "@/lib/pickup"
 
 const pickupQueueGroupLabels: Record<string, string> = {
   ca: "Clan Arena",
@@ -49,7 +49,25 @@ function buildQueueGroups(queues: PickupQueueSummary[]) {
   }))
 }
 
+function formatPickupLockUntil(lock: PickupPlayerLock) {
+  if (!lock.expiresAt) {
+    return "permanently"
+  }
+
+  const expiresAt = new Date(lock.expiresAt)
+
+  if (Number.isNaN(expiresAt.getTime())) {
+    return "temporarily"
+  }
+
+  return `until ${new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(expiresAt)}`
+}
+
 export function PickupEmptyBackground({
+  activeLock,
   guestMode,
   isQueued,
   onConnectWithSteam,
@@ -57,6 +75,7 @@ export function PickupEmptyBackground({
   queues,
   selectedQueue,
 }: {
+  activeLock?: PickupPlayerLock | null
   guestMode: boolean
   isQueued: boolean
   onConnectWithSteam: () => void
@@ -66,6 +85,7 @@ export function PickupEmptyBackground({
 }) {
   const enabledQueues = queues.filter((queue) => queue.enabled)
   const groupedQueues = buildQueueGroups(enabledQueues)
+  const lockReason = activeLock?.reason?.trim()
 
   return (
     <div className="relative h-[26rem] w-full overflow-hidden">
@@ -100,6 +120,21 @@ export function PickupEmptyBackground({
                 <Steam data-icon="inline-start" />
                 Continue with Steam
               </Button>
+            ) : activeLock ? (
+              <div
+                className="max-w-xl rounded-xl border border-orange-500/45 bg-orange-500/10 px-5 py-4 text-left shadow-[0_0_30px_color-mix(in_oklch,var(--color-orange-500)_14%,transparent)]"
+                role="alert"
+              >
+                <p className="text-sm font-semibold text-foreground">
+                  You have been locked from matchmaking{" "}
+                  {formatPickupLockUntil(activeLock)}.
+                </p>
+                {lockReason ? (
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Reason: {lockReason}
+                  </p>
+                ) : null}
+              </div>
             ) : isQueued ? (
               <Button
                 className="!h-14 gap-2 bg-success px-8 text-lg text-success-foreground shadow-[0_0_28px_color-mix(in_oklch,var(--color-success)_28%,transparent)]"

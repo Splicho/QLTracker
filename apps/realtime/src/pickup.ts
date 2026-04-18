@@ -1099,6 +1099,7 @@ export function createPickupService(io: Server) {
   }
 
   const playerStateApi = createPlayerStateApi({
+    getActivePlayerLock,
     getActiveSeason,
     getLatestPlayerActiveMatch,
     getLatestPlayerRecentCompletedMatch,

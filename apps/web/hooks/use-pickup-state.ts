@@ -218,8 +218,10 @@ export function usePickupState(
   const buildIdleState = (
     nextViewer: PickupPlayer,
     nextPublicState: PickupPublicState,
-    rating: PickupPlayerState["rating"]
+    rating: PickupPlayerState["rating"],
+    activeLock: PickupPlayerState["activeLock"]
   ): PickupPlayerState => ({
+    activeLock,
     publicState: nextPublicState,
     rating,
     serverNow: new Date().toISOString(),
@@ -310,7 +312,8 @@ export function usePickupState(
         idleState: buildIdleState(
           playerState.viewer,
           playerState.publicState,
-          playerState.rating
+          playerState.rating,
+          playerState.activeLock
         ),
         matchId: playerState.match.id,
       })
@@ -462,6 +465,16 @@ export function usePickupState(
         value: false,
       })
       void appendPickupLog("pickup.socket.error", payload)
+      if (
+        payload.message?.startsWith(
+          "This account is locked from matchmaking"
+        )
+      ) {
+        if (sessionToken.trim().length > 0) {
+          void refetchPlayerState()
+        }
+        return
+      }
       if (payload.message) {
         toast.error(payload.message)
       }

@@ -27,6 +27,7 @@ import type {
   PickupMatchState,
   PickupMatchPlayerCard,
   PickupPlayer,
+  PickupPlayerLock,
   PickupPlayerState,
   PickupProfileMatch,
   PickupPublicState,
@@ -527,6 +528,7 @@ const mockStages: PickupMockStage[] = [
 ]
 
 export function PickupPage({
+  activeLock,
   guestMode,
   liveMatches,
   mockMode,
@@ -544,6 +546,7 @@ export function PickupPage({
   recentMatches,
   userLoading = false,
 }: {
+  activeLock?: PickupPlayerLock | null
   guestMode: boolean
   liveMatches: PickupMatchState[]
   mockMode: boolean
@@ -565,6 +568,7 @@ export function PickupPage({
 }) {
   const shouldGatePlayAction = guestMode || (!player && !userLoading)
   const activeState = playerState?.stage ?? "idle"
+  const visibleActiveLock = playerState?.activeLock ?? activeLock ?? null
   const serverClockRef = useRef({
     localNowMs: 0,
     serverNowMs: 0,
@@ -664,6 +668,7 @@ export function PickupPage({
       {showHeroBackground ? (
         <>
           <PickupEmptyBackground
+            activeLock={visibleActiveLock}
             guestMode={shouldGatePlayAction}
             isQueued={activeState === "queue" || activeState === "ready_check"}
             onConnectWithSteam={onConnectWithSteam}

@@ -3,18 +3,22 @@ import type {
   PickupPlayerState,
   PickupPublicState,
   PickupRating,
+  PickupPlayerLock,
   PickupSeasonalRating,
 } from "@/lib/pickup"
 import {
+  getActivePickupPlayerLock,
   getPreferredPickupPlayerRating,
   getPickupPlayerActiveRatings,
   toPickupActiveRatingDto,
   toPickupPlayerDto,
+  toPickupPlayerLockNoticeDto,
   toPickupRatingDto,
 } from "@/lib/server/pickup"
 import { getPickupBrowserSession } from "@/lib/server/pickup-auth"
 
 export type InitialPickupBrowserState = {
+  activeLock: PickupPlayerLock | null
   player: PickupPlayerDto | null
   playerState: PickupPlayerState | null
   publicState: PickupPublicState | null
@@ -57,6 +61,7 @@ export async function getInitialPickupBrowserState(options?: {
   if (!session) {
     return {
       player: null,
+      activeLock: null,
       playerState: null,
       publicState: shouldFetchPublicState
         ? ((
@@ -71,10 +76,17 @@ export async function getInitialPickupBrowserState(options?: {
     }
   }
 
-  const [preferredRating, ratings, publicStatePayload, playerStatePayload] =
+  const [
+    preferredRating,
+    ratings,
+    activeLock,
+    publicStatePayload,
+    playerStatePayload,
+  ] =
     await Promise.all([
       getPreferredPickupPlayerRating(session.player.id),
       getPickupPlayerActiveRatings(session.player.id),
+      getActivePickupPlayerLock(session.player.id),
       fetchRealtimeJson<{ ok: boolean; state?: PickupPublicState }>(
         "/api/pickup/public-state"
       ),
@@ -89,6 +101,7 @@ export async function getInitialPickupBrowserState(options?: {
     ])
 
   return {
+    activeLock: activeLock ? toPickupPlayerLockNoticeDto(activeLock) : null,
     player: toPickupPlayerDto(session.player),
     playerState: playerStatePayload?.state ?? null,
     publicState: publicStatePayload?.state ?? null,

@@ -52,6 +52,12 @@ export type PickupSeasonalRating = PickupRating & {
   seasonName: string
 }
 
+export type PickupPlayerLock = {
+  expiresAt: string | null
+  id: string
+  reason: string | null
+}
+
 export type PickupLinkSession = {
   authorizeUrl: string
   expiresAt: string
@@ -372,6 +378,7 @@ export type PickupNotice = {
 
 export type PickupPlayerState =
   | {
+      activeLock: PickupPlayerLock | null
       publicState: PickupPublicState
       rating: PickupRating | null
       serverNow: string
@@ -379,6 +386,7 @@ export type PickupPlayerState =
       viewer: PickupPlayer
     }
   | {
+      activeLock: PickupPlayerLock | null
       publicState: PickupPublicState
       queue: {
         joinedAt: string
@@ -393,6 +401,7 @@ export type PickupPlayerState =
       viewer: PickupPlayer
     }
   | {
+      activeLock: PickupPlayerLock | null
       match: PickupMatchState
       publicState: PickupPublicState
       rating: PickupRating | null
@@ -492,6 +501,7 @@ export async function fetchPickupSteamLinkSession(id: string) {
 
 export async function fetchPickupMe(sessionToken: string) {
   return requestPickupApi<{
+    activeLock?: PickupPlayerLock | null
     player: PickupPlayer
     rating: PickupRating | null
     ratings?: PickupSeasonalRating[]

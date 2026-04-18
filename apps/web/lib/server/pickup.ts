@@ -134,6 +134,7 @@ export type PickupActiveRatingDto = PickupRatingDto & {
 }
 
 export type PickupMeDto = {
+  activeLock: PickupPlayerLockNoticeDto | null
   player: PickupPlayerDto
   rating: PickupRatingDto | null
   ratings: PickupActiveRatingDto[]
@@ -318,6 +319,12 @@ export type PickupPlayerLockDto = {
   revokedAt: string | null
   revokedBySteamId: string | null
   updatedAt: string
+}
+
+export type PickupPlayerLockNoticeDto = {
+  expiresAt: string | null
+  id: string
+  reason: string | null
 }
 
 export type PickupAdminLocksDto = {
@@ -588,6 +595,16 @@ export function toPickupPlayerLockDto(
     revokedAt: lock.revokedAt?.toISOString() ?? null,
     revokedBySteamId: lock.revokedBySteamId ?? null,
     updatedAt: lock.updatedAt.toISOString(),
+  }
+}
+
+export function toPickupPlayerLockNoticeDto(
+  lock: PickupPlayerLock
+): PickupPlayerLockNoticeDto {
+  return {
+    expiresAt: lock.expiresAt?.toISOString() ?? null,
+    id: lock.id,
+    reason: lock.reason ?? null,
   }
 }
 
@@ -1161,6 +1178,19 @@ export async function getPickupAdminSettings(
     settings: toPickupSettingsDto(settings),
     viewer: toPickupPlayerDto(viewer),
   }
+}
+
+export async function getActivePickupPlayerLock(playerId: string) {
+  return getPrisma().pickupPlayerLock.findFirst({
+    where: {
+      playerId,
+      revokedAt: null,
+      OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  })
 }
 
 export async function getPickupAdminLocks(

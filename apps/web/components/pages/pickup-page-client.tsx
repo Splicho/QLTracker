@@ -22,6 +22,7 @@ export function PickupPageClient({
   const auth = usePickupAuth(
     initialPickupState
       ? {
+          activeLock: initialPickupState.activeLock,
           player: initialPickupState.player,
           rating: initialPickupState.rating,
           ratings: initialPickupState.ratings,
@@ -79,6 +80,7 @@ export function PickupPageClient({
 
   return (
     <PickupPage
+      activeLock={auth.activeLock}
       guestMode={auth.guestMode}
       liveMatches={landingQuery.data?.liveMatches ?? []}
       mockMode={pickup.mockMode}

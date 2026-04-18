@@ -79,6 +79,12 @@ export type PickupPlayerLockRow = {
   reason: string | null;
 };
 
+export type PickupPlayerLockState = {
+  expiresAt: string | null;
+  id: string;
+  reason: string | null;
+};
+
 export type PickupVetoTurn = {
   captainPlayerId: string;
   mapKey: string;
@@ -279,6 +285,7 @@ export type PickupMatchState = {
 
 export type PickupPlayerState =
   | {
+      activeLock: PickupPlayerLockState | null;
       publicState: PickupPublicState;
       rating: PickupPlayerRatingState;
       ratings: PickupActiveRatingState[];
@@ -287,6 +294,7 @@ export type PickupPlayerState =
       viewer: PickupPlayerIdentity;
     }
   | {
+      activeLock: PickupPlayerLockState | null;
       publicState: PickupPublicState;
       queue: {
         joinedAt: string;
@@ -301,6 +309,7 @@ export type PickupPlayerState =
       viewer: PickupPlayerIdentity;
     }
   | {
+      activeLock: PickupPlayerLockState | null;
       match: PickupMatchState;
       publicState: PickupPublicState;
       rating: PickupPlayerRatingState;

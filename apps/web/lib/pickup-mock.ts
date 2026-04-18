@@ -373,6 +373,7 @@ export function createMockPickupState(
 
   if (stage === "idle") {
     return {
+      activeLock: null,
       publicState: createPublicState(0, safeViewer),
       rating,
       serverNow,
@@ -383,6 +384,7 @@ export function createMockPickupState(
 
   if (stage === "queue") {
     return {
+      activeLock: null,
       publicState: createPublicState(1, safeViewer),
       queue: {
         joinedAt: new Date().toISOString(),
@@ -398,6 +400,7 @@ export function createMockPickupState(
   }
 
   return {
+    activeLock: null,
     match: createBaseMatch(stage, safeViewer),
     publicState: createPublicState(8, safeViewer),
     rating,

@@ -6,6 +6,8 @@ import type {
   PickupMatchRow,
   PickupMatchState,
   PickupPlayerIdentity,
+  PickupPlayerLockRow,
+  PickupPlayerLockState,
   PickupPlayerState,
   PickupPublicState,
   PickupRatingRow,
@@ -25,6 +27,7 @@ type PlayerStateDeps = {
     season: PickupSeasonRow,
   ) => Promise<PickupRatingRow>;
   getPlayerActiveRatings: (playerId: string) => Promise<PickupActiveRatingRow[]>;
+  getActivePlayerLock: (playerId: string) => Promise<PickupPlayerLockRow | null>;
   getPlayerSeasonRating: (
     playerId: string,
     seasonId: string,
@@ -41,6 +44,18 @@ type PlayerStateDeps = {
 };
 
 export function createPlayerStateApi(deps: PlayerStateDeps) {
+  function lockToState(lock: PickupPlayerLockRow | null): PickupPlayerLockState | null {
+    if (!lock) {
+      return null;
+    }
+
+    return {
+      expiresAt: lock.expiresAt?.toISOString() ?? null,
+      id: lock.id,
+      reason: lock.reason,
+    };
+  }
+
   async function buildMatchState(match: PickupMatchRow): Promise<PickupMatchState> {
     const matchPlayers = await deps.getMatchPlayers(match.id);
     const left = matchPlayers.filter((member) => member.team === "left");
@@ -84,7 +99,11 @@ export function createPlayerStateApi(deps: PlayerStateDeps) {
     player: PickupPlayerIdentity,
   ): Promise<PickupPlayerState> {
     const serverNow = new Date().toISOString();
-    const match = await deps.getLatestPlayerActiveMatch(player.id);
+    const [match, activeLock] = await Promise.all([
+      deps.getLatestPlayerActiveMatch(player.id),
+      deps.getActivePlayerLock(player.id),
+    ]);
+    const lockState = lockToState(activeLock);
 
     if (match) {
       const [publicState, rating, ratings] = await Promise.all([
@@ -95,6 +114,7 @@ export function createPlayerStateApi(deps: PlayerStateDeps) {
       const matchState = await buildMatchState(match);
 
       return {
+        activeLock: lockState,
         match: matchState,
         publicState,
         rating: ratingToState(rating),
@@ -122,6 +142,7 @@ export function createPlayerStateApi(deps: PlayerStateDeps) {
       const ratings = await deps.getPlayerActiveRatings(player.id);
 
       return {
+        activeLock: lockState,
         publicState,
         queue: {
           joinedAt: membership.joinedAt.toISOString(),
@@ -145,6 +166,7 @@ export function createPlayerStateApi(deps: PlayerStateDeps) {
       ]);
 
       return {
+        activeLock: lockState,
         match: matchState,
         publicState,
         rating: ratingToState(rating),
@@ -169,6 +191,7 @@ export function createPlayerStateApi(deps: PlayerStateDeps) {
     ]);
 
     return {
+      activeLock: lockState,
       publicState,
       rating: ratingToState(rating),
       ratings: ratings.map(activeRatingToState),

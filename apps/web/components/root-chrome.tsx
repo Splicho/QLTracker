@@ -11,7 +11,7 @@ import { PickupReadyModal } from "@/components/pickup/pickup-ready-modal"
 import { usePickupAuth } from "@/hooks/use-pickup-auth"
 import { usePickupState } from "@/hooks/use-pickup-state"
 import { fetchNewsArticleQuery, newsQueryKeys } from "@/lib/news-query"
-import { fetchPickupNotices } from "@/lib/pickup"
+import { fetchPickupNotices, type PickupNotice } from "@/lib/pickup"
 import type { NewsArticleDto } from "@/lib/server/news"
 import type { PublicPickupNoticeDto } from "@/lib/server/notices"
 import type { InitialPickupBrowserState } from "@/lib/server/pickup-browser"
@@ -88,6 +88,21 @@ function getHeaderState(pathname: string) {
   return { pageTitle: "Server List" }
 }
 
+function formatPickupLockNoticeContent(lock: {
+  expiresAt: string | null
+  reason: string | null
+}) {
+  const until = lock.expiresAt
+    ? `until ${new Intl.DateTimeFormat(undefined, {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }).format(new Date(lock.expiresAt))}`
+    : "permanently"
+  const reason = lock.reason?.trim() ? ` Reason: ${lock.reason.trim()}` : ""
+
+  return `You are locked from matchmaking ${until}.${reason}`
+}
+
 export function RootChrome({
   children,
   initialNewsArticles = [],
@@ -108,7 +123,8 @@ export function RootChrome({
       : null
   const pickupAuth = usePickupAuth(
     initialPickupState
-      ? {
+        ? {
+          activeLock: initialPickupState.activeLock,
           player: initialPickupState.player,
           rating: initialPickupState.rating,
           ratings: initialPickupState.ratings,
@@ -139,6 +155,19 @@ export function RootChrome({
     staleTime: 60_000,
   })
   const activeNotice = noticesQuery.data?.find(Boolean) ?? null
+  const activePickupLock =
+    pickupState.playerState?.activeLock ?? pickupAuth.activeLock ?? null
+  const activeLockNotice = activePickupLock
+    ? ({
+        content: formatPickupLockNoticeContent(activePickupLock),
+        dismissable: false,
+        id: `pickup-lock:${activePickupLock.id}`,
+        linkHref: null,
+        linkLabel: null,
+        variant: "alert",
+      } satisfies PickupNotice)
+    : null
+  const visibleNotice = activeLockNotice ?? activeNotice
   const headerState = getHeaderState(pathname)
   const resolvedHeaderState =
     newsArticleSlug && newsArticleQuery.data
@@ -244,13 +273,13 @@ export function RootChrome({
           pickupStage={pickupState.playerState?.stage ?? null}
         />
       }
-      notice={activeNotice ? <NoticeBar notice={activeNotice} /> : null}
+      notice={visibleNotice ? <NoticeBar notice={visibleNotice} /> : null}
       sidebar={
         <AppSidebar
           initialNewsArticles={initialNewsArticles}
           initialPickupPublicState={initialPickupState?.publicState ?? null}
           initialReadNewsSlugs={initialReadNewsSlugs}
-          noticeVisible={activeNotice != null}
+          noticeVisible={visibleNotice != null}
           pickupPlayer={pickupAuth.player}
         />
       }
