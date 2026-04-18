@@ -156,19 +156,15 @@ export function PlayerProfileOverviewPane({
           </div>
           <div className="px-4 py-4">
             <p className="text-[11px] font-medium text-muted-foreground uppercase">
-              Rating
+              Rank
             </p>
             {highestPlacedRating?.rank ? (
-              <Badge
-                className="mt-1 h-8 max-w-full gap-1.5 rounded-md border-border/70 bg-muted px-2 text-sm font-semibold text-foreground"
-                variant="outline"
-              >
+              <div className="mt-2 flex items-center">
                 <PickupRankBadge
-                  imageClassName="size-5"
+                  imageClassName="size-10 rounded-md"
                   rank={highestPlacedRating.rank}
-                  showTitle
                 />
-              </Badge>
+              </div>
             ) : highestRating ? (
               <p className="mt-2 text-sm font-semibold text-muted-foreground">
                 Unranked {highestRating.placementGamesPlayed}/
