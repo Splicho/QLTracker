@@ -4,6 +4,7 @@ import NumberFlow from "@number-flow/react"
 import { ArrowLeft } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Medal } from "@/components/icon"
+import { PickupRankBadge } from "@/components/pickup/pickup-rank-badge"
 import { RecentMatchRow } from "@/components/profile/recent-match-row"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -42,6 +43,18 @@ function getHighestRating(ratings: PickupSeasonalRating[]) {
   )
 }
 
+function getHighestPlacedRating(ratings: PickupSeasonalRating[]) {
+  const placedRatings = ratings.filter((rating) => rating.isPlaced && rating.rank)
+
+  if (placedRatings.length === 0) {
+    return null
+  }
+
+  return placedRatings.reduce((best, current) =>
+    current.displayRating > best.displayRating ? current : best
+  )
+}
+
 export function PlayerProfileOverviewPane({
   onOpenMatch,
   profile,
@@ -52,6 +65,7 @@ export function PlayerProfileOverviewPane({
   onOpenMatches: () => void
 }) {
   const highestRating = getHighestRating(profile.ratings)
+  const highestPlacedRating = getHighestPlacedRating(profile.ratings)
   const roundedWinRate = getRoundedWinRate(profile.stats.winRate)
   const [hasEntered, setHasEntered] = useState(false)
   const hasOverviewData =
@@ -92,7 +106,7 @@ export function PlayerProfileOverviewPane({
   return (
     <div className="min-h-0 flex-1 data-[state=inactive]:hidden">
       <div className="border-b border-border">
-        <div className="grid grid-cols-2 gap-0 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-0 sm:grid-cols-5">
           <div className="border-b border-border px-4 py-4 sm:border-r sm:border-b-0">
             <p className="text-[11px] font-medium text-muted-foreground uppercase">
               Matches
@@ -127,7 +141,7 @@ export function PlayerProfileOverviewPane({
               />
             )}
           </div>
-          <div className="px-4 py-4">
+          <div className="border-b border-border px-4 py-4 sm:border-r sm:border-b-0">
             <p className="text-[11px] font-medium text-muted-foreground uppercase">
               Peak Rating
             </p>
@@ -136,6 +150,30 @@ export function PlayerProfileOverviewPane({
                 className="mt-1 text-2xl font-semibold text-foreground"
                 value={hasEntered ? highestRating.displayRating : 0}
               />
+            ) : (
+              <p className="mt-1 text-2xl font-semibold text-foreground">-</p>
+            )}
+          </div>
+          <div className="px-4 py-4">
+            <p className="text-[11px] font-medium text-muted-foreground uppercase">
+              Rating
+            </p>
+            {highestPlacedRating?.rank ? (
+              <Badge
+                className="mt-1 h-8 max-w-full gap-1.5 rounded-md border-border/70 bg-muted px-2 text-sm font-semibold text-foreground"
+                variant="outline"
+              >
+                <PickupRankBadge
+                  imageClassName="size-5"
+                  rank={highestPlacedRating.rank}
+                  showTitle
+                />
+              </Badge>
+            ) : highestRating ? (
+              <p className="mt-2 text-sm font-semibold text-muted-foreground">
+                Unranked {highestRating.placementGamesPlayed}/
+                {highestRating.placementGamesRequired}
+              </p>
             ) : (
               <p className="mt-1 text-2xl font-semibold text-foreground">-</p>
             )}
@@ -153,13 +191,11 @@ export function PlayerProfileOverviewPane({
               >
                 <span className="text-foreground/70">{rating.queueName}</span>
                 <span className="inline-flex h-6 items-center gap-1 rounded-sm border border-border/70 bg-background px-1.5 text-foreground/80">
-                  {rating.rank?.badgeUrl ? (
-                    <img
-                      alt=""
-                      className="size-3.5 rounded-xs object-contain"
-                      src={rating.rank.badgeUrl}
-                    />
-                  ) : null}
+                  <PickupRankBadge
+                    imageClassName="size-3.5 rounded-xs"
+                    rank={rating.rank}
+                    tooltip={`${rating.queueName}: ${rating.rank?.title ?? "Unranked"}`}
+                  />
                   {rating.isPlaced
                     ? (rating.rank?.title ?? "Unranked")
                     : `Unranked ${rating.placementGamesPlayed}/${rating.placementGamesRequired}`}

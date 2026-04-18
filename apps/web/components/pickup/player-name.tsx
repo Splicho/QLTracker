@@ -1,4 +1,5 @@
 import { PickupCountryFlag } from "@/components/pickup/pickup-country-flag"
+import { PickupRankBadge } from "@/components/pickup/pickup-rank-badge"
 import { QuakeText } from "@/lib/quake"
 import { cn } from "@/lib/utils"
 
@@ -27,14 +28,7 @@ export function PlayerName({
       className={cn("inline-flex max-w-full items-center gap-2", className)}
     >
       <QuakeText fallbackClassName={fallbackClassName} text={personaName} />
-      {rank?.badgeUrl ? (
-        <img
-          alt={rank.title}
-          className="size-5 shrink-0 rounded-sm object-contain"
-          src={rank.badgeUrl}
-          title={rank.title}
-        />
-      ) : null}
+      <PickupRankBadge rank={rank} />
       {country ? (
         <PickupCountryFlag
           className={cn("h-4 w-4", countryClassName)}
