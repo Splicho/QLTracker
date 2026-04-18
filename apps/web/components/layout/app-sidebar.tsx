@@ -94,7 +94,7 @@ const primaryNavigationItems: readonly NavItem[] = [
 ] as const
 
 const competitiveNavigationItems: readonly NavItem[] = [
-  { href: "/pickup", icon: Medal, id: "pickup", label: "Pickup" },
+  { href: "/pickup", icon: Medal, id: "pickup", label: "Matchmaking" },
   {
     href: "/leaderboards",
     icon: Leaderboard,
