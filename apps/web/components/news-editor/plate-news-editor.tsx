@@ -231,7 +231,7 @@ function ImageElement(props: PlateElementProps<TMediaElement>) {
         <Resizable
           className="group relative max-w-full"
           contentEditable={false}
-          options={{ maxWidth: "100%", minWidth: 180 }}
+          options={{ maxWidth: "100%", minWidth: 64 }}
         >
           <ResizeHandle
             options={{ direction: "left" }}
