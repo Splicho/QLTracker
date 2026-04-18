@@ -25,20 +25,15 @@ import type {
   PickupAdminOverviewDto,
   PickupMapPoolDto,
   PickupQueueDto,
-  PickupRankDto,
   PickupSeasonDto,
 } from "@/lib/server/pickup"
 
 type PendingAction =
   | "createQueue"
-  | "createRank"
   | "createSeason"
-  | `deleteRank:${string}`
   | "saveMaps"
   | "saveQueue"
-  | `updateRank:${string}`
   | `updateSeason:${string}`
-  | `uploadRankBadge:${string}`
   | null
 
 type SeasonFormState = {
@@ -48,14 +43,6 @@ type SeasonFormState = {
   startsAt: string
   startingRating: number
   status: "draft" | "active" | "completed"
-}
-
-type RankFormState = {
-  active: boolean
-  badgeUrl: string
-  minRating: number
-  sortOrder: number
-  title: string
 }
 
 function formatDateTimeInput(value: string) {
@@ -71,30 +58,6 @@ function createDefaultSeasonForm(): SeasonFormState {
     startingRating: 1000,
     status: "draft",
   }
-}
-
-function createDefaultRankForm(): RankFormState {
-  return {
-    active: true,
-    badgeUrl: "",
-    minRating: 1000,
-    sortOrder: 0,
-    title: "",
-  }
-}
-
-function createRankForm(rank: PickupRankDto): RankFormState {
-  return {
-    active: rank.active,
-    badgeUrl: rank.badgeUrl ?? "",
-    minRating: rank.minRating,
-    sortOrder: rank.sortOrder,
-    title: rank.title,
-  }
-}
-
-function createRankDrafts(ranks: PickupRankDto[]) {
-  return Object.fromEntries(ranks.map((rank) => [rank.id, createRankForm(rank)]))
 }
 
 function createSeasonDrafts(seasons: PickupSeasonDto[]) {
@@ -134,34 +97,6 @@ const seasonStatusOptions = [
   { key: "completed", label: "Completed" },
 ] as const
 
-function sortRanks(ranks: PickupRankDto[]) {
-  return [...ranks].sort(
-    (left, right) =>
-      left.minRating - right.minRating ||
-      left.sortOrder - right.sortOrder ||
-      left.title.localeCompare(right.title)
-  )
-}
-
-async function readUploadResponse<T>(response: Response) {
-  const payload = (await response.json().catch(() => null)) as
-    | { error?: string; message?: string }
-    | T
-    | null
-
-  if (!response.ok) {
-    const errorPayload =
-      payload && typeof payload === "object"
-        ? (payload as { error?: string; message?: string })
-        : null
-    const message =
-      errorPayload?.error ?? errorPayload?.message ?? "Request failed."
-    throw new Error(message ?? "Request failed.")
-  }
-
-  return payload as T
-}
-
 export function PickupAdminDashboard({
   initialOverview,
 }: {
@@ -183,12 +118,6 @@ export function PickupAdminDashboard({
   >(
     initialOverview.queues[0]
       ? createSeasonDrafts(initialOverview.queues[0].seasons)
-      : {}
-  )
-  const [rankForm, setRankForm] = useState(createDefaultRankForm())
-  const [rankDrafts, setRankDrafts] = useState<Record<string, RankFormState>>(
-    initialOverview.queues[0]
-      ? createRankDrafts(initialOverview.queues[0].ranks)
       : {}
   )
   const [mapsText, setMapsText] = useState(
@@ -235,15 +164,12 @@ export function PickupAdminDashboard({
     if (!selectedQueueOverview) {
       setQueueForm(null)
       setMapsText("")
-      setRankDrafts({})
       setSeasonDrafts({})
       return
     }
 
     setQueueForm(createQueueForm(selectedQueueOverview.queue))
     setMapsText(createMapsText(selectedQueueOverview.maps))
-    setRankDrafts(createRankDrafts(selectedQueueOverview.ranks))
-    setRankForm(createDefaultRankForm())
     setSeasonForm(createDefaultSeasonForm())
     setSeasonDrafts(createSeasonDrafts(selectedQueueOverview.seasons))
   }, [selectedQueueOverview])
@@ -278,8 +204,6 @@ export function PickupAdminDashboard({
     setSelectedQueueId(entry.queue.id)
     setQueueForm(createQueueForm(entry.queue))
     setMapsText(createMapsText(entry.maps))
-    setRankDrafts(createRankDrafts(entry.ranks))
-    setRankForm(createDefaultRankForm())
     setSeasonForm(createDefaultSeasonForm())
     setSeasonDrafts(createSeasonDrafts(entry.seasons))
   }
@@ -537,167 +461,6 @@ export function PickupAdminDashboard({
     })
   }
 
-  const uploadRankBadge = (
-    target: "new" | string,
-    title: string,
-    file: File | null
-  ) => {
-    if (!selectedQueue || !file) {
-      return
-    }
-
-    void runAction(`uploadRankBadge:${target}`, async () => {
-      try {
-        const formData = new FormData()
-        formData.set("queueId", selectedQueue.id)
-        formData.set("title", title.trim() || "rank-badge")
-        formData.set("file", file)
-
-        const payload = await readUploadResponse<{ url: string }>(
-          await fetch("/api/pickup/admin/ranks/upload", {
-            body: formData,
-            credentials: "include",
-            method: "POST",
-          })
-        )
-
-        if (target === "new") {
-          setRankForm((current) => ({ ...current, badgeUrl: payload.url }))
-        } else {
-          setRankDrafts((current) => ({
-            ...current,
-            [target]: {
-              ...(current[target] ?? createDefaultRankForm()),
-              badgeUrl: payload.url,
-            },
-          }))
-        }
-
-        toast.success("Rank badge uploaded.")
-      } catch (error) {
-        toast.danger("Rank badge upload failed.", {
-          description:
-            error instanceof Error ? error.message : "Request failed.",
-        })
-      }
-    })
-  }
-
-  const createRank = () => {
-    if (!selectedQueue) {
-      return
-    }
-
-    void runAction("createRank", async () => {
-      try {
-        const payload = await requestJson<{ rank: PickupRankDto }>(
-          `/api/pickup/admin/queues/${encodeURIComponent(selectedQueue.id)}/ranks`,
-          {
-            body: JSON.stringify({
-              ...rankForm,
-              badgeUrl: rankForm.badgeUrl.trim() || null,
-            }),
-            method: "POST",
-          }
-        )
-
-        patchQueueOverview(selectedQueue.id, (entry) => ({
-          ...entry,
-          ranks: sortRanks([...entry.ranks, payload.rank]),
-        }))
-        setRankDrafts((current) => ({
-          ...current,
-          [payload.rank.id]: createRankForm(payload.rank),
-        }))
-        setRankForm(createDefaultRankForm())
-        toast.success("Rank created.")
-      } catch (error) {
-        toast.danger("Rank creation failed.", {
-          description:
-            error instanceof Error ? error.message : "Request failed.",
-        })
-      }
-    })
-  }
-
-  const updateRank = (rank: PickupRankDto) => {
-    if (!selectedQueue) {
-      return
-    }
-
-    const draft = rankDrafts[rank.id]
-    if (!draft) {
-      return
-    }
-
-    void runAction(`updateRank:${rank.id}`, async () => {
-      try {
-        const payload = await requestJson<{ rank: PickupRankDto }>(
-          `/api/pickup/admin/ranks/${encodeURIComponent(rank.id)}`,
-          {
-            body: JSON.stringify({
-              ...draft,
-              badgeUrl: draft.badgeUrl.trim() || null,
-            }),
-            method: "PATCH",
-          }
-        )
-
-        patchQueueOverview(selectedQueue.id, (entry) => ({
-          ...entry,
-          ranks: sortRanks(
-            entry.ranks.map((entryRank) =>
-              entryRank.id === rank.id ? payload.rank : entryRank
-            )
-          ),
-        }))
-        setRankDrafts((current) => ({
-          ...current,
-          [rank.id]: createRankForm(payload.rank),
-        }))
-        toast.success("Rank saved.")
-      } catch (error) {
-        toast.danger("Rank update failed.", {
-          description:
-            error instanceof Error ? error.message : "Request failed.",
-        })
-      }
-    })
-  }
-
-  const deleteRank = (rank: PickupRankDto) => {
-    if (!selectedQueue) {
-      return
-    }
-
-    void runAction(`deleteRank:${rank.id}`, async () => {
-      try {
-        await requestJson<{ deletedRankId: string }>(
-          `/api/pickup/admin/ranks/${encodeURIComponent(rank.id)}`,
-          {
-            method: "DELETE",
-          }
-        )
-
-        patchQueueOverview(selectedQueue.id, (entry) => ({
-          ...entry,
-          ranks: entry.ranks.filter((entryRank) => entryRank.id !== rank.id),
-        }))
-        setRankDrafts((current) => {
-          const next = { ...current }
-          delete next[rank.id]
-          return next
-        })
-        toast.success("Rank deleted.")
-      } catch (error) {
-        toast.danger("Rank delete failed.", {
-          description:
-            error instanceof Error ? error.message : "Request failed.",
-        })
-      }
-    })
-  }
-
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-10 text-white">
       <header className="flex flex-wrap items-center justify-between gap-4">
@@ -915,10 +678,6 @@ export function PickupAdminDashboard({
                 </Tabs.Tab>
                 <Tabs.Tab id="seasons">
                   Seasons
-                  <Tabs.Indicator />
-                </Tabs.Tab>
-                <Tabs.Tab id="ranks">
-                  Ranks
                   <Tabs.Indicator />
                 </Tabs.Tab>
                 <Tabs.Tab id="maps">
@@ -1248,323 +1007,6 @@ export function PickupAdminDashboard({
               ) : (
                 <div className="rounded-2xl border border-dashed border-white/10 px-4 py-5 text-sm text-white/55">
                   Select a queue to manage seasons.
-                </div>
-              )}
-            </Tabs.Panel>
-
-            <Tabs.Panel id="ranks" className="space-y-6">
-              {selectedQueue ? (
-                <>
-                  <div>
-                    <h3 className="text-lg font-medium">Queue Ranks</h3>
-                    <p className="mt-1 text-sm text-white/60">
-                      Ranks are queue-specific. Players stay Unranked until 10
-                      rated placement games, then the highest active threshold
-                      at or below their display rating is shown.
-                    </p>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/10 p-4">
-                    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_8rem_7rem_auto]">
-                      <Field label="Title">
-                        <FieldInput
-                          disabled={isPending}
-                          placeholder="Gold"
-                          value={rankForm.title}
-                          onChange={(value) =>
-                            setRankForm((current) => ({
-                              ...current,
-                              title: value,
-                            }))
-                          }
-                        />
-                      </Field>
-                      <Field label="Min rating">
-                        <FieldInput
-                          disabled={isPending}
-                          min={0}
-                          type="number"
-                          value={String(rankForm.minRating)}
-                          onChange={(value) =>
-                            setRankForm((current) => ({
-                              ...current,
-                              minRating: Math.max(0, Number(value) || 0),
-                            }))
-                          }
-                        />
-                      </Field>
-                      <Field label="Order">
-                        <FieldInput
-                          disabled={isPending}
-                          min={0}
-                          type="number"
-                          value={String(rankForm.sortOrder)}
-                          onChange={(value) =>
-                            setRankForm((current) => ({
-                              ...current,
-                              sortOrder: Math.max(0, Number(value) || 0),
-                            }))
-                          }
-                        />
-                      </Field>
-                      <div className="flex items-end">
-                        <ActionButton
-                          isDisabled={
-                            isPending || rankForm.title.trim().length === 0
-                          }
-                          isPending={pendingAction === "createRank"}
-                          onPress={createRank}
-                          variant="primary"
-                        >
-                          Create Rank
-                        </ActionButton>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto]">
-                      <Field label="Badge URL">
-                        <FieldInput
-                          disabled={isPending}
-                          placeholder="https://..."
-                          value={rankForm.badgeUrl}
-                          onChange={(value) =>
-                            setRankForm((current) => ({
-                              ...current,
-                              badgeUrl: value,
-                            }))
-                          }
-                        />
-                      </Field>
-                      <div className="flex items-end gap-3">
-                        <Switch
-                          isDisabled={isPending}
-                          isSelected={rankForm.active}
-                          size="sm"
-                          onChange={(active) =>
-                            setRankForm((current) => ({
-                              ...current,
-                              active,
-                            }))
-                          }
-                        >
-                          <Switch.Control>
-                            <Switch.Thumb />
-                          </Switch.Control>
-                          <Switch.Content>Active</Switch.Content>
-                        </Switch>
-                        <label className="inline-flex h-10 cursor-pointer items-center rounded-2xl border border-white/10 px-4 text-sm text-white/70 transition hover:bg-white/[0.04]">
-                          Upload Badge
-                          <input
-                            accept="image/*"
-                            className="sr-only"
-                            disabled={isPending}
-                            type="file"
-                            onChange={(event) => {
-                              uploadRankBadge(
-                                "new",
-                                rankForm.title,
-                                event.currentTarget.files?.[0] ?? null
-                              )
-                              event.currentTarget.value = ""
-                            }}
-                          />
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="overflow-hidden rounded-2xl border border-white/10">
-                    {selectedQueueOverview?.ranks.length ? (
-                      <table className="min-w-full text-left text-sm">
-                        <thead className="bg-[#111111] text-xs tracking-[0.18em] text-white/40 uppercase">
-                          <tr>
-                            <th className="px-4 py-3 font-medium">Badge</th>
-                            <th className="px-4 py-3 font-medium">Title</th>
-                            <th className="px-4 py-3 font-medium">
-                              Min Rating
-                            </th>
-                            <th className="px-4 py-3 font-medium">Order</th>
-                            <th className="px-4 py-3 font-medium">Active</th>
-                            <th className="px-4 py-3 text-right font-medium">
-                              Actions
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {selectedQueueOverview.ranks.map((rank) => {
-                            const draft = rankDrafts[rank.id] ?? createRankForm(rank)
-
-                            return (
-                              <tr
-                                key={rank.id}
-                                className="border-t border-white/10 align-top"
-                              >
-                                <td className="px-4 py-4">
-                                  <div className="flex items-center gap-3">
-                                    {draft.badgeUrl ? (
-                                      <img
-                                        alt=""
-                                        className="size-10 rounded-lg border border-white/10 object-contain"
-                                        src={draft.badgeUrl}
-                                      />
-                                    ) : (
-                                      <div className="size-10 rounded-lg border border-dashed border-white/15" />
-                                    )}
-                                    <label className="inline-flex h-10 cursor-pointer items-center rounded-2xl border border-white/10 px-3 text-xs text-white/70 transition hover:bg-white/[0.04]">
-                                      Upload
-                                      <input
-                                        accept="image/*"
-                                        className="sr-only"
-                                        disabled={isPending}
-                                        type="file"
-                                        onChange={(event) => {
-                                          uploadRankBadge(
-                                            rank.id,
-                                            draft.title,
-                                            event.currentTarget.files?.[0] ??
-                                              null
-                                          )
-                                          event.currentTarget.value = ""
-                                        }}
-                                      />
-                                    </label>
-                                  </div>
-                                </td>
-                                <td className="px-4 py-4">
-                                  <Input
-                                    className="h-10 min-w-40 border-white/10 bg-transparent text-white"
-                                    disabled={isPending}
-                                    value={draft.title}
-                                    onChange={(event) =>
-                                      setRankDrafts((current) => ({
-                                        ...current,
-                                        [rank.id]: {
-                                          ...draft,
-                                          title: event.target.value,
-                                        },
-                                      }))
-                                    }
-                                  />
-                                  <Input
-                                    className="mt-2 h-10 min-w-56 border-white/10 bg-transparent text-white/70"
-                                    disabled={isPending}
-                                    placeholder="Badge URL"
-                                    value={draft.badgeUrl}
-                                    onChange={(event) =>
-                                      setRankDrafts((current) => ({
-                                        ...current,
-                                        [rank.id]: {
-                                          ...draft,
-                                          badgeUrl: event.target.value,
-                                        },
-                                      }))
-                                    }
-                                  />
-                                </td>
-                                <td className="px-4 py-4">
-                                  <Input
-                                    className="h-10 max-w-28 border-white/10 bg-transparent text-white"
-                                    disabled={isPending}
-                                    min={0}
-                                    type="number"
-                                    value={String(draft.minRating)}
-                                    onChange={(event) =>
-                                      setRankDrafts((current) => ({
-                                        ...current,
-                                        [rank.id]: {
-                                          ...draft,
-                                          minRating: Math.max(
-                                            0,
-                                            Number(event.target.value) || 0
-                                          ),
-                                        },
-                                      }))
-                                    }
-                                  />
-                                </td>
-                                <td className="px-4 py-4">
-                                  <Input
-                                    className="h-10 max-w-24 border-white/10 bg-transparent text-white"
-                                    disabled={isPending}
-                                    min={0}
-                                    type="number"
-                                    value={String(draft.sortOrder)}
-                                    onChange={(event) =>
-                                      setRankDrafts((current) => ({
-                                        ...current,
-                                        [rank.id]: {
-                                          ...draft,
-                                          sortOrder: Math.max(
-                                            0,
-                                            Number(event.target.value) || 0
-                                          ),
-                                        },
-                                      }))
-                                    }
-                                  />
-                                </td>
-                                <td className="px-4 py-4">
-                                  <Switch
-                                    isDisabled={isPending}
-                                    isSelected={draft.active}
-                                    size="sm"
-                                    onChange={(active) =>
-                                      setRankDrafts((current) => ({
-                                        ...current,
-                                        [rank.id]: {
-                                          ...draft,
-                                          active,
-                                        },
-                                      }))
-                                    }
-                                  >
-                                    <Switch.Control>
-                                      <Switch.Thumb />
-                                    </Switch.Control>
-                                  </Switch>
-                                </td>
-                                <td className="px-4 py-4">
-                                  <div className="flex justify-end gap-3">
-                                    <ActionButton
-                                      isDisabled={isPending}
-                                      isPending={
-                                        pendingAction ===
-                                        `updateRank:${rank.id}`
-                                      }
-                                      onPress={() => updateRank(rank)}
-                                      variant="secondary"
-                                    >
-                                      Save
-                                    </ActionButton>
-                                    <ActionButton
-                                      isDisabled={isPending}
-                                      isPending={
-                                        pendingAction ===
-                                        `deleteRank:${rank.id}`
-                                      }
-                                      onPress={() => deleteRank(rank)}
-                                      variant="outline"
-                                    >
-                                      Delete
-                                    </ActionButton>
-                                  </div>
-                                </td>
-                              </tr>
-                            )
-                          })}
-                        </tbody>
-                      </table>
-                    ) : (
-                      <div className="px-4 py-5 text-sm text-white/55">
-                        No ranks yet. Create the first threshold to start
-                        revealing badges after placements.
-                      </div>
-                    )}
-                  </div>
-                </>
-              ) : (
-                <div className="rounded-2xl border border-dashed border-white/10 px-4 py-5 text-sm text-white/55">
-                  Select a queue to manage ranks.
                 </div>
               )}
             </Tabs.Panel>
