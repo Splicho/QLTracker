@@ -1,4 +1,5 @@
-const MINIMUM_RATED_CA_LOSER_SCORE = 5;
+const DEFAULT_CA_ROUND_LIMIT = 10;
+const MINIMUM_RATED_CA_COMPLETION_RATIO = 0.5;
 
 export function parsePickupFinalScore(finalScore: string | null | undefined) {
   if (typeof finalScore !== "string") {
@@ -19,13 +20,16 @@ export function parsePickupFinalScore(finalScore: string | null | undefined) {
   return { left, right };
 }
 
+export function minimumRatedRoundsPlayed(roundLimit = DEFAULT_CA_ROUND_LIMIT) {
+  const maxPossibleRounds = roundLimit * 2 - 1;
+  return Math.ceil(maxPossibleRounds * MINIMUM_RATED_CA_COMPLETION_RATIO);
+}
+
 export function shouldApplyPickupRating(finalScore: string | null | undefined) {
   const parsedScore = parsePickupFinalScore(finalScore);
   if (!parsedScore) {
     return false;
   }
 
-  return (
-    Math.min(parsedScore.left, parsedScore.right) >= MINIMUM_RATED_CA_LOSER_SCORE
-  );
+  return parsedScore.left + parsedScore.right >= minimumRatedRoundsPlayed();
 }
