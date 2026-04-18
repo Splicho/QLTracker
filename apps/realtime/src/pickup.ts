@@ -79,12 +79,18 @@ function createRating(mu: number, sigma: number) {
 }
 
 const DEFAULT_PICKUP_DISPLAY_RATING = 1000;
+const QUEUE_MEMBER_CLEANUP_MIN_INTERVAL_MS = 60_000;
+const QUEUE_MEMBER_CLEANUP_MAX_INTERVAL_MS = 5 * 60_000;
+const QUEUE_RESTART_CLEANUP_MIN_DELAY_MS = 30_000;
 
 export function createPickupService(io: Server) {
+  const serviceStartedAt = new Date();
   const readyTimers = new Map<string, NodeJS.Timeout>();
   const vetoTimers = new Map<string, NodeJS.Timeout>();
   const queueDisconnectTimers = new Map<string, NodeJS.Timeout>();
   const connectedPickupSocketsByPlayerId = new Map<string, Set<string>>();
+  let queueMemberCleanupInterval: NodeJS.Timeout | null = null;
+  let restartQueueCleanupTimer: NodeJS.Timeout | null = null;
 
   async function notifyDiscordWebhook(
     payload: PickupDiscordWebhookPayload,
@@ -1092,6 +1098,122 @@ export function createPickupService(io: Server) {
 
     connectedPickupSocketsByPlayerId.delete(playerId);
     return 0;
+  }
+
+  function connectedPickupPlayerIds() {
+    return [...connectedPickupSocketsByPlayerId.keys()];
+  }
+
+  async function emitQueueCleanupResult(
+    reason: string,
+    rows: readonly { playerId: string; queueId: string }[],
+  ) {
+    if (rows.length === 0) {
+      return;
+    }
+
+    console.log(`pickup cleaned ${rows.length} queue member(s): ${reason}`);
+    await broadcastPublicState();
+
+    const playerIds = [...new Set(rows.map((row) => row.playerId))];
+    for (const playerId of playerIds) {
+      await emitPlayerState(playerId);
+    }
+  }
+
+  async function cleanupExpiredQueueMembers(reason: string) {
+    const cutoff = new Date(Date.now() - config.pickupQueueMemberMaxAgeMs);
+    const result = await pool.query<{ playerId: string; queueId: string }>(
+      `
+        delete from "PickupQueueMember" qm
+        where
+          qm."joinedAt" < $1
+          and not exists (
+            select 1
+            from "PickupMatchPlayer" mp
+            inner join "PickupMatch" m on m."id" = mp."matchId"
+            where
+              mp."playerId" = qm."playerId"
+              and (
+                m."status" in ('provisioning', 'server_ready', 'live')
+                or (m."status" = 'ready_check' and m."readyDeadlineAt" > now())
+                or (m."status" = 'veto' and m."vetoDeadlineAt" > now())
+              )
+          )
+        returning "playerId", "queueId"
+      `,
+      [cutoff],
+    );
+
+    await emitQueueCleanupResult(reason, result.rows);
+  }
+
+  async function cleanupDisconnectedPreexistingQueueMembers() {
+    const result = await pool.query<{ playerId: string; queueId: string }>(
+      `
+        delete from "PickupQueueMember" qm
+        where
+          qm."joinedAt" < $1
+          and not (qm."playerId" = any($2::text[]))
+          and not exists (
+            select 1
+            from "PickupMatchPlayer" mp
+            inner join "PickupMatch" m on m."id" = mp."matchId"
+            where
+              mp."playerId" = qm."playerId"
+              and (
+                m."status" in ('provisioning', 'server_ready', 'live')
+                or (m."status" = 'ready_check' and m."readyDeadlineAt" > now())
+                or (m."status" = 'veto' and m."vetoDeadlineAt" > now())
+              )
+          )
+        returning "playerId", "queueId"
+      `,
+      [serviceStartedAt, connectedPickupPlayerIds()],
+    );
+
+    await emitQueueCleanupResult("restart-disconnected", result.rows);
+  }
+
+  function startQueueMemberCleanupLoop() {
+    if (queueMemberCleanupInterval) {
+      return;
+    }
+
+    const intervalMs = Math.min(
+      QUEUE_MEMBER_CLEANUP_MAX_INTERVAL_MS,
+      Math.max(
+        QUEUE_MEMBER_CLEANUP_MIN_INTERVAL_MS,
+        Math.floor(config.pickupQueueMemberMaxAgeMs / 4),
+      ),
+    );
+    queueMemberCleanupInterval = setInterval(() => {
+      void cleanupExpiredQueueMembers("max-age").catch((error) => {
+        console.error("Failed to clean expired pickup queue members:", error);
+      });
+    }, intervalMs);
+    queueMemberCleanupInterval.unref?.();
+  }
+
+  function scheduleRestartQueueCleanup() {
+    if (restartQueueCleanupTimer) {
+      return;
+    }
+
+    const delayMs = Math.max(
+      QUEUE_RESTART_CLEANUP_MIN_DELAY_MS,
+      config.pickupQueueDisconnectGraceMs * 2,
+    );
+    restartQueueCleanupTimer = setTimeout(() => {
+      restartQueueCleanupTimer = null;
+      void cleanupDisconnectedPreexistingQueueMembers().catch((error) => {
+        console.error(
+          "Failed to clean disconnected preexisting pickup queue members:",
+          error,
+        );
+      });
+    }, delayMs);
+    restartQueueCleanupTimer.unref?.();
   }
 
   function clearReadyTimer(matchId: string) {
@@ -2494,7 +2616,10 @@ export function createPickupService(io: Server) {
     },
     async hydrate() {
       await ensureBootstrapData();
+      await cleanupExpiredQueueMembers("startup-max-age");
       await hydrateTimers();
+      startQueueMemberCleanupLoop();
+      scheduleRestartQueueCleanup();
       await broadcastPublicState();
     },
     async authenticateSocket(socket: Socket) {

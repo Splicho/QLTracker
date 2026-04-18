@@ -17,6 +17,11 @@ const envSchema = z.object({
   HISTORY_RETENTION_DAYS: z.coerce.number().int().positive().default(7),
   HISTORY_SAMPLE_INTERVAL_MS: z.coerce.number().int().positive().default(300000),
   PICKUP_QUEUE_DISCONNECT_GRACE_MS: z.coerce.number().int().positive().default(15000),
+  PICKUP_QUEUE_MEMBER_MAX_AGE_MS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(21600000),
   PICKUP_QUEUE_ALERTS_WEBHOOK_SECRET: z.string().optional(),
   PICKUP_QUEUE_ALERTS_WEBHOOK_URL: z.string().url().optional(),
   POLL_INTERVAL_MS: z.coerce.number().int().positive().default(30000),
@@ -76,6 +81,7 @@ export const config = {
     ? normalizeUrl(pickupQueueAlertsWebhookUrl)
     : "",
   pickupQueueDisconnectGraceMs: parsedEnv.PICKUP_QUEUE_DISCONNECT_GRACE_MS,
+  pickupQueueMemberMaxAgeMs: parsedEnv.PICKUP_QUEUE_MEMBER_MAX_AGE_MS,
   pollIntervalMs: parsedEnv.POLL_INTERVAL_MS,
   port: parsedEnv.PORT,
   qlstatsApiUrl: normalizeUrl(parsedEnv.QLSTATS_API_URL),
