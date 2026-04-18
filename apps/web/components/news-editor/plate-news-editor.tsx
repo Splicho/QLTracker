@@ -2,7 +2,6 @@
 
 import {
   type ComponentProps,
-  type ComponentType,
   forwardRef,
   useEffect,
   useImperativeHandle,
@@ -106,11 +105,6 @@ function getImageWidthValue(width?: number | string) {
   const trimmedWidth = width.trim()
   return trimmedWidth.length > 0 ? trimmedWidth : undefined
 }
-
-const NewsResizeHandle = ResizeHandle as unknown as ComponentType<{
-  className?: string
-  direction: "left" | "right"
-}>
 
 const imageMarkdownRule = {
   ...defaultRules.img,
@@ -239,8 +233,8 @@ function ImageElement(props: PlateElementProps<TMediaElement>) {
           contentEditable={false}
           options={{ maxWidth: "100%", minWidth: 180 }}
         >
-          <NewsResizeHandle
-            direction="left"
+          <ResizeHandle
+            options={{ direction: "left" }}
             className="absolute top-0 bottom-0 left-0 z-10 w-4 -translate-x-1/2 cursor-ew-resize touch-none after:absolute after:top-6 after:bottom-6 after:left-1/2 after:w-1 after:-translate-x-1/2 after:rounded-full after:bg-white/80 after:opacity-0 after:shadow-[0_0_18px_rgba(255,255,255,0.3)] after:transition-opacity group-hover:after:opacity-100 hover:after:opacity-100"
           />
           <img
@@ -248,8 +242,8 @@ function ImageElement(props: PlateElementProps<TMediaElement>) {
             className="max-h-[28rem] w-full rounded-2xl border border-white/10 object-cover"
             src={props.element.url}
           />
-          <NewsResizeHandle
-            direction="right"
+          <ResizeHandle
+            options={{ direction: "right" }}
             className="absolute top-0 right-0 bottom-0 z-10 w-4 translate-x-1/2 cursor-ew-resize touch-none after:absolute after:top-6 after:bottom-6 after:left-1/2 after:w-1 after:-translate-x-1/2 after:rounded-full after:bg-white/80 after:opacity-0 after:shadow-[0_0_18px_rgba(255,255,255,0.3)] after:transition-opacity group-hover:after:opacity-100 hover:after:opacity-100"
           />
         </Resizable>
