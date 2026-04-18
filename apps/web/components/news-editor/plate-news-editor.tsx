@@ -2,6 +2,7 @@
 
 import {
   type ComponentProps,
+  type ComponentType,
   forwardRef,
   useEffect,
   useImperativeHandle,
@@ -9,7 +10,7 @@ import {
   useRef,
   useState,
 } from "react"
-import type { TLinkElement, TMediaElement, TSelection } from "platejs"
+import type { Descendant, TLinkElement, TMediaElement, TSelection } from "platejs"
 import {
   ParagraphPlugin,
   Plate,
@@ -39,13 +40,18 @@ import {
   NumberedListPlugin,
 } from "@platejs/list-classic/react"
 import {
+  defaultRules,
   deserializeMd,
   MarkdownPlugin,
+  type MdNodeParser,
+  propsToAttributes,
   remarkMdx,
   serializeMd,
+  type MdRules,
 } from "@platejs/markdown"
 import { insertImage } from "@platejs/media"
 import { ImagePlugin } from "@platejs/media/react"
+import { Resizable, ResizeHandle } from "@platejs/resizable"
 import {
   TableCellHeaderPlugin,
   TableCellPlugin,
@@ -67,6 +73,63 @@ const DEFAULT_VALUE = [
     type: "p",
   },
 ]
+
+type NewsImageElement = TMediaElement & {
+  caption?: Descendant[]
+  title?: string
+  width?: number | string
+}
+
+function getImageCaptionText(caption?: Descendant[]): string {
+  return (
+    caption
+      ?.map((node) => {
+        if ("text" in node) {
+          return node.text
+        }
+
+        return getImageCaptionText(node.children)
+      })
+      .join("") ?? ""
+  )
+}
+
+function getImageWidthValue(width?: number | string) {
+  if (typeof width === "number") {
+    return width
+  }
+
+  if (typeof width !== "string") {
+    return undefined
+  }
+
+  const trimmedWidth = width.trim()
+  return trimmedWidth.length > 0 ? trimmedWidth : undefined
+}
+
+const NewsResizeHandle = ResizeHandle as unknown as ComponentType<{
+  className?: string
+  direction: "left" | "right"
+}>
+
+const imageMarkdownRule = {
+  ...defaultRules.img,
+  serialize: ({ caption, title, url, width }: NewsImageElement) => ({
+    attributes: propsToAttributes({
+      alt: getImageCaptionText(caption),
+      ...(title ? { title } : {}),
+      ...(getImageWidthValue(width) ? { width: getImageWidthValue(width) } : {}),
+      src: url,
+    }),
+    children: [],
+    name: "img",
+    type: "mdxJsxFlowElement",
+  }),
+} as unknown as MdNodeParser<"img">
+
+const newsMarkdownRules: MdRules = {
+  img: imageMarkdownRule,
+}
 
 function ParagraphElement(props: PlateElementProps) {
   return (
@@ -166,15 +229,29 @@ function LinkElement(props: PlateElementProps<TLinkElement>) {
 }
 
 function ImageElement(props: PlateElementProps<TMediaElement>) {
+  const element = props.element as NewsImageElement
+
   return (
     <PlateElement {...props} as="div" className="my-4">
-      <div contentEditable={false}>
+      <Resizable
+        className="group relative max-w-full"
+        contentEditable={false}
+        options={{ maxWidth: "100%", minWidth: 180 }}
+      >
+        <NewsResizeHandle
+          direction="left"
+          className="absolute top-0 bottom-0 left-0 z-10 w-4 -translate-x-1/2 cursor-ew-resize touch-none after:absolute after:top-6 after:bottom-6 after:left-1/2 after:w-1 after:-translate-x-1/2 after:rounded-full after:bg-white/80 after:opacity-0 after:shadow-[0_0_18px_rgba(255,255,255,0.3)] after:transition-opacity group-hover:after:opacity-100 hover:after:opacity-100"
+        />
         <img
-          alt=""
+          alt={getImageCaptionText(element.caption)}
           className="max-h-[28rem] w-full rounded-2xl border border-white/10 object-cover"
           src={props.element.url}
         />
-      </div>
+        <NewsResizeHandle
+          direction="right"
+          className="absolute top-0 right-0 bottom-0 z-10 w-4 translate-x-1/2 cursor-ew-resize touch-none after:absolute after:top-6 after:bottom-6 after:left-1/2 after:w-1 after:-translate-x-1/2 after:rounded-full after:bg-white/80 after:opacity-0 after:shadow-[0_0_18px_rgba(255,255,255,0.3)] after:transition-opacity group-hover:after:opacity-100 hover:after:opacity-100"
+        />
+      </Resizable>
       {props.children}
     </PlateElement>
   )
@@ -287,6 +364,7 @@ function createEditorPlugins() {
     MarkdownPlugin.configure({
       options: {
         remarkPlugins: newsRemarkPlugins,
+        rules: newsMarkdownRules,
       },
     }),
   ]
@@ -296,6 +374,7 @@ function deserializeMarkdown(editor: PlateEditor, markdown: string) {
   const value = deserializeMd(editor, markdown, {
     preserveEmptyParagraphs: true,
     remarkPlugins: newsRemarkPlugins,
+    rules: newsMarkdownRules,
   })
 
   return value.length > 0 ? value : DEFAULT_VALUE
@@ -305,6 +384,7 @@ function serializeMarkdown(editor: PlateEditor) {
   return serializeMd(editor, {
     preserveEmptyParagraphs: true,
     remarkPlugins: newsRemarkPlugins,
+    rules: newsMarkdownRules,
   })
 }
 

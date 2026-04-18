@@ -102,6 +102,19 @@ function NewsImage({
   return <img alt={alt} className={className} src={src} />
 }
 
+function normalizeArticleImageWidth(width?: number | string) {
+  if (typeof width === "number") {
+    return `${width}px`
+  }
+
+  if (typeof width !== "string") {
+    return undefined
+  }
+
+  const trimmedWidth = width.trim()
+  return trimmedWidth.length > 0 ? trimmedWidth : undefined
+}
+
 function NewsTabs({ activeCategory }: { activeCategory: CategoryFilter }) {
   const router = useRouter()
 
@@ -504,12 +517,15 @@ function NewsArticleInner({
                   />
                 )
               },
-              img({ alt, src }) {
+              img({ alt, src, width }) {
+                const imageWidth = normalizeArticleImageWidth(width)
+
                 return src ? (
                   <img
                     alt={alt ?? ""}
-                    className="w-full rounded-2xl object-cover"
+                    className="mx-auto max-w-full rounded-2xl object-cover"
                     src={src}
+                    style={{ width: imageWidth ?? "100%" }}
                   />
                 ) : null
               },
