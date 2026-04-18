@@ -63,8 +63,10 @@ function stripMarkdown(value: string) {
       (_match, entity: string) => decodeExcerptEntity(entity)
     )
     .replace(/\[([^\]]+)]\([^)]+\)/g, "$1")
+    .replace(/[\u200B-\u200D\uFEFF]/g, " ")
     .replace(/[`*_>#~|-]/g, " ")
     .replace(/\s+/g, " ")
+    .replace(/\s+([,.;:!?])/g, "$1")
     .trim()
 }
 

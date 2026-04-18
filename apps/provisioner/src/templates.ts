@@ -39,6 +39,7 @@ function loadPickupWorkshopIds() {
 }
 
 const PICKUP_WORKSHOP_IDS = loadPickupWorkshopIds();
+const MIN_SERVER_CLIENTS = 16;
 
 function formatQueueLabel(queueId: string, teamSize: number) {
   const normalized = queueId.trim().toLowerCase();
@@ -73,6 +74,10 @@ function getMapPoolFile(teamSize: number) {
   }
 
   return "mappool_capickup_4v4.txt";
+}
+
+function getMaxClients(teamSize: number) {
+  return Math.max(teamSize * 2 + 2, MIN_SERVER_CLIENTS);
 }
 
 export function buildSlotMetadata(
@@ -124,7 +129,7 @@ export function buildServerCfg(
   rconToken: string,
 ) {
   const teamSize = metadata.teams.red.length;
-  const maxClients = teamSize * 2 + 2;
+  const maxClients = getMaxClients(teamSize);
   const metadataFile = path.join(slotDir, "match.json");
   const queueLabel = formatQueueLabel(metadata.queueId, teamSize);
   const pickupBrandName = `^1QLTracker^7 Pickup`;
@@ -167,7 +172,7 @@ export function buildManualServerCfg(
   rconPort: number,
   rconToken: string,
 ) {
-  const maxClients = teamSize * 2 + 2;
+  const maxClients = getMaxClients(teamSize);
   const manualLabel = `${teamSize}v${teamSize} CA`;
   const manualBrandName = "^1QLTracker^7 | Clan Arena";
   const customSpawnsFile = path.join(config.qldsBaseDir, "baseq3", "custom_spawns.json");
