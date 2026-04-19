@@ -72,8 +72,10 @@ in
     fi
 
     if [ ! -f .devenv/state/pnpm-install.stamp ] || [ pnpm-lock.yaml -nt .devenv/state/pnpm-install.stamp ]; then
-      echo "[devenv] installing workspace dependencies"
-      pnpm install --frozen-lockfile
+      echo "[devenv] installing web + realtime workspace dependencies"
+      pnpm install --frozen-lockfile \
+        --filter @qltracker/web... \
+        --filter @qltracker/realtime...
       touch .devenv/state/pnpm-install.stamp
     fi
 
