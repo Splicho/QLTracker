@@ -86,6 +86,12 @@ export function PickupEmptyBackground({
   const enabledQueues = queues.filter((queue) => queue.enabled)
   const groupedQueues = buildQueueGroups(enabledQueues)
   const lockReason = activeLock?.reason?.trim()
+  const directQueue =
+    enabledQueues.length === 1
+      ? enabledQueues[0]
+      : enabledQueues.length === 0
+        ? selectedQueue
+        : null
 
   return (
     <div className="relative h-[26rem] w-full overflow-hidden">
@@ -143,6 +149,15 @@ export function PickupEmptyBackground({
               >
                 <Spinner data-icon="inline-start" />
                 In Queue
+              </Button>
+            ) : directQueue ? (
+              <Button
+                className="!h-14 cursor-pointer gap-2 bg-success px-8 text-lg text-success-foreground shadow-[0_0_28px_color-mix(in_oklch,var(--color-success)_28%,transparent)] hover:bg-success-hover hover:shadow-[0_0_34px_color-mix(in_oklch,var(--color-success-hover)_34%,transparent)]"
+                onClick={() => onJoinQueue(directQueue)}
+                size="lg"
+              >
+                <Play data-icon="inline-start" />
+                Play
               </Button>
             ) : (
               <DropdownMenu>
