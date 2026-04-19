@@ -14,6 +14,8 @@ type MatchPlayerIndex = {
   bySteamId: Map<string, PickupMatchPlayerRow>;
 };
 
+const latchedMatchGuidByMatchId = new Map<string, string>();
+
 function asObject(value: unknown): Record<string, unknown> | null {
   return value != null && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
@@ -449,6 +451,27 @@ function parseSummaryUpdate(event: MatchStatsEvent) {
   };
 }
 
+function isMatchGuidLockedEventType(eventType: string) {
+  return eventType === "PLAYER_STATS" || eventType === "MATCH_REPORT";
+}
+
+function readEventMatchGuid(event: MatchStatsEvent) {
+  return readString(
+    pickFirst(
+      event.data.MATCH_GUID,
+      event.data.matchGuid,
+      event.data.match_guid,
+    ),
+  );
+}
+
+function isQuitPlayerStatsEvent(event: MatchStatsEvent) {
+  return (
+    event.type === "PLAYER_STATS" &&
+    (readBoolean(pickFirst(event.data.QUIT, event.data.quit)) ?? false)
+  );
+}
+
 async function insertRawEvent(
   client: PoolClient,
   matchId: string,
@@ -846,8 +869,21 @@ export async function applyPickupMatchStats(
   const client = await pool.connect();
   try {
     await client.query("begin");
+    let latchedMatchGuid = latchedMatchGuidByMatchId.get(matchId) ?? null;
 
     for (const event of parsed.events) {
+      if (isMatchGuidLockedEventType(event.type)) {
+        const eventMatchGuid = readEventMatchGuid(event);
+        if (latchedMatchGuid) {
+          if (eventMatchGuid !== latchedMatchGuid) {
+            continue;
+          }
+        } else if (eventMatchGuid) {
+          latchedMatchGuid = eventMatchGuid;
+          latchedMatchGuidByMatchId.set(matchId, eventMatchGuid);
+        }
+      }
+
       await insertRawEvent(client, matchId, event);
 
       if (
@@ -862,7 +898,7 @@ export async function applyPickupMatchStats(
         await upsertStatsSummary(client, matchId, event);
       }
 
-      if (event.type === "PLAYER_STATS") {
+      if (event.type === "PLAYER_STATS" && !isQuitPlayerStatsEvent(event)) {
         await upsertPlayerStats(client, matchId, event, index);
       }
 

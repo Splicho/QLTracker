@@ -82,7 +82,7 @@ const weaponChartColors: Record<string, string> = {
   GRENADE: "#029012",
   NAILGUN: "#ec4899",
   BFG: "#14b8a6",
-  GAUNTLET: "#f43f5e",
+  GAUNTLET: "#00FFFF",
   CHAINGUN: "#64748b",
 }
 
@@ -233,6 +233,14 @@ function getRatingDelta(after: number | null, before: number) {
 
 function formatNumber(value: number | null) {
   return value == null ? "-" : value.toLocaleString()
+}
+
+function truncateLabel(value: string, maxLength: number) {
+  if (value.length <= maxLength) {
+    return value
+  }
+
+  return `${value.slice(0, Math.max(0, maxLength - 1))}\u2026`
 }
 
 function formatAccuracy(stat: PickupMatchWeaponStat) {
@@ -634,6 +642,8 @@ function PlayerAxisTick({
           .toUpperCase()
       : ""
   const profileHref = player ? getPlayerProfileHref(player) : null
+  const displayLabel = truncateLabel(player?.label ?? payload?.value ?? "", 14)
+  const avatarClipId = player ? `weapon-chart-avatar-${player.id}` : null
 
   if (typeof x !== "number" || typeof y !== "number") {
     return null
@@ -641,7 +651,15 @@ function PlayerAxisTick({
 
   return (
     <g transform={`translate(${x},${y})`}>
+      {avatarClipId ? (
+        <defs>
+          <clipPath id={avatarClipId}>
+            <circle cx={-118} cy={0} r="14" />
+          </clipPath>
+        </defs>
+      ) : null}
       <a href={profileHref ?? undefined}>
+        <title>{player?.label ?? payload?.value ?? ""}</title>
         <rect
           fill="transparent"
           height="34"
@@ -655,6 +673,7 @@ function PlayerAxisTick({
             height="28"
             href={player.avatarUrl}
             preserveAspectRatio="xMidYMid slice"
+            clipPath={avatarClipId ? `url(#${avatarClipId})` : undefined}
             width="28"
             x="-132"
             y="-14"
@@ -695,7 +714,7 @@ function PlayerAxisTick({
           x={flagSrc ? -67 : -95}
           y={5}
         >
-          {player?.label ?? payload?.value ?? ""}
+          {displayLabel}
         </text>
       </a>
     </g>
@@ -822,7 +841,7 @@ function WeaponDamageChart({ detail }: { detail: PickupMatchDetail }) {
                 dataKey="playerKey"
                 tick={<PlayerAxisTick players={chart.players} />}
                 tickLine={false}
-                tickMargin={10}
+                tickMargin={22}
                 type="category"
                 width={150}
               />
