@@ -68,6 +68,14 @@ const DEFAULT_MAP_POOL = [
 const ratingEnv = new TrueSkill(1000, 150, 75, 5, 0);
 const COMPLETED_MATCH_VISIBLE_MS = 12_000;
 const PROVISION_RETRY_DELAYS_MS = [0, 5_000, 10_000, 20_000, 30_000] as const;
+const ABORTABLE_PICKUP_STATUSES = [
+  "ready_check",
+  "veto",
+  "provisioning",
+  "server_ready",
+  "live",
+] as const;
+const ABORTABLE_PICKUP_STATUS_SET = new Set<string>(ABORTABLE_PICKUP_STATUSES);
 function hashPickupToken(token: string) {
   return crypto
     .createHmac("sha256", config.sessionSecret)
@@ -95,12 +103,18 @@ export function createPickupService(io: Server) {
   async function notifyDiscordWebhook(
     payload: PickupDiscordWebhookPayload,
   ): Promise<void> {
-    if (!config.pickupQueueAlertsWebhookUrl || !config.pickupQueueAlertsWebhookSecret) {
+    if (
+      !config.pickupQueueAlertsWebhookUrl ||
+      !config.pickupQueueAlertsWebhookSecret
+    ) {
       return;
     }
 
     const body = JSON.stringify(payload);
-    const signature = createSignature(config.pickupQueueAlertsWebhookSecret, body);
+    const signature = createSignature(
+      config.pickupQueueAlertsWebhookSecret,
+      body,
+    );
 
     try {
       const response = await fetch(config.pickupQueueAlertsWebhookUrl, {
@@ -155,8 +169,12 @@ export function createPickupService(io: Server) {
         teamSize: queue.teamSize,
       },
       teams: {
-        left: players.filter((player) => player.team === "left").map(toPayloadPlayer),
-        right: players.filter((player) => player.team === "right").map(toPayloadPlayer),
+        left: players
+          .filter((player) => player.team === "left")
+          .map(toPayloadPlayer),
+        right: players
+          .filter((player) => player.team === "right")
+          .map(toPayloadPlayer),
       },
       type: "pickup.match_report",
       winnerTeam: match.winnerTeam,
@@ -379,11 +397,17 @@ export function createPickupService(io: Server) {
     );
 
     return result.rows.sort((left, right) => {
-      if (left.slug === DEFAULT_QUEUE.slug && right.slug !== DEFAULT_QUEUE.slug) {
+      if (
+        left.slug === DEFAULT_QUEUE.slug &&
+        right.slug !== DEFAULT_QUEUE.slug
+      ) {
         return -1;
       }
 
-      if (right.slug === DEFAULT_QUEUE.slug && left.slug !== DEFAULT_QUEUE.slug) {
+      if (
+        right.slug === DEFAULT_QUEUE.slug &&
+        left.slug !== DEFAULT_QUEUE.slug
+      ) {
         return 1;
       }
 
@@ -641,7 +665,13 @@ export function createPickupService(io: Server) {
               "wins",
               "losses"
           `,
-          [season.id, player.id, startingRating, ratingEnv.sigma, startingRating],
+          [
+            season.id,
+            player.id,
+            startingRating,
+            ratingEnv.sigma,
+            startingRating,
+          ],
         );
 
         return normalized.rows[0] ?? rating;
@@ -879,7 +909,9 @@ export function createPickupService(io: Server) {
         `,
       ),
       Promise.all(queues.map((queue) => getActiveSeason(queue.id))),
-      Promise.all(queues.map((queue) => getQueueMembers(queue.id, queue.playerCount))),
+      Promise.all(
+        queues.map((queue) => getQueueMembers(queue.id, queue.playerCount)),
+      ),
     ]);
     const countByQueueId = new Map(
       queueCounts.rows.map((row) => [row.queueId, Number(row.count ?? "0")]),
@@ -945,7 +977,9 @@ export function createPickupService(io: Server) {
     return {
       ...row,
       balanceSummary: parseJson<PickupBalanceSummary>(row.balanceSummary),
-      provisionPayload: parseJson<Record<string, unknown>>(row.provisionPayload),
+      provisionPayload: parseJson<Record<string, unknown>>(
+        row.provisionPayload,
+      ),
       resultPayload: parseJson<Record<string, unknown>>(row.resultPayload),
       vetoState: parseJson<PickupVetoState>(row.vetoState),
     };
@@ -1002,7 +1036,9 @@ export function createPickupService(io: Server) {
     return {
       ...row,
       balanceSummary: parseJson<PickupBalanceSummary>(row.balanceSummary),
-      provisionPayload: parseJson<Record<string, unknown>>(row.provisionPayload),
+      provisionPayload: parseJson<Record<string, unknown>>(
+        row.provisionPayload,
+      ),
       resultPayload: parseJson<Record<string, unknown>>(row.resultPayload),
       vetoState: parseJson<PickupVetoState>(row.vetoState),
     };
@@ -1056,7 +1092,9 @@ export function createPickupService(io: Server) {
     return {
       ...row,
       balanceSummary: parseJson<PickupBalanceSummary>(row.balanceSummary),
-      provisionPayload: parseJson<Record<string, unknown>>(row.provisionPayload),
+      provisionPayload: parseJson<Record<string, unknown>>(
+        row.provisionPayload,
+      ),
       resultPayload: parseJson<Record<string, unknown>>(row.resultPayload),
       vetoState: parseJson<PickupVetoState>(row.vetoState),
     };
@@ -1139,11 +1177,20 @@ export function createPickupService(io: Server) {
     io.to(`pickup:player:${playerId}`).emit("pickup:state", state);
 
     if (state.stage === "queue") {
-      io.to(`pickup:player:${playerId}`).emit("pickup:queue:update", state.queue);
+      io.to(`pickup:player:${playerId}`).emit(
+        "pickup:queue:update",
+        state.queue,
+      );
     } else if (state.stage === "ready_check" || state.stage === "veto") {
-      io.to(`pickup:player:${playerId}`).emit("pickup:lobby:update", state.match);
+      io.to(`pickup:player:${playerId}`).emit(
+        "pickup:lobby:update",
+        state.match,
+      );
     } else if (state.stage !== "idle") {
-      io.to(`pickup:player:${playerId}`).emit("pickup:match:update", state.match);
+      io.to(`pickup:player:${playerId}`).emit(
+        "pickup:match:update",
+        state.match,
+      );
     }
   }
 
@@ -1177,7 +1224,8 @@ export function createPickupService(io: Server) {
 
   function trackConnectedPickupSocket(playerId: string, socketId: string) {
     clearQueueDisconnectTimer(playerId);
-    const sockets = connectedPickupSocketsByPlayerId.get(playerId) ?? new Set<string>();
+    const sockets =
+      connectedPickupSocketsByPlayerId.get(playerId) ?? new Set<string>();
     sockets.add(socketId);
     connectedPickupSocketsByPlayerId.set(playerId, sockets);
   }
@@ -1383,7 +1431,10 @@ export function createPickupService(io: Server) {
     );
   }
 
-  async function createMatchFromQueue(queue: PickupQueueRow, season: PickupSeasonRow) {
+  async function createMatchFromQueue(
+    queue: PickupQueueRow,
+    season: PickupSeasonRow,
+  ) {
     const settings = await getPickupSettings();
     const members = await getQueueMembers(queue.id, queue.playerCount);
     if (members.length < queue.playerCount) {
@@ -1468,7 +1519,9 @@ export function createPickupService(io: Server) {
         return null;
       }
 
-      const lockedIds = lockedMembers.rows.map((member) => member.queueMemberId);
+      const lockedIds = lockedMembers.rows.map(
+        (member) => member.queueMemberId,
+      );
       const deletedMembers = await client.query<{ queueMemberId: string }>(
         `
           delete from "PickupQueueMember"
@@ -1478,7 +1531,9 @@ export function createPickupService(io: Server) {
         [lockedIds],
       );
       if (deletedMembers.rows.length !== lockedIds.length) {
-        throw new Error("Pickup queue members could not be claimed atomically.");
+        throw new Error(
+          "Pickup queue members could not be claimed atomically.",
+        );
       }
 
       const matchResult = await client.query<{ id: string }>(
@@ -1505,12 +1560,19 @@ export function createPickupService(io: Server) {
           )
           returning "id"
         `,
-        [queue.id, season.id, readyDeadlineAt, JSON.stringify(teams.balanceSummary)],
+        [
+          queue.id,
+          season.id,
+          readyDeadlineAt,
+          JSON.stringify(teams.balanceSummary),
+        ],
       );
 
       const matchId = matchResult.rows[0]!.id;
       for (const member of ratedMembers) {
-        const team = teams.left.some((leftMember) => leftMember.playerId === member.playerId)
+        const team = teams.left.some(
+          (leftMember) => leftMember.playerId === member.playerId,
+        )
           ? "left"
           : "right";
         const isCaptain =
@@ -1646,16 +1708,24 @@ export function createPickupService(io: Server) {
     }
 
     const players = await getMatchPlayers(matchId);
-    const readyPlayers = players.filter((player) => player.readyState === "ready");
-    const pendingPlayers = players.filter((player) => player.readyState !== "ready");
+    const readyPlayers = players.filter(
+      (player) => player.readyState === "ready",
+    );
+    const pendingPlayers = players.filter(
+      (player) => player.readyState !== "ready",
+    );
 
     if (pendingPlayers.length === 0) {
       await transitionMatchToVeto(matchId);
       return;
     }
 
-    await requeueReadyPlayers(match.queueId, readyPlayers);
-    await pool.query(
+    const timeoutPayload = {
+      reason: "ready-check-timeout",
+      droppedPlayerIds: pendingPlayers.map((player) => player.playerId),
+      requeuedPlayerIds: readyPlayers.map((player) => player.playerId),
+    };
+    const cancelResult = await pool.query(
       `
         update "PickupMatch"
         set
@@ -1663,17 +1733,17 @@ export function createPickupService(io: Server) {
           "resultPayload" = $2::jsonb,
           "updatedAt" = now()
         where "id" = $1
+          and "status" = 'ready_check'
+        returning "id"
       `,
-      [
-        matchId,
-        JSON.stringify({
-          reason: "ready-check-timeout",
-          droppedPlayerIds: pendingPlayers.map((player) => player.playerId),
-          requeuedPlayerIds: readyPlayers.map((player) => player.playerId),
-        }),
-      ],
+      [matchId, JSON.stringify(timeoutPayload)],
     );
 
+    if ((cancelResult.rowCount ?? 0) === 0) {
+      return;
+    }
+
+    await requeueReadyPlayers(match.queueId, readyPlayers);
     await broadcastPublicState();
     for (const player of players) {
       await emitPlayerState(player.playerId);
@@ -1726,7 +1796,8 @@ export function createPickupService(io: Server) {
       balanceSummary.captainPlayerIds.right,
     ];
     const turnCaptainPlayerId =
-      captainIds[Math.floor(Math.random() * captainIds.length)] ?? captainIds[0]!;
+      captainIds[Math.floor(Math.random() * captainIds.length)] ??
+      captainIds[0]!;
     const vetoDeadlineAt = new Date(
       Date.now() + settings.vetoTurnDurationSeconds * 1000,
     );
@@ -1737,7 +1808,7 @@ export function createPickupService(io: Server) {
       turns: [],
     };
 
-    await pool.query(
+    const transitionResult = await pool.query(
       `
         update "PickupMatch"
         set
@@ -1748,9 +1819,15 @@ export function createPickupService(io: Server) {
           "vetoState" = $4::jsonb,
           "updatedAt" = now()
         where "id" = $1
+          and "status" = 'ready_check'
+        returning "id"
       `,
       [matchId, vetoDeadlineAt, turnCaptainPlayerId, JSON.stringify(vetoState)],
     );
+
+    if ((transitionResult.rowCount ?? 0) === 0) {
+      return;
+    }
 
     scheduleVetoTimer(matchId, vetoDeadlineAt);
     for (const player of players) {
@@ -1783,6 +1860,95 @@ export function createPickupService(io: Server) {
       `,
       [matchId, eventType, JSON.stringify(payload)],
     );
+  }
+
+  async function abortPickupMatch(
+    matchId: string,
+    payload: Record<string, unknown>,
+  ) {
+    clearReadyTimer(matchId);
+    clearVetoTimer(matchId);
+
+    const match = await getLatestMatchById(matchId);
+    if (!match) {
+      throw new Error("Pickup match was not found.");
+    }
+
+    if (!ABORTABLE_PICKUP_STATUS_SET.has(match.status)) {
+      return {
+        aborted: false,
+        matchId,
+        status: match.status,
+        warning: "Pickup match is already inactive.",
+      };
+    }
+
+    const players = await getMatchPlayers(matchId);
+    const adminSteamId =
+      typeof payload.adminSteamId === "string" && payload.adminSteamId.trim()
+        ? payload.adminSteamId.trim()
+        : null;
+    const requestedAt =
+      typeof payload.requestedAt === "string" && payload.requestedAt.trim()
+        ? payload.requestedAt.trim()
+        : new Date().toISOString();
+    const abortPayload = {
+      reason: "admin-abort",
+      abortedAt: new Date().toISOString(),
+      adminSteamId,
+      previousStatus: match.status,
+      requestedAt,
+      requeuedPlayerIds: [],
+      ratingApplied: false,
+    };
+
+    const updateResult = await pool.query<{ status: PickupMatchRow["status"] }>(
+      `
+        update "PickupMatch"
+        set
+          "status" = 'cancelled',
+          "readyDeadlineAt" = null,
+          "vetoDeadlineAt" = null,
+          "currentCaptainPlayerId" = null,
+          "resultPayload" = $2::jsonb,
+          "updatedAt" = now()
+        where
+          "id" = $1
+          and "status" in (
+            'ready_check',
+            'veto',
+            'provisioning',
+            'server_ready',
+            'live'
+          )
+        returning "status"
+      `,
+      [matchId, JSON.stringify(abortPayload)],
+    );
+
+    if ((updateResult.rowCount ?? 0) === 0) {
+      const latestMatch = await getLatestMatchById(matchId);
+      return {
+        aborted: false,
+        matchId,
+        status: latestMatch?.status ?? match.status,
+        warning: "Pickup match is already inactive.",
+      };
+    }
+
+    await recordProvisionEvent(matchId, "admin-abort", abortPayload);
+    await broadcastPublicState();
+    for (const player of players) {
+      await emitPlayerState(player.playerId);
+    }
+    emitMatchDetailUpdate(matchId, "result");
+
+    return {
+      aborted: true,
+      matchId,
+      previousStatus: match.status,
+      status: "cancelled" as const,
+    };
   }
 
   async function applyProvisionResult(
@@ -1819,11 +1985,12 @@ export function createPickupService(io: Server) {
 
     const location = await lookupCountry(ip);
     const joinAddress =
-      typeof payload.joinAddress === "string" && payload.joinAddress.trim().length > 0
+      typeof payload.joinAddress === "string" &&
+      payload.joinAddress.trim().length > 0
         ? payload.joinAddress.trim()
         : `${ip}:${port}`;
 
-    await pool.query(
+    const updateResult = await pool.query(
       `
         update "PickupMatch"
         set
@@ -1836,7 +2003,10 @@ export function createPickupService(io: Server) {
           "serverProvisionedAt" = now(),
           "provisionPayload" = coalesce("provisionPayload", '{}'::jsonb) || $8::jsonb,
           "updatedAt" = now()
-        where "id" = $1
+        where
+          "id" = $1
+          and "status" in ('provisioning', 'server_ready', 'live')
+        returning "id"
       `,
       [
         matchId,
@@ -1854,6 +2024,10 @@ export function createPickupService(io: Server) {
       ],
     );
 
+    if ((updateResult.rowCount ?? 0) === 0) {
+      return;
+    }
+
     await recordProvisionEvent(matchId, "provisioned", payload);
     const players = await getMatchPlayers(matchId);
     for (const player of players) {
@@ -1867,11 +2041,18 @@ export function createPickupService(io: Server) {
       return;
     }
 
-    const failProvision = async (reason: string, payload?: Record<string, unknown>) => {
+    const failProvision = async (
+      reason: string,
+      payload?: Record<string, unknown>,
+    ) => {
       const players = await getMatchPlayers(matchId);
       const requeuedPlayerIds = players.map((player) => player.playerId);
-      await requeueReadyPlayers(match.queueId, players);
-      await pool.query(
+      const failurePayload = {
+        ...(payload ?? {}),
+        reason,
+        requeuedPlayerIds,
+      };
+      const cancelResult = await pool.query(
         `
           update "PickupMatch"
           set
@@ -1879,21 +2060,19 @@ export function createPickupService(io: Server) {
             "resultPayload" = $2::jsonb,
             "updatedAt" = now()
           where "id" = $1
+            and "status" = 'provisioning'
+          returning "id"
         `,
-        [
-          matchId,
-          JSON.stringify({
-            ...(payload ?? {}),
-            reason,
-            requeuedPlayerIds,
-          }),
-        ],
+        [matchId, JSON.stringify(failurePayload)],
       );
 
+      if ((cancelResult.rowCount ?? 0) === 0) {
+        return;
+      }
+
+      await requeueReadyPlayers(match.queueId, players);
       await recordProvisionEvent(matchId, "provision-failed", {
-        ...(payload ?? {}),
-        reason,
-        requeuedPlayerIds,
+        ...failurePayload,
       });
       await broadcastPublicState();
       for (const player of players) {
@@ -2031,7 +2210,10 @@ export function createPickupService(io: Server) {
         const text = await response.text();
         let parsed: Record<string, unknown> | null = null;
         try {
-          parsed = text.length > 0 ? (JSON.parse(text) as Record<string, unknown>) : null;
+          parsed =
+            text.length > 0
+              ? (JSON.parse(text) as Record<string, unknown>)
+              : null;
         } catch {
           parsed = { raw: text };
         }
@@ -2119,7 +2301,9 @@ export function createPickupService(io: Server) {
       throw new Error("No maps remain to ban.");
     }
 
-    const availableMaps = vetoState.availableMaps.filter((value) => value !== mapKey);
+    const availableMaps = vetoState.availableMaps.filter(
+      (value) => value !== mapKey,
+    );
     const bannedMaps = [...vetoState.bannedMaps, mapKey];
     const turns = [
       ...vetoState.turns,
@@ -2132,7 +2316,7 @@ export function createPickupService(io: Server) {
     ];
 
     if (availableMaps.length === 1) {
-      await pool.query(
+      const provisionTransitionResult = await pool.query(
         `
           update "PickupMatch"
           set
@@ -2144,6 +2328,8 @@ export function createPickupService(io: Server) {
             "vetoState" = $4::jsonb,
             "updatedAt" = now()
           where "id" = $1
+            and "status" = 'veto'
+          returning "id"
         `,
         [
           matchId,
@@ -2157,6 +2343,10 @@ export function createPickupService(io: Server) {
           }),
         ],
       );
+
+      if ((provisionTransitionResult.rowCount ?? 0) === 0) {
+        return;
+      }
 
       const players = await getMatchPlayers(matchId);
       for (const player of players) {
@@ -2174,7 +2364,7 @@ export function createPickupService(io: Server) {
     const vetoDeadlineAt = new Date(
       Date.now() + settings.vetoTurnDurationSeconds * 1000,
     );
-    await pool.query(
+    const vetoUpdateResult = await pool.query(
       `
         update "PickupMatch"
         set
@@ -2184,6 +2374,8 @@ export function createPickupService(io: Server) {
           "vetoState" = $5::jsonb,
           "updatedAt" = now()
         where "id" = $1
+          and "status" = 'veto'
+        returning "id"
       `,
       [
         matchId,
@@ -2198,6 +2390,10 @@ export function createPickupService(io: Server) {
         }),
       ],
     );
+
+    if ((vetoUpdateResult.rowCount ?? 0) === 0) {
+      return;
+    }
 
     scheduleVetoTimer(matchId, vetoDeadlineAt);
     const players = await getMatchPlayers(matchId);
@@ -2342,7 +2538,10 @@ export function createPickupService(io: Server) {
     const timeout = setTimeout(() => {
       queueDisconnectTimers.delete(playerId);
       void autoLeaveDisconnectedPlayerQueue(playerId).catch((error) => {
-        console.error("Failed to auto-leave disconnected pickup player:", error);
+        console.error(
+          "Failed to auto-leave disconnected pickup player:",
+          error,
+        );
       });
     }, config.pickupQueueDisconnectGraceMs);
 
@@ -2393,7 +2592,11 @@ export function createPickupService(io: Server) {
     payload: Record<string, unknown>,
   ) {
     const match = await getLatestMatchById(matchId);
-    if (!match || match.status === "completed" || match.status === "cancelled") {
+    if (
+      !match ||
+      match.status === "completed" ||
+      match.status === "cancelled"
+    ) {
       return;
     }
 
@@ -2401,17 +2604,24 @@ export function createPickupService(io: Server) {
       throw new Error("Pickup match server is not ready yet.");
     }
 
-    await pool.query(
+    const updateResult = await pool.query(
       `
         update "PickupMatch"
         set
           "status" = 'live',
           "liveStartedAt" = coalesce("liveStartedAt", now()),
           "updatedAt" = now()
-        where "id" = $1
+        where
+          "id" = $1
+          and "status" in ('server_ready', 'live')
+        returning "id"
       `,
       [matchId],
     );
+
+    if ((updateResult.rowCount ?? 0) === 0) {
+      return;
+    }
 
     await recordProvisionEvent(matchId, "live", payload);
     const players = await getMatchPlayers(matchId);
@@ -2425,7 +2635,11 @@ export function createPickupService(io: Server) {
     payload: Record<string, unknown>,
   ) {
     const match = await getLatestMatchById(matchId);
-    if (!match || match.status === "completed" || match.status === "cancelled") {
+    if (
+      !match ||
+      match.status === "completed" ||
+      match.status === "cancelled"
+    ) {
       return;
     }
 
@@ -2446,19 +2660,47 @@ export function createPickupService(io: Server) {
     const [leftRated, rightRated] = shouldRate
       ? (ratingEnv.rate(
           [
-            left.map((player) => createRating(player.muBefore, player.sigmaBefore)),
-            right.map((player) => createRating(player.muBefore, player.sigmaBefore)),
+            left.map((player) =>
+              createRating(player.muBefore, player.sigmaBefore),
+            ),
+            right.map((player) =>
+              createRating(player.muBefore, player.sigmaBefore),
+            ),
           ],
           winnerTeam === "left" ? [0, 1] : [1, 0],
         ) as Rating[][])
       : [
-          left.map((player) => createRating(player.muBefore, player.sigmaBefore)),
-          right.map((player) => createRating(player.muBefore, player.sigmaBefore)),
+          left.map((player) =>
+            createRating(player.muBefore, player.sigmaBefore),
+          ),
+          right.map((player) =>
+            createRating(player.muBefore, player.sigmaBefore),
+          ),
         ];
 
     const client = await pool.connect();
     try {
       await client.query("begin");
+      const lockedMatchResult = await client.query<{
+        status: PickupMatchRow["status"];
+      }>(
+        `
+          select "status"
+          from "PickupMatch"
+          where "id" = $1
+          for update
+        `,
+        [matchId],
+      );
+      const lockedStatus = lockedMatchResult.rows[0]?.status;
+      if (
+        !lockedStatus ||
+        lockedStatus === "completed" ||
+        lockedStatus === "cancelled"
+      ) {
+        await client.query("commit");
+        return;
+      }
 
       for (const [index, player] of left.entries()) {
         const rating = leftRated[index]!;
@@ -2637,13 +2879,16 @@ export function createPickupService(io: Server) {
     }
 
     const steamId =
-      typeof payload.playerSteamId === "string" ? payload.playerSteamId.trim() : "";
+      typeof payload.playerSteamId === "string"
+        ? payload.playerSteamId.trim()
+        : "";
     const channel =
       typeof payload.channel === "string" && payload.channel.trim().length > 0
         ? payload.channel.trim()
         : "chat";
     const sentAt =
-      typeof payload.sentAt === "string" && !Number.isNaN(Date.parse(payload.sentAt))
+      typeof payload.sentAt === "string" &&
+      !Number.isNaN(Date.parse(payload.sentAt))
         ? new Date(payload.sentAt)
         : new Date();
 
@@ -2686,12 +2931,23 @@ export function createPickupService(io: Server) {
           now()
         )
       `,
-      [matchId, playerId, steamId || null, personaName, channel, message, sentAt],
+      [
+        matchId,
+        playerId,
+        steamId || null,
+        personaName,
+        channel,
+        message,
+        sentAt,
+      ],
     );
     emitMatchDetailUpdate(matchId, "chat");
   }
 
-  async function emitSocketState(socket: Socket, session: PickupSessionIdentity | null) {
+  async function emitSocketState(
+    socket: Socket,
+    session: PickupSessionIdentity | null,
+  ) {
     socket.emit("pickup:public-state", await getPublicState());
     if (session) {
       socket.emit("pickup:state", await getPlayerState(session.player));
@@ -2758,6 +3014,7 @@ export function createPickupService(io: Server) {
     handleProvisionCallback,
     handleResultCallback,
     handleStatsCallback,
+    verifyCallbackSignature,
   } = callbackApi;
 
   return {
@@ -2787,7 +3044,10 @@ export function createPickupService(io: Server) {
 
       return authenticatePickupSession(rawToken);
     },
-    async handleSocketConnection(socket: Socket, session: PickupSessionIdentity | null) {
+    async handleSocketConnection(
+      socket: Socket,
+      session: PickupSessionIdentity | null,
+    ) {
       socket.join("pickup:public");
       if (session) {
         trackConnectedPickupSocket(session.player.id, socket.id);
@@ -2892,19 +3152,75 @@ export function createPickupService(io: Server) {
         }
       });
     },
-    async handleProvisionCallback(request: RawBodyRequest, response: express.Response) {
+    async handleProvisionCallback(
+      request: RawBodyRequest,
+      response: express.Response,
+    ) {
       return handleProvisionCallback(request, response);
     },
-    async handleChatCallback(request: RawBodyRequest, response: express.Response) {
+    async handleAdminAbortMatch(
+      request: RawBodyRequest,
+      response: express.Response,
+    ) {
+      try {
+        const matchId =
+          typeof request.body?.matchId === "string"
+            ? request.body.matchId.trim()
+            : "";
+        if (!matchId) {
+          response
+            .status(400)
+            .json({ ok: false, error: "matchId is required." });
+          return;
+        }
+
+        const reason =
+          typeof request.body?.reason === "string"
+            ? request.body.reason.trim()
+            : "";
+        if (reason !== "admin-abort") {
+          response.status(400).json({
+            ok: false,
+            error: 'reason must be "admin-abort".',
+          });
+          return;
+        }
+
+        await verifyCallbackSignature(matchId, request);
+        const result = await abortPickupMatch(
+          matchId,
+          request.body as Record<string, unknown>,
+        );
+        response.json({ ok: true, ...result });
+      } catch (error) {
+        response.status(400).json({
+          ok: false,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    },
+    async handleChatCallback(
+      request: RawBodyRequest,
+      response: express.Response,
+    ) {
       return handleChatCallback(request, response);
     },
-    async handleLiveCallback(request: RawBodyRequest, response: express.Response) {
+    async handleLiveCallback(
+      request: RawBodyRequest,
+      response: express.Response,
+    ) {
       return handleLiveCallback(request, response);
     },
-    async handleResultCallback(request: RawBodyRequest, response: express.Response) {
+    async handleResultCallback(
+      request: RawBodyRequest,
+      response: express.Response,
+    ) {
       return handleResultCallback(request, response);
     },
-    async handleStatsCallback(request: RawBodyRequest, response: express.Response) {
+    async handleStatsCallback(
+      request: RawBodyRequest,
+      response: express.Response,
+    ) {
       return handleStatsCallback(request, response);
     },
   };

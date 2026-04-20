@@ -14,6 +14,7 @@ import {
 } from "@/components/pickup-admin-ui"
 import { requestJson } from "@/lib/client/request-json"
 import type {
+  AbortPickupResponse,
   SlotEvent,
   SlotEventsResponse,
   SlotMetadata,
@@ -50,6 +51,12 @@ function statusColor(state: SlotState["state"]) {
     case "busy":
       return "success" as const
   }
+}
+
+function isPickupSlot(slot: SlotState | null) {
+  return Boolean(
+    slot?.matchId && slot.queueId && !slot.matchId.startsWith("manual-")
+  )
 }
 
 function eventColor(type: string) {
@@ -328,6 +335,7 @@ export function PickupAdminSlotDetail({ slotId }: { slotId: number }) {
   const [cmdInput, setCmdInput] = useState("")
   const lastTimestamp = useRef<string | undefined>(undefined)
   const stopModal = useOverlayState()
+  const abortModal = useOverlayState()
   const confirmTarget = useRef<{
     action: string
     steamId: string
@@ -508,6 +516,46 @@ export function PickupAdminSlotDetail({ slotId }: { slotId: number }) {
     }
   }
 
+  const confirmAbort = async () => {
+    const matchId = slot?.matchId
+    if (!matchId) return
+
+    setPendingAction("abort")
+    try {
+      const data = await requestJson<AbortPickupResponse>(
+        `/api/pickup/admin/pickups/${matchId}/abort`,
+        {
+          method: "POST",
+          body: JSON.stringify({ slotId }),
+        }
+      )
+
+      if (data.abort.aborted) {
+        toast.success("Pickup aborted.", {
+          description:
+            data.slotStopWarning ??
+            (data.slotStopped ? `Stopped Slot ${slotId}.` : undefined),
+        })
+      } else {
+        toast.success("Pickup already inactive.", {
+          description: data.abort.warning,
+        })
+      }
+
+      abortModal.close()
+      setEvents([])
+      setEventsError(null)
+      setPlayers([])
+      lastTimestamp.current = undefined
+    } catch (err) {
+      toast.danger("Failed to abort pickup.", {
+        description: err instanceof Error ? err.message : "Request failed.",
+      })
+    } finally {
+      setPendingAction(null)
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center px-6 py-20">
@@ -517,6 +565,7 @@ export function PickupAdminSlotDetail({ slotId }: { slotId: number }) {
   }
 
   const isActive = slot && slot.state !== "idle"
+  const isPickup = isPickupSlot(slot)
   const joinUrl =
     isActive && slot.joinAddress ? buildSteamConnectUrl(slot.joinAddress) : null
 
@@ -577,9 +626,15 @@ export function PickupAdminSlotDetail({ slotId }: { slotId: number }) {
                 Join Server
               </Button>
             )}
-            <Button variant="danger" size="sm" onPress={stopModal.open}>
-              Stop Server
-            </Button>
+            {isPickup ? (
+              <Button variant="danger" size="sm" onPress={abortModal.open}>
+                Abort Pickup
+              </Button>
+            ) : (
+              <Button variant="danger" size="sm" onPress={stopModal.open}>
+                Stop Server
+              </Button>
+            )}
           </div>
         )}
       </header>
@@ -712,6 +767,50 @@ export function PickupAdminSlotDetail({ slotId }: { slotId: number }) {
                     <>
                       {isPending ? <Spinner color="current" size="sm" /> : null}
                       Stop Server
+                    </>
+                  )}
+                </Button>
+              </Modal.Footer>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
+
+      {/* Abort confirmation modal */}
+      <Modal state={abortModal}>
+        <Modal.Backdrop>
+          <Modal.Container placement="center" size="md">
+            <Modal.Dialog>
+              <Modal.Header className="border-b border-white/10 px-6 py-4">
+                <div>
+                  <Modal.Heading className="text-xl font-medium">
+                    Abort Pickup
+                  </Modal.Heading>
+                  <p className="mt-1 text-sm text-white/60">
+                    This cancels the pickup and stops Slot {slotId}.
+                  </p>
+                </div>
+                <Modal.CloseTrigger />
+              </Modal.Header>
+              <Modal.Body className="px-6 py-5">
+                <p className="text-sm text-white/70">
+                  Aborting disconnects players if this slot is running, does not
+                  requeue anyone, and does not apply rating.
+                </p>
+              </Modal.Body>
+              <Modal.Footer className="flex justify-end gap-3 border-t border-white/10 px-6 py-4">
+                <Button variant="secondary" onPress={abortModal.close}>
+                  Cancel
+                </Button>
+                <Button
+                  isPending={pendingAction === "abort"}
+                  variant="danger"
+                  onPress={() => void confirmAbort()}
+                >
+                  {({ isPending }) => (
+                    <>
+                      {isPending ? <Spinner color="current" size="sm" /> : null}
+                      Abort Pickup
                     </>
                   )}
                 </Button>

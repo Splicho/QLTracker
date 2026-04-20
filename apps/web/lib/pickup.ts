@@ -171,6 +171,7 @@ export type PickupMatchState = {
     | "server_ready"
     | "live"
     | "completed"
+    | "cancelled"
   teams: {
     left: PickupMatchPlayerCard[]
     right: PickupMatchPlayerCard[]

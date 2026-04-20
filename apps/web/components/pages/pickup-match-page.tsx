@@ -573,10 +573,10 @@ function WeaponDamageTooltip({
           const accuracy = Number(item.payload?.[`${key}Accuracy`] ?? 0)
 
           return (
-              <div
-                className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-md px-1.5 py-1"
-                key={key}
-              >
+            <div
+              className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-md px-1.5 py-1"
+              key={key}
+            >
               <img
                 alt=""
                 className="size-4 object-contain opacity-90"
@@ -593,9 +593,7 @@ function WeaponDamageTooltip({
               </span>
               <span
                 className={`font-mono font-medium tabular-nums ${
-                  hoveredWeapon === key
-                    ? "text-amber-200"
-                    : "text-foreground"
+                  hoveredWeapon === key ? "text-amber-200" : "text-foreground"
                 }`}
               >
                 {formatNumber(damage)} dmg · {accuracy}%
@@ -631,16 +629,15 @@ function PlayerAxisTick({
   const player = players.find((entry) => entry.key === payload?.value)
   const flagSrc = getPickupCountryFlagSrc(player?.countryCode)
   const fill = player ? chartTeamTextColor[player.team] : "#94a3b8"
-  const initials =
-    player?.personaName
-      ? stripQuakeColors(player.personaName)
-          .trim()
-          .split(/\s+/)
-          .map((part) => part[0] ?? "")
-          .join("")
-          .slice(0, 2)
-          .toUpperCase()
-      : ""
+  const initials = player?.personaName
+    ? stripQuakeColors(player.personaName)
+        .trim()
+        .split(/\s+/)
+        .map((part) => part[0] ?? "")
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : ""
   const profileHref = player ? getPlayerProfileHref(player) : null
   const displayLabel = truncateLabel(player?.label ?? payload?.value ?? "", 14)
   const avatarClipId = player ? `weapon-chart-avatar-${player.id}` : null
@@ -680,12 +677,7 @@ function PlayerAxisTick({
           />
         ) : (
           <>
-            <circle
-              cx={-118}
-              cy={0}
-              fill="rgb(38 38 38)"
-              r="14"
-            />
+            <circle cx={-118} cy={0} fill="rgb(38 38 38)" r="14" />
             <text
               className="text-[10px] font-semibold"
               fill="rgb(229 229 229)"
@@ -1227,6 +1219,15 @@ function getMatchStatus(
   status: PickupMatchDetail["match"]["status"],
   finalScore: string | null
 ) {
+  if (status === "cancelled") {
+    return {
+      className: "border-border bg-transparent text-muted-foreground",
+      iconClassName: "text-destructive",
+      icon: X,
+      label: "Aborted",
+    }
+  }
+
   if (status === "completed" && finalScore && parseScore(finalScore) == null) {
     return {
       className: "border-border bg-transparent text-muted-foreground",

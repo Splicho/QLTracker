@@ -37,17 +37,16 @@ app.use(
   cors({
     origin: config.corsOrigins,
     credentials: true,
-  })
+  }),
 );
 app.use(
   express.json({
     limit: "1mb",
     verify: (request, _response, buffer) => {
-      (request as express.Request & { rawBody?: string }).rawBody = buffer.toString(
-        "utf8"
-      );
+      (request as express.Request & { rawBody?: string }).rawBody =
+        buffer.toString("utf8");
     },
-  })
+  }),
 );
 
 let playerPresenceBySteamId = new Map<string, PlayerPresence>();
@@ -55,15 +54,26 @@ let snapshotsByAddr = new Map<string, ServerSnapshot>();
 let lastHistorySampleAt: string | null = null;
 
 function sanitizeSnapshotCounts(snapshot: ServerSnapshot): ServerSnapshot {
-  const rawMaxPlayers = Number.isFinite(snapshot.maxPlayers) ? snapshot.maxPlayers : 16;
+  const rawMaxPlayers = Number.isFinite(snapshot.maxPlayers)
+    ? snapshot.maxPlayers
+    : 16;
   const maxPlayers = Math.max(1, Math.min(64, Math.trunc(rawMaxPlayers)));
-  const playersInfoCount = Array.isArray(snapshot.playersInfo) ? snapshot.playersInfo.length : 0;
+  const playersInfoCount = Array.isArray(snapshot.playersInfo)
+    ? snapshot.playersInfo.length
+    : 0;
   const rawPlayers = Number.isFinite(snapshot.players) ? snapshot.players : 0;
   const players = Math.max(
     0,
-    Math.min(maxPlayers, playersInfoCount > 0 ? Math.min(rawPlayers, playersInfoCount) : rawPlayers),
+    Math.min(
+      maxPlayers,
+      playersInfoCount > 0
+        ? Math.min(rawPlayers, playersInfoCount)
+        : rawPlayers,
+    ),
   );
-  const rawBots = Number.isFinite(snapshot.bots ?? 0) ? (snapshot.bots ?? 0) : 0;
+  const rawBots = Number.isFinite(snapshot.bots ?? 0)
+    ? (snapshot.bots ?? 0)
+    : 0;
   const bots = Math.max(0, Math.min(maxPlayers, Math.trunc(rawBots)));
 
   return {
@@ -105,7 +115,7 @@ async function upsertServerSnapshot(snapshot: ServerSnapshot) {
       set payload = excluded.payload,
           updated_at = excluded.updated_at
     `,
-    [snapshot.addr, JSON.stringify(normalizedSnapshot)]
+    [snapshot.addr, JSON.stringify(normalizedSnapshot)],
   );
 
   return normalizedSnapshot;
@@ -148,18 +158,20 @@ function buildPlayerPresenceIndex(snapshots: ServerSnapshot[]) {
 
 function replaceSnapshotsIndex(snapshots: ServerSnapshot[]) {
   snapshotsByAddr = new Map(
-    snapshots.map((snapshot) => [snapshot.addr, snapshot] as const)
+    snapshots.map((snapshot) => [snapshot.addr, snapshot] as const),
   );
 }
 
 function haveSamePresence(
   left: PlayerPresence | null | undefined,
-  right: PlayerPresence | null | undefined
+  right: PlayerPresence | null | undefined,
 ) {
   return JSON.stringify(left ?? null) === JSON.stringify(right ?? null);
 }
 
-function broadcastPlayerPresenceChanges(nextIndex: Map<string, PlayerPresence>) {
+function broadcastPlayerPresenceChanges(
+  nextIndex: Map<string, PlayerPresence>,
+) {
   const steamIds = new Set([
     ...playerPresenceBySteamId.keys(),
     ...nextIndex.keys(),
@@ -184,7 +196,7 @@ function broadcastPlayerPresenceChanges(nextIndex: Map<string, PlayerPresence>) 
 
 function rebuildAndBroadcastPlayerPresence() {
   broadcastPlayerPresenceChanges(
-    buildPlayerPresenceIndex(Array.from(snapshotsByAddr.values()))
+    buildPlayerPresenceIndex(Array.from(snapshotsByAddr.values())),
   );
 }
 
@@ -233,7 +245,9 @@ async function runPollCycle() {
   rebuildAndBroadcastPlayerPresence();
   await maybeCollectHistorySnapshots(enrichedSnapshots);
 
-  console.log(`qltracker-realtime synced ${enrichedSnapshots.length} snapshots`);
+  console.log(
+    `qltracker-realtime synced ${enrichedSnapshots.length} snapshots`,
+  );
 }
 
 function isAuthorizedIngestRequest(request: express.Request) {
@@ -269,7 +283,8 @@ app.get("/api/pickup/public-state", async (_request, response) => {
   } catch (error) {
     response.status(500).json({
       ok: false,
-      error: error instanceof Error ? error.message : "Pickup state unavailable.",
+      error:
+        error instanceof Error ? error.message : "Pickup state unavailable.",
     });
   }
 });
@@ -278,14 +293,18 @@ app.get("/api/pickup/me/state", async (request, response) => {
   const authorization = request.header("authorization");
   const token = authorization?.replace(/^Bearer\s+/i, "").trim() ?? "";
   if (!token) {
-    response.status(401).json({ ok: false, error: "Missing pickup session token." });
+    response
+      .status(401)
+      .json({ ok: false, error: "Missing pickup session token." });
     return;
   }
 
   try {
     const state = await pickupService.getPlayerStateByToken(token);
     if (!state) {
-      response.status(401).json({ ok: false, error: "Pickup session is invalid." });
+      response
+        .status(401)
+        .json({ ok: false, error: "Pickup session is invalid." });
       return;
     }
 
@@ -296,7 +315,8 @@ app.get("/api/pickup/me/state", async (request, response) => {
   } catch (error) {
     response.status(500).json({
       ok: false,
-      error: error instanceof Error ? error.message : "Pickup state unavailable.",
+      error:
+        error instanceof Error ? error.message : "Pickup state unavailable.",
     });
   }
 });
@@ -304,35 +324,42 @@ app.get("/api/pickup/me/state", async (request, response) => {
 app.post("/api/pickup/callbacks/provisioned", async (request, response) => {
   await pickupService.handleProvisionCallback(
     request as express.Request & { rawBody?: string },
-    response
+    response,
+  );
+});
+
+app.post("/api/pickup/admin/matches/abort", async (request, response) => {
+  await pickupService.handleAdminAbortMatch(
+    request as express.Request & { rawBody?: string },
+    response,
   );
 });
 
 app.post("/api/pickup/callbacks/live", async (request, response) => {
   await pickupService.handleLiveCallback(
     request as express.Request & { rawBody?: string },
-    response
+    response,
   );
 });
 
 app.post("/api/pickup/callbacks/result", async (request, response) => {
   await pickupService.handleResultCallback(
     request as express.Request & { rawBody?: string },
-    response
+    response,
   );
 });
 
 app.post("/api/pickup/callbacks/stats", async (request, response) => {
   await pickupService.handleStatsCallback(
     request as express.Request & { rawBody?: string },
-    response
+    response,
   );
 });
 
 app.post("/api/pickup/callbacks/chat", async (request, response) => {
   await pickupService.handleChatCallback(
     request as express.Request & { rawBody?: string },
-    response
+    response,
   );
 });
 
@@ -340,11 +367,13 @@ app.get("/api/servers/:addr", async (request, response) => {
   const addr = decodeURIComponent(request.params.addr);
   const result = await pool.query(
     "select payload, updated_at from realtime.server_snapshots where addr = $1",
-    [addr]
+    [addr],
   );
 
   if (result.rowCount === 0) {
-    response.status(404).json({ ok: false, error: "Server snapshot not found." });
+    response
+      .status(404)
+      .json({ ok: false, error: "Server snapshot not found." });
     return;
   }
 
@@ -365,7 +394,9 @@ app.get("/api/servers/:addr/history", async (request, response) => {
       : "15m";
 
   if (!addr) {
-    response.status(400).json({ ok: false, error: "Server address is required." });
+    response
+      .status(400)
+      .json({ ok: false, error: "Server address is required." });
     return;
   }
 
@@ -385,7 +416,9 @@ app.get("/api/servers/:addr/history", async (request, response) => {
 });
 
 app.post("/api/servers/lookup", async (request, response) => {
-  const addrs = normalizeStringArray((request.body as { addrs?: unknown })?.addrs);
+  const addrs = normalizeStringArray(
+    (request.body as { addrs?: unknown })?.addrs,
+  );
 
   if (addrs.length === 0) {
     response.json({ ok: true, snapshots: [] });
@@ -394,7 +427,7 @@ app.post("/api/servers/lookup", async (request, response) => {
 
   const result = await pool.query(
     "select payload from realtime.server_snapshots where addr = any($1::text[])",
-    [addrs]
+    [addrs],
   );
 
   response.json({
@@ -405,7 +438,9 @@ app.post("/api/servers/lookup", async (request, response) => {
 
 app.get("/api/presence/:steamId", (request, response) => {
   const steamId = decodeURIComponent(request.params.steamId).trim();
-  const presence = steamId ? (playerPresenceBySteamId.get(steamId) ?? null) : null;
+  const presence = steamId
+    ? (playerPresenceBySteamId.get(steamId) ?? null)
+    : null;
 
   response.json({
     ok: true,
@@ -415,13 +450,16 @@ app.get("/api/presence/:steamId", (request, response) => {
 
 app.post("/api/presence/lookup", (request, response) => {
   const steamIds = normalizeStringArray(
-    (request.body as { steamIds?: unknown })?.steamIds
+    (request.body as { steamIds?: unknown })?.steamIds,
   );
 
   response.json({
     ok: true,
     presences: Object.fromEntries(
-      steamIds.map((steamId) => [steamId, playerPresenceBySteamId.get(steamId) ?? null])
+      steamIds.map((steamId) => [
+        steamId,
+        playerPresenceBySteamId.get(steamId) ?? null,
+      ]),
     ),
   });
 });
@@ -441,7 +479,7 @@ app.get("/api/players/:steamId/name-history", async (request, response) => {
 
 app.post("/api/players/name-history/lookup", async (request, response) => {
   const steamIds = normalizeStringArray(
-    (request.body as { steamIds?: unknown })?.steamIds
+    (request.body as { steamIds?: unknown })?.steamIds,
   );
 
   response.json({
@@ -498,7 +536,7 @@ io.on("connection", async (socket) => {
 
     const result = await pool.query(
       "select payload from realtime.server_snapshots where addr = any($1::text[])",
-      [addrs]
+      [addrs],
     );
 
     for (const row of result.rows) {
@@ -545,7 +583,7 @@ server.listen(config.port, () => {
   void hydrateStateFromDb()
     .then(() => {
       console.log(
-        `qltracker-realtime hydrated ${snapshotsByAddr.size} cached snapshots`
+        `qltracker-realtime hydrated ${snapshotsByAddr.size} cached snapshots`,
       );
     })
     .catch((error: unknown) => {
@@ -558,7 +596,7 @@ server.listen(config.port, () => {
 
   if (!config.steamApiKey) {
     console.warn(
-      "STEAM_API_KEY is not configured. Automatic Steam polling is disabled."
+      "STEAM_API_KEY is not configured. Automatic Steam polling is disabled.",
     );
     return;
   }

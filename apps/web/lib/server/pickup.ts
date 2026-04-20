@@ -332,6 +332,27 @@ export type PickupAdminLocksDto = {
   viewer: PickupPlayerDto
 }
 
+export type PickupAdminActivePickupDto = {
+  createdAt: string
+  finalMapKey: string | null
+  id: string
+  liveStartedAt: string | null
+  players: Array<{
+    isCaptain: boolean
+    player: PickupPlayerDto
+    readyState: PickupMatchPlayer["readyState"]
+    team: PickupMatchPlayer["team"]
+  }>
+  queue: PickupQueueDto
+  readyDeadlineAt: string | null
+  serverJoinAddress: string | null
+  status: Extract<
+    PickupMatch["status"],
+    "ready_check" | "veto" | "provisioning" | "server_ready" | "live"
+  >
+  vetoDeadlineAt: string | null
+}
+
 function getPickupAvatarUrl(player: PickupPlayer) {
   return player.customAvatarUrl ?? player.avatarUrl ?? null
 }
@@ -1209,6 +1230,56 @@ export async function getPickupAdminLocks(
     locks: locks.map((lock) => toPickupPlayerLockDto(lock, now)),
     viewer: toPickupPlayerDto(viewer),
   }
+}
+
+export async function getPickupAdminActivePickups(): Promise<
+  PickupAdminActivePickupDto[]
+> {
+  await ensurePickupBootstrapData()
+
+  const activeStatuses = [
+    "ready_check",
+    "veto",
+    "provisioning",
+    "server_ready",
+    "live",
+  ] satisfies PickupAdminActivePickupDto["status"][]
+
+  const matches = await getPrisma().pickupMatch.findMany({
+    where: {
+      status: {
+        in: activeStatuses,
+      },
+    },
+    include: {
+      players: {
+        include: {
+          player: true,
+        },
+        orderBy: [{ team: "asc" }, { joinedAt: "asc" }],
+      },
+      queue: true,
+    },
+    orderBy: [{ createdAt: "desc" }],
+  })
+
+  return matches.map((match) => ({
+    createdAt: match.createdAt.toISOString(),
+    finalMapKey: match.finalMapKey ?? null,
+    id: match.id,
+    liveStartedAt: match.liveStartedAt?.toISOString() ?? null,
+    players: match.players.map((membership) => ({
+      isCaptain: membership.isCaptain,
+      player: toPickupPlayerDto(membership.player),
+      readyState: membership.readyState,
+      team: membership.team,
+    })),
+    queue: toPickupQueueDto(match.queue),
+    readyDeadlineAt: match.readyDeadlineAt?.toISOString() ?? null,
+    serverJoinAddress: match.serverJoinAddress ?? null,
+    status: match.status as PickupAdminActivePickupDto["status"],
+    vetoDeadlineAt: match.vetoDeadlineAt?.toISOString() ?? null,
+  }))
 }
 
 export async function getPickupActiveSeason(queueId: string) {
