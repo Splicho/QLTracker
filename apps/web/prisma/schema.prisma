@@ -59,6 +59,19 @@ enum PickupMatchStatus {
   cancelled
 }
 
+enum PickupMatchSubRequestStatus {
+  pending
+  accepted
+  declined
+  cancelled
+  expired
+}
+
+enum PickupMatchSubstitutionStage {
+  veto
+  server_ready
+}
+
 enum PickupReadyState {
   pending
   ready
@@ -194,6 +207,10 @@ model PickupPlayer {
   matchStatLines   PickupPlayerMatchStat[]
   queueMemberships PickupQueueMember[]
   matchPlayers     PickupMatchPlayer[]
+  outgoingSubRequests PickupMatchSubRequest[] @relation("PickupMatchSubRequestRequester")
+  incomingSubRequests PickupMatchSubRequest[] @relation("PickupMatchSubRequestTarget")
+  substitutionsIn  PickupMatchSubstitution[]  @relation("PickupMatchSubstitutionInPlayer")
+  substitutionsOut PickupMatchSubstitution[]  @relation("PickupMatchSubstitutionOutPlayer")
   seasonRatings    PickupPlayerSeasonRating[]
   weaponStatLines  PickupPlayerWeaponStat[]
 }
@@ -381,6 +398,8 @@ model PickupMatch {
   chatEvents                PickupMatchChatEvent[]
   killEvents                PickupKillEvent[]
   players                   PickupMatchPlayer[]
+  subRequests               PickupMatchSubRequest[]
+  substitutions             PickupMatchSubstitution[]
   provisionEvents           PickupProvisionEvent[]
   queue                     PickupQueue       @relation(fields: [queueId], references: [id], onDelete: Cascade)
   rawEvents                 PickupMatchEventRaw[]
@@ -391,6 +410,44 @@ model PickupMatch {
 
   @@index([queueId, status])
   @@index([seasonId, status])
+}
+
+model PickupMatchSubRequest {
+  id                String                      @id @default(cuid())
+  matchId           String
+  requesterPlayerId String
+  targetPlayerId    String
+  status            PickupMatchSubRequestStatus @default(pending)
+  expiresAt         DateTime
+  respondedAt       DateTime?
+  createdAt         DateTime                    @default(now())
+  updatedAt         DateTime                    @updatedAt
+  match             PickupMatch                 @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  requesterPlayer   PickupPlayer                @relation("PickupMatchSubRequestRequester", fields: [requesterPlayerId], references: [id], onDelete: Cascade)
+  targetPlayer      PickupPlayer                @relation("PickupMatchSubRequestTarget", fields: [targetPlayerId], references: [id], onDelete: Cascade)
+  acceptedSubstitution PickupMatchSubstitution?
+
+  @@index([matchId, status, createdAt])
+  @@index([requesterPlayerId, status, createdAt])
+  @@index([targetPlayerId, status, expiresAt])
+}
+
+model PickupMatchSubstitution {
+  id                String                       @id @default(cuid())
+  matchId           String
+  outPlayerId       String
+  inPlayerId        String
+  acceptedRequestId String                       @unique
+  stage             PickupMatchSubstitutionStage
+  createdAt         DateTime                     @default(now())
+  acceptedRequest   PickupMatchSubRequest        @relation(fields: [acceptedRequestId], references: [id], onDelete: Cascade)
+  inPlayer          PickupPlayer                 @relation("PickupMatchSubstitutionInPlayer", fields: [inPlayerId], references: [id], onDelete: Cascade)
+  match             PickupMatch                  @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  outPlayer         PickupPlayer                 @relation("PickupMatchSubstitutionOutPlayer", fields: [outPlayerId], references: [id], onDelete: Cascade)
+
+  @@index([matchId, createdAt])
+  @@index([outPlayerId, createdAt])
+  @@index([inPlayerId, createdAt])
 }
 
 model PickupMatchChatEvent {

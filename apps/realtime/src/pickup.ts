@@ -7,7 +7,7 @@ import {
 import { createSignature } from "@qltracker/crypto";
 import { stripQuakeColors } from "@qltracker/quake";
 import type express from "express";
-import type { QueryResult } from "pg";
+import type { PoolClient } from "pg";
 import type { Server, Socket } from "socket.io";
 import { Rating, TrueSkill } from "ts-trueskill";
 import { config } from "./config.js";
@@ -24,6 +24,7 @@ import type {
   PickupActiveRatingRow,
   PickupBalanceSummary,
   PickupMatchPlayerRow,
+  PickupMatchSubRequestRow,
   PickupMatchRow,
   PickupPlayerIdentity,
   PickupPlayerLockRow,
@@ -68,6 +69,7 @@ const DEFAULT_MAP_POOL = [
 const ratingEnv = new TrueSkill(1000, 150, 75, 5, 0);
 const COMPLETED_MATCH_VISIBLE_MS = 12_000;
 const PROVISION_RETRY_DELAYS_MS = [0, 5_000, 10_000, 20_000, 30_000] as const;
+const SUBSTITUTE_REQUEST_EXPIRY_MS = 90_000;
 const ABORTABLE_PICKUP_STATUSES = [
   "ready_check",
   "veto",
@@ -95,6 +97,7 @@ export function createPickupService(io: Server) {
   const serviceStartedAt = new Date();
   const readyTimers = new Map<string, NodeJS.Timeout>();
   const vetoTimers = new Map<string, NodeJS.Timeout>();
+  const subRequestTimers = new Map<string, NodeJS.Timeout>();
   const queueDisconnectTimers = new Map<string, NodeJS.Timeout>();
   const connectedPickupSocketsByPlayerId = new Map<string, Set<string>>();
   let queueMemberCleanupInterval: NodeJS.Timeout | null = null;
@@ -1020,7 +1023,7 @@ export function createPickupService(io: Server) {
           and (
             m."status" in ('provisioning', 'server_ready', 'live')
             or (m."status" = 'ready_check' and m."readyDeadlineAt" > now())
-            or (m."status" = 'veto' and m."vetoDeadlineAt" > now())
+            or m."status" = 'veto'
           )
         order by m."createdAt" desc
         limit 1
@@ -1136,11 +1139,138 @@ export function createPickupService(io: Server) {
     return result.rows;
   }
 
+  async function getPickupPlayerIdentityById(playerId: string) {
+    const result = await pool.query<PickupPlayerIdentity>(
+      `
+        select
+          "id",
+          "steamId",
+          "personaName",
+          coalesce("customAvatarUrl", "avatarUrl") as "avatarUrl",
+          "countryCode",
+          "profileUrl"
+        from "PickupPlayer"
+        where "id" = $1
+        limit 1
+      `,
+      [playerId],
+    );
+
+    return result.rows[0] ?? null;
+  }
+
+  async function getPendingSubRequestForPlayer(
+    playerId: string,
+    role: "requester" | "target",
+  ) {
+    const playerColumn =
+      role === "requester" ? `sr."requesterPlayerId"` : `sr."targetPlayerId"`;
+    const result = await pool.query<PickupMatchSubRequestRow>(
+      `
+        select
+          sr."id",
+          sr."matchId",
+          sr."status",
+          sr."expiresAt",
+          sr."respondedAt",
+          sr."createdAt",
+          m."status" as "stage",
+          m."queueId",
+          q."name" as "queueName",
+          q."slug" as "queueSlug",
+          m."finalMapKey",
+          requester."id" as "requesterPlayerId",
+          requester."personaName" as "requesterPersonaName",
+          coalesce(requester."customAvatarUrl", requester."avatarUrl") as "requesterAvatarUrl",
+          requester."countryCode" as "requesterCountryCode",
+          requester."profileUrl" as "requesterProfileUrl",
+          requester."steamId" as "requesterSteamId",
+          target."id" as "targetPlayerId",
+          target."personaName" as "targetPersonaName",
+          coalesce(target."customAvatarUrl", target."avatarUrl") as "targetAvatarUrl",
+          target."countryCode" as "targetCountryCode",
+          target."profileUrl" as "targetProfileUrl",
+          target."steamId" as "targetSteamId"
+        from "PickupMatchSubRequest" sr
+        inner join "PickupMatch" m on m."id" = sr."matchId"
+        inner join "PickupQueue" q on q."id" = m."queueId"
+        inner join "PickupPlayer" requester on requester."id" = sr."requesterPlayerId"
+        inner join "PickupPlayer" target on target."id" = sr."targetPlayerId"
+        where
+          ${playerColumn} = $1
+          and sr."status" = 'pending'
+          and sr."expiresAt" > now()
+          and m."status" in ('veto', 'server_ready')
+        order by sr."createdAt" desc
+        limit 1
+      `,
+      [playerId],
+    );
+
+    return result.rows[0] ?? null;
+  }
+
+  async function getPendingSubRequestForRequester(playerId: string) {
+    return getPendingSubRequestForPlayer(playerId, "requester");
+  }
+
+  async function getPendingSubRequestForTarget(playerId: string) {
+    return getPendingSubRequestForPlayer(playerId, "target");
+  }
+
+  async function getPendingMatchSubRequest(matchId: string) {
+    const result = await pool.query<PickupMatchSubRequestRow>(
+      `
+        select
+          sr."id",
+          sr."matchId",
+          sr."status",
+          sr."expiresAt",
+          sr."respondedAt",
+          sr."createdAt",
+          m."status" as "stage",
+          m."queueId",
+          q."name" as "queueName",
+          q."slug" as "queueSlug",
+          m."finalMapKey",
+          requester."id" as "requesterPlayerId",
+          requester."personaName" as "requesterPersonaName",
+          coalesce(requester."customAvatarUrl", requester."avatarUrl") as "requesterAvatarUrl",
+          requester."countryCode" as "requesterCountryCode",
+          requester."profileUrl" as "requesterProfileUrl",
+          requester."steamId" as "requesterSteamId",
+          target."id" as "targetPlayerId",
+          target."personaName" as "targetPersonaName",
+          coalesce(target."customAvatarUrl", target."avatarUrl") as "targetAvatarUrl",
+          target."countryCode" as "targetCountryCode",
+          target."profileUrl" as "targetProfileUrl",
+          target."steamId" as "targetSteamId"
+        from "PickupMatchSubRequest" sr
+        inner join "PickupMatch" m on m."id" = sr."matchId"
+        inner join "PickupQueue" q on q."id" = m."queueId"
+        inner join "PickupPlayer" requester on requester."id" = sr."requesterPlayerId"
+        inner join "PickupPlayer" target on target."id" = sr."targetPlayerId"
+        where
+          sr."matchId" = $1
+          and sr."status" = 'pending'
+          and sr."expiresAt" > now()
+        order by sr."createdAt" desc
+        limit 1
+      `,
+      [matchId],
+    );
+
+    return result.rows[0] ?? null;
+  }
+
   const playerStateApi = createPlayerStateApi({
     getActivePlayerLock,
     getActiveSeason,
     getLatestPlayerActiveMatch,
     getLatestPlayerRecentCompletedMatch,
+    getPendingMatchSubRequest,
+    getPendingSubRequestForRequester,
+    getPendingSubRequestForTarget,
     getMatchPlayers,
     getOrCreatePlayerSeasonRating,
     getPlayerActiveRatings,
@@ -1210,6 +1340,79 @@ export function createPickupService(io: Server) {
       reason,
       updatedAt: new Date().toISOString(),
     });
+  }
+
+  async function emitStatesForPlayerIds(playerIds: readonly string[]) {
+    const uniquePlayerIds = [...new Set(playerIds.filter(Boolean))];
+    for (const playerId of uniquePlayerIds) {
+      await emitPlayerState(playerId);
+    }
+  }
+
+  function emitPickupErrorToPlayers(
+    playerIds: readonly string[],
+    message: string,
+  ) {
+    const uniquePlayerIds = [...new Set(playerIds.filter(Boolean))];
+    for (const playerId of uniquePlayerIds) {
+      io.to(`pickup:player:${playerId}`).emit("pickup:error", { message });
+    }
+  }
+
+  async function emitSubRequestPlayerStates(
+    matchId: string,
+    requesterPlayerId: string,
+    targetPlayerId: string,
+  ) {
+    const matchPlayers = await getMatchPlayers(matchId);
+    await emitStatesForPlayerIds([
+      ...matchPlayers.map((player) => player.playerId),
+      requesterPlayerId,
+      targetPlayerId,
+    ]);
+  }
+
+  async function getPendingSubRequestById(requestId: string) {
+    const result = await pool.query<PickupMatchSubRequestRow>(
+      `
+        select
+          sr."id",
+          sr."matchId",
+          sr."status",
+          sr."expiresAt",
+          sr."respondedAt",
+          sr."createdAt",
+          m."status" as "stage",
+          m."queueId",
+          q."name" as "queueName",
+          q."slug" as "queueSlug",
+          m."finalMapKey",
+          requester."id" as "requesterPlayerId",
+          requester."personaName" as "requesterPersonaName",
+          coalesce(requester."customAvatarUrl", requester."avatarUrl") as "requesterAvatarUrl",
+          requester."countryCode" as "requesterCountryCode",
+          requester."profileUrl" as "requesterProfileUrl",
+          requester."steamId" as "requesterSteamId",
+          target."id" as "targetPlayerId",
+          target."personaName" as "targetPersonaName",
+          coalesce(target."customAvatarUrl", target."avatarUrl") as "targetAvatarUrl",
+          target."countryCode" as "targetCountryCode",
+          target."profileUrl" as "targetProfileUrl",
+          target."steamId" as "targetSteamId"
+        from "PickupMatchSubRequest" sr
+        inner join "PickupMatch" m on m."id" = sr."matchId"
+        inner join "PickupQueue" q on q."id" = m."queueId"
+        inner join "PickupPlayer" requester on requester."id" = sr."requesterPlayerId"
+        inner join "PickupPlayer" target on target."id" = sr."targetPlayerId"
+        where
+          sr."id" = $1
+          and sr."status" = 'pending'
+        limit 1
+      `,
+      [requestId],
+    );
+
+    return result.rows[0] ?? null;
   }
 
   function clearQueueDisconnectTimer(playerId: string) {
@@ -1352,6 +1555,9 @@ export function createPickupService(io: Server) {
       ),
     );
     queueMemberCleanupInterval = setInterval(() => {
+      void cleanupPendingSubRequests("interval").catch((error) => {
+        console.error("Failed to clean pending substitute requests:", error);
+      });
       void cleanupLockedQueueMembers("locked").catch((error) => {
         console.error("Failed to clean locked pickup queue members:", error);
       });
@@ -1399,6 +1605,14 @@ export function createPickupService(io: Server) {
     }
   }
 
+  function clearSubRequestTimer(requestId: string) {
+    const timer = subRequestTimers.get(requestId);
+    if (timer) {
+      clearTimeout(timer);
+      subRequestTimers.delete(requestId);
+    }
+  }
+
   function scheduleReadyTimer(matchId: string, readyDeadlineAt: Date | null) {
     clearReadyTimer(matchId);
     if (!readyDeadlineAt) {
@@ -1429,6 +1643,252 @@ export function createPickupService(io: Server) {
         void handleVetoTimeout(matchId);
       }, delay),
     );
+  }
+
+  function scheduleSubRequestTimer(requestId: string, expiresAt: Date) {
+    clearSubRequestTimer(requestId);
+    const delay = Math.max(0, expiresAt.getTime() - Date.now());
+    subRequestTimers.set(
+      requestId,
+      setTimeout(() => {
+        subRequestTimers.delete(requestId);
+        void expireSubRequest(requestId);
+      }, delay),
+    );
+  }
+
+  async function resumeVetoAfterPendingSubRequest(matchId: string) {
+    const [match, pendingRequest, settings] = await Promise.all([
+      getLatestMatchById(matchId),
+      getPendingMatchSubRequest(matchId),
+      getPickupSettings(),
+    ]);
+    if (!match || match.status !== "veto" || !match.vetoState || pendingRequest) {
+      return null;
+    }
+
+    const vetoDeadlineAt = new Date(
+      Date.now() + settings.vetoTurnDurationSeconds * 1000,
+    );
+    const updateResult = await pool.query(
+      `
+        update "PickupMatch"
+        set
+          "vetoDeadlineAt" = $2,
+          "updatedAt" = now()
+        where
+          "id" = $1
+          and "status" = 'veto'
+          and "vetoState" is not null
+        returning "id"
+      `,
+      [matchId, vetoDeadlineAt],
+    );
+
+    if ((updateResult.rowCount ?? 0) === 0) {
+      return null;
+    }
+
+    scheduleVetoTimer(matchId, vetoDeadlineAt);
+    return vetoDeadlineAt;
+  }
+
+  async function resolvePendingSubRequest(
+    requestId: string,
+    status: "cancelled" | "declined" | "expired",
+    options?: {
+      resumeVeto?: boolean;
+    },
+  ) {
+    const request = await getPendingSubRequestById(requestId);
+    if (!request) {
+      return null;
+    }
+
+    clearSubRequestTimer(requestId);
+
+    const updateResult = await pool.query(
+      `
+        update "PickupMatchSubRequest"
+        set
+          "status" = $2::"PickupMatchSubRequestStatus",
+          "respondedAt" = now(),
+          "updatedAt" = now()
+        where
+          "id" = $1
+          and "status" = 'pending'
+        returning "id"
+      `,
+      [requestId, status],
+    );
+
+    if ((updateResult.rowCount ?? 0) === 0) {
+      return null;
+    }
+
+    if (request.stage === "veto" && options?.resumeVeto !== false) {
+      await resumeVetoAfterPendingSubRequest(request.matchId);
+    }
+
+    await emitSubRequestPlayerStates(
+      request.matchId,
+      request.requesterPlayerId,
+      request.targetPlayerId,
+    );
+
+    return request;
+  }
+
+  async function expireSubRequest(requestId: string) {
+    return resolvePendingSubRequest(requestId, "expired");
+  }
+
+  async function cancelPendingSubRequestsForMatch(
+    matchId: string,
+    options?: {
+      resumeVeto?: boolean;
+    },
+  ) {
+    const request = await getPendingMatchSubRequest(matchId);
+    if (!request) {
+      return;
+    }
+
+    await resolvePendingSubRequest(request.id, "cancelled", options);
+  }
+
+  async function cleanupPendingSubRequests(reason: string) {
+    const expiredRequests = await pool.query<{ id: string }>(
+      `
+        update "PickupMatchSubRequest"
+        set
+          "status" = 'expired',
+          "respondedAt" = now(),
+          "updatedAt" = now()
+        where
+          "status" = 'pending'
+          and "expiresAt" <= now()
+        returning "id"
+      `,
+    );
+
+    for (const row of expiredRequests.rows) {
+      clearSubRequestTimer(row.id);
+    }
+
+    const invalidRequests = await pool.query<{
+      id: string;
+      matchId: string;
+      requesterPlayerId: string;
+      targetPlayerId: string;
+    }>(
+      `
+        update "PickupMatchSubRequest" sr
+        set
+          "status" = 'cancelled',
+          "respondedAt" = now(),
+          "updatedAt" = now()
+        from "PickupMatch" m
+        where
+          sr."matchId" = m."id"
+          and sr."status" = 'pending'
+          and (
+            m."status" not in ('veto', 'server_ready')
+            or exists (
+              select 1
+              from "PickupPlayerLock" lock
+              where
+                lock."playerId" in (sr."requesterPlayerId", sr."targetPlayerId")
+                and lock."revokedAt" is null
+                and (lock."expiresAt" is null or lock."expiresAt" > now())
+            )
+            or not exists (
+              select 1
+              from "PickupMatchPlayer" requester_match_player
+              where
+                requester_match_player."matchId" = sr."matchId"
+                and requester_match_player."playerId" = sr."requesterPlayerId"
+            )
+            or exists (
+              select 1
+              from "PickupMatchPlayer" target_match_player
+              where
+                target_match_player."matchId" = sr."matchId"
+                and target_match_player."playerId" = sr."targetPlayerId"
+            )
+            or exists (
+              select 1
+              from "PickupMatchPlayer" active_match_player
+              inner join "PickupMatch" active_match
+                on active_match."id" = active_match_player."matchId"
+              where
+                active_match_player."playerId" = sr."targetPlayerId"
+                and active_match_player."matchId" <> sr."matchId"
+                and (
+                  active_match."status" in ('provisioning', 'server_ready', 'live')
+                  or (active_match."status" = 'ready_check' and active_match."readyDeadlineAt" > now())
+                  or active_match."status" = 'veto'
+                )
+            )
+          )
+        returning
+          sr."id",
+          sr."matchId",
+          sr."requesterPlayerId",
+          sr."targetPlayerId"
+      `,
+    );
+
+    for (const row of invalidRequests.rows) {
+      clearSubRequestTimer(row.id);
+      if (reason !== "silent") {
+        console.log(
+          `pickup cancelled invalid substitute request ${row.id}: ${reason}`,
+        );
+      }
+    }
+
+    const matchIdsNeedingVetoResume = [
+      ...new Set(invalidRequests.rows.map((row) => row.matchId)),
+    ];
+    for (const matchId of matchIdsNeedingVetoResume) {
+      await resumeVetoAfterPendingSubRequest(matchId);
+    }
+
+    const playerIdsToRefresh = [
+      ...new Set(
+        invalidRequests.rows.flatMap((row) => [
+          row.requesterPlayerId,
+          row.targetPlayerId,
+        ]),
+      ),
+    ];
+    if (playerIdsToRefresh.length > 0) {
+      for (const matchId of matchIdsNeedingVetoResume) {
+        const players = await getMatchPlayers(matchId);
+        playerIdsToRefresh.push(...players.map((player) => player.playerId));
+      }
+      await emitStatesForPlayerIds(playerIdsToRefresh);
+    }
+  }
+
+  async function hydratePendingSubRequests() {
+    await cleanupPendingSubRequests("startup");
+
+    const requests = await pool.query<{ expiresAt: Date; id: string }>(
+      `
+        select "id", "expiresAt"
+        from "PickupMatchSubRequest"
+        where
+          "status" = 'pending'
+          and "expiresAt" > now()
+        order by "createdAt" asc
+      `,
+    );
+
+    for (const request of requests.rows) {
+      scheduleSubRequestTimer(request.id, request.expiresAt);
+    }
   }
 
   async function createMatchFromQueue(
@@ -1868,6 +2328,7 @@ export function createPickupService(io: Server) {
   ) {
     clearReadyTimer(matchId);
     clearVetoTimer(matchId);
+    await cancelPendingSubRequestsForMatch(matchId, { resumeVeto: false });
 
     const match = await getLatestMatchById(matchId);
     if (!match) {
@@ -2035,6 +2496,173 @@ export function createPickupService(io: Server) {
     }
   }
 
+  function getProvisionerBaseUrl(provisionApiUrl: string) {
+    return new URL("/", provisionApiUrl).toString().replace(/\/$/, "");
+  }
+
+  async function provisionerAdminFetch(
+    settings: PickupSettingsRow,
+    path: string,
+    init?: RequestInit,
+  ) {
+    if (!settings.provisionApiUrl) {
+      throw new Error("Provision API URL is not configured.");
+    }
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...((init?.headers as Record<string, string> | undefined) ?? {}),
+    };
+    if (settings.provisionAuthToken) {
+      headers.Authorization = `Bearer ${settings.provisionAuthToken}`;
+    }
+
+    const response = await fetch(`${getProvisionerBaseUrl(settings.provisionApiUrl)}${path}`, {
+      ...init,
+      headers,
+    });
+    const text = await response.text();
+    const payload =
+      text.length > 0
+        ? (() => {
+            try {
+              return JSON.parse(text) as Record<string, unknown>;
+            } catch {
+              return { raw: text } satisfies Record<string, unknown>;
+            }
+          })()
+        : {};
+
+    if (!response.ok) {
+      const message =
+        typeof payload.error === "string"
+          ? payload.error
+          : `Provisioner request failed with HTTP ${response.status}.`;
+      throw new Error(message);
+    }
+
+    return payload;
+  }
+
+  async function buildProvisionPayload(match: PickupMatchRow) {
+    const [players, queue] = await Promise.all([
+      getMatchPlayers(match.id),
+      getQueueById(match.queueId),
+    ]);
+    const ratingRows = await pool.query<{
+      displayRating: number;
+      personaName: string;
+      playerId: string;
+      steamId: string;
+    }>(
+      `
+        select
+          r."displayRating",
+          p."personaName",
+          p."id" as "playerId",
+          p."steamId"
+        from "PickupPlayerSeasonRating" r
+        inner join "PickupPlayer" p on p."id" = r."playerId"
+        where r."seasonId" = $1
+      `,
+      [match.seasonId],
+    );
+
+    if (!match.finalMapKey) {
+      throw new Error("Pickup match is missing a final map.");
+    }
+
+    return {
+      payload: {
+        captains: match.balanceSummary?.captainPlayerIds ?? null,
+        finalMapKey: match.finalMapKey,
+        matchId: match.id,
+        queue: queue
+          ? {
+              id: queue.id,
+              name: queue.name,
+              playerCount: queue.playerCount,
+              slug: queue.slug,
+              teamSize: queue.teamSize,
+            }
+          : undefined,
+        queueId: match.queueId,
+        ratings: ratingRows.rows.map((row) => ({
+          displayRating: row.displayRating,
+          personaName: row.personaName,
+          playerId: row.playerId,
+          steamId: row.steamId,
+        })),
+        seasonId: match.seasonId,
+        teams: {
+          left: players
+            .filter((player) => player.team === "left")
+            .map((player) => ({
+              displayRating: player.displayBefore,
+              personaName: player.personaName,
+              playerId: player.playerId,
+              steamId: player.steamId,
+            })),
+          right: players
+            .filter((player) => player.team === "right")
+            .map((player) => ({
+              displayRating: player.displayBefore,
+              personaName: player.personaName,
+              playerId: player.playerId,
+              steamId: player.steamId,
+            })),
+        },
+      },
+      players,
+    };
+  }
+
+  async function syncServerReadySubstitution(matchId: string) {
+    const [settings, match] = await Promise.all([
+      getPickupSettings(),
+      getLatestMatchById(matchId),
+    ]);
+    if (!match || match.status !== "server_ready") {
+      return;
+    }
+
+    const slotsPayload = await provisionerAdminFetch(settings, "/api/admin/slots");
+    const slots = Array.isArray(slotsPayload.slots)
+      ? (slotsPayload.slots as Array<Record<string, unknown>>)
+      : [];
+    const activeSlot = slots.find((slot) => {
+      const metadata =
+        slot.metadata && typeof slot.metadata === "object"
+          ? (slot.metadata as Record<string, unknown>)
+          : null;
+      return metadata?.matchId === matchId;
+    });
+
+    const slotState =
+      activeSlot?.slot && typeof activeSlot.slot === "object"
+        ? (activeSlot.slot as Record<string, unknown>)
+        : null;
+    const slotId =
+      typeof slotState?.slotId === "number"
+        ? slotState.slotId
+        : typeof slotState?.slotId === "string"
+          ? Number(slotState.slotId)
+          : null;
+    if (!slotId || !Number.isFinite(slotId)) {
+      throw new Error("No active provisioner slot was found for this pickup.");
+    }
+
+    const { payload } = await buildProvisionPayload(match);
+    await provisionerAdminFetch(
+      settings,
+      `/api/admin/slots/${slotId}/pickup-metadata`,
+      {
+        body: JSON.stringify(payload),
+        method: "POST",
+      },
+    );
+  }
+
   async function requestProvision(matchId: string) {
     const match = await getLatestMatchById(matchId);
     if (!match || match.status !== "provisioning") {
@@ -2089,38 +2717,9 @@ export function createPickupService(io: Server) {
       return;
     }
 
-    let players: PickupMatchPlayerRow[];
-    let queue: PickupQueueRow | null;
-    let ratingRows: QueryResult<{
-      displayRating: number;
-      personaName: string;
-      playerId: string;
-      steamId: string;
-    }>;
-
+    let payload: Record<string, unknown>;
     try {
-      [players, queue] = await Promise.all([
-        getMatchPlayers(matchId),
-        getQueueById(match.queueId),
-      ]);
-      ratingRows = await pool.query<{
-        displayRating: number;
-        personaName: string;
-        playerId: string;
-        steamId: string;
-      }>(
-        `
-          select
-            r."displayRating",
-            p."personaName",
-            p."id" as "playerId",
-            p."steamId"
-          from "PickupPlayerSeasonRating" r
-          inner join "PickupPlayer" p on p."id" = r."playerId"
-          where r."seasonId" = $1
-        `,
-        [match.seasonId],
-      );
+      ({ payload } = await buildProvisionPayload(match));
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       await recordProvisionEvent(matchId, "provision-error", {
@@ -2132,47 +2731,6 @@ export function createPickupService(io: Server) {
       });
       return;
     }
-
-    const payload = {
-      captains: match.balanceSummary?.captainPlayerIds ?? null,
-      finalMapKey: match.finalMapKey,
-      matchId: match.id,
-      queue: queue
-        ? {
-            id: queue.id,
-            name: queue.name,
-            playerCount: queue.playerCount,
-            slug: queue.slug,
-            teamSize: queue.teamSize,
-          }
-        : undefined,
-      queueId: match.queueId,
-      ratings: ratingRows.rows.map((row) => ({
-        displayRating: row.displayRating,
-        personaName: row.personaName,
-        playerId: row.playerId,
-        steamId: row.steamId,
-      })),
-      seasonId: match.seasonId,
-      teams: {
-        left: players
-          .filter((player) => player.team === "left")
-          .map((player) => ({
-            displayRating: player.displayBefore,
-            personaName: player.personaName,
-            playerId: player.playerId,
-            steamId: player.steamId,
-          })),
-        right: players
-          .filter((player) => player.team === "right")
-          .map((player) => ({
-            displayRating: player.displayBefore,
-            personaName: player.personaName,
-            playerId: player.playerId,
-            steamId: player.steamId,
-          })),
-      },
-    };
 
     await recordProvisionEvent(matchId, "request", payload);
     const requestBody = JSON.stringify(payload);
@@ -2265,6 +2823,813 @@ export function createPickupService(io: Server) {
     }
   }
 
+  async function getLockedMatchPlayersForUpdate(
+    client: PoolClient,
+    matchId: string,
+  ) {
+    const result = await client.query<PickupMatchPlayerRow>(
+      `
+        select
+          mp."id" as "matchPlayerId",
+          mp."matchId",
+          mp."playerId",
+          mp."joinedAt",
+          mp."readyState",
+          mp."readyConfirmedAt",
+          mp."team",
+          mp."isCaptain",
+          mp."muBefore",
+          mp."sigmaBefore",
+          mp."displayBefore",
+          mp."muAfter",
+          mp."sigmaAfter",
+          mp."displayAfter",
+          mp."won",
+          p."id" as "id",
+          p."personaName",
+          coalesce(p."customAvatarUrl", p."avatarUrl") as "avatarUrl",
+          p."countryCode",
+          p."profileUrl",
+          p."steamId"
+        from "PickupMatchPlayer" mp
+        inner join "PickupPlayer" p on p."id" = mp."playerId"
+        where mp."matchId" = $1
+        order by mp."joinedAt" asc, p."personaName" asc
+        for update of mp
+      `,
+      [matchId],
+    );
+
+    return result.rows;
+  }
+
+  async function getActiveMapsWithClient(client: PoolClient, queueId: string) {
+    const result = await client.query<{ mapKey: string }>(
+      `
+        select "mapKey"
+        from "PickupMapPool"
+        where "queueId" = $1 and "active" = true
+        order by "sortOrder" asc, "label" asc
+      `,
+      [queueId],
+    );
+
+    return result.rows.map((row) => row.mapKey);
+  }
+
+  async function requestSubstitute(
+    session: PickupSessionIdentity,
+    targetPlayerId: string,
+  ) {
+    const normalizedTargetPlayerId = targetPlayerId.trim();
+    if (!normalizedTargetPlayerId) {
+      throw new Error("A substitute player is required.");
+    }
+
+    const match = await getLatestPlayerActiveMatch(session.player.id);
+    if (!match || !["veto", "server_ready"].includes(match.status)) {
+      throw new Error(
+        "Substitutes can only be requested during veto or server warmup.",
+      );
+    }
+
+    if (normalizedTargetPlayerId === session.player.id) {
+      throw new Error("You cannot substitute yourself with yourself.");
+    }
+
+    const [pendingMatchRequest, players, targetPlayer] = await Promise.all([
+      getPendingMatchSubRequest(match.id),
+      getMatchPlayers(match.id),
+      getPickupPlayerIdentityById(normalizedTargetPlayerId),
+    ]);
+
+    if (!players.some((player) => player.playerId === session.player.id)) {
+      throw new Error("You are not on the active pickup roster.");
+    }
+
+    if (pendingMatchRequest) {
+      throw new Error("This pickup already has a pending substitute request.");
+    }
+
+    if (!targetPlayer) {
+      throw new Error("The selected substitute player could not be found.");
+    }
+
+    if (players.some((player) => player.playerId === targetPlayer.id)) {
+      throw new Error("That player is already on the active pickup roster.");
+    }
+
+    const [
+      targetLock,
+      targetActiveMatch,
+      targetIncomingRequest,
+      targetOutgoingRequest,
+    ] = await Promise.all([
+      getActivePlayerLock(targetPlayer.id),
+      getLatestPlayerActiveMatch(targetPlayer.id),
+      getPendingSubRequestForTarget(targetPlayer.id),
+      getPendingSubRequestForRequester(targetPlayer.id),
+    ]);
+
+    if (targetLock) {
+      throw new Error("That player is locked from matchmaking right now.");
+    }
+
+    if (targetActiveMatch && targetActiveMatch.id !== match.id) {
+      throw new Error("That player is already in another active pickup.");
+    }
+
+    if (targetIncomingRequest || targetOutgoingRequest) {
+      throw new Error("That player already has a pending substitute request.");
+    }
+
+    const expiresAt = new Date(Date.now() + SUBSTITUTE_REQUEST_EXPIRY_MS);
+    const client = await pool.connect();
+    let requestId: string | null = null;
+    try {
+      await client.query("begin");
+
+      const lockedMatchResult = await client.query<{ status: PickupMatchRow["status"] }>(
+        `
+          select "status"
+          from "PickupMatch"
+          where "id" = $1
+          for update
+        `,
+        [match.id],
+      );
+      const lockedStatus = lockedMatchResult.rows[0]?.status;
+      if (!lockedStatus || !["veto", "server_ready"].includes(lockedStatus)) {
+        throw new Error(
+          "Substitutes can only be requested during veto or server warmup.",
+        );
+      }
+
+      const pendingRequestResult = await client.query<{ id: string }>(
+        `
+          select "id"
+          from "PickupMatchSubRequest"
+          where
+            "matchId" = $1
+            and "status" = 'pending'
+            and "expiresAt" > now()
+          limit 1
+        `,
+        [match.id],
+      );
+      if (pendingRequestResult.rows[0]) {
+        throw new Error("This pickup already has a pending substitute request.");
+      }
+
+      const lockedRosterResult = await client.query<{ playerId: string }>(
+        `
+          select "playerId"
+          from "PickupMatchPlayer"
+          where "matchId" = $1
+          for update
+        `,
+        [match.id],
+      );
+      const lockedRosterPlayerIds = new Set(
+        lockedRosterResult.rows.map((row) => row.playerId),
+      );
+      if (!lockedRosterPlayerIds.has(session.player.id)) {
+        throw new Error("You are not on the active pickup roster.");
+      }
+      if (lockedRosterPlayerIds.has(targetPlayer.id)) {
+        throw new Error("That player is already on the active pickup roster.");
+      }
+
+      const insertResult = await client.query<{ id: string }>(
+        `
+          insert into "PickupMatchSubRequest" (
+            "id",
+            "matchId",
+            "requesterPlayerId",
+            "targetPlayerId",
+            "status",
+            "expiresAt",
+            "createdAt",
+            "updatedAt"
+          )
+          values (
+            gen_random_uuid()::text,
+            $1,
+            $2,
+            $3,
+            'pending',
+            $4,
+            now(),
+            now()
+          )
+          returning "id"
+        `,
+        [match.id, session.player.id, targetPlayer.id, expiresAt],
+      );
+      requestId = insertResult.rows[0]?.id ?? null;
+
+      if (lockedStatus === "veto") {
+        clearVetoTimer(match.id);
+        await client.query(
+          `
+            update "PickupMatch"
+            set
+              "vetoDeadlineAt" = null,
+              "updatedAt" = now()
+            where "id" = $1
+              and "status" = 'veto'
+          `,
+          [match.id],
+        );
+      }
+
+      await client.query("commit");
+    } catch (error) {
+      await client.query("rollback");
+      throw error;
+    } finally {
+      client.release();
+    }
+
+    if (requestId) {
+      scheduleSubRequestTimer(requestId, expiresAt);
+    }
+
+    await emitSubRequestPlayerStates(match.id, session.player.id, targetPlayer.id);
+    return getPlayerState(session.player);
+  }
+
+  async function cancelSubstituteRequest(session: PickupSessionIdentity) {
+    const request = await getPendingSubRequestForRequester(session.player.id);
+    if (!request) {
+      throw new Error("You do not have a pending substitute request.");
+    }
+
+    await resolvePendingSubRequest(request.id, "cancelled");
+    return getPlayerState(session.player);
+  }
+
+  async function acceptSubstituteRequest(
+    requestId: string,
+    targetPlayerId: string,
+  ) {
+    const settings = await getPickupSettings();
+    const client = await pool.connect();
+    let syncServerReady = false;
+    let syncPlayerIds: string[] = [];
+    let syncMatchId: string | null = null;
+
+    try {
+      await client.query("begin");
+
+      const lockedRequestResult = await client.query<{
+        expiresAt: Date;
+        id: string;
+        matchId: string;
+        queueId: string;
+        seasonId: string;
+        stage: PickupMatchRow["status"];
+        targetPlayerId: string;
+        requesterPlayerId: string;
+      }>(
+        `
+          select
+            sr."id",
+            sr."matchId",
+            sr."requesterPlayerId",
+            sr."targetPlayerId",
+            sr."expiresAt",
+            m."status" as "stage",
+            m."queueId",
+            m."seasonId"
+          from "PickupMatchSubRequest" sr
+          inner join "PickupMatch" m on m."id" = sr."matchId"
+          where
+            sr."id" = $1
+            and sr."status" = 'pending'
+          for update of sr, m
+        `,
+        [requestId],
+      );
+      const lockedRequest = lockedRequestResult.rows[0];
+      if (!lockedRequest) {
+        throw new Error("That substitute request is no longer available.");
+      }
+
+      if (lockedRequest.targetPlayerId !== targetPlayerId) {
+        throw new Error("Only the selected substitute player can accept.");
+      }
+
+      if (!["veto", "server_ready"].includes(lockedRequest.stage)) {
+        throw new Error("That substitute request is no longer active.");
+      }
+
+      if (lockedRequest.expiresAt.getTime() <= Date.now()) {
+        throw new Error("That substitute request has already expired.");
+      }
+
+      const roster = await getLockedMatchPlayersForUpdate(
+        client,
+        lockedRequest.matchId,
+      );
+      if (
+        !roster.some(
+          (player) => player.playerId === lockedRequest.requesterPlayerId,
+        )
+      ) {
+        throw new Error("The requester is no longer on this pickup roster.");
+      }
+
+      if (
+        roster.some((player) => player.playerId === lockedRequest.targetPlayerId)
+      ) {
+        throw new Error("The substitute player is already on this pickup roster.");
+      }
+
+      const targetPlayerResult = await client.query<PickupPlayerIdentity>(
+        `
+          select
+            "id",
+            "steamId",
+            "personaName",
+            coalesce("customAvatarUrl", "avatarUrl") as "avatarUrl",
+            "countryCode",
+            "profileUrl"
+          from "PickupPlayer"
+          where "id" = $1
+          limit 1
+        `,
+        [lockedRequest.targetPlayerId],
+      );
+      const targetPlayer = targetPlayerResult.rows[0];
+      if (!targetPlayer) {
+        throw new Error("The substitute player could not be found.");
+      }
+
+      const targetLockResult = await client.query<{ id: string }>(
+        `
+          select "id"
+          from "PickupPlayerLock"
+          where
+            "playerId" = $1
+            and "revokedAt" is null
+            and ("expiresAt" is null or "expiresAt" > now())
+          limit 1
+        `,
+        [lockedRequest.targetPlayerId],
+      );
+      if (targetLockResult.rows[0]) {
+        throw new Error("That player is locked from matchmaking right now.");
+      }
+
+      const targetActiveMatchResult = await client.query<{ matchId: string }>(
+        `
+          select mp."matchId"
+          from "PickupMatchPlayer" mp
+          inner join "PickupMatch" m on m."id" = mp."matchId"
+          where
+            mp."playerId" = $1
+            and mp."matchId" <> $2
+            and (
+              m."status" in ('provisioning', 'server_ready', 'live')
+              or (m."status" = 'ready_check' and m."readyDeadlineAt" > now())
+              or m."status" = 'veto'
+            )
+          limit 1
+        `,
+        [lockedRequest.targetPlayerId, lockedRequest.matchId],
+      );
+      if (targetActiveMatchResult.rows[0]) {
+        throw new Error("That player is already in another active pickup.");
+      }
+
+      const queueResult = await client.query<{
+        name: string;
+        slug: string;
+        teamSize: number;
+      }>(
+        `
+          select "name", "slug", "teamSize"
+          from "PickupQueue"
+          where "id" = $1
+          limit 1
+        `,
+        [lockedRequest.queueId],
+      );
+      const queue = queueResult.rows[0];
+      if (!queue) {
+        throw new Error("Pickup queue could not be found.");
+      }
+
+      const seasonResult = await client.query<{ startingRating: number }>(
+        `
+          select "startingRating"
+          from "PickupSeason"
+          where "id" = $1
+          limit 1
+        `,
+        [lockedRequest.seasonId],
+      );
+      const season = seasonResult.rows[0];
+      if (!season) {
+        throw new Error("Pickup season could not be found.");
+      }
+
+      const targetRatingResult = await client.query<PickupRatingRow>(
+        `
+          insert into "PickupPlayerSeasonRating" (
+            "id",
+            "seasonId",
+            "playerId",
+            "mu",
+            "sigma",
+            "displayRating",
+            "gamesPlayed",
+            "wins",
+            "losses",
+            "seededFrom",
+            "createdAt",
+            "updatedAt"
+          )
+          values (
+            gen_random_uuid()::text,
+            $1,
+            $2,
+            $3,
+            $4,
+            $5,
+            0,
+            0,
+            0,
+            'season-starting-rating',
+            now(),
+            now()
+          )
+          on conflict ("seasonId", "playerId") do update
+          set "updatedAt" = now()
+          returning
+            "playerId",
+            "mu",
+            "sigma",
+            "displayRating",
+            "gamesPlayed",
+            "wins",
+            "losses"
+        `,
+        [
+          lockedRequest.seasonId,
+          lockedRequest.targetPlayerId,
+          season.startingRating,
+          ratingEnv.sigma,
+          season.startingRating,
+        ],
+      );
+      const targetRating = targetRatingResult.rows[0];
+      if (!targetRating) {
+        throw new Error("The substitute rating could not be loaded.");
+      }
+
+      const remainingRoster = roster.filter(
+        (player) => player.playerId !== lockedRequest.requesterPlayerId,
+      );
+      const ratingRowsResult = await client.query<PickupRatingRow>(
+        `
+          select
+            "playerId",
+            "mu",
+            "sigma",
+            "displayRating",
+            "gamesPlayed",
+            "wins",
+            "losses"
+          from "PickupPlayerSeasonRating"
+          where
+            "seasonId" = $1
+            and "playerId" = any($2::text[])
+        `,
+        [
+          lockedRequest.seasonId,
+          [
+            ...remainingRoster.map((player) => player.playerId),
+            lockedRequest.targetPlayerId,
+          ],
+        ],
+      );
+      const ratingByPlayerId = new Map(
+        ratingRowsResult.rows.map((row) => [row.playerId, row]),
+      );
+      ratingByPlayerId.set(targetRating.playerId, targetRating);
+
+      const removedQueueMembership = await client.query<{ joinedAt: Date }>(
+        `
+          delete from "PickupQueueMember"
+          where "playerId" = $1
+          returning "joinedAt"
+        `,
+        [lockedRequest.targetPlayerId],
+      );
+      const targetJoinedAt =
+        removedQueueMembership.rows[0]?.joinedAt ?? new Date();
+
+      const balancedMembers = chooseBalancedTeams(
+        queue.teamSize,
+        [
+          ...remainingRoster.map((player) => {
+            const rating = ratingByPlayerId.get(player.playerId) ?? {
+              displayRating: player.displayBefore,
+              gamesPlayed: 0,
+              losses: 0,
+              mu: player.muBefore,
+              playerId: player.playerId,
+              sigma: player.sigmaBefore,
+              wins: 0,
+            };
+
+            return {
+              ...player,
+              balanceRating: rating.displayRating,
+              balanceRatingSource: "pickup" as const,
+              queueMemberId: `match:${player.matchPlayerId}`,
+              rating,
+            };
+          }),
+          {
+            ...targetPlayer,
+            balanceRating: targetRating.displayRating,
+            balanceRatingSource: "pickup" as const,
+            joinedAt: targetJoinedAt,
+            playerId: targetPlayer.id,
+            queueMemberId: `sub:${lockedRequest.id}`,
+            rating: targetRating,
+          },
+        ],
+      );
+
+      await client.query(
+        `
+          delete from "PickupMatchPlayer"
+          where
+            "matchId" = $1
+            and "playerId" = $2
+        `,
+        [lockedRequest.matchId, lockedRequest.requesterPlayerId],
+      );
+
+      for (const player of remainingRoster) {
+        const team = balancedMembers.left.some(
+          (member) => member.playerId === player.playerId,
+        )
+          ? "left"
+          : "right";
+        const isCaptain =
+          balancedMembers.balanceSummary.captainPlayerIds.left ===
+            player.playerId ||
+          balancedMembers.balanceSummary.captainPlayerIds.right ===
+            player.playerId;
+        await client.query(
+          `
+            update "PickupMatchPlayer"
+            set
+              "team" = $3::"PickupTeamSide",
+              "isCaptain" = $4,
+              "updatedAt" = now()
+            where
+              "matchId" = $1
+              and "playerId" = $2
+          `,
+          [lockedRequest.matchId, player.playerId, team, isCaptain],
+        );
+      }
+
+      const targetTeam = balancedMembers.left.some(
+        (member) => member.playerId === lockedRequest.targetPlayerId,
+      )
+        ? "left"
+        : "right";
+      const targetIsCaptain =
+        balancedMembers.balanceSummary.captainPlayerIds.left ===
+          lockedRequest.targetPlayerId ||
+        balancedMembers.balanceSummary.captainPlayerIds.right ===
+          lockedRequest.targetPlayerId;
+      await client.query(
+        `
+          insert into "PickupMatchPlayer" (
+            "id",
+            "matchId",
+            "playerId",
+            "joinedAt",
+            "readyState",
+            "readyConfirmedAt",
+            "team",
+            "isCaptain",
+            "muBefore",
+            "sigmaBefore",
+            "displayBefore",
+            "createdAt",
+            "updatedAt"
+          )
+          values (
+            gen_random_uuid()::text,
+            $1,
+            $2,
+            $3,
+            'ready',
+            now(),
+            $4::"PickupTeamSide",
+            $5,
+            $6,
+            $7,
+            $8,
+            now(),
+            now()
+          )
+        `,
+        [
+          lockedRequest.matchId,
+          lockedRequest.targetPlayerId,
+          targetJoinedAt,
+          targetTeam,
+          targetIsCaptain,
+          targetRating.mu,
+          targetRating.sigma,
+          targetRating.displayRating,
+        ],
+      );
+
+      let nextVetoDeadlineAt: Date | null = null;
+      if (lockedRequest.stage === "veto") {
+        const activeMaps = await getActiveMapsWithClient(
+          client,
+          lockedRequest.queueId,
+        );
+        const captainIds = [
+          balancedMembers.balanceSummary.captainPlayerIds.left,
+          balancedMembers.balanceSummary.captainPlayerIds.right,
+        ];
+        const turnCaptainPlayerId =
+          captainIds[Math.floor(Math.random() * captainIds.length)] ??
+          captainIds[0]!;
+        nextVetoDeadlineAt = new Date(
+          Date.now() + settings.vetoTurnDurationSeconds * 1000,
+        );
+
+        await client.query(
+          `
+            update "PickupMatch"
+            set
+              "balanceSummary" = $2::jsonb,
+              "finalMapKey" = null,
+              "bannedMapKeys" = null,
+              "currentCaptainPlayerId" = $3,
+              "vetoDeadlineAt" = $4,
+              "vetoState" = $5::jsonb,
+              "updatedAt" = now()
+            where
+              "id" = $1
+              and "status" = 'veto'
+          `,
+          [
+            lockedRequest.matchId,
+            JSON.stringify(balancedMembers.balanceSummary),
+            turnCaptainPlayerId,
+            nextVetoDeadlineAt,
+            JSON.stringify({
+              availableMaps: activeMaps,
+              bannedMaps: [],
+              turnCaptainPlayerId,
+              turns: [],
+            } satisfies PickupVetoState),
+          ],
+        );
+      } else {
+        await client.query(
+          `
+            update "PickupMatch"
+            set
+              "balanceSummary" = $2::jsonb,
+              "currentCaptainPlayerId" = null,
+              "updatedAt" = now()
+            where
+              "id" = $1
+              and "status" = 'server_ready'
+          `,
+          [
+            lockedRequest.matchId,
+            JSON.stringify(balancedMembers.balanceSummary),
+          ],
+        );
+        syncServerReady = true;
+      }
+
+      await client.query(
+        `
+          update "PickupMatchSubRequest"
+          set
+            "status" = 'accepted',
+            "respondedAt" = now(),
+            "updatedAt" = now()
+          where "id" = $1
+        `,
+        [lockedRequest.id],
+      );
+
+      await client.query(
+        `
+          insert into "PickupMatchSubstitution" (
+            "id",
+            "matchId",
+            "outPlayerId",
+            "inPlayerId",
+            "acceptedRequestId",
+            "stage",
+            "createdAt"
+          )
+          values (
+            gen_random_uuid()::text,
+            $1,
+            $2,
+            $3,
+            $4,
+            $5::"PickupMatchSubstitutionStage",
+            now()
+          )
+        `,
+        [
+          lockedRequest.matchId,
+          lockedRequest.requesterPlayerId,
+          lockedRequest.targetPlayerId,
+          lockedRequest.id,
+          lockedRequest.stage,
+        ],
+      );
+
+      await client.query("commit");
+      clearSubRequestTimer(lockedRequest.id);
+
+      syncPlayerIds = [
+        ...new Set(
+          roster
+            .map((player) => player.playerId)
+            .filter((playerId) => playerId !== lockedRequest.requesterPlayerId)
+            .concat([
+              lockedRequest.requesterPlayerId,
+              lockedRequest.targetPlayerId,
+            ]),
+        ),
+      ];
+      syncMatchId = lockedRequest.matchId;
+
+      if (nextVetoDeadlineAt) {
+        scheduleVetoTimer(lockedRequest.matchId, nextVetoDeadlineAt);
+      }
+    } catch (error) {
+      await client.query("rollback");
+      throw error;
+    } finally {
+      client.release();
+    }
+
+    if (syncMatchId) {
+      await broadcastPublicState();
+      await emitStatesForPlayerIds(syncPlayerIds);
+    }
+
+    if (syncServerReady && syncMatchId) {
+      try {
+        await syncServerReadySubstitution(syncMatchId);
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : String(error);
+        await recordProvisionEvent(syncMatchId, "substitution-sync-error", {
+          error: message,
+        });
+        emitPickupErrorToPlayers(
+          syncPlayerIds,
+          "Substitute accepted, but the live server roster could not be refreshed automatically.",
+        );
+      }
+    }
+  }
+
+  async function respondToSubstituteRequest(
+    session: PickupSessionIdentity,
+    requestId: string,
+    action: "accept" | "decline",
+  ) {
+    const request = await getPendingSubRequestById(requestId);
+    if (!request || request.targetPlayerId !== session.player.id) {
+      throw new Error("That substitute request is no longer available.");
+    }
+
+    if (action === "decline") {
+      await resolvePendingSubRequest(request.id, "declined");
+      return getPlayerState(session.player);
+    }
+
+    await acceptSubstituteRequest(request.id, session.player.id);
+    return getPlayerState(session.player);
+  }
+
   async function applyBan(
     matchId: string,
     requestedByPlayerId: string | null,
@@ -2275,6 +3640,11 @@ export function createPickupService(io: Server) {
     const match = await getLatestMatchById(matchId);
     if (!match || match.status !== "veto" || !match.vetoState) {
       return;
+    }
+
+    const pendingSubRequest = await getPendingMatchSubRequest(matchId);
+    if (pendingSubRequest) {
+      throw new Error("Veto is paused while a substitute request is pending.");
     }
 
     const balanceSummary = match.balanceSummary;
@@ -2591,6 +3961,7 @@ export function createPickupService(io: Server) {
     matchId: string,
     payload: Record<string, unknown>,
   ) {
+    await cancelPendingSubRequestsForMatch(matchId);
     const match = await getLatestMatchById(matchId);
     if (
       !match ||
@@ -2634,6 +4005,7 @@ export function createPickupService(io: Server) {
     matchId: string,
     payload: Record<string, unknown>,
   ) {
+    await cancelPendingSubRequestsForMatch(matchId);
     const match = await getLatestMatchById(matchId);
     if (
       !match ||
@@ -3026,6 +4398,7 @@ export function createPickupService(io: Server) {
     },
     async hydrate() {
       await ensureBootstrapData();
+      await hydratePendingSubRequests();
       await cleanupLockedQueueMembers("startup-locked");
       await cleanupExpiredQueueMembers("startup-max-age");
       await hydrateTimers();
@@ -3145,6 +4518,88 @@ export function createPickupService(io: Server) {
 
         try {
           socket.emit("pickup:state", await banMap(session, mapKey));
+        } catch (error) {
+          socket.emit("pickup:error", {
+            message: error instanceof Error ? error.message : String(error),
+          });
+        }
+      });
+
+      socket.on("pickup:sub:request", async (payload: unknown) => {
+        if (!session) {
+          socket.emit("pickup:error", { message: "Pickup login is required." });
+          return;
+        }
+
+        const targetPlayerId =
+          typeof (payload as { targetPlayerId?: unknown })?.targetPlayerId ===
+          "string"
+            ? (payload as { targetPlayerId: string }).targetPlayerId.trim()
+            : "";
+        if (!targetPlayerId) {
+          socket.emit("pickup:error", {
+            message: "A substitute player is required.",
+          });
+          return;
+        }
+
+        try {
+          socket.emit(
+            "pickup:state",
+            await requestSubstitute(session, targetPlayerId),
+          );
+        } catch (error) {
+          socket.emit("pickup:error", {
+            message: error instanceof Error ? error.message : String(error),
+          });
+        }
+      });
+
+      socket.on("pickup:sub:cancel", async () => {
+        if (!session) {
+          socket.emit("pickup:error", { message: "Pickup login is required." });
+          return;
+        }
+
+        try {
+          socket.emit("pickup:state", await cancelSubstituteRequest(session));
+        } catch (error) {
+          socket.emit("pickup:error", {
+            message: error instanceof Error ? error.message : String(error),
+          });
+        }
+      });
+
+      socket.on("pickup:sub:respond", async (payload: unknown) => {
+        if (!session) {
+          socket.emit("pickup:error", { message: "Pickup login is required." });
+          return;
+        }
+
+        const requestId =
+          typeof (payload as { requestId?: unknown })?.requestId === "string"
+            ? (payload as { requestId: string }).requestId.trim()
+            : "";
+        const action =
+          typeof (payload as { action?: unknown })?.action === "string"
+            ? (payload as { action: string }).action.trim()
+            : "";
+        if (!requestId || !["accept", "decline"].includes(action)) {
+          socket.emit("pickup:error", {
+            message: "A valid substitute response is required.",
+          });
+          return;
+        }
+
+        try {
+          socket.emit(
+            "pickup:state",
+            await respondToSubstituteRequest(
+              session,
+              requestId,
+              action as "accept" | "decline",
+            ),
+          );
         } catch (error) {
           socket.emit("pickup:error", {
             message: error instanceof Error ? error.message : String(error),

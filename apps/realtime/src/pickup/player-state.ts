@@ -3,11 +3,14 @@ import { toPlayerCard } from "./state.js";
 import type {
   PickupActiveRatingRow,
   PickupMatchPlayerRow,
+  PickupMatchSubRequestRow,
   PickupMatchRow,
   PickupMatchState,
   PickupPlayerIdentity,
   PickupPlayerLockRow,
   PickupPlayerLockState,
+  PickupSubRequestParticipantState,
+  PickupSubRequestState,
   PickupPlayerState,
   PickupPublicState,
   PickupRatingRow,
@@ -21,6 +24,15 @@ type PlayerStateDeps = {
   getLatestPlayerRecentCompletedMatch: (
     playerId: string,
   ) => Promise<PickupMatchRow | null>;
+  getPendingMatchSubRequest: (
+    matchId: string,
+  ) => Promise<PickupMatchSubRequestRow | null>;
+  getPendingSubRequestForRequester: (
+    playerId: string,
+  ) => Promise<PickupMatchSubRequestRow | null>;
+  getPendingSubRequestForTarget: (
+    playerId: string,
+  ) => Promise<PickupMatchSubRequestRow | null>;
   getMatchPlayers: (matchId: string) => Promise<PickupMatchPlayerRow[]>;
   getOrCreatePlayerSeasonRating: (
     player: PickupPlayerIdentity,
@@ -56,8 +68,68 @@ export function createPlayerStateApi(deps: PlayerStateDeps) {
     };
   }
 
+  function toSubRequestParticipantState(
+    participant: {
+      avatarUrl: string | null;
+      countryCode: string | null;
+      id: string;
+      personaName: string;
+      profileUrl: string | null;
+      steamId: string;
+    },
+  ): PickupSubRequestParticipantState {
+    return {
+      avatarUrl: participant.avatarUrl,
+      countryCode: participant.countryCode,
+      id: participant.id,
+      personaName: participant.personaName,
+      profileUrl: participant.profileUrl,
+      steamId: participant.steamId,
+    };
+  }
+
+  function toSubRequestState(
+    request: PickupMatchSubRequestRow | null,
+  ): PickupSubRequestState | null {
+    if (!request) {
+      return null;
+    }
+
+    return {
+      createdAt: request.createdAt.toISOString(),
+      expiresAt: request.expiresAt.toISOString(),
+      finalMapKey: request.finalMapKey,
+      id: request.id,
+      matchId: request.matchId,
+      queueId: request.queueId,
+      queueName: request.queueName,
+      queueSlug: request.queueSlug,
+      requester: toSubRequestParticipantState({
+        avatarUrl: request.requesterAvatarUrl,
+        countryCode: request.requesterCountryCode,
+        id: request.requesterPlayerId,
+        personaName: request.requesterPersonaName,
+        profileUrl: request.requesterProfileUrl,
+        steamId: request.requesterSteamId,
+      }),
+      stage: request.stage,
+      status: request.status,
+      target: toSubRequestParticipantState({
+        avatarUrl: request.targetAvatarUrl,
+        countryCode: request.targetCountryCode,
+        id: request.targetPlayerId,
+        personaName: request.targetPersonaName,
+        profileUrl: request.targetProfileUrl,
+        steamId: request.targetSteamId,
+      }),
+    };
+  }
+
   async function buildMatchState(match: PickupMatchRow): Promise<PickupMatchState> {
-    const matchPlayers = await deps.getMatchPlayers(match.id);
+    const [matchPlayers, pendingSubRequest] = await Promise.all([
+      deps.getMatchPlayers(match.id),
+      deps.getPendingMatchSubRequest(match.id),
+    ]);
     const left = matchPlayers.filter((member) => member.team === "left");
     const right = matchPlayers.filter((member) => member.team === "right");
 
@@ -68,6 +140,29 @@ export function createPlayerStateApi(deps: PlayerStateDeps) {
       finalScore: match.finalScore,
       id: match.id,
       liveStartedAt: match.liveStartedAt?.toISOString() ?? null,
+      pendingSubRequest: pendingSubRequest
+        ? {
+            createdAt: pendingSubRequest.createdAt.toISOString(),
+            expiresAt: pendingSubRequest.expiresAt.toISOString(),
+            id: pendingSubRequest.id,
+            requester: toSubRequestParticipantState({
+              avatarUrl: pendingSubRequest.requesterAvatarUrl,
+              countryCode: pendingSubRequest.requesterCountryCode,
+              id: pendingSubRequest.requesterPlayerId,
+              personaName: pendingSubRequest.requesterPersonaName,
+              profileUrl: pendingSubRequest.requesterProfileUrl,
+              steamId: pendingSubRequest.requesterSteamId,
+            }),
+            target: toSubRequestParticipantState({
+              avatarUrl: pendingSubRequest.targetAvatarUrl,
+              countryCode: pendingSubRequest.targetCountryCode,
+              id: pendingSubRequest.targetPlayerId,
+              personaName: pendingSubRequest.targetPersonaName,
+              profileUrl: pendingSubRequest.targetProfileUrl,
+              steamId: pendingSubRequest.targetSteamId,
+            }),
+          }
+        : null,
       queueId: match.queueId,
       readyDeadlineAt: match.readyDeadlineAt?.toISOString() ?? null,
       seasonId: match.seasonId,
@@ -99,11 +194,15 @@ export function createPlayerStateApi(deps: PlayerStateDeps) {
     player: PickupPlayerIdentity,
   ): Promise<PickupPlayerState> {
     const serverNow = new Date().toISOString();
-    const [match, activeLock] = await Promise.all([
+    const [match, activeLock, outgoingSubRequest, incomingSubRequest] = await Promise.all([
       deps.getLatestPlayerActiveMatch(player.id),
       deps.getActivePlayerLock(player.id),
+      deps.getPendingSubRequestForRequester(player.id),
+      deps.getPendingSubRequestForTarget(player.id),
     ]);
     const lockState = lockToState(activeLock);
+    const outgoingSubRequestState = toSubRequestState(outgoingSubRequest);
+    const incomingSubRequestState = toSubRequestState(incomingSubRequest);
 
     if (match) {
       const [publicState, rating, ratings] = await Promise.all([
@@ -115,7 +214,9 @@ export function createPlayerStateApi(deps: PlayerStateDeps) {
 
       return {
         activeLock: lockState,
+        incomingSubRequest: incomingSubRequestState,
         match: matchState,
+        outgoingSubRequest: outgoingSubRequestState,
         publicState,
         rating: ratingToState(rating),
         ratings: ratings.map(activeRatingToState),
@@ -143,6 +244,8 @@ export function createPlayerStateApi(deps: PlayerStateDeps) {
 
       return {
         activeLock: lockState,
+        incomingSubRequest: incomingSubRequestState,
+        outgoingSubRequest: outgoingSubRequestState,
         publicState,
         queue: {
           joinedAt: membership.joinedAt.toISOString(),
@@ -167,7 +270,9 @@ export function createPlayerStateApi(deps: PlayerStateDeps) {
 
       return {
         activeLock: lockState,
+        incomingSubRequest: incomingSubRequestState,
         match: matchState,
+        outgoingSubRequest: outgoingSubRequestState,
         publicState,
         rating: ratingToState(rating),
         ratings: ratings.map(activeRatingToState),
@@ -192,6 +297,8 @@ export function createPlayerStateApi(deps: PlayerStateDeps) {
 
     return {
       activeLock: lockState,
+      incomingSubRequest: incomingSubRequestState,
+      outgoingSubRequest: outgoingSubRequestState,
       publicState,
       rating: ratingToState(rating),
       ratings: ratings.map(activeRatingToState),

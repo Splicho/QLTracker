@@ -952,6 +952,7 @@ function toPickupLandingMatchState(
     finalScore: match.finalScore ?? null,
     id: match.id,
     liveStartedAt: match.liveStartedAt?.toISOString() ?? null,
+    pendingSubRequest: null,
     queueId: match.queueId,
     readyDeadlineAt: match.readyDeadlineAt?.toISOString() ?? null,
     seasonId: match.seasonId,
@@ -1384,6 +1385,50 @@ export async function getPickupPlayerByIdOrSteamId(playerIdOrSteamId: string) {
     where: {
       OR: [{ id: playerIdOrSteamId }, { steamId: playerIdOrSteamId }],
     },
+  })
+}
+
+export async function searchPickupPlayersForSubstitute(
+  query: string,
+  excludePlayerId?: string
+) {
+  const trimmedQuery = query.trim()
+  if (!trimmedQuery) {
+    return []
+  }
+
+  return getPrisma().pickupPlayer.findMany({
+    where: {
+      ...(excludePlayerId
+        ? {
+            id: {
+              not: excludePlayerId,
+            },
+          }
+        : {}),
+      OR: [
+        {
+          steamId: {
+            contains: trimmedQuery,
+          },
+        },
+        {
+          personaName: {
+            contains: trimmedQuery,
+            mode: "insensitive",
+          },
+        },
+      ],
+    },
+    orderBy: [
+      {
+        lastLoginAt: "desc",
+      },
+      {
+        updatedAt: "desc",
+      },
+    ],
+    take: 10,
   })
 }
 

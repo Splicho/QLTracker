@@ -136,6 +136,47 @@ export type PickupMatchPlayerCard = {
   won: boolean | null
 }
 
+export type PickupSubRequestParticipant = {
+  avatarUrl: string | null
+  countryCode?: string | null
+  id: string
+  personaName: string
+  profileUrl: string | null
+  steamId: string
+}
+
+export type PickupSubRequest = {
+  createdAt: string
+  expiresAt: string
+  finalMapKey: string | null
+  id: string
+  matchId: string
+  queueId: string
+  queueName: string
+  queueSlug: string
+  requester: PickupSubRequestParticipant
+  stage: "veto" | "server_ready"
+  status: "pending" | "accepted" | "declined" | "cancelled" | "expired"
+  target: PickupSubRequestParticipant
+}
+
+export type PickupMatchPendingSubRequest = {
+  createdAt: string
+  expiresAt: string
+  id: string
+  requester: PickupSubRequestParticipant
+  target: PickupSubRequestParticipant
+}
+
+export type PickupPlayerSearchResult = {
+  avatarUrl: string | null
+  countryCode: string | null
+  id: string
+  personaName: string
+  profileUrl: string | null
+  steamId: string
+}
+
 export type PickupMatchState = {
   balanceSummary: {
     captainPlayerIds: {
@@ -153,6 +194,7 @@ export type PickupMatchState = {
   finalScore: string | null
   id: string
   liveStartedAt: string | null
+  pendingSubRequest: PickupMatchPendingSubRequest | null
   queueId: string
   readyDeadlineAt: string | null
   seasonId: string
@@ -380,14 +422,19 @@ export type PickupNotice = {
 export type PickupPlayerState =
   | {
       activeLock: PickupPlayerLock | null
+      incomingSubRequest: PickupSubRequest | null
+      outgoingSubRequest: PickupSubRequest | null
       publicState: PickupPublicState
       rating: PickupRating | null
+      ratings?: PickupSeasonalRating[]
       serverNow: string
       stage: "idle"
       viewer: PickupPlayer
     }
   | {
       activeLock: PickupPlayerLock | null
+      incomingSubRequest: PickupSubRequest | null
+      outgoingSubRequest: PickupSubRequest | null
       publicState: PickupPublicState
       queue: {
         joinedAt: string
@@ -397,15 +444,19 @@ export type PickupPlayerState =
         queueSlug: string
       }
       rating: PickupRating | null
+      ratings?: PickupSeasonalRating[]
       serverNow: string
       stage: "queue"
       viewer: PickupPlayer
     }
   | {
       activeLock: PickupPlayerLock | null
+      incomingSubRequest: PickupSubRequest | null
       match: PickupMatchState
+      outgoingSubRequest: PickupSubRequest | null
       publicState: PickupPublicState
       rating: PickupRating | null
+      ratings?: PickupSeasonalRating[]
       serverNow: string
       stage:
         | "ready_check"
@@ -663,4 +714,22 @@ export async function fetchPickupPlayerState(sessionToken: string) {
     state: PickupPlayerState
   }
   return payload.state
+}
+
+export async function searchPickupPlayers(
+  sessionToken: string,
+  query: string
+) {
+  const trimmedQuery = query.trim()
+  if (!trimmedQuery) {
+    return [] satisfies PickupPlayerSearchResult[]
+  }
+
+  const payload = await requestPickupApi<{ players: PickupPlayerSearchResult[] }>(
+    `/api/pickup/players/search?q=${encodeURIComponent(trimmedQuery)}`,
+    undefined,
+    sessionToken
+  )
+
+  return payload.players
 }

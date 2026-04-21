@@ -292,6 +292,7 @@ function createBaseMatch(
       stage === "live" || stage === "completed"
         ? new Date().toISOString()
         : null,
+    pendingSubRequest: null,
     queueId: MOCK_QUEUE_ID,
     readyDeadlineAt:
       stage === "ready_check"
@@ -374,6 +375,8 @@ export function createMockPickupState(
   if (stage === "idle") {
     return {
       activeLock: null,
+      incomingSubRequest: null,
+      outgoingSubRequest: null,
       publicState: createPublicState(0, safeViewer),
       rating,
       serverNow,
@@ -385,6 +388,8 @@ export function createMockPickupState(
   if (stage === "queue") {
     return {
       activeLock: null,
+      incomingSubRequest: null,
+      outgoingSubRequest: null,
       publicState: createPublicState(1, safeViewer),
       queue: {
         joinedAt: new Date().toISOString(),
@@ -401,7 +406,9 @@ export function createMockPickupState(
 
   return {
     activeLock: null,
+    incomingSubRequest: null,
     match: createBaseMatch(stage, safeViewer),
+    outgoingSubRequest: null,
     publicState: createPublicState(8, safeViewer),
     rating,
     serverNow,

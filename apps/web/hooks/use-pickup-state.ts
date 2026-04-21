@@ -219,11 +219,16 @@ export function usePickupState(
     nextViewer: PickupPlayer,
     nextPublicState: PickupPublicState,
     rating: PickupPlayerState["rating"],
-    activeLock: PickupPlayerState["activeLock"]
+    activeLock: PickupPlayerState["activeLock"],
+    ratings: PickupPlayerState["ratings"] = [],
+    incomingSubRequest: PickupPlayerState["incomingSubRequest"] = null
   ): PickupPlayerState => ({
     activeLock,
+    incomingSubRequest,
+    outgoingSubRequest: null,
     publicState: nextPublicState,
     rating,
+    ratings,
     serverNow: new Date().toISOString(),
     stage: "idle",
     viewer: nextViewer,
@@ -313,7 +318,9 @@ export function usePickupState(
           playerState.viewer,
           playerState.publicState,
           playerState.rating,
-          playerState.activeLock
+          playerState.activeLock,
+          playerState.ratings ?? [],
+          playerState.incomingSubRequest
         ),
         matchId: playerState.match.id,
       })
@@ -701,6 +708,30 @@ export function usePickupState(
       }
 
       emit("pickup:veto:ban", { mapKey })
+    },
+    requestSubstitute: (targetPlayerId: string) => {
+      if (mockMode) {
+        return
+      }
+
+      emit("pickup:sub:request", { targetPlayerId })
+    },
+    cancelSubstituteRequest: () => {
+      if (mockMode) {
+        return
+      }
+
+      emit("pickup:sub:cancel")
+    },
+    respondToSubstituteRequest: (
+      requestId: string,
+      action: "accept" | "decline"
+    ) => {
+      if (mockMode) {
+        return
+      }
+
+      emit("pickup:sub:respond", { action, requestId })
     },
   }
 }

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { type ReactNode, useEffect, useRef, useState } from "react"
 import { Crown, LoaderCircle, MapPinned } from "lucide-react"
 import { Medal, Steam } from "@/components/icon"
 import { PickupEmptyBackground } from "@/components/pickup/pickup-empty-background"
@@ -9,6 +9,7 @@ import { PickupRecentMatches } from "@/components/pickup/pickup-recent-matches"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import {
   Empty,
   EmptyContent,
@@ -28,10 +29,12 @@ import type {
   PickupMatchPlayerCard,
   PickupPlayer,
   PickupPlayerLock,
+  PickupPlayerSearchResult,
   PickupPlayerState,
   PickupProfileMatch,
   PickupPublicState,
   PickupQueueSummary,
+  PickupSubRequest,
 } from "@/lib/pickup"
 
 function formatCountdown(deadlineAt: string | null, nowMs = Date.now()) {
@@ -221,21 +224,228 @@ function VetoMapCard({
   )
 }
 
+function SubstituteSearchPanel({
+  onRequestSubstitute,
+}: {
+  onRequestSubstitute: (targetPlayerId: string) => void
+}) {
+  const [query, setQuery] = useState("")
+  const [results, setResults] = useState<PickupPlayerSearchResult[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const trimmedQuery = query.trim()
+    if (trimmedQuery.length < 2) {
+      setResults([])
+      setLoading(false)
+      setError(null)
+      return
+    }
+
+    let cancelled = false
+    const timeoutId = window.setTimeout(async () => {
+      setLoading(true)
+      setError(null)
+
+      try {
+        const response = await fetch(
+          `/api/pickup/players/search?q=${encodeURIComponent(trimmedQuery)}`,
+          {
+            cache: "no-store",
+          }
+        )
+
+        if (!response.ok) {
+          let nextMessage = "Pickup player search failed."
+          try {
+            const payload = (await response.json()) as { message?: string }
+            if (payload.message) {
+              nextMessage = payload.message
+            }
+          } catch {
+            // Ignore invalid search errors.
+          }
+
+          throw new Error(nextMessage)
+        }
+
+        const payload = (await response.json()) as {
+          players: PickupPlayerSearchResult[]
+        }
+        if (!cancelled) {
+          setResults(payload.players ?? [])
+        }
+      } catch (nextError) {
+        if (!cancelled) {
+          setResults([])
+          setError(
+            nextError instanceof Error
+              ? nextError.message
+              : "Pickup player search failed."
+          )
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false)
+        }
+      }
+    }, 200)
+
+    return () => {
+      cancelled = true
+      window.clearTimeout(timeoutId)
+    }
+  }, [query])
+
+  return (
+    <Card className="border-border/70 bg-card/70">
+      <CardContent className="flex flex-col gap-4 p-4">
+        <div className="space-y-1">
+          <p className="text-sm font-semibold text-foreground">
+            Find Substitute
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Search by player name or SteamID, then send a direct substitute
+            request.
+          </p>
+        </div>
+
+        <Input
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Search player or SteamID"
+          value={query}
+        />
+
+        <div className="flex flex-col gap-2">
+          {loading ? (
+            <div className="flex items-center gap-2 rounded-md border border-border/60 bg-muted/20 px-3 py-2 text-sm text-muted-foreground">
+              <LoaderCircle className="size-4 animate-spin" />
+              Searching players...
+            </div>
+          ) : null}
+
+          {!loading && error ? (
+            <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {error}
+            </div>
+          ) : null}
+
+          {!loading && !error && query.trim().length >= 2 && results.length === 0 ? (
+            <div className="rounded-md border border-border/60 bg-muted/20 px-3 py-2 text-sm text-muted-foreground">
+              No matching pickup players found.
+            </div>
+          ) : null}
+
+          {results.map((result) => (
+            <div
+              className="flex items-center gap-3 rounded-md border border-border/60 bg-muted/20 px-3 py-2"
+              key={result.id}
+            >
+              <PlayerAvatar
+                avatarUrl={result.avatarUrl}
+                personaName={result.personaName}
+                size="default"
+              />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold text-foreground">
+                  {stripQuakeColors(result.personaName).trim()}
+                </p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {result.steamId}
+                </p>
+              </div>
+              <Button
+                onClick={() => onRequestSubstitute(result.id)}
+                size="sm"
+                type="button"
+              >
+                Request
+              </Button>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+function SubstitutePromptCard({
+  countdownNowMs,
+  request,
+  description,
+  title,
+  children,
+}: {
+  countdownNowMs: number
+  request: PickupSubRequest
+  description?: ReactNode
+  title: string
+  children?: ReactNode
+}) {
+  const defaultDescription = (
+    <p className="text-sm text-foreground">
+      <span className="font-semibold">
+        {stripQuakeColors(request.requester.personaName).trim()}
+      </span>{" "}
+      wants you to substitute into{" "}
+      <span className="font-semibold">{request.queueName}</span>
+      {request.finalMapKey
+        ? ` on ${getMapEntry(request.finalMapKey)?.name ?? request.finalMapKey}`
+        : ""}
+      .
+    </p>
+  )
+
+  return (
+    <Card className="border-primary/25 bg-card/70">
+      <CardContent className="flex flex-col gap-3 p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-1">
+            <p className="text-sm font-semibold tracking-[0.18em] text-primary uppercase">
+              {title}
+            </p>
+            {description ?? defaultDescription}
+          </div>
+          <Badge className="border-border/70" variant="outline">
+            {formatCountdown(request.expiresAt, countdownNowMs)}
+          </Badge>
+        </div>
+        {children}
+      </CardContent>
+    </Card>
+  )
+}
+
 function PickupActiveMatchLayout({
   canBan,
   countdownNowMs,
   currentPlayerId,
+  incomingSubRequest,
   locationFlag,
   match,
+  onCancelSubstituteRequest,
+  onRequestSubstitute,
+  onRespondToSubstituteRequest,
   onVetoBan,
+  outgoingSubRequest,
 }: {
   canBan: boolean
   countdownNowMs: number
   currentPlayerId: string | null
+  incomingSubRequest: PickupSubRequest | null
   locationFlag: string | null
   match: PickupMatchState
+  onCancelSubstituteRequest: () => void
+  onRequestSubstitute: (targetPlayerId: string) => void
+  onRespondToSubstituteRequest: (
+    requestId: string,
+    action: "accept" | "decline"
+  ) => void
   onVetoBan: (mapKey: string) => void
+  outgoingSubRequest: PickupSubRequest | null
 }) {
+  const [showSubstituteSearch, setShowSubstituteSearch] = useState(false)
   const isVeto = match.status === "veto"
   const isProvisioning = match.status === "provisioning"
   const isServerReady = match.status === "server_ready"
@@ -248,6 +458,12 @@ function PickupActiveMatchLayout({
       (player) => player.id === match.veto.currentCaptainPlayerId
     ) ?? null
   const activeCaptainId = isVeto ? match.veto.currentCaptainPlayerId : null
+  const pendingSubRequest = match.pendingSubRequest
+  const canOpenSubstituteSearch =
+    (isVeto || isServerReady) &&
+    !pendingSubRequest &&
+    !outgoingSubRequest &&
+    !incomingSubRequest
   const turnText =
     match.veto.currentCaptainPlayerId === currentPlayerId
       ? "Your turn to ban"
@@ -280,10 +496,14 @@ function PickupActiveMatchLayout({
         {isVeto ? (
           <div className="flex flex-col items-center">
             <p className="text-lg font-semibold text-foreground sm:text-xl">
-              {turnText}
+              {pendingSubRequest
+                ? "Veto paused for substitute request"
+                : turnText}
             </p>
             <p className="mt-2 text-5xl font-semibold tracking-tight text-primary sm:text-6xl">
-              {formatCountdown(match.veto.deadlineAt, countdownNowMs)}
+              {pendingSubRequest
+                ? formatCountdown(pendingSubRequest.expiresAt, countdownNowMs)
+                : formatCountdown(match.veto.deadlineAt, countdownNowMs)}
             </p>
           </div>
         ) : isProvisioning ? (
@@ -326,6 +546,110 @@ function PickupActiveMatchLayout({
           </div>
         )}
       </div>
+
+      {incomingSubRequest && incomingSubRequest.matchId === match.id ? (
+        <SubstitutePromptCard
+          countdownNowMs={countdownNowMs}
+          request={incomingSubRequest}
+          title="Incoming Substitute Request"
+        >
+          <div className="flex flex-wrap items-center gap-3">
+            <Button
+              onClick={() =>
+                onRespondToSubstituteRequest(incomingSubRequest.id, "accept")
+              }
+              size="sm"
+              type="button"
+            >
+              Accept
+            </Button>
+            <Button
+              onClick={() =>
+                onRespondToSubstituteRequest(incomingSubRequest.id, "decline")
+              }
+              size="sm"
+              type="button"
+              variant="outline"
+            >
+              Decline
+            </Button>
+          </div>
+        </SubstitutePromptCard>
+      ) : null}
+
+      {outgoingSubRequest && outgoingSubRequest.matchId === match.id ? (
+        <SubstitutePromptCard
+          countdownNowMs={countdownNowMs}
+          description={
+            <p className="text-sm text-foreground">
+              Waiting for{" "}
+              <span className="font-semibold">
+                {stripQuakeColors(outgoingSubRequest.target.personaName).trim()}
+              </span>{" "}
+              to accept your substitute request for{" "}
+              <span className="font-semibold">
+                {outgoingSubRequest.queueName}
+              </span>
+              {outgoingSubRequest.finalMapKey
+                ? ` on ${getMapEntry(outgoingSubRequest.finalMapKey)?.name ?? outgoingSubRequest.finalMapKey}`
+                : ""}
+              .
+            </p>
+          }
+          request={outgoingSubRequest}
+          title="Substitute Pending"
+        >
+          <div className="flex flex-wrap items-center gap-3">
+            <p className="text-sm text-muted-foreground">
+              Waiting for{" "}
+              <span className="font-semibold text-foreground">
+                {stripQuakeColors(outgoingSubRequest.target.personaName).trim()}
+              </span>{" "}
+              to accept.
+            </p>
+            <Button
+              onClick={onCancelSubstituteRequest}
+              size="sm"
+              type="button"
+              variant="outline"
+            >
+              Cancel Request
+            </Button>
+          </div>
+        </SubstitutePromptCard>
+      ) : null}
+
+      {canOpenSubstituteSearch ? (
+        <div className="flex justify-center">
+          {!showSubstituteSearch ? (
+            <Button
+              onClick={() => setShowSubstituteSearch(true)}
+              type="button"
+              variant="outline"
+            >
+              Find Substitute
+            </Button>
+          ) : (
+            <div className="w-full max-w-2xl space-y-3">
+              <SubstituteSearchPanel
+                onRequestSubstitute={(targetPlayerId) => {
+                  onRequestSubstitute(targetPlayerId)
+                  setShowSubstituteSearch(false)
+                }}
+              />
+              <div className="flex justify-end">
+                <Button
+                  onClick={() => setShowSubstituteSearch(false)}
+                  type="button"
+                  variant="ghost"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : null}
 
       <div className="grid items-start gap-6 xl:grid-cols-[1fr_minmax(22rem,30rem)_1fr]">
         <VetoTeamColumn
@@ -533,10 +857,13 @@ export function PickupPage({
   liveMatches,
   mockMode,
   mockStage,
+  onCancelSubstituteRequest,
   onConnectWithSteam,
   onJoinQueue,
   onOpenMatch,
   onOpenPlayerProfile,
+  onRequestSubstitute,
+  onRespondToSubstituteRequest,
   onSetMockStage,
   onVetoBan,
   pickupAvailable,
@@ -551,18 +878,22 @@ export function PickupPage({
   liveMatches: PickupMatchState[]
   mockMode: boolean
   mockStage: PickupMockStage
+  onCancelSubstituteRequest: () => void
   onConnectWithSteam: () => void
   onJoinQueue: (queue: PickupQueueSummary) => void
   onOpenMatch: (matchId: string) => void
   onOpenPlayerProfile: (playerId: string) => void
+  onRequestSubstitute: (targetPlayerId: string) => void
+  onRespondToSubstituteRequest: (
+    requestId: string,
+    action: "accept" | "decline"
+  ) => void
   onSetMockStage: (stage: PickupMockStage) => void
-  onReadyUp: () => void
   onVetoBan: (mapKey: string) => void
   pickupAvailable: boolean
   player: PickupPlayer | null
   playerState: PickupPlayerState | null
   publicState: PickupPublicState | null
-  readyActionPending?: boolean
   recentMatches: PickupProfileMatch[]
   userLoading?: boolean
 }) {
@@ -575,11 +906,14 @@ export function PickupPage({
   })
   const [countdownNowMs, setCountdownNowMs] = useState(() => Date.now())
   const match = playerState && "match" in playerState ? playerState.match : null
-  const matchServerNow =
-    playerState && "match" in playerState ? playerState.serverNow : null
+  const stateServerNow = playerState?.serverNow ?? null
   const activeCaptainId = match?.veto.currentCaptainPlayerId ?? null
   const canBan =
-    match && player && match.status === "veto" && activeCaptainId === player.id
+    match &&
+    player &&
+    match.status === "veto" &&
+    !match.pendingSubRequest &&
+    activeCaptainId === player.id
   const locationFlag = match?.server.countryCode
     ? getCountryFlagSrc(match.server.countryCode)
     : null
@@ -606,14 +940,23 @@ export function PickupPage({
     : isMatchStage
       ? "flex min-h-[calc(100vh-8rem)] flex-1 flex-col gap-6 bg-[linear-gradient(180deg,#050505_0%,#121212_100%)] p-6"
       : "flex flex-1 flex-col gap-6 p-6"
+  const incomingSubRequest = playerState?.incomingSubRequest ?? null
+  const outgoingSubRequest = playerState?.outgoingSubRequest ?? null
 
   useEffect(() => {
-    if (!match || !["ready_check", "veto", "live"].includes(match.status)) {
+    const shouldTrackClock =
+      Boolean(incomingSubRequest) ||
+      Boolean(outgoingSubRequest) ||
+      (match != null &&
+        (["ready_check", "veto", "live"].includes(match.status) ||
+          Boolean(match.pendingSubRequest)))
+
+    if (!shouldTrackClock) {
       return
     }
 
-    const nextServerNowMs = matchServerNow
-      ? new Date(matchServerNow).getTime()
+    const nextServerNowMs = stateServerNow
+      ? new Date(stateServerNow).getTime()
       : Number.NaN
     const nextLocalNowMs = Date.now()
 
@@ -637,10 +980,13 @@ export function PickupPage({
     match,
     match?.id,
     match?.liveStartedAt,
+    match?.pendingSubRequest?.expiresAt,
     match?.readyDeadlineAt,
     match?.status,
     match?.veto.deadlineAt,
-    matchServerNow,
+    incomingSubRequest,
+    outgoingSubRequest,
+    stateServerNow,
   ])
 
   if (!pickupAvailable) {
@@ -665,6 +1011,38 @@ export function PickupPage({
 
   return (
     <div className={pageClassName}>
+      {incomingSubRequest && (!match || incomingSubRequest.matchId !== match.id) ? (
+        <div className="mx-auto w-full max-w-[104rem]">
+          <SubstitutePromptCard
+            countdownNowMs={countdownNowMs}
+            request={incomingSubRequest}
+            title="Incoming Substitute Request"
+          >
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                onClick={() =>
+                  onRespondToSubstituteRequest(incomingSubRequest.id, "accept")
+                }
+                size="sm"
+                type="button"
+              >
+                Accept
+              </Button>
+              <Button
+                onClick={() =>
+                  onRespondToSubstituteRequest(incomingSubRequest.id, "decline")
+                }
+                size="sm"
+                type="button"
+                variant="outline"
+              >
+                Decline
+              </Button>
+            </div>
+          </SubstitutePromptCard>
+        </div>
+      ) : null}
+
       {showHeroBackground ? (
         <>
           <PickupEmptyBackground
@@ -727,9 +1105,14 @@ export function PickupPage({
             canBan={!!canBan}
             countdownNowMs={countdownNowMs}
             currentPlayerId={player.id}
+            incomingSubRequest={incomingSubRequest}
             locationFlag={locationFlag}
             match={match}
+            onCancelSubstituteRequest={onCancelSubstituteRequest}
+            onRequestSubstitute={onRequestSubstitute}
+            onRespondToSubstituteRequest={onRespondToSubstituteRequest}
             onVetoBan={onVetoBan}
+            outgoingSubRequest={outgoingSubRequest}
           />
         </div>
       ) : null}

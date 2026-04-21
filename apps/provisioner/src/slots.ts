@@ -100,6 +100,14 @@ export function readSlotMetadata(slotId: number) {
   return JSON.parse(fs.readFileSync(file, "utf8")) as SlotMetadata;
 }
 
+export function writeSlotMetadata(slotId: number, metadata: SlotMetadata) {
+  fs.writeFileSync(
+    metadataFile(slotId),
+    `${JSON.stringify(metadata, null, 2)}\n`,
+    "utf8",
+  );
+}
+
 export async function reconcileSlots() {
   for (const slot of SLOT_DEFINITIONS) {
     const state = readSlotState(slot);
@@ -155,7 +163,7 @@ export async function allocateSlot(payload: ProvisionPayload) {
     const rconPort = RCON_BASE_PORT + slot.id;
     const currentDir = slotDir(slot.id);
     const metadata = buildSlotMetadata(payload, slot, token);
-    fs.writeFileSync(metadataFile(slot.id), `${JSON.stringify(metadata, null, 2)}\n`, "utf8");
+    writeSlotMetadata(slot.id, metadata);
     fs.writeFileSync(
       path.join(currentDir, "home", "baseq3", "pickup-server.cfg"),
       `${buildServerCfg(currentDir, slot, metadata, rconPort, rconToken)}\n`,

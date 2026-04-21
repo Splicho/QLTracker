@@ -9,6 +9,7 @@ import minqlx
 class pickup_bridge(minqlx.Plugin):
     def __init__(self):
         super().__init__()
+        self.add_command("reloadpickup", self.cmd_reloadpickup, 5)
         self.add_hook("map", self.handle_map)
         self.add_hook("player_connect", self.handle_player_connect, priority=minqlx.PRI_HIGH)
         self.add_hook("player_loaded", self.handle_player_loaded)
@@ -50,6 +51,30 @@ class pickup_bridge(minqlx.Plugin):
         with open(metadata_file, "r", encoding="utf-8") as handle:
             return json.load(handle)
 
+    def reload_metadata(self):
+        self.metadata = self.load_metadata()
+        self.populate_roster()
+
+    def apply_roster(self):
+        for player in self.players():
+            steam_id = self.parse_steam_id(player)
+            if steam_id is None:
+                continue
+
+            target_team = self.allowed_players.get(steam_id)
+            try:
+                if target_team:
+                    if player.team != target_team:
+                        player.put(target_team)
+                elif player.team != "spectator":
+                    player.put("spectator")
+            except Exception as error:
+                self.logger.warning(
+                    "failed to apply pickup roster for %s: %s",
+                    player.clean_name,
+                    error,
+                )
+
     def populate_roster(self):
         self.match_id = self.metadata.get("matchId")
         self.callback_url = self.metadata.get("callbackBaseUrl")
@@ -61,6 +86,18 @@ class pickup_bridge(minqlx.Plugin):
 
         for player in self.metadata.get("teams", {}).get("blue", []):
             self.allowed_players[int(player["steamId"])] = "blue"
+
+    def cmd_reloadpickup(self, _player, _msg, _channel):
+        try:
+            self.reload_metadata()
+            self.apply_roster()
+        except Exception as error:
+            self.logger.error("failed to reload pickup metadata: %s", error)
+            self.msg("^1[QLTRACKER] ^7Failed to reload pickup metadata.")
+            return minqlx.RET_STOP_ALL
+
+        self.msg("^1[QLTRACKER] ^7Pickup metadata reloaded.")
+        return minqlx.RET_STOP_ALL
 
     def post_json(self, suffix, payload):
         if not self.callback_url or not self.callback_token:

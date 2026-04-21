@@ -85,18 +85,19 @@ export function PickupPageClient({
       liveMatches={landingQuery.data?.liveMatches ?? []}
       mockMode={pickup.mockMode}
       mockStage={pickup.mockStage}
+      onCancelSubstituteRequest={pickup.cancelSubstituteRequest}
       onConnectWithSteam={auth.connectWithSteam}
       onJoinQueue={pickup.joinQueue}
       onOpenMatch={(matchId) => router.push(`/matches/${matchId}`)}
       onOpenPlayerProfile={(playerId) => router.push(`/players/${playerId}`)}
+      onRequestSubstitute={pickup.requestSubstitute}
+      onRespondToSubstituteRequest={pickup.respondToSubstituteRequest}
       onSetMockStage={pickup.setMockStage}
-      onReadyUp={pickup.readyUp}
       onVetoBan={pickup.vetoBan}
       pickupAvailable={auth.pickupAvailable}
       player={auth.player}
       playerState={pickup.playerState}
       publicState={pickup.publicState}
-      readyActionPending={pickup.readyActionPending}
       recentMatches={landingQuery.data?.recentMatches ?? []}
       userLoading={auth.userLoading}
     />

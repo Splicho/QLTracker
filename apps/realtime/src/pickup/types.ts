@@ -171,6 +171,66 @@ export type PickupMatchPlayerRow = PickupPlayerIdentity & {
   won: boolean | null;
 };
 
+export type PickupMatchSubRequestStatus =
+  | "pending"
+  | "accepted"
+  | "declined"
+  | "cancelled"
+  | "expired";
+
+export type PickupMatchSubstitutionStage = "veto" | "server_ready";
+
+export type PickupSubRequestParticipantState = PickupPlayerIdentity;
+
+export type PickupSubRequestState = {
+  createdAt: string;
+  expiresAt: string;
+  finalMapKey: string | null;
+  id: string;
+  matchId: string;
+  queueId: string;
+  queueName: string;
+  queueSlug: string;
+  requester: PickupSubRequestParticipantState;
+  stage: PickupMatchSubstitutionStage;
+  status: PickupMatchSubRequestStatus;
+  target: PickupSubRequestParticipantState;
+};
+
+export type PickupMatchPendingSubRequestState = {
+  createdAt: string;
+  expiresAt: string;
+  id: string;
+  requester: PickupSubRequestParticipantState;
+  target: PickupSubRequestParticipantState;
+};
+
+export type PickupMatchSubRequestRow = {
+  createdAt: Date;
+  expiresAt: Date;
+  finalMapKey: string | null;
+  id: string;
+  matchId: string;
+  queueId: string;
+  queueName: string;
+  queueSlug: string;
+  requesterAvatarUrl: string | null;
+  requesterCountryCode: string | null;
+  requesterPersonaName: string;
+  requesterPlayerId: string;
+  requesterProfileUrl: string | null;
+  requesterSteamId: string;
+  respondedAt: Date | null;
+  stage: PickupMatchSubstitutionStage;
+  status: PickupMatchSubRequestStatus;
+  targetAvatarUrl: string | null;
+  targetCountryCode: string | null;
+  targetPersonaName: string;
+  targetPlayerId: string;
+  targetProfileUrl: string | null;
+  targetSteamId: string;
+};
+
 export type PickupQueueSeasonState = {
   endsAt: string;
   id: string;
@@ -257,6 +317,7 @@ export type PickupMatchState = {
   finalScore: string | null;
   id: string;
   liveStartedAt: string | null;
+  pendingSubRequest: PickupMatchPendingSubRequestState | null;
   queueId: string;
   readyDeadlineAt: string | null;
   seasonId: string;
@@ -286,6 +347,8 @@ export type PickupMatchState = {
 export type PickupPlayerState =
   | {
       activeLock: PickupPlayerLockState | null;
+      incomingSubRequest: PickupSubRequestState | null;
+      outgoingSubRequest: PickupSubRequestState | null;
       publicState: PickupPublicState;
       rating: PickupPlayerRatingState;
       ratings: PickupActiveRatingState[];
@@ -295,6 +358,8 @@ export type PickupPlayerState =
     }
   | {
       activeLock: PickupPlayerLockState | null;
+      incomingSubRequest: PickupSubRequestState | null;
+      outgoingSubRequest: PickupSubRequestState | null;
       publicState: PickupPublicState;
       queue: {
         joinedAt: string;
@@ -310,6 +375,8 @@ export type PickupPlayerState =
     }
   | {
       activeLock: PickupPlayerLockState | null;
+      incomingSubRequest: PickupSubRequestState | null;
+      outgoingSubRequest: PickupSubRequestState | null;
       match: PickupMatchState;
       publicState: PickupPublicState;
       rating: PickupPlayerRatingState;

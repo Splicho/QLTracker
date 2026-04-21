@@ -2,6 +2,7 @@ import express from "express";
 import { z } from "zod";
 import { config, ensureAppDirectories, SLOT_DEFINITIONS } from "./config.js";
 import { createSignature } from "./signing.js";
+import { buildSlotMetadata } from "./templates.js";
 import {
   allocateSlot,
   markSlotResultPosted,
@@ -13,6 +14,7 @@ import {
   releaseSlot,
   startSlot,
   stopSlot,
+  writeSlotMetadata,
 } from "./slots.js";
 import { provisionPayloadSchema } from "./types.js";
 import {
@@ -144,6 +146,53 @@ async function postMatchChat(
 
 function getSlotById(slotId: number) {
   return SLOT_DEFINITIONS.find((slot) => slot.id === slotId) ?? null;
+}
+
+async function sendSlotRconAction(
+  slotId: number,
+  action: "ban" | "cmd" | "kick" | "say",
+  body: {
+    message?: string;
+    target?: string;
+  },
+) {
+  const slot = getSlotById(slotId);
+  if (!slot) {
+    throw new Error("Unknown slot.");
+  }
+
+  const state = readSlotState(slot);
+  if (state.state === "idle" || !state.rconPort || !state.rconToken) {
+    throw new Error("Slot is not active or rcon is not available.");
+  }
+
+  const rconUrl = `http://127.0.0.1:${state.rconPort}/${action}`;
+  const rconPayload: Record<string, string> = {};
+  if (body.target) {
+    rconPayload.steamId = body.target;
+  }
+  if (body.message) {
+    rconPayload.message = body.message;
+  }
+  if (action === "cmd" && body.message) {
+    rconPayload.command = body.message;
+  }
+
+  const rconResponse = await fetch(rconUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${state.rconToken}`,
+    },
+    body: JSON.stringify(rconPayload),
+  });
+
+  if (!rconResponse.ok) {
+    const text = await rconResponse.text().catch(() => "Unknown error");
+    throw new Error(`Rcon error: ${text}`);
+  }
+
+  return rconResponse.json().catch(() => ({}));
 }
 
 app.get("/healthz", async (_request, response) => {
@@ -488,6 +537,61 @@ app.get("/internal/slots/:slotId/metadata", (request, response) => {
   response.json(metadata);
 });
 
+app.post("/api/admin/slots/:slotId/pickup-metadata", async (request, response) => {
+  try {
+    requireProvisionAuth(request);
+    const slotId = Number(request.params.slotId);
+    const slot = getSlotById(slotId);
+    if (!slot) {
+      response.status(404).json({ ok: false, error: "Unknown slot." });
+      return;
+    }
+
+    const payload = provisionPayloadSchema.parse(request.body);
+    const state = readSlotState(slot);
+    if (
+      state.state === "idle" ||
+      !state.token ||
+      !state.matchId ||
+      state.matchId !== payload.matchId
+    ) {
+      response.status(409).json({
+        ok: false,
+        error: "Slot is not active for the requested pickup match.",
+      });
+      return;
+    }
+
+    const metadata = buildSlotMetadata(payload, slot, state.token);
+    writeSlotMetadata(slotId, metadata);
+
+    await sendSlotRconAction(slotId, "cmd", {
+      message: "qlx reloadpickup",
+    });
+    await sendSlotRconAction(slotId, "cmd", {
+      message: "qlx sort",
+    });
+
+    response.json({ ok: true, metadata });
+  } catch (error) {
+    const status =
+      error instanceof z.ZodError
+        ? 400
+        : error instanceof Error && error.message === "Unauthorized."
+          ? 401
+          : error instanceof Error &&
+              (error.message === "Unknown slot." ||
+                error.message ===
+                  "Slot is not active or rcon is not available.")
+            ? 409
+            : 500;
+    response.status(status).json({
+      ok: false,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+});
+
 app.post("/api/admin/slots/:slotId/stop", async (request, response) => {
   try {
     requireProvisionAuth(request);
@@ -608,28 +712,10 @@ app.post("/api/admin/slots/:slotId/command", async (request, response) => {
     }
 
     const body = bodySchema.parse(request.body);
-    const rconUrl = `http://127.0.0.1:${state.rconPort}/${body.action}`;
-    const rconPayload: Record<string, string> = {};
-    if (body.target) rconPayload.steamId = body.target;
-    if (body.message) rconPayload.message = body.message;
-    if (body.action === "cmd" && body.message) rconPayload.command = body.message;
-
-    const rconResponse = await fetch(rconUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${state.rconToken}`,
-      },
-      body: JSON.stringify(rconPayload),
+    const result = await sendSlotRconAction(slotId, body.action, {
+      message: body.message,
+      target: body.target,
     });
-
-    if (!rconResponse.ok) {
-      const text = await rconResponse.text().catch(() => "Unknown error");
-      response.status(502).json({ ok: false, error: `Rcon error: ${text}` });
-      return;
-    }
-
-    const result = await rconResponse.json().catch(() => ({}));
     response.json({ ok: true, ...result });
   } catch (error) {
     const status = error instanceof z.ZodError ? 400 : error instanceof Error && error.message === "Unauthorized." ? 401 : 500;
