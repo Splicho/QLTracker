@@ -27,6 +27,14 @@ type BotRuntime = {
   readonly client: Client;
 };
 
+function getQueueAlertsChannelId() {
+  return env.PICKUP_QUEUE_ALERTS_CHANNEL_ID ?? null;
+}
+
+function getMatchReportsChannelId() {
+  return env.PICKUP_MATCH_REPORTS_CHANNEL_ID ?? env.PICKUP_QUEUE_ALERTS_CHANNEL_ID ?? null;
+}
+
 function hasValidSignature(body: string, signatureHeader: string | undefined): boolean {
   if (!signatureHeader) {
     return false;
@@ -42,7 +50,12 @@ async function postQueueOpenedAlert(
   client: Client,
   payload: import('@qltracker/contracts').PickupQueueAlertPayload,
 ): Promise<void> {
-  const channel = await client.channels.fetch(env.PICKUP_QUEUE_ALERTS_CHANNEL_ID ?? '');
+  const channelId = getQueueAlertsChannelId();
+  if (!channelId) {
+    throw new Error('PICKUP_QUEUE_ALERTS_CHANNEL_ID is not configured.');
+  }
+
+  const channel = await client.channels.fetch(channelId);
 
   if (!channel || !channel.isTextBased() || !('send' in channel)) {
     throw new Error('Configured pickup queue alerts channel is not a sendable text channel.');
@@ -145,7 +158,14 @@ async function postMatchReportAlert(
   client: Client,
   payload: PickupMatchReportPayload,
 ): Promise<void> {
-  const channel = await client.channels.fetch(env.PICKUP_QUEUE_ALERTS_CHANNEL_ID ?? '');
+  const channelId = getMatchReportsChannelId();
+  if (!channelId) {
+    throw new Error(
+      'Neither PICKUP_MATCH_REPORTS_CHANNEL_ID nor PICKUP_QUEUE_ALERTS_CHANNEL_ID is configured.',
+    );
+  }
+
+  const channel = await client.channels.fetch(channelId);
 
   if (!channel || !channel.isTextBased() || !('send' in channel)) {
     throw new Error('Configured pickup queue alerts channel is not a sendable text channel.');
@@ -218,7 +238,10 @@ async function postMatchReportAlert(
 }
 
 export function startPickupQueueAlertsWebhook(runtimes: readonly BotRuntime[]): HttpServer | null {
-  if (!env.PICKUP_QUEUE_ALERTS_CHANNEL_ID || !env.PICKUP_QUEUE_ALERTS_WEBHOOK_SECRET) {
+  if (
+    (!env.PICKUP_QUEUE_ALERTS_CHANNEL_ID && !env.PICKUP_MATCH_REPORTS_CHANNEL_ID) ||
+    !env.PICKUP_QUEUE_ALERTS_WEBHOOK_SECRET
+  ) {
     logger.info('Pickup queue alerts webhook disabled');
     return null;
   }
@@ -293,10 +316,14 @@ export function startPickupQueueAlertsWebhook(runtimes: readonly BotRuntime[]): 
           response.writeHead(204).end();
         })
         .catch((error: unknown) => {
+          const channelId =
+            parsedPayload.type === 'pickup.match_report'
+              ? getMatchReportsChannelId()
+              : getQueueAlertsChannelId();
           logger.error(
             {
               err: error,
-              channelId: env.PICKUP_QUEUE_ALERTS_CHANNEL_ID,
+              channelId,
               eventType: parsedPayload.type,
               queueSlug: parsedPayload.queue.slug,
             },
@@ -319,8 +346,9 @@ export function startPickupQueueAlertsWebhook(runtimes: readonly BotRuntime[]): 
     logger.info(
       {
         botId: secondaryRuntime.bot.id,
-        channelId: env.PICKUP_QUEUE_ALERTS_CHANNEL_ID,
+        matchReportsChannelId: getMatchReportsChannelId(),
         port: env.INTERNAL_WEBHOOK_PORT,
+        queueAlertsChannelId: getQueueAlertsChannelId(),
       },
       'Pickup queue alerts webhook is listening',
     );

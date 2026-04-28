@@ -23,6 +23,7 @@ const envSchema = z
     DATABASE_URL: z.string().url().optional(),
     INTERNAL_WEBHOOK_PORT: z.coerce.number().int().positive().default(8788),
     PUBLIC_APP_URL: z.string().url().optional(),
+    PICKUP_MATCH_REPORTS_CHANNEL_ID: z.string().min(1).optional(),
     PICKUP_QUEUE_ALERTS_CHANNEL_ID: z.string().min(1).optional(),
     PICKUP_QUEUE_ALERTS_ROLE_ID: z.string().min(1).optional(),
     PICKUP_QUEUE_ALERTS_WEBHOOK_SECRET: z.string().min(16).optional(),
@@ -57,10 +58,16 @@ const envSchema = z
     }
 
     const hasPublicAppUrl = Boolean(value.PUBLIC_APP_URL);
+    const hasMatchReportsChannelId = Boolean(value.PICKUP_MATCH_REPORTS_CHANNEL_ID);
     const hasQueueAlertsChannelId = Boolean(value.PICKUP_QUEUE_ALERTS_CHANNEL_ID);
     const hasQueueAlertsSecret = Boolean(value.PICKUP_QUEUE_ALERTS_WEBHOOK_SECRET);
 
-    if (!hasPublicAppUrl && !hasQueueAlertsChannelId && !hasQueueAlertsSecret) {
+    if (
+      !hasPublicAppUrl &&
+      !hasMatchReportsChannelId &&
+      !hasQueueAlertsChannelId &&
+      !hasQueueAlertsSecret
+    ) {
       return;
     }
 
@@ -80,11 +87,12 @@ const envSchema = z
       });
     }
 
-    if (!hasQueueAlertsChannelId) {
+    if (!hasQueueAlertsChannelId && !hasMatchReportsChannelId) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['PICKUP_QUEUE_ALERTS_CHANNEL_ID'],
-        message: 'PICKUP_QUEUE_ALERTS_CHANNEL_ID is required when pickup queue alerts are enabled'
+        message:
+          'Either PICKUP_QUEUE_ALERTS_CHANNEL_ID or PICKUP_MATCH_REPORTS_CHANNEL_ID is required when pickup Discord webhooks are enabled'
       });
     }
 
