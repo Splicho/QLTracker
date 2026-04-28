@@ -474,6 +474,7 @@ model PickupMatchPlayer {
   playerId          String
   joinedAt          DateTime
   readyState        PickupReadyState @default(pending)
+  readyDeadlineAt   DateTime?
   readyConfirmedAt  DateTime?
   team              PickupTeamSide?
   isCaptain         Boolean          @default(false)

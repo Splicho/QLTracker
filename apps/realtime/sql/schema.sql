@@ -246,6 +246,7 @@ create table if not exists "PickupMatchPlayer" (
   "playerId" text not null references "PickupPlayer"("id") on delete cascade,
   "joinedAt" timestamptz not null,
   "readyState" "PickupReadyState" not null default 'pending',
+  "readyDeadlineAt" timestamptz,
   "readyConfirmedAt" timestamptz,
   "team" "PickupTeamSide",
   "isCaptain" boolean not null default false,

@@ -159,6 +159,7 @@ export type PickupMatchPlayerRow = PickupPlayerIdentity & {
   playerId: string;
   joinedAt: Date;
   readyState: "pending" | "ready" | "dropped";
+  readyDeadlineAt: Date | null;
   readyConfirmedAt: Date | null;
   team: "left" | "right" | null;
   isCaptain: boolean;

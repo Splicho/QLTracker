@@ -19,6 +19,10 @@ import type {
 } from "./types.js";
 
 type PlayerStateDeps = {
+  ensureReadyCheckPlayerDeadline: (
+    matchId: string,
+    playerId: string,
+  ) => Promise<Date | null>;
   getActiveSeason: (queueId: string) => Promise<PickupSeasonRow | null>;
   getLatestPlayerActiveMatch: (playerId: string) => Promise<PickupMatchRow | null>;
   getLatestPlayerRecentCompletedMatch: (
@@ -125,7 +129,10 @@ export function createPlayerStateApi(deps: PlayerStateDeps) {
     };
   }
 
-  async function buildMatchState(match: PickupMatchRow): Promise<PickupMatchState> {
+  async function buildMatchState(
+    match: PickupMatchRow,
+    readyDeadlineAtOverride?: Date | null,
+  ): Promise<PickupMatchState> {
     const [matchPlayers, pendingSubRequest] = await Promise.all([
       deps.getMatchPlayers(match.id),
       deps.getPendingMatchSubRequest(match.id),
@@ -164,7 +171,10 @@ export function createPlayerStateApi(deps: PlayerStateDeps) {
           }
         : null,
       queueId: match.queueId,
-      readyDeadlineAt: match.readyDeadlineAt?.toISOString() ?? null,
+      readyDeadlineAt:
+        readyDeadlineAtOverride === undefined
+          ? match.readyDeadlineAt?.toISOString() ?? null
+          : readyDeadlineAtOverride?.toISOString() ?? null,
       seasonId: match.seasonId,
       server: {
         countryCode: match.serverLocationCountryCode,
@@ -205,12 +215,16 @@ export function createPlayerStateApi(deps: PlayerStateDeps) {
     const incomingSubRequestState = toSubRequestState(incomingSubRequest);
 
     if (match) {
+      const viewerReadyDeadlineAt =
+        match.status === "ready_check"
+          ? await deps.ensureReadyCheckPlayerDeadline(match.id, player.id)
+          : undefined;
       const [publicState, rating, ratings] = await Promise.all([
         deps.getPublicState(),
         deps.getPlayerSeasonRating(player.id, match.seasonId),
         deps.getPlayerActiveRatings(player.id),
       ]);
-      const matchState = await buildMatchState(match);
+      const matchState = await buildMatchState(match, viewerReadyDeadlineAt);
 
       return {
         activeLock: lockState,

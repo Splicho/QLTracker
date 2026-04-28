@@ -1022,7 +1022,14 @@ export function createPickupService(io: Server) {
           mp."playerId" = $1
           and (
             m."status" in ('provisioning', 'server_ready', 'live')
-            or (m."status" = 'ready_check' and m."readyDeadlineAt" > now())
+            or (
+              m."status" = 'ready_check'
+              and (
+                mp."readyState" = 'ready'
+                or mp."readyDeadlineAt" is null
+                or mp."readyDeadlineAt" > now()
+              )
+            )
             or m."status" = 'veto'
           )
         order by m."createdAt" desc
@@ -1112,6 +1119,7 @@ export function createPickupService(io: Server) {
           mp."playerId",
           mp."joinedAt",
           mp."readyState",
+          mp."readyDeadlineAt",
           mp."readyConfirmedAt",
           mp."team",
           mp."isCaptain",
@@ -1137,6 +1145,104 @@ export function createPickupService(io: Server) {
     );
 
     return result.rows;
+  }
+
+  async function getPendingReadyCheckDeadline(
+    matchId: string,
+    client: Pick<PoolClient, "query"> = pool,
+  ) {
+    const result = await client.query<{ readyDeadlineAt: Date | null }>(
+      `
+        select min("readyDeadlineAt") as "readyDeadlineAt"
+        from "PickupMatchPlayer"
+        where
+          "matchId" = $1
+          and "readyState" <> 'ready'
+          and "readyDeadlineAt" is not null
+      `,
+      [matchId],
+    );
+
+    return result.rows[0]?.readyDeadlineAt ?? null;
+  }
+
+  async function syncReadyCheckDeadline(
+    matchId: string,
+    client: Pick<PoolClient, "query"> = pool,
+  ) {
+    const readyDeadlineAt = await getPendingReadyCheckDeadline(matchId, client);
+    await client.query(
+      `
+        update "PickupMatch"
+        set
+          "readyDeadlineAt" = $2,
+          "updatedAt" = now()
+        where
+          "id" = $1
+          and "status" = 'ready_check'
+      `,
+      [matchId, readyDeadlineAt],
+    );
+
+    return readyDeadlineAt;
+  }
+
+  async function ensureReadyCheckPlayerDeadline(matchId: string, playerId: string) {
+    const currentResult = await pool.query<{
+      readyDeadlineAt: Date | null;
+      readyState: "pending" | "ready" | "dropped";
+    }>(
+      `
+        select
+          mp."readyDeadlineAt",
+          mp."readyState"
+        from "PickupMatchPlayer" mp
+        inner join "PickupMatch" m on m."id" = mp."matchId"
+        where
+          mp."matchId" = $1
+          and mp."playerId" = $2
+          and m."status" = 'ready_check'
+        limit 1
+      `,
+      [matchId, playerId],
+    );
+    const current = currentResult.rows[0];
+    if (!current) {
+      return null;
+    }
+
+    if (current.readyDeadlineAt || current.readyState === "ready") {
+      return current.readyDeadlineAt;
+    }
+
+    const settings = await getPickupSettings();
+    const nextReadyDeadlineAt = new Date(
+      Date.now() + settings.readyCheckDurationSeconds * 1000,
+    );
+    const updateResult = await pool.query<{ readyDeadlineAt: Date | null }>(
+      `
+        update "PickupMatchPlayer" mp
+        set
+          "readyDeadlineAt" = $3,
+          "updatedAt" = now()
+        from "PickupMatch" m
+        where
+          mp."matchId" = $1
+          and mp."playerId" = $2
+          and mp."readyState" <> 'ready'
+          and mp."readyDeadlineAt" is null
+          and m."id" = mp."matchId"
+          and m."status" = 'ready_check'
+        returning mp."readyDeadlineAt"
+      `,
+      [matchId, playerId, nextReadyDeadlineAt],
+    );
+
+    const readyDeadlineAt =
+      updateResult.rows[0]?.readyDeadlineAt ?? nextReadyDeadlineAt;
+    const matchReadyDeadlineAt = await syncReadyCheckDeadline(matchId);
+    scheduleReadyTimer(matchId, matchReadyDeadlineAt);
+    return readyDeadlineAt;
   }
 
   async function getPickupPlayerIdentityById(playerId: string) {
@@ -1264,6 +1370,7 @@ export function createPickupService(io: Server) {
   }
 
   const playerStateApi = createPlayerStateApi({
+    ensureReadyCheckPlayerDeadline,
     getActivePlayerLock,
     getActiveSeason,
     getLatestPlayerActiveMatch,
@@ -1484,7 +1591,14 @@ export function createPickupService(io: Server) {
               mp."playerId" = qm."playerId"
               and (
                 m."status" in ('provisioning', 'server_ready', 'live')
-                or (m."status" = 'ready_check' and m."readyDeadlineAt" > now())
+                or (
+                  m."status" = 'ready_check'
+                  and (
+                    mp."readyState" = 'ready'
+                    or mp."readyDeadlineAt" is null
+                    or mp."readyDeadlineAt" > now()
+                  )
+                )
                 or (m."status" = 'veto' and m."vetoDeadlineAt" > now())
               )
           )
@@ -1530,7 +1644,14 @@ export function createPickupService(io: Server) {
               mp."playerId" = qm."playerId"
               and (
                 m."status" in ('provisioning', 'server_ready', 'live')
-                or (m."status" = 'ready_check' and m."readyDeadlineAt" > now())
+                or (
+                  m."status" = 'ready_check'
+                  and (
+                    mp."readyState" = 'ready'
+                    or mp."readyDeadlineAt" is null
+                    or mp."readyDeadlineAt" > now()
+                  )
+                )
                 or (m."status" = 'veto' and m."vetoDeadlineAt" > now())
               )
           )
@@ -1826,7 +1947,14 @@ export function createPickupService(io: Server) {
                 and active_match_player."matchId" <> sr."matchId"
                 and (
                   active_match."status" in ('provisioning', 'server_ready', 'live')
-                  or (active_match."status" = 'ready_check' and active_match."readyDeadlineAt" > now())
+                  or (
+                    active_match."status" = 'ready_check'
+                    and (
+                      active_match_player."readyState" = 'ready'
+                      or active_match_player."readyDeadlineAt" is null
+                      or active_match_player."readyDeadlineAt" > now()
+                    )
+                  )
                   or active_match."status" = 'veto'
                 )
             )
@@ -1895,7 +2023,6 @@ export function createPickupService(io: Server) {
     queue: PickupQueueRow,
     season: PickupSeasonRow,
   ) {
-    const settings = await getPickupSettings();
     const members = await getQueueMembers(queue.id, queue.playerCount);
     if (members.length < queue.playerCount) {
       return null;
@@ -1924,9 +2051,6 @@ export function createPickupService(io: Server) {
       }),
     );
     const teams = chooseBalancedTeams(queue.teamSize, ratedMembers);
-    const readyDeadlineAt = new Date(
-      Date.now() + settings.readyCheckDurationSeconds * 1000,
-    );
 
     const client = await pool.connect();
     try {
@@ -2023,7 +2147,7 @@ export function createPickupService(io: Server) {
         [
           queue.id,
           season.id,
-          readyDeadlineAt,
+          null,
           JSON.stringify(teams.balanceSummary),
         ],
       );
@@ -2047,6 +2171,7 @@ export function createPickupService(io: Server) {
               "playerId",
               "joinedAt",
               "readyState",
+              "readyDeadlineAt",
               "team",
               "isCaptain",
               "muBefore",
@@ -2061,6 +2186,7 @@ export function createPickupService(io: Server) {
               $2,
               $3,
               'pending',
+              null,
               $4::"PickupTeamSide",
               $5,
               $6,
@@ -2084,7 +2210,6 @@ export function createPickupService(io: Server) {
       }
 
       await client.query("commit");
-      scheduleReadyTimer(matchId, readyDeadlineAt);
       await broadcastPublicState();
       for (const member of ratedMembers) {
         await emitPlayerState(member.playerId);
@@ -2168,21 +2293,26 @@ export function createPickupService(io: Server) {
     }
 
     const players = await getMatchPlayers(matchId);
-    const readyPlayers = players.filter(
-      (player) => player.readyState === "ready",
+    const now = Date.now();
+    const timedOutPlayers = players.filter(
+      (player) =>
+        player.readyState !== "ready" &&
+        player.readyDeadlineAt != null &&
+        player.readyDeadlineAt.getTime() <= now,
     );
-    const pendingPlayers = players.filter(
-      (player) => player.readyState !== "ready",
-    );
-
-    if (pendingPlayers.length === 0) {
-      await transitionMatchToVeto(matchId);
+    if (timedOutPlayers.length === 0) {
+      const nextReadyDeadlineAt = await syncReadyCheckDeadline(matchId);
+      scheduleReadyTimer(matchId, nextReadyDeadlineAt);
       return;
     }
 
+    const readyPlayers = players.filter(
+      (player) => player.readyState === "ready",
+    );
+
     const timeoutPayload = {
       reason: "ready-check-timeout",
-      droppedPlayerIds: pendingPlayers.map((player) => player.playerId),
+      droppedPlayerIds: timedOutPlayers.map((player) => player.playerId),
       requeuedPlayerIds: readyPlayers.map((player) => player.playerId),
     };
     const cancelResult = await pool.query(
@@ -3192,7 +3322,14 @@ export function createPickupService(io: Server) {
             and mp."matchId" <> $2
             and (
               m."status" in ('provisioning', 'server_ready', 'live')
-              or (m."status" = 'ready_check' and m."readyDeadlineAt" > now())
+              or (
+                m."status" = 'ready_check'
+                and (
+                  mp."readyState" = 'ready'
+                  or mp."readyDeadlineAt" is null
+                  or mp."readyDeadlineAt" > now()
+                )
+              )
               or m."status" = 'veto'
             )
           limit 1
@@ -3939,6 +4076,9 @@ export function createPickupService(io: Server) {
     const players = await getMatchPlayers(match.id);
     if (players.every((player) => player.readyState === "ready")) {
       await transitionMatchToVeto(match.id);
+    } else {
+      const nextReadyDeadlineAt = await syncReadyCheckDeadline(match.id);
+      scheduleReadyTimer(match.id, nextReadyDeadlineAt);
     }
 
     for (const player of players) {
@@ -4361,7 +4501,9 @@ export function createPickupService(io: Server) {
 
     for (const match of matches.rows) {
       if (match.status === "ready_check") {
-        scheduleReadyTimer(match.id, match.readyDeadlineAt);
+        const readyDeadlineAt =
+          match.readyDeadlineAt ?? (await syncReadyCheckDeadline(match.id));
+        scheduleReadyTimer(match.id, readyDeadlineAt);
       } else if (match.status === "veto") {
         scheduleVetoTimer(match.id, match.vetoDeadlineAt);
       }
